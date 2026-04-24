@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NS Platform</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:#0b1220;
+  color:white;
+}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 40px;
+  background:#111827;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.logo{
+  font-size:20px;
+  font-weight:bold;
+  color:#38bdf8;
+}
+
+.menu{
+  font-size:26px;
+  cursor:pointer;
+}
+
+/* LANGUAGE MENU */
+.lang-box{
+  position:absolute;
+  right:40px;
+  top:60px;
+  background:#1f2937;
+  display:none;
+  flex-direction:column;
+  border-radius:8px;
+  overflow:hidden;
+  z-index:200;
+}
+
+.lang-box button{
+  background:none;
+  border:none;
+  color:white;
+  padding:10px 15px;
+  cursor:pointer;
+}
+
+.lang-box button:hover{
+  background:#38bdf8;
+}
+
+/* LOGIN */
+.auth{
+  position:absolute;
+  left:40px;
+  top:80px;
+}
+
+.auth a{
+  color:white;
+  text-decoration:none;
+  margin-right:10px;
+  padding:6px 10px;
+  border:1px solid #38bdf8;
+  border-radius:6px;
+}
+
+/* HERO */
+.hero{
+  text-align:center;
+  padding:70px 20px 30px;
+}
+
+.hero h1{
+  color:#38bdf8;
+}
+
+.hero p{
+  max-width:900px;
+  margin:auto;
+  line-height:1.6;
+  color:#cbd5e1;
+}
+
+/* SOCIAL SECTION */
+.social-wrapper{
+  display:flex;
+  justify-content:space-between;
+  padding:60px 80px;
+  align-items:center;
+}
+
+.social-column{
+  display:flex;
+  flex-direction:column;
+  gap:40px;
+}
+
+/* BIG CARDS */
+.social-box{
+  width:180px;
+  height:180px;
+  background:#1f2937;
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  cursor:pointer;
+  transition:0.3s;
+  font-size:20px;
+  font-weight:bold;
+  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+
+.social-box span{
+  margin-top:10px;
+  font-size:14px;
+  color:#cbd5e1;
+}
+
+.social-box:hover{
+  transform:translateY(-8px);
+}
+
+/* COLORS */
+.youtube:hover{background:#ff0000;}
+.tiktok:hover{background:#000000;}
+.instagram:hover{background:#e1306c;}
+.facebook:hover{background:#1877f2;}
+
+/* BOTTOM SOCIAL */
+.bottom-social{
+  display:flex;
+  justify-content:center;
+  gap:25px;
+  margin:20px 0 40px;
+}
+
+/* FOOTER */
+footer{
+  background:#111827;
+  padding:40px 20px;
+  text-align:center;
+}
+
+.footer-text{
+  max-width:900px;
+  margin:auto;
+  line-height:1.6;
+  color:#cbd5e1;
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  margin-top:25px;
+  flex-wrap:wrap;
+}
+
+.bottom-nav a{
+  color:#cbd5e1;
+  text-decoration:none;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.bottom-nav a:hover{
+  color:#38bdf8;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">NS Platform</div>
+  <div class="menu" onclick="toggleLang()">☰</div>
+</header>
+
+<!-- LANGUAGE MENU -->
+<div class="lang-box" id="langBox">
+  <button onclick="setLang('en')">English</button>
+  <button onclick="setLang('rw')">Ikinyarwanda</button>
+  <button onclick="setLang('fr')">Français</button>
+</div>
+
+<!-- LOGIN -->
+<div class="auth">
+  <a href="#">Login</a>
+  <a href="#">Signup</a>
+</div>
+
+<!-- HEADER TEXT -->
+<div class="hero">
+  <h1 id="title"></h1>
+  <p id="desc"></p>
+</div>
+
+<!-- SOCIAL MEDIA -->
+<div class="social-wrapper">
+
+  <div class="social-column">
+    <div class="social-box youtube" onclick="openLink('https://youtube.com')">▶ YouTube <span>Open</span></div>
+    <div class="social-box tiktok" onclick="openLink('https://tiktok.com')">🎵 TikTok <span>Open</span></div>
+  </div>
+
+  <div class="social-column">
+    <div class="social-box instagram" onclick="openLink('https://instagram.com')">📸 Instagram <span>Open</span></div>
+    <div class="social-box facebook" onclick="openLink('https://facebook.com')">📘 Facebook <span>Open</span></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM SOCIAL -->
+<div class="bottom-social">
+  <div class="social-box youtube" onclick="openLink('https://youtube.com')">YouTube</div>
+  <div class="social-box tiktok" onclick="openLink('https://tiktok.com')">TikTok</div>
+  <div class="social-box instagram" onclick="openLink('https://instagram.com')">Instagram</div>
+  <div class="social-box facebook" onclick="openLink('https://facebook.com')">Facebook</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+
+  <div class="footer-text" id="footerText"></div>
+
+  <div class="bottom-nav">
+    <a id="navHome">Home</a>
+    <a id="navServices">Services</a>
+    <a id="navVIP">VIP</a>
+    <a id="navBonus">Bonus</a>
+    <a id="navRules">Regulations</a>
+  </div>
+
+</footer>
+
+<script>
+function openLink(url){
+  window.open(url,"_blank");
+}
+
+function toggleLang(){
+  let box = document.getElementById("langBox");
+  box.style.display = box.style.display === "flex" ? "none" : "flex";
+}
+
+/* FULL LANGUAGE SYSTEM */
+function setLang(lang){
+
+  let title = document.getElementById("title");
+  let desc = document.getElementById("desc");
+  let footer = document.getElementById("footerText");
+
+  let navHome = document.getElementById("navHome");
+  let navServices = document.getElementById("navServices");
+  let navVIP = document.getElementById("navVIP");
+  let navBonus = document.getElementById("navBonus");
+  let navRules = document.getElementById("navRules");
+
+  if(lang === "en"){
+    title.innerText = "Welcome to NS Platform";
+    desc.innerText = "Welcome to NS Platform — the place where you can improve your social media engagement and grow your online presence. Please take a moment to read our website regulations and policies before getting started.";
+
+    footer.innerText = "NS Platform is a digital platform designed to help users promote content and improve social media engagement. We provide real followers, likes, comments, and genuine YouTube subscribers across different social media platforms, ensuring authentic growth without bots or automation.";
+
+    navHome.innerText="Home";
+    navServices.innerText="Services";
+    navVIP.innerText="VIP";
+    navBonus.innerText="Bonus";
+    navRules.innerText="Regulations";
+  }
+
+  if(lang === "rw"){
+    title.innerText = "Murakaza neza kuri NS Platform";
+    desc.innerText = "Murakaza neza kuri NS Platform — aha ni ahantu ho guteza imbere imikurire yawe ku mbuga nkoranyambaga. Nyamuneka soma amategeko n'amabwiriza mbere yo gutangira.";
+
+    footer.innerText = "NS Platform ni urubuga rwakozwe hagamijwe guteza imbere no kuzamura imbuga nkoranyambaga zitandukanye. aho dutanga aba followers, likes, comments ndetse naba subscribers ba YouTube b’ukuri.";
+
+    navHome.innerText="Ahabanza";
+    navServices.innerText="Serivisi";
+    navVIP.innerText="VIP";
+    navBonus.innerText="Ibihembo";
+    navRules.innerText="Amategeko";
+  }
+
+  if(lang === "fr"){
+    title.innerText = "Bienvenue sur NS Platform";
+    desc.innerText = "Bienvenue sur NS Platform — un endroit pour améliorer votre engagement sur les réseaux sociaux et développer votre présence en ligne. Veuillez lire nos règles avant de commencer.";
+
+    footer.innerText = "NS Platform est une plateforme numérique conçue pour aider les utilisateurs à promouvoir leur contenu et améliorer leur engagement sur les réseaux sociaux. Nous fournissons de vrais abonnés, likes et commentaires authentiques.";
+
+    navHome.innerText="Accueil";
+    navServices.innerText="Services";
+    navVIP.innerText="VIP";
+    navBonus.innerText="Bonus";
+    navRules.innerText="Règlements";
+  }
+
+  document.getElementById("langBox").style.display="none";
+}
+
+/* DEFAULT LANGUAGE */
+setLang("en");
+</script>
+
+</body>
+</html>
