@@ -5,317 +5,280 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NS Platform</title>
 
+<!-- PROFESSIONAL ICONS -->
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
 <style>
 body{
-  margin:0;
-  font-family: Arial, sans-serif;
-  background:#0b1220;
-  color:white;
+margin:0;
+font-family:Arial, sans-serif;
+background:#0b1220;
+color:white;
 }
 
 /* HEADER */
 header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:18px 40px;
-  background:#111827;
-  position:sticky;
-  top:0;
-  z-index:100;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:18px 40px;
+background:#111827;
+position:sticky;
+top:0;
 }
-
 .logo{
-  font-size:20px;
-  font-weight:bold;
-  color:#38bdf8;
-}
-
-.menu{
-  font-size:26px;
-  cursor:pointer;
-}
-
-/* LANGUAGE MENU */
-.lang-box{
-  position:absolute;
-  right:40px;
-  top:60px;
-  background:#1f2937;
-  display:none;
-  flex-direction:column;
-  border-radius:8px;
-  overflow:hidden;
-  z-index:200;
-}
-
-.lang-box button{
-  background:none;
-  border:none;
-  color:white;
-  padding:10px 15px;
-  cursor:pointer;
-}
-
-.lang-box button:hover{
-  background:#38bdf8;
+font-size:22px;
+font-weight:bold;
+color:#38bdf8;
 }
 
 /* LOGIN */
 .auth{
-  position:absolute;
-  left:40px;
-  top:80px;
+position:absolute;
+left:40px;
+top:75px;
 }
-
 .auth a{
-  color:white;
-  text-decoration:none;
-  margin-right:10px;
-  padding:6px 10px;
-  border:1px solid #38bdf8;
-  border-radius:6px;
+color:white;
+text-decoration:none;
+margin-right:10px;
+padding:6px 12px;
+border:1px solid #38bdf8;
+border-radius:6px;
 }
 
 /* HERO */
 .hero{
-  text-align:center;
-  padding:70px 20px 30px;
+text-align:center;
+padding:70px 20px 30px;
 }
-
-.hero h1{
-  color:#38bdf8;
-}
-
+.hero h1{color:#38bdf8;font-size:34px;}
 .hero p{
-  max-width:900px;
-  margin:auto;
-  line-height:1.6;
-  color:#cbd5e1;
+max-width:900px;
+margin:auto;
+line-height:1.6;
+color:#cbd5e1;
 }
 
-/* SOCIAL SECTION */
+/* ===== SOCIAL GRID ===== */
 .social-wrapper{
-  display:flex;
-  justify-content:space-between;
-  padding:60px 80px;
-  align-items:center;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:70px;
+padding:60px 20px;
+}
+.social-row{
+display:flex;
+gap:140px;
+justify-content:center;
 }
 
-.social-column{
-  display:flex;
-  flex-direction:column;
-  gap:40px;
-}
-
-/* BIG CARDS */
+/* BOX */
 .social-box{
-  width:180px;
-  height:180px;
-  background:#1f2937;
-  border-radius:18px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  cursor:pointer;
-  transition:0.3s;
-  font-size:20px;
-  font-weight:bold;
-  box-shadow:0 10px 25px rgba(0,0,0,0.3);
+width:190px;
+height:190px;
+border-radius:18px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+cursor:pointer;
+transition:.35s;
+font-size:20px;
+font-weight:bold;
+color:white;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
 }
+.youtube{background:#ff0000;}
+.tiktok{background:#000;}
+.instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4);}
+.facebook{background:#1877f2;}
+.social-box i{font-size:42px;margin-bottom:10px;}
+.social-box:hover{transform:translateY(-10px) scale(1.05);}
 
-.social-box span{
-  margin-top:10px;
-  font-size:14px;
-  color:#cbd5e1;
-}
-
-.social-box:hover{
-  transform:translateY(-8px);
-}
-
-/* COLORS */
-.youtube:hover{background:#ff0000;}
-.tiktok:hover{background:#000000;}
-.instagram:hover{background:#e1306c;}
-.facebook:hover{background:#1877f2;}
-
-/* BOTTOM SOCIAL */
-.bottom-social{
-  display:flex;
-  justify-content:center;
-  gap:25px;
-  margin:20px 0 40px;
-}
-
-/* FOOTER */
+/* ===== FOOTER ===== */
 footer{
-  background:#111827;
-  padding:40px 20px;
-  text-align:center;
+background:#111827;
+padding:45px 20px;
+text-align:center;
 }
-
 .footer-text{
-  max-width:900px;
-  margin:auto;
-  line-height:1.6;
-  color:#cbd5e1;
+max-width:900px;
+margin:auto;
+line-height:1.6;
+color:#cbd5e1;
 }
-
-/* BOTTOM NAV */
 .bottom-nav{
-  display:flex;
-  justify-content:center;
-  gap:30px;
-  margin-top:25px;
-  flex-wrap:wrap;
+display:flex;
+justify-content:center;
+gap:170px;
+margin-top:45px;
+flex-wrap:wrap;
+}
+.nav-item{
+display:flex;
+flex-direction:column;
+align-items:center;
+text-decoration:none;
+color:#cbd5e1;
+font-weight:bold;
+transition:.3s;
+}
+.nav-item span{
+font-size:28px;
+margin-bottom:8px;
+}
+.nav-item:hover{
+color:#38bdf8;
+transform:translateY(-5px);
 }
 
-.bottom-nav a{
-  color:#cbd5e1;
-  text-decoration:none;
-  cursor:pointer;
-  font-weight:bold;
+/* ACTIVE PAGE */
+.nav-item.active{
+color:#38bdf8;
 }
 
-.bottom-nav a:hover{
-  color:#38bdf8;
+/* ===== LEFT LANGUAGE MENU ===== */
+.sidebar{
+position:fixed;
+left:0;
+top:0;
+height:100%;
+width:160px;
+background:#111827;
+padding-top:100px;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:15px;
+border-right:1px solid #1f2937;
+}
+.lang-btn{
+background:none;
+border:1px solid #38bdf8;
+color:white;
+padding:8px 12px;
+border-radius:6px;
+cursor:pointer;
+width:120px;
+transition:.3s;
+}
+.lang-btn:hover{
+background:#38bdf8;
+color:#000;
+}
+.main-content{
+margin-left:170px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- LEFT LANGUAGE MENU -->
+<div class="sidebar">
+<button class="lang-btn" onclick="setLang('en')">English</button>
+<button class="lang-btn" onclick="setLang('fr')">Français</button>
+<button class="lang-btn" onclick="setLang('rw')">Kinyarwanda</button>
+</div>
+
+<div class="main-content">
+
 <header>
-  <div class="logo">NS Platform</div>
-  <div class="menu" onclick="toggleLang()">☰</div>
+<div class="logo">NS Platform</div>
 </header>
 
-<!-- LANGUAGE MENU -->
-<div class="lang-box" id="langBox">
-  <button onclick="setLang('en')">English</button>
-  <button onclick="setLang('rw')">Ikinyarwanda</button>
-  <button onclick="setLang('fr')">Français</button>
-</div>
-
-<!-- LOGIN -->
 <div class="auth">
-  <a href="#">Login</a>
-  <a href="#">Signup</a>
+<a href="login.html">Login</a>
+<a href="signup.html">Signup</a>
 </div>
 
-<!-- HEADER TEXT -->
+<!-- HERO -->
 <div class="hero">
-  <h1 id="title"></h1>
-  <p id="desc"></p>
+<h1 id="title">Welcome to NS Platform</h1>
+<p id="desc">
+Welcome to NS Platform — the place where you can improve your social media engagement
+and grow your online presence. Please take a moment to read our website regulations
+and policies before getting started.
+</p>
 </div>
 
 <!-- SOCIAL MEDIA -->
 <div class="social-wrapper">
-
-  <div class="social-column">
-    <div class="social-box youtube" onclick="openLink('https://youtube.com')">▶ YouTube <span>Open</span></div>
-    <div class="social-box tiktok" onclick="openLink('https://tiktok.com')">🎵 TikTok <span>Open</span></div>
-  </div>
-
-  <div class="social-column">
-    <div class="social-box instagram" onclick="openLink('https://instagram.com')">📸 Instagram <span>Open</span></div>
-    <div class="social-box facebook" onclick="openLink('https://facebook.com')">📘 Facebook <span>Open</span></div>
-  </div>
-
+<div class="social-row">
+<div class="social-box youtube" onclick="goPage('youtube.html')">
+<i class="fa-brands fa-youtube"></i>YouTube
+</div>
+<div class="social-box tiktok" onclick="goPage('tiktok.html')">
+<i class="fa-brands fa-tiktok"></i>TikTok
+</div>
 </div>
 
-<!-- BOTTOM SOCIAL -->
-<div class="bottom-social">
-  <div class="social-box youtube" onclick="openLink('https://youtube.com')">YouTube</div>
-  <div class="social-box tiktok" onclick="openLink('https://tiktok.com')">TikTok</div>
-  <div class="social-box instagram" onclick="openLink('https://instagram.com')">Instagram</div>
-  <div class="social-box facebook" onclick="openLink('https://facebook.com')">Facebook</div>
+<div class="social-row">
+<div class="social-box instagram" onclick="goPage('instagram.html')">
+<i class="fa-brands fa-instagram"></i>Instagram
+</div>
+<div class="social-box facebook" onclick="goPage('facebook.html')">
+<i class="fa-brands fa-facebook-f"></i>Facebook
+</div>
+</div>
 </div>
 
 <!-- FOOTER -->
 <footer>
+<div class="footer-text">
+NS Platform is a digital platform designed to help users promote content,
+improve social media engagement where we provide real followers,
+likes, comments and subscribers on different social media platforms.
+All engagements are real and not generated by machines.
+</div>
 
-  <div class="footer-text" id="footerText"></div>
-
-  <div class="bottom-nav">
-    <a id="navHome">Home</a>
-    <a id="navServices">Services</a>
-    <a id="navVIP">VIP</a>
-    <a id="navBonus">Bonus</a>
-    <a id="navRules">Regulations</a>
-  </div>
-
+<div class="bottom-nav">
+<a class="nav-item" href="index.html" data-page="index"><span>🏠</span>Home</a>
+<a class="nav-item" href="services.html" data-page="services"><span>🛠</span>Services</a>
+<a class="nav-item" href="vip.html" data-page="vip"><span>💎</span>VIP</a>
+<a class="nav-item" href="bonus.html" data-page="bonus"><span>🎁</span>Bonus</a>
+<a class="nav-item" href="regulations.html" data-page="regulations"><span>📜</span>Regulations</a>
+</div>
 </footer>
 
+</div>
+
 <script>
-function openLink(url){
-  window.open(url,"_blank");
+function goPage(page){
+window.location.href = page;
 }
 
-function toggleLang(){
-  let box = document.getElementById("langBox");
-  box.style.display = box.style.display === "flex" ? "none" : "flex";
+/* ===== ACTIVE PAGE HIGHLIGHT ===== */
+const page = window.location.pathname.split("/").pop().replace(".html","") || "index";
+document.querySelectorAll(".nav-item").forEach(item=>{
+if(item.dataset.page === page){
+item.classList.add("active");
 }
+});
 
-/* FULL LANGUAGE SYSTEM */
+/* ===== LANGUAGE SYSTEM ===== */
 function setLang(lang){
-
-  let title = document.getElementById("title");
-  let desc = document.getElementById("desc");
-  let footer = document.getElementById("footerText");
-
-  let navHome = document.getElementById("navHome");
-  let navServices = document.getElementById("navServices");
-  let navVIP = document.getElementById("navVIP");
-  let navBonus = document.getElementById("navBonus");
-  let navRules = document.getElementById("navRules");
-
-  if(lang === "en"){
-    title.innerText = "Welcome to NS Platform";
-    desc.innerText = "Welcome to NS Platform — the place where you can improve your social media engagement and grow your online presence. Please take a moment to read our website regulations and policies before getting started.";
-
-    footer.innerText = "NS Platform is a digital platform designed to help users promote content and improve social media engagement. We provide real followers, likes, comments, and genuine YouTube subscribers across different social media platforms, ensuring authentic growth without bots or automation.";
-
-    navHome.innerText="Home";
-    navServices.innerText="Services";
-    navVIP.innerText="VIP";
-    navBonus.innerText="Bonus";
-    navRules.innerText="Regulations";
-  }
-
-  if(lang === "rw"){
-    title.innerText = "Murakaza neza kuri NS Platform";
-    desc.innerText = "Murakaza neza kuri NS Platform — aha ni ahantu ho guteza imbere imikurire yawe ku mbuga nkoranyambaga. Nyamuneka soma amategeko n'amabwiriza mbere yo gutangira.";
-
-    footer.innerText = "NS Platform ni urubuga rwakozwe hagamijwe guteza imbere no kuzamura imbuga nkoranyambaga zitandukanye. aho dutanga aba followers, likes, comments ndetse naba subscribers ba YouTube b’ukuri.";
-
-    navHome.innerText="Ahabanza";
-    navServices.innerText="Serivisi";
-    navVIP.innerText="VIP";
-    navBonus.innerText="Ibihembo";
-    navRules.innerText="Amategeko";
-  }
-
-  if(lang === "fr"){
-    title.innerText = "Bienvenue sur NS Platform";
-    desc.innerText = "Bienvenue sur NS Platform — un endroit pour améliorer votre engagement sur les réseaux sociaux et développer votre présence en ligne. Veuillez lire nos règles avant de commencer.";
-
-    footer.innerText = "NS Platform est une plateforme numérique conçue pour aider les utilisateurs à promouvoir leur contenu et améliorer leur engagement sur les réseaux sociaux. Nous fournissons de vrais abonnés, likes et commentaires authentiques.";
-
-    navHome.innerText="Accueil";
-    navServices.innerText="Services";
-    navVIP.innerText="VIP";
-    navBonus.innerText="Bonus";
-    navRules.innerText="Règlements";
-  }
-
-  document.getElementById("langBox").style.display="none";
+const text = {
+en:{
+title:"Welcome to NS Platform",
+desc:"Welcome to NS Platform — the place where you can improve your social media engagement and grow your online presence. Please take a moment to read our website regulations and policies before getting started."
+},
+fr:{
+title:"Bienvenue sur NS Platform",
+desc:"Bienvenue sur NS Platform — un endroit pour améliorer votre engagement sur les réseaux sociaux et développer votre présence en ligne. Veuillez lire nos règles et politiques."
+},
+rw:{
+title:"Murakaza neza kuri NS Platform",
+desc:"Murakaza neza kuri NS Platform — aho ushobora kongera ibikorwa byawe ku mbuga nkoranyambaga no kwagura ibikorwa byawe."
 }
+};
 
-/* DEFAULT LANGUAGE */
-setLang("en");
+document.getElementById("title").innerText = text[lang].title;
+document.getElementById("desc").innerText = text[lang].desc;
+}
 </script>
 
 </body>
