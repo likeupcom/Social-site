@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NS Platform</title>
 
-<!-- PROFESSIONAL ICONS -->
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
@@ -26,6 +25,7 @@ padding:18px 40px;
 background:#111827;
 position:sticky;
 top:0;
+z-index:1000;
 }
 .logo{
 font-size:22px;
@@ -33,16 +33,21 @@ font-weight:bold;
 color:#38bdf8;
 }
 
-/* LOGIN */
+/* LEFT MENU ICON */
+.menu-btn{
+font-size:26px;
+cursor:pointer;
+color:white;
+}
+
+/* AUTH RIGHT SIDE */
 .auth{
-position:absolute;
-left:40px;
-top:75px;
+display:flex;
+gap:10px;
 }
 .auth a{
 color:white;
 text-decoration:none;
-margin-right:10px;
 padding:6px 12px;
 border:1px solid #38bdf8;
 border-radius:6px;
@@ -61,7 +66,7 @@ line-height:1.6;
 color:#cbd5e1;
 }
 
-/* ===== SOCIAL GRID ===== */
+/* SOCIAL */
 .social-wrapper{
 display:flex;
 flex-direction:column;
@@ -74,8 +79,6 @@ display:flex;
 gap:140px;
 justify-content:center;
 }
-
-/* BOX */
 .social-box{
 width:190px;
 height:190px;
@@ -96,12 +99,45 @@ box-shadow:0 10px 30px rgba(0,0,0,0.4);
 .instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4);}
 .facebook{background:#1877f2;}
 .social-box i{font-size:42px;margin-bottom:10px;}
-.social-box:hover{transform:translateY(-10px) scale(1.05);}
+.social-box:hover{transform:scale(1.05);}
 
-/* ===== FOOTER ===== */
+/* SIDEBAR */
+.sidebar{
+position:fixed;
+left:-250px;
+top:0;
+height:100%;
+width:200px;
+background:#111827;
+padding-top:90px;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:15px;
+border-right:1px solid #1f2937;
+transition:.3s;
+z-index:2000;
+}
+.sidebar.open{left:0;}
+
+.lang-btn{
+background:none;
+border:1px solid #38bdf8;
+color:white;
+padding:8px 12px;
+border-radius:6px;
+cursor:pointer;
+width:140px;
+}
+.lang-btn:hover{
+background:#38bdf8;
+color:#000;
+}
+
+/* FOOTER */
 footer{
 background:#111827;
-padding:45px 20px;
+padding:45px 20px 120px;
 text-align:center;
 }
 .footer-text{
@@ -110,12 +146,20 @@ margin:auto;
 line-height:1.6;
 color:#cbd5e1;
 }
+
+/* BOTTOM NAV */
 .bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:#111827;
 display:flex;
 justify-content:center;
-gap:170px;
-margin-top:45px;
-flex-wrap:wrap;
+gap:90px;
+padding:15px 0;
+border-top:1px solid #1f2937;
+z-index:1500;
 }
 .nav-item{
 display:flex;
@@ -124,103 +168,61 @@ align-items:center;
 text-decoration:none;
 color:#cbd5e1;
 font-weight:bold;
-transition:.3s;
 }
-.nav-item span{
-font-size:28px;
-margin-bottom:8px;
-}
-.nav-item:hover{
-color:#38bdf8;
-transform:translateY(-5px);
-}
-
-/* ACTIVE PAGE */
-.nav-item.active{
-color:#38bdf8;
-}
-
-/* ===== LEFT LANGUAGE MENU ===== */
-.sidebar{
-position:fixed;
-left:0;
-top:0;
-height:100%;
-width:160px;
-background:#111827;
-padding-top:100px;
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:15px;
-border-right:1px solid #1f2937;
-}
-.lang-btn{
-background:none;
-border:1px solid #38bdf8;
-color:white;
-padding:8px 12px;
-border-radius:6px;
-cursor:pointer;
-width:120px;
-transition:.3s;
-}
-.lang-btn:hover{
-background:#38bdf8;
-color:#000;
-}
-.main-content{
-margin-left:170px;
-}
+.nav-item span{font-size:22px;}
+.nav-item:hover{color:#38bdf8;}
+.nav-item.active{color:#38bdf8;}
 </style>
 </head>
 
 <body>
 
-<!-- LEFT LANGUAGE MENU -->
-<div class="sidebar">
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
 <button class="lang-btn" onclick="setLang('en')">English</button>
 <button class="lang-btn" onclick="setLang('fr')">Français</button>
 <button class="lang-btn" onclick="setLang('rw')">Kinyarwanda</button>
+
+<a class="lang-btn" href="about.html">About Us</a>
 </div>
 
-<div class="main-content">
-
+<!-- HEADER -->
 <header>
-<div class="logo">NS Platform</div>
-</header>
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+<div class="logo" id="headerTitle">NS Platform</div>
 
 <div class="auth">
 <a href="login.html">Login</a>
 <a href="signup.html">Signup</a>
 </div>
+</header>
 
 <!-- HERO -->
 <div class="hero">
-<h1 id="title">Welcome to NS Platform</h1>
-<p id="desc">
+<h1 id="heroTitle">Welcome to NS Platform</h1>
+<p id="heroDesc">
 Welcome to NS Platform — the place where you can improve your social media engagement
 and grow your online presence. Please take a moment to read our website regulations
 and policies before getting started.
 </p>
 </div>
 
-<!-- SOCIAL MEDIA -->
+<!-- SOCIAL -->
 <div class="social-wrapper">
 <div class="social-row">
-<div class="social-box youtube" onclick="goPage('youtube.html')">
+<div class="social-box youtube" onclick="location.href='youtube.html'">
 <i class="fa-brands fa-youtube"></i>YouTube
 </div>
-<div class="social-box tiktok" onclick="goPage('tiktok.html')">
+<div class="social-box tiktok" onclick="location.href='tiktok.html'">
 <i class="fa-brands fa-tiktok"></i>TikTok
 </div>
 </div>
 
 <div class="social-row">
-<div class="social-box instagram" onclick="goPage('instagram.html')">
+<div class="social-box instagram" onclick="location.href='instagram.html'">
 <i class="fa-brands fa-instagram"></i>Instagram
 </div>
-<div class="social-box facebook" onclick="goPage('facebook.html')">
+<div class="social-box facebook" onclick="location.href='facebook.html'">
 <i class="fa-brands fa-facebook-f"></i>Facebook
 </div>
 </div>
@@ -234,55 +236,87 @@ improve social media engagement where we provide real followers,
 likes, comments and subscribers on different social media platforms.
 All engagements are real and not generated by machines.
 </div>
-
-<div class="bottom-nav">
-<a class="nav-item" href="index.html" data-page="index"><span>🏠</span>Home</a>
-<a class="nav-item" href="services.html" data-page="services"><span>🛠</span>Services</a>
-<a class="nav-item" href="vip.html" data-page="vip"><span>💎</span>VIP</a>
-<a class="nav-item" href="bonus.html" data-page="bonus"><span>🎁</span>Bonus</a>
-<a class="nav-item" href="regulations.html" data-page="regulations"><span>📜</span>Regulations</a>
-</div>
 </footer>
 
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+<a class="nav-item active" href="index.html"><span>🏠</span><span id="homeT">Home</span></a>
+<a class="nav-item" href="services.html"><span>🛠</span><span id="servicesT">Services</span></a>
+<a class="nav-item" href="vip.html"><span>💎</span><span id="vipT">VIP</span></a>
+<a class="nav-item" href="bonus.html"><span>🎁</span><span id="bonusT">Bonus</span></a>
+<a class="nav-item" href="regulations.html"><span>📜</span><span id="rulesT">Regulations</span></a>
 </div>
 
 <script>
-function goPage(page){
-window.location.href = page;
+
+function toggleMenu(){
+document.getElementById("sidebar").classList.toggle("open");
 }
 
-/* ACTIVE PAGE */
-const page = window.location.pathname.split("/").pop().replace(".html","") || "index";
-document.querySelectorAll(".nav-item").forEach(item=>{
-if(item.dataset.page === page){
-item.classList.add("active");
-}
-});
-
-/* LANGUAGE SYSTEM */
 function setLang(lang){
-const text = {
+localStorage.setItem("lang", lang);
+applyLang(lang);
+}
+
+function applyLang(lang){
+
+const t={
+
 en:{
-title:"Welcome to NS Platform",
+home:"Home",
+services:"Services",
+vip:"VIP",
+bonus:"Bonus",
+rules:"Regulations",
+header:"NS Platform",
+hero:"Welcome to NS Platform",
 desc:"Welcome to NS Platform — the place where you can improve your social media engagement and grow your online presence. Please take a moment to read our website regulations and policies before getting started.",
 footer:"NS Platform is a digital platform designed to help users promote content, improve social media engagement where we provide real followers, likes, comments and subscribers on different social media platforms. All engagements are real and not generated by machines."
 },
+
 fr:{
-title:"Bienvenue sur NS Platform",
-desc:"Bienvenue sur NS Platform — un endroit pour améliorer votre engagement sur les réseaux sociaux et développer votre présence en ligne. Veuillez lire nos règles et politiques.",
-footer:"NS Platform est une plateforme numérique conçue pour aider les utilisateurs à promouvoir leur contenu et améliorer leur engagement sur les réseaux sociaux."
+home:"Accueil",
+services:"Services",
+vip:"VIP",
+bonus:"Bonus",
+rules:"Règlements",
+header:"Plateforme NS",
+hero:"Bienvenue sur NS Platform",
+desc:"Bienvenue sur NS Platform — l’endroit où vous pouvez améliorer votre engagement sur les réseaux sociaux et développer votre présence en ligne. Veuillez prendre un moment pour lire les règlements et politiques de notre site avant de commencer.",
+footer:"NS Platform est une plateforme numérique conçue pour aider les utilisateurs à promouvoir leur contenu et à améliorer leur engagement sur les réseaux sociaux. Nous fournissons de vrais abonnés, mentions J’aime, commentaires et abonnements sur différentes plateformes sociales. Tous les engagements sont réels et non générés par des machines."
 },
+
 rw:{
-title:"Murakaza neza kuri NS Platform",
-desc:"Murakaza neza kuri NS Platform — aho ushobora guteza imbere imbuga nkoranyambaga zawe zose. ibuka kubanza gusoma amategeko n'amabwiriza mbere yo gutangira.",
-footer:"NS Platform ni urubuga rwakozwe hagamijwe gufasha abarugana bose guteza imbere imbuga nkoranyambaga zabo , aho abarugana bashobora kubona ababa kuricyirana banyabo."
+home:"Ahabanza",
+services:"Serivisi",
+vip:"VIP",
+bonus:"Ibihembo",
+rules:"Amategeko",
+header:"NS Platform",
+hero:"Murakaza neza kuri NS Platform",
+desc:"Murakaza neza kuri NS Platform — ni ahantu ushobora kuzamura no kwagura imbuga nkoranyambaga zawe. Mbere yo gutangira, turagusaba gusoma amategeko n’amabwiriza agenga uru rubuga.",
+footer:"NS Platform ni urubuga rwakozwe hagamijwe gufasha abakoresha imbuga nkoranyambaga bose.aho Dutanga aba followers , likes , comments na views ndetse naba subscribers kuri youtube. kandi ibi byose nibyanyabyo kuko ntama robo akoreshwa kur'urubuga rwacu."
 }
+
 };
 
-document.getElementById("title").innerText = text[lang].title;
-document.getElementById("desc").innerText = text[lang].desc;
-document.getElementById("footerText").innerText = text[lang].footer;
+document.getElementById("headerTitle").innerText=t[lang].header;
+document.getElementById("heroTitle").innerText=t[lang].hero;
+document.getElementById("heroDesc").innerText=t[lang].desc;
+document.getElementById("footerText").innerText=t[lang].footer;
+
+document.getElementById("homeT").innerText=t[lang].home;
+document.getElementById("servicesT").innerText=t[lang].services;
+document.getElementById("vipT").innerText=t[lang].vip;
+document.getElementById("bonusT").innerText=t[lang].bonus;
+document.getElementById("rulesT").innerText=t[lang].rules;
 }
+
+window.onload=function(){
+let savedLang=localStorage.getItem("lang")||"en";
+applyLang(savedLang);
+}
+
 </script>
 
 </body>
