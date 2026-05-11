@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NS Platform</title>
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
 body{
@@ -107,11 +106,7 @@ box-shadow:0 10px 30px rgba(0,0,0,0.4);
 .instagram{background:linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4);}
 .facebook{background:#1877f2;}
 
-.social-box i{
-font-size:42px;
-margin-bottom:10px;
-}
-
+.social-box i{font-size:42px;margin-bottom:10px;}
 .social-box:hover{transform:scale(1.05);}
 
 /* SIDEBAR */
@@ -177,6 +172,7 @@ justify-content:space-around;
 padding:12px 0;
 border-top:1px solid #1f2937;
 z-index:1500;
+flex-wrap:nowrap;
 }
 
 .nav-item{
@@ -202,14 +198,13 @@ font-size:12px;
 <button class="lang-btn" onclick="selectLang('en')">English</button>
 <button class="lang-btn" onclick="selectLang('fr')">Français</button>
 <button class="lang-btn" onclick="selectLang('rw')">Kinyarwanda</button>
-<a class="lang-btn" href="about.html">About Us</a>
+<a class="lang-btn" href="about.html" onclick="closeMenu()">About Us</a>
 </div>
 
 <!-- HEADER -->
 <header>
 <div class="menu-btn" onclick="toggleMenu()">☰</div>
 <div class="logo" id="headerTitle">NS Platform</div>
-
 <div class="auth">
 <a href="login.html">Login</a>
 <a href="signup.html">Signup</a>
@@ -219,11 +214,30 @@ font-size:12px;
 <!-- HERO -->
 <div class="hero">
 <h1 id="heroTitle">Welcome to NS Platform</h1>
-
 <p id="heroDesc">
-Welcome to NS Platform — the place where you can improve your social media engagement and grow your online presence.
-Please take a moment to read our website regulations and policies before getting started.
+Welcome to NS Platform — the place where you can improve your social media engagement and grow your online presence. Please take a moment to read our website regulations and policies before getting started.
 </p>
+</div>
+
+<!-- SOCIAL -->
+<div class="social-wrapper">
+<div class="social-row">
+<div class="social-box youtube" onclick="location.href='youtube.html'">
+<i class="fa-brands fa-youtube"></i>YouTube
+</div>
+<div class="social-box tiktok" onclick="location.href='tiktok.html'">
+<i class="fa-brands fa-tiktok"></i>TikTok
+</div>
+</div>
+
+<div class="social-row">
+<div class="social-box instagram" onclick="location.href='instagram.html'">
+<i class="fa-brands fa-instagram"></i>Instagram
+</div>
+<div class="social-box facebook" onclick="location.href='facebook.html'">
+<i class="fa-brands fa-facebook-f"></i>Facebook
+</div>
+</div>
 </div>
 
 <!-- FOOTER -->
@@ -235,52 +249,90 @@ NS Platform is a digital platform designed to help users promote content, improv
 
 <!-- BOTTOM NAV -->
 <div class="bottom-nav">
-<a class="nav-item active"><span>🏠</span><span id="homeT">Home</span></a>
-<a class="nav-item"><span>🛠</span><span id="servicesT">Services</span></a>
-<a class="nav-item"><span>💎</span><span id="vipT">VIP</span></a>
-<a class="nav-item"><span>🎁</span><span id="bonusT">Bonus</span></a>
-<a class="nav-item"><span>📜</span><span id="rulesT">Regulations</span></a>
+<a class="nav-item active" href="index.html"><span>🏠</span><span id="homeT">Home</span></a>
+<a class="nav-item" href="services.html"><span>🛠</span><span id="servicesT">Services</span></a>
+<a class="nav-item" href="vip.html"><span>💎</span><span id="vipT">VIP</span></a>
+<a class="nav-item" href="bonus.html"><span>🎁</span><span id="bonusT">Bonus</span></a>
+<a class="nav-item" href="regulations.html"><span>📜</span><span id="rulesT">Regulations</span></a>
 </div>
 
 <script>
-
-/* MENU */
 function toggleMenu(){
 document.getElementById("sidebar").classList.toggle("open");
 }
 
-/* SAVE LANGUAGE */
-function selectLang(lang){
-localStorage.setItem("lang",lang);
-applyLang(lang);
+function closeMenu(){
+document.getElementById("sidebar").classList.remove("open");
 }
 
-/* APPLY LANGUAGE */
-function applyLang(lang){
+/* CLOSE MENU WHEN CLICKING OUTSIDE */
+document.addEventListener("click", function(e){
+const sidebar = document.getElementById("sidebar");
+const menuBtn = document.querySelector(".menu-btn");
 
+if(sidebar.classList.contains("open")){
+if(!sidebar.contains(e.target) && !menuBtn.contains(e.target)){
+closeMenu();
+}
+}
+});
+
+/* SWIPE LEFT TO CLOSE MENU */
+let startX = 0;
+
+document.addEventListener("touchstart", function(e){
+startX = e.touches[0].clientX;
+});
+
+document.addEventListener("touchend", function(e){
+let endX = e.changedTouches[0].clientX;
+
+if(startX - endX > 80){
+closeMenu();
+}
+});
+
+/* LANGUAGE */
+function selectLang(lang){
+localStorage.setItem("lang", lang);
+applyLang(lang);
+closeMenu();
+}
+
+function applyLang(lang){
 const t={
 en:{
+home:"Home",
+services:"Services",
+vip:"VIP",
+bonus:"Bonus",
+rules:"Regulations",
 header:"NS Platform",
 hero:"Welcome to NS Platform",
 desc:"Welcome to NS Platform — the place where you can improve your social media engagement and grow your online presence. Please take a moment to read our website regulations and policies before getting started.",
-footer:"NS Platform is a digital platform designed to help users promote content, improve social media engagement where we provide real followers, likes, comments and subscribers on different social media platforms. All engagements are real and not generated by machines.",
-home:"Home",services:"Services",vip:"VIP",bonus:"Bonus",rules:"Regulations"
+footer:"NS Platform is a digital platform designed to help users promote content, improve social media engagement where we provide real followers, likes, comments and subscribers on different social media platforms. All engagements are real and not generated by machines."
 },
-
 fr:{
+home:"Accueil",
+services:"Services",
+vip:"VIP",
+bonus:"Bonus",
+rules:"Règlements",
 header:"Plateforme NS",
 hero:"Bienvenue sur NS Platform",
-desc:"Bienvenue sur NS Platform — l’endroit où vous pouvez améliorer votre engagement sur les réseaux sociaux et développer votre présence en ligne.",
-footer:"NS Platform est une plateforme numérique conçue pour aider les utilisateurs à promouvoir leur contenu et améliorer leur engagement.",
-home:"Accueil",services:"Services",vip:"VIP",bonus:"Bonus",rules:"Règlements"
+desc:"Bienvenue sur NS Platform — l’endroit où vous pouvez améliorer votre engagement sur les réseaux sociaux et développer votre présence en ligne. Veuillez prendre un moment pour lire les règlements et politiques de notre site avant de commencer.",
+footer:"NS Platform est une plateforme numérique conçue pour aider les utilisateurs à promouvoir leur contenu et à améliorer leur engagement sur les réseaux sociaux."
 },
-
 rw:{
+home:"Ahabanza",
+services:"Serivisi",
+vip:"VIP",
+bonus:"Ibihembo",
+rules:"Amategeko",
 header:"NS Platform",
 hero:"Murakaza neza kuri NS Platform",
-desc:""ni ahantu ushobora kuzamura no kwagura imbuga nkoranyambaga zawe. Mbere yo gutangira, turagusaba gusoma amategeko n’amabwiriza agenga uru rubuga.",
-footer:"NS Platform ni urubuga rwakozwe hagamijwe gufasha abakoresha imbuga nkoranyambaga bose.aho Dutanga aba followers , likes , comments na views ndetse naba subscribers kuri youtube. kandi ibi byose nibyanyabyo kuko ntama robo akoreshwa kur'urubuga rwacu.",
-home:"Ahabanza",services:"Serivisi",vip:"VIP",bonus:"Ibihembo",rules:"Amategeko"
+desc:"ni ahantu ushobora kuzamura no kwagura imbuga nkoranyambaga zawe. Mbere yo gutangira, turagusaba gusoma amategeko n’amabwiriza agenga uru rubuga.",
+footer:"NS Platform ni urubuga rwakozwe hagamijwe gufasha abakoresha imbuga nkoranyambaga bose.aho Dutanga aba followers , likes , comments na views ndetse naba subscribers kuri youtube. kandi ibi byose nibyanyabyo kuko ntama robo akoreshwa kur'urubuga rwacu."
 }
 };
 
@@ -296,12 +348,10 @@ document.getElementById("bonusT").innerText=t[lang].bonus;
 document.getElementById("rulesT").innerText=t[lang].rules;
 }
 
-/* LOAD SAVED LANGUAGE */
 window.onload=function(){
-let lang=localStorage.getItem("lang")||"en";
-applyLang(lang);
-};
-
+let savedLang=localStorage.getItem("lang")||"en";
+applyLang(savedLang);
+}
 </script>
 
 </body>
