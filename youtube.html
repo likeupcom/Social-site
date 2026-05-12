@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YouTube Promotion Center</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  background:#0b1220;
+  color:#fff;
+  min-height:100vh;
+  padding-bottom:110px;
+  overflow-x:hidden;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 40px;
+  background:#111827;
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:bold;
+  color:#38bdf8;
+}
+
+.menu-btn{
+  font-size:26px;
+  cursor:pointer;
+  color:white;
+}
+
+.auth{
+  display:flex;
+  gap:10px;
+}
+
+.auth a{
+  color:white;
+  text-decoration:none;
+  padding:6px 12px;
+  border:1px solid #38bdf8;
+  border-radius:6px;
+}
+
+.container{
+  text-align:center;
+  padding:60px 20px;
+}
+
+h1{
+  font-size:28px;
+  margin-bottom:40px;
+  color:#38bdf8;
+}
+
+.buttons{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  align-items:center;
+}
+
+.tool-btn{
+  padding:15px 30px;
+  font-size:18px;
+  border:none;
+  border-radius:30px;
+  cursor:pointer;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  transition:.3s;
+  width:260px;
+}
+
+.tool-btn:hover{
+  background:rgba(255,255,255,0.3);
+}
+
+footer{
+  background:#111827;
+  padding:45px 20px 60px;
+  text-align:center;
+}
+
+.footer-text{
+  max-width:900px;
+  margin:auto;
+  line-height:1.6;
+  color:#cbd5e1;
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#111827;
+  display:flex;
+  justify-content:space-around;
+  padding:12px 0;
+  border-top:1px solid #1f2937;
+  z-index:1500;
+}
+
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-decoration:none;
+  color:#cbd5e1;
+  font-weight:bold;
+  font-size:12px;
+}
+
+.nav-item span:first-child{font-size:20px;}
+.nav-item:hover{color:#38bdf8;}
+.nav-item.active{color:#38bdf8;}
+
+.sidebar{
+  position:fixed;
+  left:-250px;
+  top:0;
+  height:100%;
+  width:200px;
+  background:#111827;
+  padding-top:90px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:15px;
+  border-right:1px solid #1f2937;
+  transition:.3s;
+  z-index:2000;
+}
+
+.sidebar.open{left:0;}
+
+.lang-btn{
+  background:none;
+  border:1px solid #38bdf8;
+  color:white;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  width:140px;
+  text-align:center;
+}
+
+.lang-btn:hover{
+  background:#38bdf8;
+  color:#000;
+}
+
+.watermark{
+  position:fixed;
+  right:20px;
+  bottom:100px;
+  font-size:55px;
+  color:#fff;
+  opacity:0.75;
+  cursor:pointer;
+  z-index:3000;
+  transition:.3s;
+}
+
+.watermark:hover{
+  transform:scale(1.1);
+  opacity:1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar" id="sidebar">
+  <button class="lang-btn" onclick="selectLang('en')">English</button>
+  <button class="lang-btn" onclick="selectLang('fr')">Français</button>
+  <button class="lang-btn" onclick="selectLang('rw')">Kinyarwanda</button>
+</div>
+
+<header>
+  <div class="logo" id="title">YouTube Promotion Center</div>
+  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;margin-left:auto;display:flex;align-items:center;">
+    →
+  </a>
+</header>
+
+<div class="container">
+  <h1 id="pageTitle">YouTube Promotion Center</h1>
+
+  <div class="buttons">
+    <button class="tool-btn" onclick="location.href='improve-youtube.html'" id="btn1">
+      Improve Your YouTube Channel
+    </button>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-text" id="footerText">
+    © 2026 YouTube Promotion Center. All rights reserved.<br>
+    Grow your presence, boost engagement, and reach more people.
+  </div>
+</footer>
+
+<div class="bottom-nav">
+  <a class="nav-item" href="index.html"><span>🏠</span><span></span></a>
+  <a class="nav-item" href="services.html"><span>🛠</span><span></span></a>
+  <a class="nav-item" href="vip.html"><span>💎</span><span></span></a>
+  <a class="nav-item" href="bonus.html"><span>🎁</span><span></span></a>
+  <a class="nav-item" href="regulations.html"><span>📜</span><span></span></a>
+</div>
+
+<!-- ✅ ONLY CHANGE: YOUTUBE ICON -->
+<a href="youtube.html" class="watermark">
+  <i class="fa-brands fa-youtube"></i>
+</a>
+
+<script>
+function selectLang(lang){
+  localStorage.setItem("lang", lang);
+  applyLang(lang);
+}
+
+function applyLang(lang){
+  const t={
+    en:{
+      title:"YouTube Promotion Center",
+      btn1:"Improve Your YouTube Channel",
+      home:"Home",
+      services:"Services",
+      vip:"VIP",
+      bonus:"Bonus",
+      rules:"Regulations",
+      footer:"© 2026 YouTube Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
+    },
+    fr:{
+      title:"Centre de Promotion YouTube",
+      btn1:"Améliorer votre chaîne YouTube",
+      home:"Accueil",
+      services:"Services",
+      vip:"VIP",
+      bonus:"Bonus",
+      rules:"Règlements",
+      footer:"© 2026 YouTube Promotion Center. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
+    },
+    rw:{
+      title:"YouTube Promotion Center",
+      btn1:"Ongera Channel yawe ya YouTube",
+      home:"Ahabanza",
+      services:"Serivisi",
+      vip:"VIP",
+      bonus:"Ibihembo",
+      rules:"Amategeko",
+      footer:"© 2026 YouTube Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere channel yawe no kongera abakureba."
+    }
+  };
+
+  document.getElementById("title").innerText=t[lang].title;
+  document.getElementById("pageTitle").innerText=t[lang].title;
+  document.getElementById("btn1").innerText=t[lang].btn1;
+  document.getElementById("footerText").innerText=t[lang].footer;
+
+  let nav=document.querySelectorAll(".bottom-nav .nav-item span:nth-child(2)");
+  nav[0].innerText=t[lang].home;
+  nav[1].innerText=t[lang].services;
+  nav[2].innerText=t[lang].vip;
+  nav[3].innerText=t[lang].bonus;
+  nav[4].innerText=t[lang].rules;
+}
+
+window.onload=function(){
+  let lang=localStorage.getItem("lang")||"en";
+  applyLang(lang);
+}
+</script>
+
+</body>
+</html>
