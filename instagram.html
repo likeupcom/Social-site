@@ -1,11 +1,222 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Instagram - NS Platform</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Instagram Promotion</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#0f172a;
+color:white;
+}
+
+/* HEADER */
+.header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+background:#020617;
+padding:15px;
+box-shadow:0 2px 10px rgba(0,0,0,.5);
+}
+
+.back-btn{
+color:white;
+font-size:20px;
+cursor:pointer;
+}
+
+.logo{
+font-size:20px;
+font-weight:bold;
+}
+
+/* MENU ICONS */
+.menu{
+display:flex;
+justify-content:space-around;
+background:#020617;
+padding:12px 0;
+border-top:1px solid #1e293b;
+border-bottom:1px solid #1e293b;
+}
+
+.menu a{
+color:white;
+text-decoration:none;
+font-size:14px;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+.menu i{
+font-size:18px;
+margin-bottom:5px;
+}
+
+/* CONTENT */
+.container{
+padding:20px;
+text-align:center;
+}
+
+.card{
+background:#020617;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+box-shadow:0 0 10px rgba(0,0,0,.5);
+}
+
+input{
+width:90%;
+padding:12px;
+border-radius:8px;
+border:none;
+margin-top:10px;
+}
+
+button{
+margin-top:15px;
+padding:12px 25px;
+border:none;
+border-radius:8px;
+background:#ec4899;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#db2777;
+}
+
+</style>
 </head>
+
 <body>
 
-<h1>Instagram Page</h1>
+<!-- HEADER -->
+<div class="header">
+<i class="fas fa-arrow-left back-btn" onclick="goBack()"></i>
+<div class="logo" id="titleText">Instagram Promotion</div>
+</div>
+
+<!-- MENU SAME AS HOME -->
+<div class="menu">
+<a href="index.html">
+<i class="fas fa-home"></i>
+<span id="homeText">Home</span>
+</a>
+
+<a href="#">
+<i class="fas fa-concierge-bell"></i>
+<span id="serviceText">Services</span>
+</a>
+
+<a href="#">
+<i class="fas fa-gem"></i>
+<span id="vipText">VIP Bonus</span>
+</a>
+
+<a href="#">
+<i class="fas fa-scale-balanced"></i>
+<span id="ruleText">Regulations</span>
+</a>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+
+<div class="card">
+<h2 id="boostTitle">Boost Instagram Account</h2>
+
+<input type="text" id="username"
+placeholder="Enter Instagram Username">
+
+<br>
+
+<button id="submitBtn">Start Promotion</button>
+
+</div>
+
+</div>
+
+<script>
+
+/* BACK BUTTON */
+function goBack(){
+window.location.href="index.html";
+}
+
+/* LANGUAGE SYSTEM */
+/* Language comes ONLY from index.html */
+let lang = localStorage.getItem("language") || "en";
+
+/* TRANSLATIONS */
+const text = {
+
+en:{
+title:"Instagram Promotion",
+home:"Home",
+service:"Services",
+vip:"VIP Bonus",
+rule:"Regulations",
+boost:"Boost Instagram Account",
+placeholder:"Enter Instagram Username",
+button:"Start Promotion"
+},
+
+fr:{
+title:"Promotion Instagram",
+home:"Accueil",
+service:"Services",
+vip:"Bonus VIP",
+rule:"Règlements",
+boost:"Booster le compte Instagram",
+placeholder:"Entrez le nom Instagram",
+button:"Démarrer la promotion"
+},
+
+rw:{
+title:"Kuzamura konti ya Instagram",
+home:"Ahabanza",
+service:"Serivisi",
+vip:"Bonus VIP",
+rule:"Amategeko",
+boost:"Kuzamura konti ya Instagram",
+placeholder:"Andika izina rya Instagram",
+button:"Tangira kuzamura"
+}
+
+};
+
+/* APPLY LANGUAGE */
+function applyLanguage(){
+
+document.getElementById("titleText").innerText=text[lang].title;
+document.getElementById("homeText").innerText=text[lang].home;
+document.getElementById("serviceText").innerText=text[lang].service;
+document.getElementById("vipText").innerText=text[lang].vip;
+document.getElementById("ruleText").innerText=text[lang].rule;
+document.getElementById("boostTitle").innerText=text[lang].boost;
+document.getElementById("username").placeholder=text[lang].placeholder;
+document.getElementById("submitBtn").innerText=text[lang].button;
+
+}
+
+applyLanguage();
+
+</script>
 
 </body>
 </html>
