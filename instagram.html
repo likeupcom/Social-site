@@ -1,221 +1,302 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TikTok Promotion Center</title>
 
-<title>Instagram Promotion</title>
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
 
 body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:#0f172a;
-color:white;
+  background:#0b1220;
+  color:#fff;
+  min-height:100vh;
+  padding-bottom:110px;
+  overflow-x:hidden;
 }
 
-/* HEADER */
-.header{
-display:flex;
-align-items:center;
-justify-content:space-between;
-background:#020617;
-padding:15px;
-box-shadow:0 2px 10px rgba(0,0,0,.5);
-}
-
-.back-btn{
-color:white;
-font-size:20px;
-cursor:pointer;
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 40px;
+  background:#111827;
+  position:sticky;
+  top:0;
+  z-index:1000;
 }
 
 .logo{
-font-size:20px;
-font-weight:bold;
+  font-size:22px;
+  font-weight:bold;
+  color:#38bdf8;
 }
 
-/* MENU ICONS */
-.menu{
-display:flex;
-justify-content:space-around;
-background:#020617;
-padding:12px 0;
-border-top:1px solid #1e293b;
-border-bottom:1px solid #1e293b;
+.menu-btn{
+  font-size:26px;
+  cursor:pointer;
+  color:white;
 }
 
-.menu a{
-color:white;
-text-decoration:none;
-font-size:14px;
-display:flex;
-flex-direction:column;
-align-items:center;
+.auth{
+  display:flex;
+  gap:10px;
 }
 
-.menu i{
-font-size:18px;
-margin-bottom:5px;
+.auth a{
+  color:white;
+  text-decoration:none;
+  padding:6px 12px;
+  border:1px solid #38bdf8;
+  border-radius:6px;
 }
 
-/* CONTENT */
 .container{
-padding:20px;
-text-align:center;
+  text-align:center;
+  padding:60px 20px;
 }
 
-.card{
-background:#020617;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-box-shadow:0 0 10px rgba(0,0,0,.5);
+h1{
+  font-size:28px;
+  margin-bottom:40px;
+  color:#38bdf8;
 }
 
-input{
-width:90%;
-padding:12px;
-border-radius:8px;
-border:none;
-margin-top:10px;
+.buttons{
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  align-items:center;
 }
 
-button{
-margin-top:15px;
-padding:12px 25px;
-border:none;
-border-radius:8px;
-background:#ec4899;
-color:white;
-font-weight:bold;
-cursor:pointer;
+.tool-btn{
+  padding:15px 30px;
+  font-size:18px;
+  border:none;
+  border-radius:30px;
+  cursor:pointer;
+  background:rgba(255,255,255,0.1);
+  color:#fff;
+  transition:.3s;
+  width:260px;
 }
 
-button:hover{
-background:#db2777;
+.tool-btn:hover{
+  background:rgba(255,255,255,0.3);
 }
 
+footer{
+  background:#111827;
+  padding:45px 20px 60px;
+  text-align:center;
+}
+
+.footer-text{
+  max-width:900px;
+  margin:auto;
+  line-height:1.6;
+  color:#cbd5e1;
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#111827;
+  display:flex;
+  justify-content:space-around;
+  padding:12px 0;
+  border-top:1px solid #1f2937;
+  z-index:1500;
+}
+
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-decoration:none;
+  color:#cbd5e1;
+  font-weight:bold;
+  font-size:12px;
+}
+
+.nav-item span:first-child{font-size:20px;}
+.nav-item:hover{color:#38bdf8;}
+.nav-item.active{color:#38bdf8;}
+
+.sidebar{
+  position:fixed;
+  left:-250px;
+  top:0;
+  height:100%;
+  width:200px;
+  background:#111827;
+  padding-top:90px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:15px;
+  border-right:1px solid #1f2937;
+  transition:.3s;
+  z-index:2000;
+}
+
+.sidebar.open{left:0;}
+
+.lang-btn{
+  background:none;
+  border:1px solid #38bdf8;
+  color:white;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  width:140px;
+  text-align:center;
+}
+
+.lang-btn:hover{
+  background:#38bdf8;
+  color:#000;
+}
+
+.watermark{
+  position:fixed;
+  right:20px;
+  bottom:100px;
+  font-size:55px;
+  color:#fff;
+  opacity:0.75;
+  cursor:pointer;
+  z-index:3000;
+  transition:.3s;
+}
+
+.watermark:hover{
+  transform:scale(1.1);
+  opacity:1;
+}
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<div class="header">
-<i class="fas fa-arrow-left back-btn" onclick="goBack()"></i>
-<div class="logo" id="titleText">Instagram Promotion</div>
+<div class="sidebar" id="sidebar">
+  <button class="lang-btn" onclick="selectLang('en')">English</button>
+  <button class="lang-btn" onclick="selectLang('fr')">Français</button>
+  <button class="lang-btn" onclick="selectLang('rw')">Kinyarwanda</button>
 </div>
 
-<!-- MENU SAME AS HOME -->
-<div class="menu">
-<a href="index.html">
-<i class="fas fa-home"></i>
-<span id="homeText">Home</span>
-</a>
+<header>
+  <div class="logo" id="title">TikTok Promotion Center</div>
+  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;margin-left:auto;display:flex;align-items:center;">
+    →
+  </a>
+</header>
 
-<a href="#">
-<i class="fas fa-concierge-bell"></i>
-<span id="serviceText">Services</span>
-</a>
-
-<a href="#">
-<i class="fas fa-gem"></i>
-<span id="vipText">VIP Bonus</span>
-</a>
-
-<a href="#">
-<i class="fas fa-scale-balanced"></i>
-<span id="ruleText">Regulations</span>
-</a>
-</div>
-
-<!-- CONTENT -->
 <div class="container">
+  <h1 id="pageTitle">Instagram Promotion Center</h1>
 
-<div class="card">
-<h2 id="boostTitle">Boost Instagram Account</h2>
+  <div class="buttons">
+    <button class="tool-btn" onclick="location.href='improve-followers.html'" id="btn1">
+      Improve Your Followers
+    </button>
 
-<input type="text" id="username"
-placeholder="Enter Instagram Username">
-
-<br>
-
-<button id="submitBtn">Start Promotion</button>
-
+    <button class="tool-btn" onclick="location.href='comments-views.html'" id="btn2">
+      Get Comments & Views
+    </button>
+  </div>
 </div>
 
+<footer>
+  <div class="footer-text" id="footerText">
+    © 2026 instagram Promotion Center. All rights reserved.<br>
+    Grow your presence, boost engagement, and reach more people.
+  </div>
+</footer>
+
+<div class="bottom-nav">
+  <a class="nav-item" href="index.html"><span>🏠</span><span></span></a>
+  <a class="nav-item" href="services.html"><span>🛠</span><span></span></a>
+  <a class="nav-item" href="vip.html"><span>💎</span><span></span></a>
+  <a class="nav-item" href="bonus.html"><span>🎁</span><span></span></a>
+  <a class="nav-item" href="regulations.html"><span>📜</span><span></span></a>
 </div>
+
+<!-- ✅ ONLY ICON CHANGED HERE -->
+<a href="tiktok.html" class="watermark">
+  <i class="fa-brands fa-instagram"></i>
+</a>
 
 <script>
-
-/* BACK BUTTON */
-function goBack(){
-window.location.href="index.html";
+function selectLang(lang){
+  localStorage.setItem("lang", lang);
+  applyLang(lang);
 }
 
-/* LANGUAGE SYSTEM */
-/* Language comes ONLY from index.html */
-let lang = localStorage.getItem("language") || "en";
+function applyLang(lang){
+  const t={
+    en:{
+      title:"Instagram Promotion Center",
+      btn1:"Improve Your Followers",
+      btn2:"Get Comments & Views",
+      home:"Home",
+      services:"Services",
+      vip:"VIP",
+      bonus:"Bonus",
+      Regulations:"Regulations",
+      footer:"© 2026 Instagram Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
+    },
+    fr:{
+      title:"Centre de Promotion Instagram",
+      btn1:"Améliorer vos abonnés",
+      btn2:"Obtenir des commentaires et des vues",
+      home:"Accueil",
+      services:"Services",
+      vip:"VIP",
+      bonus:"Bonus",
+      rules:"Règlements",
+      footer:"© 2026 Instagram Promotion Center. Tous droits réservés.\nDéveloppez votre présence, augmentez l'engagement et atteignez plus de personnes."
+    },
+    rw:{
+      title:"Instagram Promotion Center",
+      btn1:"Ongera Abagukurikirana (followers)",
+      btn2:"Shaka Comments na Views",
+      home:"Ahabanza",
+      services:"Serivisi",
+      vip:"VIP",
+      bonus:"Ibihembo",
+      rules:"Amategeko",
+      footer:"© 2026 Instagram Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere account yawe no kongera abantu bagukurikirana."
+    }
+  };
 
-/* TRANSLATIONS */
-const text = {
+  document.getElementById("title").innerText=t[lang].title;
+  document.getElementById("pageTitle").innerText=t[lang].title;
+  document.getElementById("btn1").innerText=t[lang].btn1;
+  document.getElementById("btn2").innerText=t[lang].btn2;
+  document.getElementById("footerText").innerText=t[lang].footer;
 
-en:{
-title:"Instagram Promotion",
-home:"Home",
-service:"Services",
-vip:"VIP Bonus",
-rule:"Regulations",
-boost:"Boost Instagram Account",
-placeholder:"Enter Instagram Username",
-button:"Start Promotion"
-},
-
-fr:{
-title:"Promotion Instagram",
-home:"Accueil",
-service:"Services",
-vip:"Bonus VIP",
-rule:"Règlements",
-boost:"Booster le compte Instagram",
-placeholder:"Entrez le nom Instagram",
-button:"Démarrer la promotion"
-},
-
-rw:{
-title:"Kuzamura konti ya Instagram",
-home:"Ahabanza",
-service:"Serivisi",
-vip:"Bonus VIP",
-rule:"Amategeko",
-boost:"Kuzamura konti ya Instagram",
-placeholder:"Andika izina rya Instagram",
-button:"Tangira kuzamura"
+  let nav=document.querySelectorAll(".bottom-nav .nav-item span:nth-child(2)");
+  nav[0].innerText=t[lang].home;
+  nav[1].innerText=t[lang].services;
+  nav[2].innerText=t[lang].vip;
+  nav[3].innerText=t[lang].bonus;
+  nav[4].innerText=t[lang].rules;
 }
 
-};
-
-/* APPLY LANGUAGE */
-function applyLanguage(){
-
-document.getElementById("titleText").innerText=text[lang].title;
-document.getElementById("homeText").innerText=text[lang].home;
-document.getElementById("serviceText").innerText=text[lang].service;
-document.getElementById("vipText").innerText=text[lang].vip;
-document.getElementById("ruleText").innerText=text[lang].rule;
-document.getElementById("boostTitle").innerText=text[lang].boost;
-document.getElementById("username").placeholder=text[lang].placeholder;
-document.getElementById("submitBtn").innerText=text[lang].button;
-
+window.onload=function(){
+  let lang=localStorage.getItem("lang")||"en";
+  applyLang(lang);
 }
-
-applyLanguage();
-
 </script>
 
 </body>
