@@ -168,7 +168,6 @@ footer{
   color:#000;
 }
 
-/* BIG PROFESSIONAL WATERMARK */
 .watermark{
   position:fixed;
   right:20px;
@@ -225,14 +224,13 @@ footer{
 </footer>
 
 <div class="bottom-nav">
-  <a class="nav-item" href="index.html"><span>🏠</span><span>Home</span></a>
-  <a class="nav-item" href="services.html"><span>🛠</span><span>Services</span></a>
-  <a class="nav-item" href="vip.html"><span>💎</span><span>VIP</span></a>
-  <a class="nav-item" href="bonus.html"><span>🎁</span><span>Bonus</span></a>
-  <a class="nav-item" href="regulations.html"><span>📜</span><span>Rules</span></a>
+  <a class="nav-item" href="index.html"><span>🏠</span><span></span></a>
+  <a class="nav-item" href="services.html"><span>🛠</span><span></span></a>
+  <a class="nav-item" href="vip.html"><span>💎</span><span></span></a>
+  <a class="nav-item" href="bonus.html"><span>🎁</span><span></span></a>
+  <a class="nav-item" href="regulations.html"><span>📜</span><span></span></a>
 </div>
 
-<!-- TIKTOK WATERMARK -->
 <a href="tiktok.html" class="watermark">
   <i class="fa-brands fa-tiktok"></i>
 </a>
@@ -249,18 +247,33 @@ function applyLang(lang){
       title:"TikTok Promotion Center",
       btn1:"Improve Your Followers",
       btn2:"Get Comments & Views",
+      home:"Home",
+      services:"Services",
+      vip:"VIP",
+      bonus:"Bonus",
+      rules:"Rules",
       footer:"© 2026 TikTok Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
     },
     fr:{
       title:"Centre de Promotion TikTok",
       btn1:"Améliorer vos abonnés",
       btn2:"Obtenir des commentaires et des vues",
+      home:"Accueil",
+      services:"Services",
+      vip:"VIP",
+      bonus:"Bonus",
+      rules:"Règles",
       footer:"© 2026 TikTok Promotion Center. Tous droits réservés.\nDéveloppez votre présence, augmentez l'engagement et atteignez plus de personnes."
     },
     rw:{
       title:"TikTok Promotion Center",
       btn1:"Ongera Abagukurikirana (followers)",
       btn2:"Shaka Comments na Views",
+      home:"Ahabanza",
+      services:"Serivisi",
+      vip:"VIP",
+      bonus:"Ibihembo",
+      rules:"Amategeko",
       footer:"© 2026 TikTok Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere account yawe no kongera abantu bagukurikirana."
     }
   };
@@ -270,6 +283,13 @@ function applyLang(lang){
   document.getElementById("btn1").innerText=t[lang].btn1;
   document.getElementById("btn2").innerText=t[lang].btn2;
   document.getElementById("footerText").innerText=t[lang].footer;
+
+  let nav=document.querySelectorAll(".bottom-nav .nav-item span:nth-child(2)");
+  nav[0].innerText=t[lang].home;
+  nav[1].innerText=t[lang].services;
+  nav[2].innerText=t[lang].vip;
+  nav[3].innerText=t[lang].bonus;
+  nav[4].innerText=t[lang].rules;
 }
 
 window.onload=function(){
