@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>   
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -346,6 +346,39 @@ document.getElementById("servicesT").innerText=t[lang].services;
 document.getElementById("vipT").innerText=t[lang].vip;
 document.getElementById("bonusT").innerText=t[lang].bonus;
 document.getElementById("rulesT").innerText=t[lang].rules;
+}
+
+/* ================= LOGIN CONTROL SYSTEM ================= */
+
+function isLoggedIn(){
+    return localStorage.getItem("loggedIn") === "true";
+}
+
+function showLoginMessage(){
+    alert("Please login first to access this page.");
+}
+
+/* Protect social media boxes */
+document.querySelectorAll(".social-box").forEach(box => {
+    box.addEventListener("click", function(e){
+
+        if(!isLoggedIn()){
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            showLoginMessage();
+            return;
+        }
+
+    }, true);
+});
+
+function loginUser(){
+    localStorage.setItem("loggedIn", "true");
+}
+
+function logoutUser(){
+    localStorage.setItem("loggedIn", "false");
 }
 
 window.onload=function(){

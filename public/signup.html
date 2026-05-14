@@ -3,21 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <title>Signup</title>
+
+<style>
+body{
+background:#0b1220;
+color:white;
+font-family:Arial;
+text-align:center;
+padding-top:60px;
+}
+
+form{
+background:#111827;
+display:inline-block;
+padding:30px;
+border-radius:10px;
+width:300px;
+}
+
+input{
+width:90%;
+padding:10px;
+margin:8px 0;
+border:none;
+border-radius:6px;
+}
+
+button{
+width:95%;
+padding:10px;
+border:none;
+border-radius:6px;
+background:#38bdf8;
+color:black;
+font-weight:bold;
+cursor:pointer;
+transition:.3s;
+}
+
+button:disabled{
+background:gray;
+cursor:not-allowed;
+}
+
+.msg{
+margin-top:10px;
+color:#f87171;
+font-size:14px;
+}
+</style>
 </head>
 
-<body style="background:#0b1220;color:white;text-align:center">
+<body>
 
 <h2>Create Account</h2>
 
-<form id="signupForm">
-<input type="text" name="username" placeholder="Username" required><br><br>
+<form action="/signup" method="POST">
 
-<input type="password" name="password" placeholder="Password" required><br><br>
+<input type="text" id="email" name="email" placeholder="Gmail address">
 
-<button type="submit">Signup</button>
+<input type="text" id="username" name="username" placeholder="Username">
+
+<input type="password" id="password" name="password" placeholder="Password (numbers only)">
+
+<button id="signupBtn" disabled>Signup</button>
+
+<div class="msg" id="msg"></div>
+
 </form>
 
 <p>Already have account? <a href="login.html">Login</a></p>
+
+<script>
+const email = document.getElementById("email");
+const username = document.getElementById("username");
+const password = document.getElementById("password");
+const btn = document.getElementById("signupBtn");
+const msg = document.getElementById("msg");
+
+function validate(){
+
+let emailValid = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email.value);
+let userValid = /^[a-zA-Z0-9]+$/.test(username.value);
+let passValid = /^[0-9]+$/.test(password.value);
+
+if(email.value && !emailValid){
+msg.innerText="Only Gmail addresses allowed";
+}
+else if(username.value && !userValid){
+msg.innerText="Username: letters and numbers only";
+}
+else if(password.value && !passValid){
+msg.innerText="Password must contain numbers only";
+}
+else{
+msg.innerText="";
+}
+
+btn.disabled = !(emailValid && userValid && passValid);
+}
+
+email.oninput = validate;
+username.oninput = validate;
+password.oninput = validate;
+</script>
 
 </body>
 </html>
