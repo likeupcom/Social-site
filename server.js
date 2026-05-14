@@ -1,9 +1,23 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const mongoose = require("mongoose");
 
 const app = express();
+
+/* ---------------- MONGODB CONNECTION ---------------- */
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.log(err));
+
+/* ---------------- USER MODEL ---------------- */
+const User = mongoose.model("User", {
+  email: String,
+  username: String,
+  password: String
+});
 
 /* ---------------- MIDDLEWARE ---------------- */
 app.use(express.json());
@@ -16,9 +30,6 @@ app.use(session({
 }));
 
 app.use(express.static("public"));
-
-/* ---------------- FAKE DATABASE (for now) ---------------- */
-const users = [];
 
 /* ---------------- VALIDATION RULES ---------------- */
 function isGmail(email) {
@@ -41,12 +52,13 @@ app.post("/signup", async (req, res) => {
     return res.send("Invalid format (check email, username, password rules)");
   }
 
-  const exists = users.find(u => u.username === username);
+  const exists = await User.findOne({ username });
+
   if (exists) return res.send("Username already exists");
 
   const hashed = await bcrypt.hash(password, 10);
 
-  users.push({
+  await User.create({
     email,
     username,
     password: hashed
@@ -65,7 +77,7 @@ app.post("/login", async (req, res) => {
     return res.send("Invalid format");
   }
 
-  const user = users.find(u => u.username === username);
+  const user = await User.findOne({ username });
 
   if (!user) {
     return res.send("Incorrect username or password");
