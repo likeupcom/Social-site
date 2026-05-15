@@ -1,9 +1,11 @@
 ---
 title: Social Site
-emoji: 🚀
+emoji: 🧩
 colorFrom: blue
 colorTo: green
 sdk: docker
 pinned: false
----# Social-site
-Social media engagement platform 
+---
+
+# Social-site
+Social media engagement platform
