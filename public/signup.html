@@ -1,112 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Signup</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Signup</title>
 
-<style>
-body{
-background:#0b1220;
-color:white;
-font-family:Arial;
-text-align:center;
-padding-top:60px;
-}
+    <style>
+      body {
+        background: #0b1220;
+        color: white;
+        font-family: Arial;
+        text-align: center;
+        padding-top: 60px;
+      }
 
-form{
-background:#111827;
-display:inline-block;
-padding:30px;
-border-radius:10px;
-width:300px;
-}
+      form {
+        background: #111827;
+        display: inline-block;
+        padding: 30px;
+        border-radius: 10px;
+        width: 300px;
+      }
 
-input{
-width:90%;
-padding:10px;
-margin:8px 0;
-border:none;
-border-radius:6px;
-}
+      input {
+        width: 90%;
+        padding: 10px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 6px;
+      }
 
-button{
-width:95%;
-padding:10px;
-border:none;
-border-radius:6px;
-background:#38bdf8;
-color:black;
-font-weight:bold;
-cursor:pointer;
-transition:.3s;
-}
+      button {
+        width: 95%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #38bdf8;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+      }
 
-button:disabled{
-background:gray;
-cursor:not-allowed;
-}
+      button:disabled {
+        background: gray;
+      }
 
-.msg{
-margin-top:10px;
-color:#f87171;
-font-size:14px;
-}
-</style>
-</head>
+      .msg {
+        margin-top: 10px;
+        color: #f87171;
+        font-size: 14px;
+      }
+    </style>
+  </head>
 
-<body>
+  <body>
+    <h2>Create Account</h2>
 
-<h2>Create Account</h2>
+    <form action="/signup" method="POST">
+      <input
+        type="text"
+        name="email"
+        id="email"
+        placeholder="Gmail address"
+        required
+      />
 
-<form action="/signup" method="POST">
+      <input
+        type="text"
+        name="username"
+        id="username"
+        placeholder="Username"
+        required
+      />
 
-<input type="text" id="email" name="email" placeholder="Gmail address">
+      <input
+        type="password"
+        name="password"
+        id="password"
+        placeholder="Password (numbers only)"
+        required
+      />
 
-<input type="text" id="username" name="username" placeholder="Username">
+      <button type="submit" id="signupBtn" disabled>Signup</button>
 
-<input type="password" id="password" name="password" placeholder="Password (numbers only)">
+      <div class="msg" id="msg"></div>
+    </form>
 
-<button id="signupBtn" disabled>Signup</button>
+    <p>Already have account? <a href="/login.html">Login</a></p>
 
-<div class="msg" id="msg"></div>
+    <script>
+      const email = document.getElementById("email");
+      const username = document.getElementById("username");
+      const password = document.getElementById("password");
+      const btn = document.getElementById("signupBtn");
+      const msg = document.getElementById("msg");
 
-</form>
+      function validate() {
+        const emailValid = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email.value);
+        const userValid = /^[a-zA-Z0-9]+$/.test(username.value);
+        const passValid = /^[0-9]+$/.test(password.value);
 
-<p>Already have account? <a href="login.html">Login</a></p>
+        if (email.value && !emailValid) {
+          msg.innerText = "Only Gmail addresses allowed";
+        } else if (username.value && !userValid) {
+          msg.innerText = "Username: letters and numbers only";
+        } else if (password.value && !passValid) {
+          msg.innerText = "Password must contain numbers only";
+        } else {
+          msg.innerText = "";
+        }
 
-<script>
-const email = document.getElementById("email");
-const username = document.getElementById("username");
-const password = document.getElementById("password");
-const btn = document.getElementById("signupBtn");
-const msg = document.getElementById("msg");
+        btn.disabled = !(emailValid && userValid && passValid);
+      }
 
-function validate(){
-
-let emailValid = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email.value);
-let userValid = /^[a-zA-Z0-9]+$/.test(username.value);
-let passValid = /^[0-9]+$/.test(password.value);
-
-if(email.value && !emailValid){
-msg.innerText="Only Gmail addresses allowed";
-}
-else if(username.value && !userValid){
-msg.innerText="Username: letters and numbers only";
-}
-else if(password.value && !passValid){
-msg.innerText="Password must contain numbers only";
-}
-else{
-msg.innerText="";
-}
-
-btn.disabled = !(emailValid && userValid && passValid);
-}
-
-email.oninput = validate;
-username.oninput = validate;
-password.oninput = validate;
-</script>
-
-</body>
+      email.addEventListener("input", validate);
+      username.addEventListener("input", validate);
+      password.addEventListener("input", validate);
+    </script>
+  </body>
 </html>

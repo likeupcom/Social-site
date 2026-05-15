@@ -1,111 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Login</title>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
 
-<style>
-body{
-background:#0b1220;
-color:white;
-font-family:Arial;
-text-align:center;
-padding-top:60px;
-}
+    <style>
+      body {
+        background: #0b1220;
+        color: white;
+        font-family: Arial;
+        text-align: center;
+        padding-top: 60px;
+      }
 
-form{
-background:#111827;
-display:inline-block;
-padding:30px;
-border-radius:10px;
-width:300px;
-}
+      form {
+        background: #111827;
+        display: inline-block;
+        padding: 30px;
+        border-radius: 10px;
+        width: 300px;
+      }
 
-input{
-width:90%;
-padding:10px;
-margin:8px 0;
-border:none;
-border-radius:6px;
-}
+      input {
+        width: 90%;
+        padding: 10px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 6px;
+      }
 
-button{
-width:95%;
-padding:10px;
-border:none;
-border-radius:6px;
-background:#38bdf8;
-color:black;
-font-weight:bold;
-cursor:pointer;
-transition:.3s;
-}
+      button {
+        width: 95%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #38bdf8;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+      }
 
-button:disabled{
-background:gray;
-cursor:not-allowed;
-}
+      button:disabled {
+        background: gray;
+      }
 
-.msg{
-margin-top:10px;
-color:#f87171;
-font-size:14px;
-}
+      .msg {
+        margin-top: 10px;
+        color: #f87171;
+        font-size: 14px;
+      }
 
-a{
-color:#38bdf8;
-text-decoration:none;
-}
-</style>
-</head>
+      a {
+        color: #38bdf8;
+        text-decoration: none;
+      }
+    </style>
+  </head>
 
-<body>
+  <body>
+    <h2>Login to NS Platform</h2>
 
-<h2>Login to NS Platform</h2>
+    <form action="/login" method="POST">
+      <input
+        type="text"
+        name="username"
+        id="username"
+        placeholder="Username"
+        required
+      />
 
-<form action="/login" method="POST">
+      <input
+        type="password"
+        name="password"
+        id="password"
+        placeholder="Password (numbers only)"
+        required
+      />
 
-<input type="text" id="username" name="username" placeholder="Username">
+      <button type="submit" id="loginBtn" disabled>Login</button>
 
-<input type="password" id="password" name="password" placeholder="Password (numbers only)">
+      <div class="msg" id="msg"></div>
+    </form>
 
-<button id="loginBtn" disabled>Login</button>
+    <p><a href="/forgot.html">Forgot Password?</a></p>
+    <p>Don't have account? <a href="/signup.html">Signup</a></p>
 
-<div class="msg" id="msg"></div>
+    <script>
+      const username = document.getElementById("username");
+      const password = document.getElementById("password");
+      const btn = document.getElementById("loginBtn");
+      const msg = document.getElementById("msg");
 
-</form>
+      function validate() {
+        const userValid = /^[a-zA-Z0-9]+$/.test(username.value);
+        const passValid = /^[0-9]+$/.test(password.value);
 
-<p><a href="forgot.html">Forgot Password?</a></p>
+        if (username.value && !userValid) {
+          msg.innerText = "Username must contain letters and numbers only";
+        } else if (password.value && !passValid) {
+          msg.innerText = "Password must contain numbers only";
+        } else {
+          msg.innerText = "";
+        }
 
-<p>Don't have account? <a href="signup.html">Signup</a></p>
+        btn.disabled = !(userValid && passValid);
+      }
 
-<script>
-const username = document.getElementById("username");
-const password = document.getElementById("password");
-const btn = document.getElementById("loginBtn");
-const msg = document.getElementById("msg");
-
-function validate(){
-
-let userValid = /^[a-zA-Z0-9]+$/.test(username.value);
-let passValid = /^[0-9]+$/.test(password.value);
-
-if(username.value && !userValid){
-msg.innerText="Username must contain letters and numbers only";
-}
-else if(password.value && !passValid){
-msg.innerText="Password must contain numbers only";
-}
-else{
-msg.innerText="";
-}
-
-btn.disabled = !(userValid && passValid);
-}
-
-username.oninput = validate;
-password.oninput = validate;
-</script>
-
-</body>
+      username.addEventListener("input", validate);
+      password.addEventListener("input", validate);
+    </script>
+  </body>
 </html>
