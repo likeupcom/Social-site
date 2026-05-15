@@ -2,12 +2,16 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const session = require("express-session");
+const MongoStore = require("connect-mongo"); // Added to store sessions securely in MongoDB
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
 const app = express();
 
-/* ---------------- FIX REPLIT SCRIPT BLOCKING (CSP) ---------------- */
+// Required for Hugging Face Spaces reverse-proxy cookie tracking
+app.set("trust proxy", 1); 
+
+/* ---------------- FIX REPLIT & HUGGINGFACE SCRIPT BLOCKING (CSP) ---------------- */
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
@@ -40,12 +44,21 @@ const User = mongoose.model("User", userSchema);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Configured session tracking to write directly into MongoDB Atlas
 app.use(
   session({
     secret: "ns-platform-secret-key",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: "sessions"
+    }),
+    cookie: { 
+      secure: true, // Set to true to work over Hugging Face's HTTPS proxy
+      sameSite: "none", // Allows the session cookie to persist inside cross-site space iframes
+      maxAge: 1000 * 60 * 60 * 24 // Cookie expires in 24 hours
+    },
   }),
 );
 
@@ -100,7 +113,15 @@ app.post("/signup", async (req, res) => {
 
     req.session.user = username;
 
-    res.redirect("/index.html");
+    // Forces session save completion inside MongoDB before directing browser home
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.send("Signup login tracking error.");
+      }
+      res.redirect("/index.html");
+    });
+
   } catch (error) {
     console.error(error);
     res.send("Signup error.");
@@ -136,7 +157,15 @@ app.post("/login", async (req, res) => {
 
     req.session.user = username;
 
-    res.redirect("/index.html");
+    // Forces session save completion inside MongoDB on log-in
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error:", err);
+        return res.send("Login tracking error.");
+      }
+      res.redirect("/index.html");
+    });
+
   } catch (error) {
     console.error(error);
     res.send("Login error.");
