@@ -367,26 +367,23 @@ fetch(`/me?token=${queryToken}`)
   .then((data) => {
     const authBox = document.getElementById("authBox");
     if (data.user && data.token) {
-      // 1. Swap Login/Signup buttons with user welcome panel
+      // Swaps layout header actions
       authBox.innerHTML = `
         <span style="margin-right:8px; color:#38bdf8; font-weight:bold;">Hi, ${data.user}</span>
         <a href="/logout" class="logout-btn">Logout</a>
       `;
 
-      // 2. Correctly rewrite the box link attributes using clean syntax
+      // Correctly formats and updates click paths for your private folder routes
       document.querySelectorAll(".social-box").forEach(box => {
         const currentOnClick = box.getAttribute("onclick");
         if(currentOnClick && currentOnClick.includes("location.href=")) {
-          const match = currentOnClick.match(/'([^']+)'/);
-          if (match && match[1]) {
-            const cleanRouteName = match[1].replace('.html', '');
-            box.setAttribute("onclick", `location.href='/${cleanRouteName}?auth_token=${data.token}'`);
-          }
+          const pathTarget = currentOnClick.split("'")[1].replace(".html", "");
+          box.setAttribute("onclick", "location.href='/" + pathTarget + "?auth_token=" + data.token + "'");
         }
       });
     }
   })
-  .catch((err) => console.error("Error validating active login profile:", err));
+  .catch((err) => console.error("Session verification error:", err));
 </script>
 
 </body>
