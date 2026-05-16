@@ -232,7 +232,7 @@ footer{
   <div class="logo-container">
     <div class="logo" id="title">YouTube Promotion Center</div>
   </div>
-  <!-- Text-based Back Arrow preserved exactly -->
+  <!-- Original Text Back Arrow preserved exactly -->
   <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
     →
   </a>
@@ -243,7 +243,7 @@ footer{
 
   <!-- Top Action Button -->
   <div class="buttons">
-    <button class="tool-btn" onclick="location.href='improve-youtube.html'" id="btn1" disabled>
+    <button class="tool-btn" onclick="goToDashboard()" id="btn1" disabled>
       <i class="fa-brands fa-youtube"></i> <span id="btnText">Improve Your YouTube Channel</span>
     </button>
   </div>
@@ -283,9 +283,13 @@ footer{
 </a>
 
 <script>
-// Adjusted endpoints to align naturally with your app structure
-const PROFILE_API_URL = "/api/user/profile"; 
 const YOUTUBE_HANDLE_REGEX = /^https:\/\/(www\.)?youtube\.com\/@[A-Za-z0-9_\-\.]+$/;
+
+// Automatically extract token strings if your platform handles inside custom iFrames
+const urlParams = new URLSearchParams(window.location.search);
+const tokenQuery = urlParams.get("auth_token") || urlParams.get("token") || "";
+
+const PROFILE_API_URL = tokenQuery ? `/api/user/profile?token=${tokenQuery}` : "/api/user/profile";
 
 let databaseUserChannel = null;
 let currentDict = {};
@@ -301,8 +305,8 @@ function applyLang(lang){
       bonus:"Bonus",
       rules:"Regulations",
       boxTitle:"Enter YouTube Channel Link",
-      exText:"Example: https://youtube.com/@username",
-      ph:"https://youtube.com/@username",
+      exText:"Example: https://youtube.com",
+      ph:"https://youtube.com",
       hintText:"Remove everything after the username for the link to be accepted.",
       btnUp:"Upload",
       btnCh:"Change",
@@ -320,8 +324,8 @@ function applyLang(lang){
       bonus:"Bonus",
       rules:"Règlements",
       boxTitle:"Entrez le lien de la chaîne YouTube",
-      exText:"Example: https://youtube.com/@username",
-      ph:"https://youtube.com/@username",
+      exText:"Example: https://youtube.com",
+      ph:"https://youtube.com",
       hintText:"Supprimez tout après le nom d'utilisateur pour que le lien soit accepté.",
       btnUp:"Télécharger",
       btnCh:"Modifier",
@@ -339,14 +343,14 @@ function applyLang(lang){
       bonus:"Ibihembo",
       rules:"Amategeko",
       boxTitle:"Shyiramo Umuyoboro wa YouTube (Link)",
-      exText:"Urugero: https://youtube.com/@username",
-      ph:"https://youtube.com/@username",
+      exText:"Urugero: https://youtube.com",
+      ph:"https://youtube.com",
       hintText:"kuraho amagambo yose arinyuma y'izina ya channel yawe kugira ngo link yawe yemerwe.",
       btnUp:"Bika",
       btnCh:"Hindura",
       errExist:"Uyu muyoboro usanzwe urimo!",
       errEmpty:"Banza ushyiremo link y'umuyoboro.",
-      successSave:"byagenze neza!",
+      successSave:"Umuyoboro ubikiwe neza!",
       footer:"© 2026 YouTube Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere channel yawe no kongera abakureba."
     }
   };
@@ -409,9 +413,16 @@ function validateLiveInput() {
   }
 }
 
+function goToDashboard() {
+  if (tokenQuery) {
+    location.href = `improve-youtube.html?auth_token=${tokenQuery}`;
+  } else {
+    location.href = 'improve-youtube.html';
+  }
+}
+
 async function fetchUserProfileChannel() {
   try {
-    // Cookie session routing automatically passes credential layers without manual local storage lookups
     const response = await fetch(PROFILE_API_URL, { method: "GET" });
 
     if (response.ok) {
@@ -421,7 +432,7 @@ async function fetchUserProfileChannel() {
       }
     }
   } catch (err) {
-    console.error("Could not reach backend user session context:", err);
+    console.error("Could not reach backend user profile:", err);
   }
   
   let lang = localStorage.getItem("lang") || "en";
