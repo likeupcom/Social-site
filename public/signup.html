@@ -55,7 +55,7 @@
   <body>
     <h2>Create Account</h2>
 
-    <form action="/signup" method="POST">
+    <form id="signupForm">
       <input
         type="text"
         name="email"
@@ -93,6 +93,7 @@
       const password = document.getElementById("password");
       const btn = document.getElementById("signupBtn");
       const msg = document.getElementById("msg");
+      const form = document.getElementById("signupForm");
 
       function validate() {
         const emailValid = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email.value);
@@ -115,6 +116,39 @@
       email.addEventListener("input", validate);
       username.addEventListener("input", validate);
       password.addEventListener("input", validate);
+
+      // Handle the data submission safely across the Hugging Face proxy proxy
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        msg.style.color = "#38bdf8";
+        msg.innerText = "Creating account...";
+
+        try {
+          const response = await fetch("/signup", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              email: email.value,
+              username: username.value,
+              password: password.value
+            })
+          });
+
+          // Check if server issued a redirect back to home index
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            msg.style.color = "#f87171";
+            const errorText = await response.text();
+            msg.innerText = errorText;
+          }
+        } catch (err) {
+          msg.style.color = "#f87171";
+          msg.innerText = "Network transmission error.";
+        }
+      });
     </script>
   </body>
 </html>
