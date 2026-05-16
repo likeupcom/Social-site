@@ -60,7 +60,7 @@
   <body>
     <h2>Login to NS Platform</h2>
 
-    <form action="/login" method="POST">
+    <form id="loginForm">
       <input
         type="text"
         name="username"
@@ -90,6 +90,7 @@
       const password = document.getElementById("password");
       const btn = document.getElementById("loginBtn");
       const msg = document.getElementById("msg");
+      const form = document.getElementById("loginForm");
 
       function validate() {
         const userValid = /^[a-zA-Z0-9]+$/.test(username.value);
@@ -108,6 +109,38 @@
 
       username.addEventListener("input", validate);
       password.addEventListener("input", validate);
+
+      // Submit data using asynchronous fetch to preserve auth cookies
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        msg.style.color = "#38bdf8";
+        msg.innerText = "Verifying credentials...";
+
+        try {
+          const response = await fetch("/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              username: username.value,
+              password: password.value
+            })
+          });
+
+          // Check if server validated password and issued redirect home
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            msg.style.color = "#f87171";
+            const errorText = await response.text();
+            msg.innerText = errorText;
+          }
+        } catch (err) {
+          msg.style.color = "#f87171";
+          msg.innerText = "Network transmission error.";
+        }
+      });
     </script>
   </body>
 </html>
