@@ -37,10 +37,12 @@ mongoose
   });
 
 /* ---------------- USER MODEL ---------------- */
+// ✅ ONLY UPDATE: Added the youtubeChannel property to hold the uploaded link string securely
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  youtubeChannel: { type: String, default: "" }
 });
 
 const User = mongoose.model("User", userSchema);
@@ -183,6 +185,64 @@ app.get("/logout", (req, res) => {
   res.clearCookie("token", { secure: true, sameSite: "none" });
   res.redirect("/login.html");
 });
+
+
+/* ---------------- NEW UPDATE: YOUTUBE PROFILE ENDPOINTS ---------------- */
+
+// 🟢 GET: Loads user's channel handle link configuration on application load
+app.get("/api/user/profile", async (req, res) => {
+  const token = req.cookies.token || req.query.token || req.query.auth_token;
+  if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findOne({ username: decoded.user });
+    if (!user) return res.status(404).json({ error: "User context not found." });
+
+    res.json({ youtubeChannel: user.youtubeChannel || "" });
+  } catch (err) {
+    res.status(401).json({ error: "Session token signature expired." });
+  }
+});
+
+// 🔵 POST: Saves input data handle securely while intercepting system wide duplicate channels
+app.post("/api/user/profile", async (req, res) => {
+  const token = req.cookies.token || req.query.token || req.query.auth_token;
+  if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const { youtubeChannel } = req.body;
+
+    if (!youtubeChannel) return res.status(400).json({ error: "Required channel link parameters are missing." });
+
+    // Enforce systemic uniqueness checks across the entire cluster
+    const linkExists = await User.findOne({ youtubeChannel: youtubeChannel, username: { $ne: decoded.user } });
+    if (linkExists) {
+      return res.status(409).json({ isDuplicate: true, error: "Channel already exists!" });
+    }
+
+    await User.findOneAndUpdate({ username: decoded.user }, { youtubeChannel: youtubeChannel });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(401).json({ error: "Session token signature expired." });
+  }
+});
+
+// 🔴 DELETE: Wipes out profile entry tracking when users switch channel handles
+app.delete("/api/user/profile", async (req, res) => {
+  const token = req.cookies.token || req.query.token || req.query.auth_token;
+  if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    await User.findOneAndUpdate({ username: decoded.user }, { youtubeChannel: "" });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(401).json({ error: "Session token signature expired." });
+  }
+});
+
 
 /* ---------------- AUTH MIDDLEWARE ---------------- */
 function auth(req, res, next) {
