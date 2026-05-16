@@ -358,26 +358,27 @@ document.getElementById("rulesT").innerText=t[lang].rules;
 const savedLang = localStorage.getItem("lang") || "en";
 applyLang(savedLang);
 
-/* ---------------- SIMPLE AUTHENTICATION INTERACTION ---------------- */
-// Checks for active session cookies or token parameters over the proxy
+/* ---------------- HYBRID ROUTING HANDSHAKE ---------------- */
 const urlParams = new URLSearchParams(window.location.search);
 const queryToken = urlParams.get("auth_token") || "";
 
 fetch(`/me?token=${queryToken}`)
   .then((res) => res.json())
   .then((data) => {
-    if (data.user) {
+    if (data.user && data.token) {
+      // Clear generic auth triggers and load user greeting panel
       document.getElementById("authBox").innerHTML = `
         <span style="margin-right:8px; color:#38bdf8; font-weight:bold;">Hi, ${data.user}</span>
         <a href="/logout" class="logout-btn">Logout</a>
       `;
       
-      // Updates card navigation triggers to append the access token securely
+      // Inject token parameters onto card attributes dynamically
       document.querySelectorAll(".social-box").forEach(box => {
         const currentOnClick = box.getAttribute("onclick");
         if(currentOnClick && currentOnClick.includes("location.href=")) {
-          const rawDest = currentOnClick.split("'")[1];
-          box.setAttribute("onclick", `location.href='/${rawDest}?auth_token=${queryToken}'`);
+          // Extract file target clean matching paths safely
+          const filename = currentOnClick.split("'")[1];
+          box.setAttribute("onclick", `location.href='/${filename}?auth_token=${data.token}'`);
         }
       });
     }
