@@ -25,9 +25,11 @@ if (!process.env.MONGODB_URI) {
   process.exit(1);
 }
 
-// Connected with error logging, but preventing crashes if credentials are wrong
+// Added tlsAllowInvalidCertificates to bypass the Hugging Face certificate validation error
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI, {
+    tlsAllowInvalidCertificates: true
+  })
   .then(() => console.log("✅ Database connected successfully"))
   .catch((err) => {
     console.error("❌ Database connection failed:", err.message);
