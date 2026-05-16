@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>YouTube Promotion Center</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<!-- FontAwesome Icons Clean CDN Link -->
+<link rel="stylesheet" href="https://cloudflare.com"/>
 
 <style>
 *{
@@ -34,39 +35,26 @@ header{
   z-index:1000;
 }
 
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
 .logo{
   font-size:22px;
   font-weight:bold;
   color:#38bdf8;
 }
 
-.menu-btn{
-  font-size:26px;
-  cursor:pointer;
-  color:white;
-}
-
-.auth{
-  display:flex;
-  gap:10px;
-}
-
-.auth a{
-  color:white;
-  text-decoration:none;
-  padding:6px 12px;
-  border:1px solid #38bdf8;
-  border-radius:6px;
-}
-
 .container{
   text-align:center;
-  padding:60px 20px;
+  padding:40px 20px;
 }
 
 h1{
   font-size:28px;
-  margin-bottom:40px;
+  margin-bottom:30px;
   color:#38bdf8;
 }
 
@@ -75,6 +63,7 @@ h1{
   flex-direction:column;
   gap:20px;
   align-items:center;
+  margin-bottom: 35px;
 }
 
 .tool-btn{
@@ -86,12 +75,113 @@ h1{
   background:rgba(255,255,255,0.1);
   color:#fff;
   transition:.3s;
-  width:260px;
+  width:320px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
 }
 
-.tool-btn:hover{
-  background:rgba(255,255,255,0.3);
+.tool-btn:hover:not(:disabled){
+  background:rgba(56, 189, 248, 0.2);
+  border: 1px solid #38bdf8;
 }
+
+.tool-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Channel Link Input Area Styles */
+.link-box {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  max-width: 500px;
+  margin: 0 auto 40px;
+  padding: 25px;
+}
+
+.link-box h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #cbd5e1;
+}
+
+.example-txt {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.link-input {
+  flex: 1;
+  background: #0b1220;
+  border: 1px solid #38bdf8;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.action-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.upload-style {
+  background: #38bdf8;
+  color: #0b1220;
+}
+
+.upload-style:hover:not(:disabled) {
+  background: #0ea5e9;
+}
+
+.upload-style:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.change-style {
+  background: #ef4444;
+  color: #fff;
+}
+
+.change-style:hover {
+  background: #dc2626;
+}
+
+.hint-txt {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 12px;
+  line-height: 1.4;
+  display: block;
+}
+
+.notify-msg {
+  font-size: 13px;
+  margin-top: 10px;
+  min-height: 18px;
+  font-weight: bold;
+}
+
+.error-text { color: #ef4444; }
+.success-text { color: #22c55e; }
 
 footer{
   background:#111827;
@@ -127,88 +217,50 @@ footer{
   color:#cbd5e1;
   font-weight:bold;
   font-size:12px;
+  transition: 0.2s;
 }
 
-.nav-item span:first-child{font-size:20px;}
+.nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
 .nav-item:hover{color:#38bdf8;}
 .nav-item.active{color:#38bdf8;}
-
-.sidebar{
-  position:fixed;
-  left:-250px;
-  top:0;
-  height:100%;
-  width:200px;
-  background:#111827;
-  padding-top:90px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:15px;
-  border-right:1px solid #1f2937;
-  transition:.3s;
-  z-index:2000;
-}
-
-.sidebar.open{left:0;}
-
-.lang-btn{
-  background:none;
-  border:1px solid #38bdf8;
-  color:white;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
-  width:140px;
-  text-align:center;
-}
-
-.lang-btn:hover{
-  background:#38bdf8;
-  color:#000;
-}
-
-.watermark{
-  position:fixed;
-  right:20px;
-  bottom:100px;
-  font-size:55px;
-  color:#fff;
-  opacity:0.75;
-  cursor:pointer;
-  z-index:3000;
-  transition:.3s;
-}
-
-.watermark:hover{
-  transform:scale(1.1);
-  opacity:1;
-}
 </style>
 </head>
 
 <body>
 
-<div class="sidebar" id="sidebar">
-  <button class="lang-btn" onclick="selectLang('en')">English</button>
-  <button class="lang-btn" onclick="selectLang('fr')">Français</button>
-  <button class="lang-btn" onclick="selectLang('rw')">Kinyarwanda</button>
-</div>
-
 <header>
-  <div class="logo" id="title">YouTube Promotion Center</div>
-  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;margin-left:auto;display:flex;align-items:center;">
-    →
+  <div class="logo-container">
+    <div class="logo" id="title">YouTube Promotion Center</div>
+  </div>
+  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
+    <i class="fa-solid fa-arrow-right"></i>
   </a>
 </header>
 
 <div class="container">
   <h1 id="pageTitle">YouTube Promotion Center</h1>
 
+  <!-- Top Action Button -->
   <div class="buttons">
-    <button class="tool-btn" onclick="location.href='improve-youtube.html'" id="btn1">
-      Improve Your YouTube Channel
+    <button class="tool-btn" onclick="location.href='improve-youtube.html'" id="btn1" disabled>
+      <i class="fa-brands fa-youtube"></i> <span id="btnText">Improve Your YouTube Channel</span>
     </button>
+  </div>
+
+  <!-- LINK SUBMISSION BOX -->
+  <div class="link-box">
+    <h3 id="inputLabel">Enter YouTube Channel Link</h3>
+    <!-- Fixed display format -->
+    <span class="example-txt" id="exampleLabel">Example: https://youtube.com/@username</span>
+    
+    <div class="input-group">
+      <!-- Fixed input box default pattern structure -->
+      <input type="text" id="chanLink" class="link-input" oninput="validateLiveInput()" placeholder="https://youtube.com/@username">
+      <button id="ctrlBtn" class="action-btn upload-style" onclick="handleLinkAction()" disabled>Upload</button>
+    </div>
+    
+    <span class="hint-txt" id="hintLabel">Remove everything after the username for the link to be accepted.</span>
+    <div id="notify" class="notify-msg"></div>
   </div>
 </div>
 
@@ -220,23 +272,23 @@ footer{
 </footer>
 
 <div class="bottom-nav">
-  <a class="nav-item" href="index.html"><span>🏠</span><span></span></a>
-  <a class="nav-item" href="services.html"><span>🛠</span><span></span></a>
-  <a class="nav-item" href="vip.html"><span>💎</span><span></span></a>
-  <a class="nav-item" href="bonus.html"><span>🎁</span><span></span></a>
-  <a class="nav-item" href="regulations.html"><span>📜</span><span></span></a>
+  <a class="nav-item active" href="index.html"><span>🏠</span><span class="nav-txt"></span></a>
+  <a class="nav-item" href="services.html"><span>🛠</span><span class="nav-txt"></span></a>
+  <a class="nav-item" href="vip.html"><span>💎</span><span class="nav-txt"></span></a>
+  <a class="nav-item" href="bonus.html"><span>🎁</span><span class="nav-txt"></span></a>
+  <a class="nav-item" href="regulations.html"><span>📜</span><span class="nav-txt"></span></a>
 </div>
 
-<!-- ✅ ONLY CHANGE: YOUTUBE ICON -->
-<a href="youtube.html" class="watermark">
+<a href="youtube.html" class="watermark" style="position:fixed;right:20px;bottom:100px;font-size:55px;color:#fff;opacity:0.75;cursor:pointer;z-index:3000;transition:.3s;" onmouseover="this.style.color='#FF0000'" onmouseout="this.style.color='#fff'">
   <i class="fa-brands fa-youtube"></i>
 </a>
 
 <script>
-function selectLang(lang){
-  localStorage.setItem("lang", lang);
-  applyLang(lang);
-}
+const PROFILE_API_URL = "/api/user/profile"; 
+const YOUTUBE_HANDLE_REGEX = /^https:\/\/(www\.)?youtube\.com\/@[A-Za-z0-9_\-\.]+$/;
+
+let databaseUserChannel = null;
+let currentDict = {};
 
 function applyLang(lang){
   const t={
@@ -248,6 +300,15 @@ function applyLang(lang){
       vip:"VIP",
       bonus:"Bonus",
       rules:"Regulations",
+      boxTitle:"Enter YouTube Channel Link",
+      exText:"Example: https://youtube.com/@username",
+      ph:"https://youtube.com/@username",
+      hintText:"Remove everything after the username for the link to be accepted.",
+      btnUp:"Upload",
+      btnCh:"Change",
+      errExist:"Channel already exists!",
+      errEmpty:"Please provide a valid link address first.",
+      successSave:"Channel saved successfully!",
       footer:"© 2026 YouTube Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
     },
     fr:{
@@ -258,36 +319,179 @@ function applyLang(lang){
       vip:"VIP",
       bonus:"Bonus",
       rules:"Règlements",
+      boxTitle:"Entrez le lien de la chaîne YouTube",
+      exText:"Example: https://youtube.com/@username",
+      ph:"https://youtube.com/@username",
+      hintText:"Supprimez tout après le nom d'utilisateur pour que le lien soit accepté.",
+      btnUp:"Télécharger",
+      btnCh:"Modifier",
+      errExist:"La chaîne existe déjà!",
+      errEmpty:"Veuillez d'abord fournir un lien valide.",
+      successSave:"Chaîne enregistrée avec succès!",
       footer:"© 2026 YouTube Promotion Center. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
     },
     rw:{
       title:"YouTube Promotion Center",
-      btn1:"Ongera Channel yawe ya YouTube",
+      btn1:"zamura Channel yawe ya YouTube",
       home:"Ahabanza",
       services:"Serivisi",
       vip:"VIP",
       bonus:"Ibihembo",
       rules:"Amategeko",
+      boxTitle:"Shyiramo Umuyoboro wa YouTube (Link)",
+      exText:"Urugero: https://youtube.com/@username",
+      ph:"https://youtube.com/@username",
+      hintText:"kuraho amagambo yose aza inyuma y'izina ya channel yawe kugira ngo link yamerwe.",
+      btnUp:"Bika",
+      btnCh:"Hindura",
+      errExist:"Uyu muyoboro usanzwe urimo!",
+      errEmpty:"Banza ushyiremo link y'umuyoboro.",
+      successSave:"byagenze neza!",
       footer:"© 2026 YouTube Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere channel yawe no kongera abakureba."
     }
   };
 
+  currentDict = t[lang];
+
   document.getElementById("title").innerText=t[lang].title;
   document.getElementById("pageTitle").innerText=t[lang].title;
-  document.getElementById("btn1").innerText=t[lang].btn1;
+  document.getElementById("btnText").innerText=t[lang].btn1;
   document.getElementById("footerText").innerText=t[lang].footer;
+  document.getElementById("inputLabel").innerText=t[lang].boxTitle;
+  document.getElementById("exampleLabel").innerText=t[lang].exText;
+  document.getElementById("hintLabel").innerText=t[lang].hintText;
 
-  let nav=document.querySelectorAll(".bottom-nav .nav-item span:nth-child(2)");
-  nav[0].innerText=t[lang].home;
-  nav[1].innerText=t[lang].services;
-  nav[2].innerText=t[lang].vip;
-  nav[3].innerText=t[lang].bonus;
-  nav[4].innerText=t[lang].rules;
+  let navs = document.querySelectorAll(".bottom-nav .nav-item .nav-txt");
+  if(navs.length >= 5) {
+    navs[0].innerText = t[lang].home;
+    navs[1].innerText = t[lang].services;
+    navs[2].innerText = t[lang].vip;
+    navs[3].innerText = t[lang].bonus;
+    navs[4].innerText = t[lang].rules;
+  }
+
+  syncInputStateUI();
 }
 
-window.onload=function(){
-  let lang=localStorage.getItem("lang")||"en";
+function syncInputStateUI() {
+  const inputEl = document.getElementById("chanLink");
+  const btnEl = document.getElementById("ctrlBtn");
+  const actionBtn = document.getElementById("btn1");
+
+  if(databaseUserChannel) {
+    inputEl.value = databaseUserChannel;
+    inputEl.disabled = true;
+    actionBtn.disabled = false;
+    btnEl.innerText = currentDict.btnCh;
+    btnEl.className = "action-btn change-style";
+    btnEl.disabled = false;
+  } else {
+    inputEl.disabled = false;
+    actionBtn.disabled = true;
+    btnEl.innerText = currentDict.btnUp;
+    btnEl.className = "action-btn upload-style";
+    inputEl.placeholder = currentDict.ph;
+    validateLiveInput();
+  }
+}
+
+function validateLiveInput() {
+  if (databaseUserChannel) return;
+
+  const inputEl = document.getElementById("chanLink");
+  const btnEl = document.getElementById("ctrlBtn");
+  const urlValue = inputEl.value.trim();
+
+  if (YOUTUBE_HANDLE_REGEX.test(urlValue)) {
+    btnEl.disabled = false;
+  } else {
+    btnEl.disabled = true;
+  }
+}
+
+async function fetchUserProfileChannel() {
+  try {
+    const response = await fetch(PROFILE_API_URL, {
+      method: "GET",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("user_token")}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.youtubeChannel) {
+        databaseUserChannel = data.youtubeChannel;
+      }
+    }
+  } catch (err) {
+    console.error("Could not reach backend user profile:", err);
+  }
+  
+  let lang = localStorage.getItem("lang") || "en";
   applyLang(lang);
+}
+
+async function handleLinkAction() {
+  const inputEl = document.getElementById("chanLink");
+  const notify = document.getElementById("notify");
+
+  notify.innerText = "";
+  notify.className = "notify-msg";
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${localStorage.getItem("user_token")}`
+  };
+
+  if(databaseUserChannel) {
+    try {
+      const response = await fetch(PROFILE_API_URL, {
+        method: "DELETE",
+        headers: headers
+      });
+
+      if (response.ok) {
+        databaseUserChannel = null;
+        inputEl.value = "";
+        syncInputStateUI();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  } else {
+    const urlValue = inputEl.value.trim();
+    
+    try {
+      const response = await fetch(PROFILE_API_URL, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ youtubeChannel: urlValue })
+      });
+
+      const result = await response.json();
+
+      if (response.status === 409 || result.isDuplicate) {
+        notify.innerText = currentDict.errExist;
+        notify.className = "notify-msg error-text";
+        return;
+      }
+
+      if (response.ok) {
+        databaseUserChannel = urlValue;
+        notify.innerText = currentDict.successSave;
+        notify.className = "notify-msg success-text";
+        syncInputStateUI();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
+
+window.onload = function() {
+  fetchUserProfileChannel();
 }
 </script>
 
