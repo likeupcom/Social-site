@@ -358,33 +358,31 @@ document.getElementById("rulesT").innerText=t[lang].rules;
 const savedLang = localStorage.getItem("lang") || "en";
 applyLang(savedLang);
 
-/* ---------------- AUTH TOKEN LOGIN API CHECK ---------------- */
+/* ---------------- SIMPLE AUTHENTICATION INTERACTION ---------------- */
+// Checks for active session cookies or token parameters over the proxy
 const urlParams = new URLSearchParams(window.location.search);
 const queryToken = urlParams.get("auth_token") || "";
 
 fetch(`/me?token=${queryToken}`)
   .then((res) => res.json())
   .then((data) => {
-    const authBox = document.getElementById("authBox");
-    if (data.user && data.token) {
-      // Swaps layout header actions
-      authBox.innerHTML = `
+    if (data.user) {
+      document.getElementById("authBox").innerHTML = `
         <span style="margin-right:8px; color:#38bdf8; font-weight:bold;">Hi, ${data.user}</span>
         <a href="/logout" class="logout-btn">Logout</a>
       `;
-
-      // Correctly formats and updates click paths for your private folder routes
+      
+      // Updates card navigation triggers to append the access token securely
       document.querySelectorAll(".social-box").forEach(box => {
         const currentOnClick = box.getAttribute("onclick");
         if(currentOnClick && currentOnClick.includes("location.href=")) {
-          const pathTarget = currentOnClick.split("'")[1].replace(".html", "");
-          box.setAttribute("onclick", "location.href='/" + pathTarget + "?auth_token=" + data.token + "'");
+          const rawDest = currentOnClick.split("'")[1];
+          box.setAttribute("onclick", `location.href='/${rawDest}?auth_token=${queryToken}'`);
         }
       });
     }
   })
   .catch((err) => console.error("Session verification error:", err));
 </script>
-
 </body>
 </html>
