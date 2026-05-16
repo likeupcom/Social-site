@@ -75,6 +75,7 @@ function sendTokenCookie(res, username) {
     sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000
   });
+  return token;
 }
 
 /* ---------------- SIGNUP ROUTE ---------------- */
@@ -113,8 +114,10 @@ app.post("/signup", async (req, res) => {
     });
 
     // Log user in automatically with browser token
-    sendTokenCookie(res, username);
-    res.redirect("/index.html");
+    const token = sendTokenCookie(res, username);
+    
+    // Redirect home passing the token as a query parameter for iframe support
+    res.redirect(`/index.html?auth_token=${token}`);
 
   } catch (error) {
     console.error(error);
@@ -150,8 +153,10 @@ app.post("/login", async (req, res) => {
     }
 
     // Log user in with browser token
-    sendTokenCookie(res, username);
-    res.redirect("/index.html");
+    const token = sendTokenCookie(res, username);
+    
+    // Redirect home passing the token as a query parameter for iframe support
+    res.redirect(`/index.html?auth_token=${token}`);
 
   } catch (error) {
     console.error(error);
@@ -161,14 +166,15 @@ app.post("/login", async (req, res) => {
 
 /* ---------------- LOGIN CHECK API ---------------- */
 app.get("/me", (req, res) => {
-  const token = req.cookies.token;
-  if (!token) return res.json({ user: null });
+  // Checks for token inside cookies first, then falls back to URL token query parameter
+  const token = req.cookies.token || req.query.token;
+  if (!token) return res.json({ user: null, token: null });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    res.json({ user: decoded.user });
+    res.json({ user: decoded.user, token: token });
   } catch (err) {
-    res.json({ user: null });
+    res.json({ user: null, token: null });
   }
 });
 
@@ -180,7 +186,8 @@ app.get("/logout", (req, res) => {
 
 /* ---------------- AUTH MIDDLEWARE ---------------- */
 function auth(req, res, next) {
-  const token = req.cookies.token;
+  // Looks for cookie or query parameter token string
+  const token = req.cookies.token || req.query.auth_token;
   if (!token) {
     return res.redirect("/login.html");
   }
@@ -213,18 +220,15 @@ app.get("/facebook", auth, (req, res) => {
 });
 
 /* ---------------- HOME / HEALTH CHECK ---------------- */
-// Hugging Face uses this path to confirm your server is awake
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Explicit endpoint to respond instantly to the backend load balancer
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
 /* ---------------- START SERVER ---------------- */
-// Changed port to 7860 to match Hugging Face's default load balancer expectations
 const PORT = process.env.PORT || 7860;
 const HOST = "0.0.0.0";
 
