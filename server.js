@@ -212,9 +212,15 @@ app.get("/facebook", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "private", "facebook.html"));
 });
 
-/* ---------------- HOME ---------------- */
+/* ---------------- HOME / HEALTH CHECK ---------------- */
+// Hugging Face uses this path to confirm your server is awake
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Explicit endpoint to respond instantly to the backend load balancer
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
 });
 
 /* ---------------- START SERVER ---------------- */
