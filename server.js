@@ -1,15 +1,14 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
 const app = express();
 
-// Required for Hugging Face Spaces reverse-proxy cookie tracking
-app.set("trust proxy", 1); 
+const JWT_SECRET = process.env.JWT_SECRET || "ns-platform-super-secret-key";
 
 /* ---------------- FIX SCRIPT BLOCKING (CSP) ---------------- */
 app.use((req, res, next) => {
@@ -20,37 +19,20 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ---------------- SAFE MONGODB CONNECTION ---------------- */
-let dbURI = process.env.MONGODB_URI;
-
-if (!dbURI) {
+/* ---------------- MONGODB CONNECTION ---------------- */
+if (!process.env.MONGODB_URI) {
   console.error("ERROR: MONGODB_URI missing!");
   process.exit(1);
 }
 
-// Automatically fix special characters in passwords if they exist
-try {
-  if (dbURI.includes("://") && dbURI.includes("@")) {
-    const protocolParts = dbURI.split("://");
-    const credentialsAndHost = protocolParts[1].split("@");
-    const credentials = credentialsAndHost[0];
-    const host = credentialsAndHost.slice(1).join("@");
-    
-    if (credentials.includes(":")) {
-      const [username, password] = credentials.split(":");
-      const encodedPassword = encodeURIComponent(password);
-      dbURI = `${protocolParts[0]}://${username}:${encodedPassword}@${host}`;
-    }
-  }
-} catch (e) {
-  console.log("URI parsing skipped, using raw secret string.");
-}
-
-// Connect mongoose safely
+// Connected with error logging, but preventing crashes if credentials are wrong
 mongoose
-  .connect(dbURI)
+  .connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ Database connected successfully"))
-  .catch((err) => console.error("❌ Database connection failed:", err));
+  .catch((err) => {
+    console.error("❌ Database connection failed:", err.message);
+    console.log("⚠️ Application running in degraded state. Check MongoDB credentials.");
+  });
 
 /* ---------------- USER MODEL ---------------- */
 const userSchema = new mongoose.Schema({
@@ -64,24 +46,7 @@ const User = mongoose.model("User", userSchema);
 /* ---------------- MIDDLEWARE ---------------- */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Setup safe session storage using the cleaned connection string
-app.use(
-  session({
-    secret: "ns-platform-secret-key",
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: dbURI,
-      collectionName: "sessions"
-    }),
-    cookie: { 
-      secure: true, 
-      sameSite: "none", 
-      maxAge: 1000 * 60 * 60 * 24 
-    },
-  }),
-);
+app.use(cookieParser());
 
 /* Serve public pages */
 app.use(express.static(path.join(__dirname, "public")));
@@ -99,12 +64,21 @@ function isPassword(password) {
   return /^[0-9]+$/.test(password);
 }
 
+/* ---------------- HELPER TO CREATE COOKIE ---------------- */
+function sendTokenCookie(res, username) {
+  const token = jwt.sign({ user: username }, JWT_SECRET, { expiresIn: "24h" });
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 24 * 60 * 60 * 1000
+  });
+}
+
 /* ---------------- SIGNUP ROUTE ---------------- */
 app.post("/signup", async (req, res) => {
   try {
     const { email, username, password } = req.body;
-
-    console.log("Signup request:", req.body);
 
     if (!email || !username || !password) {
       return res.send("Fill all fields.");
@@ -112,6 +86,10 @@ app.post("/signup", async (req, res) => {
 
     if (!isGmail(email) || !isUsername(username) || !isPassword(password)) {
       return res.send("Invalid signup format rules.");
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.send("Database connection is offline. Cannot save user.");
     }
 
     const usernameExists = await User.findOne({ username });
@@ -132,15 +110,9 @@ app.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
-    req.session.user = username;
-
-    req.session.save((err) => {
-      if (err) {
-        console.error("Session save error:", err);
-        return res.send("Signup login tracking error.");
-      }
-      res.redirect("/index.html");
-    });
+    // Log user in automatically with browser token
+    sendTokenCookie(res, username);
+    res.redirect("/index.html");
 
   } catch (error) {
     console.error(error);
@@ -153,8 +125,6 @@ app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    console.log("Login request:", req.body);
-
     if (!username || !password) {
       return res.send("Fill all fields.");
     }
@@ -163,27 +133,23 @@ app.post("/login", async (req, res) => {
       return res.send("Invalid login format rules.");
     }
 
-    const user = await User.findOne({ username });
+    if (mongoose.connection.readyState !== 1) {
+      return res.send("Database connection offline.");
+    }
 
+    const user = await User.findOne({ username });
     if (!user) {
       return res.send("Incorrect username or password.");
     }
 
     const match = await bcrypt.compare(password, user.password);
-
     if (!match) {
       return res.send("Incorrect username or password.");
     }
 
-    req.session.user = username;
-
-    req.session.save((err) => {
-      if (err) {
-        console.error("Session save error:", err);
-        return res.send("Login tracking error.");
-      }
-      res.redirect("/index.html");
-    });
+    // Log user in with browser token
+    sendTokenCookie(res, username);
+    res.redirect("/index.html");
 
   } catch (error) {
     console.error(error);
@@ -193,25 +159,41 @@ app.post("/login", async (req, res) => {
 
 /* ---------------- LOGIN CHECK API ---------------- */
 app.get("/me", (req, res) => {
-  res.json({ user: req.session.user || null });
+  const token = req.cookies.token;
+  if (!token) return res.json({ user: null });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    res.json({ user: decoded.user });
+  } catch (err) {
+    res.json({ user: null });
+  }
 });
 
 /* ---------------- LOGOUT ---------------- */
 app.get("/logout", (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/login.html");
-  });
+  res.clearCookie("token", { secure: true, sameSite: "none" });
+  res.redirect("/login.html");
 });
 
 /* ---------------- AUTH MIDDLEWARE ---------------- */
 function auth(req, res, next) {
-  if (!req.session.user) {
+  const token = req.cookies.token;
+  if (!token) {
     return res.redirect("/login.html");
   }
-  next();
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded.user;
+    next();
+  } catch (err) {
+    res.clearCookie("token");
+    return res.redirect("/login.html");
+  }
 }
 
-/* ---------------- PROTECTED PAGES (CLEAN URLS) ---------------- */
+/* ---------------- PROTECTED PAGES ---------------- */
 app.get("/youtube", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "private", "youtube.html"));
 });
