@@ -232,7 +232,7 @@ footer{
   <div class="logo-container">
     <div class="logo" id="title">YouTube Promotion Center</div>
   </div>
-  <!-- Original Text Back Button Restored -->
+  <!-- Text-based Back Arrow preserved exactly -->
   <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
     →
   </a>
@@ -251,10 +251,10 @@ footer{
   <!-- LINK SUBMISSION BOX -->
   <div class="link-box">
     <h3 id="inputLabel">Enter YouTube Channel Link</h3>
-    <span class="example-txt" id="exampleLabel">Example: https://youtube.com/@username</span>
+    <span class="example-txt" id="exampleLabel">Example: https://youtube.com</span>
     
     <div class="input-group">
-      <input type="text" id="chanLink" class="link-input" oninput="validateLiveInput()" placeholder="https://youtube.com/@username">
+      <input type="text" id="chanLink" class="link-input" oninput="validateLiveInput()" placeholder="https://youtube.com">
       <button id="ctrlBtn" class="action-btn upload-style" onclick="handleLinkAction()" disabled>Upload</button>
     </div>
     
@@ -283,6 +283,7 @@ footer{
 </a>
 
 <script>
+// Adjusted endpoints to align naturally with your app structure
 const PROFILE_API_URL = "/api/user/profile"; 
 const YOUTUBE_HANDLE_REGEX = /^https:\/\/(www\.)?youtube\.com\/@[A-Za-z0-9_\-\.]+$/;
 
@@ -340,7 +341,7 @@ function applyLang(lang){
       boxTitle:"Shyiramo Umuyoboro wa YouTube (Link)",
       exText:"Urugero: https://youtube.com/@username",
       ph:"https://youtube.com/@username",
-      hintText:"kuraho amagambo ari nyuma y'izina ya channel yawe kugira ngo link yawe yemerwe.",
+      hintText:"kuraho amagambo yose arinyuma y'izina ya channel yawe kugira ngo link yawe yemerwe.",
       btnUp:"Bika",
       btnCh:"Hindura",
       errExist:"Uyu muyoboro usanzwe urimo!",
@@ -362,11 +363,11 @@ function applyLang(lang){
 
   let navs = document.querySelectorAll(".bottom-nav .nav-item .nav-txt");
   if(navs.length >= 5) {
-    navs[0].innerText = t[lang].home;
-    navs[1].innerText = t[lang].services;
-    navs[2].innerText = t[lang].vip;
-    navs[3].innerText = t[lang].bonus;
-    navs[4].innerText = t[lang].rules;
+    navs.innerText = t[lang].home;
+    navs.innerText = t[lang].services;
+    navs.innerText = t[lang].vip;
+    navs.innerText = t[lang].bonus;
+    navs.innerText = t[lang].rules;
   }
 
   syncInputStateUI();
@@ -410,13 +411,8 @@ function validateLiveInput() {
 
 async function fetchUserProfileChannel() {
   try {
-    const response = await fetch(PROFILE_API_URL, {
-      method: "GET",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${localStorage.getItem("user_token")}`
-      }
-    });
+    // Cookie session routing automatically passes credential layers without manual local storage lookups
+    const response = await fetch(PROFILE_API_URL, { method: "GET" });
 
     if (response.ok) {
       const data = await response.json();
@@ -425,7 +421,7 @@ async function fetchUserProfileChannel() {
       }
     }
   } catch (err) {
-    console.error("Could not reach backend user profile:", err);
+    console.error("Could not reach backend user session context:", err);
   }
   
   let lang = localStorage.getItem("lang") || "en";
@@ -439,17 +435,9 @@ async function handleLinkAction() {
   notify.innerText = "";
   notify.className = "notify-msg";
 
-  const headers = {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${localStorage.getItem("user_token")}`
-  };
-
   if(databaseUserChannel) {
     try {
-      const response = await fetch(PROFILE_API_URL, {
-        method: "DELETE",
-        headers: headers
-      });
+      const response = await fetch(PROFILE_API_URL, { method: "DELETE" });
 
       if (response.ok) {
         databaseUserChannel = null;
@@ -465,7 +453,7 @@ async function handleLinkAction() {
     try {
       const response = await fetch(PROFILE_API_URL, {
         method: "POST",
-        headers: headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ youtubeChannel: urlValue })
       });
 
