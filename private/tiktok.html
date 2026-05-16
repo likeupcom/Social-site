@@ -92,7 +92,7 @@ h1{
   cursor: not-allowed;
 }
 
-/* Channel Link Input Area Styles */
+/* Link Input Area Styles */
 .link-box {
   background: #111827;
   border: 1px solid #1f2937;
@@ -224,7 +224,7 @@ footer{
 .nav-item:hover{color:#38bdf8;}
 .nav-item.active{color:#38bdf8;}
 
-/* Sidebar Drawer Elements */
+/* Sidebar Styles */
 .sidebar{
   position:fixed;
   left:-250px;
@@ -280,7 +280,6 @@ footer{
 <div class="container">
   <h1 id="pageTitle">TikTok Promotion Center</h1>
 
-  <!-- Dashboard Actions Row -->
   <div class="buttons">
     <button class="tool-btn" onclick="goToFollowers()" id="btn1" disabled>
       <i class="fa-solid fa-users"></i> <span id="btn1Text">Improve Your Followers</span>
@@ -325,17 +324,15 @@ footer{
 </a>
 
 <script>
-// Strictly checks for the literal layout: https://tiktok.com
 const TIKTOK_HANDLE_REGEX = /^https:\/\/(www\.)?tiktok\.com\/@[A-Za-z0-9_\-\.]+$/;
 
-// Extracts token parameters and language choices directly from URL mapping variables
 const urlParams = new URLSearchParams(window.location.search);
 const tokenQuery = urlParams.get("auth_token") || urlParams.get("token") || "";
 const urlLang = urlParams.get("lang") || "";
 
 const PROFILE_API_URL = tokenQuery ? `/api/user/profile?token=${tokenQuery}` : "/api/user/profile";
 
-let databaseUserChannel = null;
+let databaseUserChannel = null; 
 let currentDict = {};
 let isUploaded = false;
 let currentLangCode = "en";
@@ -353,8 +350,8 @@ function applyLang(langCode){
       bonus:"Bonus",
       rules:"Regulations",
       boxTitle:"Enter TikTok Profile Link",
-      exText:"Example: https://www.tiktok.com/@username",
-      ph: "https://www.tiktok.com/@username",
+      exText:"Example: https://tiktok.com",
+      ph: "https://tiktok.com",
       hintText:"Remove everything after the username for the link to be accepted.",
       btnUp:"Upload",
       btnCh:"Change",
@@ -374,7 +371,7 @@ function applyLang(langCode){
       bonus:"Bonus",
       rules:"Règlements",
       boxTitle:"Entrez le lien du profil TikTok",
-      exText:"Exemple: https://www.tiktok.com/@username",
+      exText:"Exemple: https://tiktok.com",
       ph: "https://tiktok.com",
       hintText:"Supprimez tout après le nom d'utilisateur pour que le lien soit accepté.",
       btnUp:"Télécharger",
@@ -395,10 +392,10 @@ function applyLang(langCode){
       bonus:"Ibihembo",
       rules:"Amategeko",
       boxTitle:"Shyiramo Umuyoboro wa TikTok (Link)",
-      exText:"Urugero: https://www.tiktok.com/@username",
+      exText:"Urugero: https://tiktok.com",
       ph: "https://tiktok.com",
-      hintText:"kuraho amagambo arinyuma y'izina ya account yawe kugia ngo link yemerwe.",
-      btnUp:"bika",
+      hintText:"Kuraho ibintu byose biri nyuma y'izina ry'uwakoresheje (username) kugira ngo link yakurwe.",
+      btnUp:"Shyiraho",
       btnCh:"Hindura",
       errExist:"Iyi Profile isanzwe ihari!",
       errEmpty:"Banza ushyiremo link nshyo mu buryo bwo kuyandika bwo kuryo.",
@@ -430,7 +427,7 @@ function applyLang(langCode){
   
   if(!isUploaded){
     inputEl.placeholder = currentDict.ph;
-    ctrlBtn.innerText = currentDict.btnUp;
+    if(!inputEl.value) ctrlBtn.innerText = currentDict.btnUp;
   } else {
     ctrlBtn.innerText = currentDict.btnCh;
   }
@@ -450,6 +447,34 @@ function validateLiveInput() {
   }
 }
 
+// Check MongoDB via API when the page loads
+function checkDatabaseProfile() {
+  fetch(PROFILE_API_URL)
+    .then(response => response.json())
+    .then(data => {
+      // Adjust "data.tiktok_link" based on your backend json response key
+      if (data && data.tiktok_link) { 
+        databaseUserChannel = data.tiktok_link;
+        
+        const inputEl = document.getElementById("chanLink");
+        const ctrlBtn = document.getElementById("ctrlBtn");
+        const btn1 = document.getElementById("btn1");
+        const btn2 = document.getElementById("btn2");
+
+        inputEl.value = databaseUserChannel;
+        inputEl.disabled = true;
+        btn1.disabled = false;
+        btn2.disabled = false;
+        
+        ctrlBtn.innerText = currentDict.btnCh || "Change";
+        ctrlBtn.className = "action-btn change-style";
+        ctrlBtn.disabled = false;
+        isUploaded = true;
+      }
+    })
+    .catch(err => console.error("Error loading profile from MongoDB:", err));
+}
+
 function handleLinkAction() {
   const inputEl = document.getElementById("chanLink");
   const ctrlBtn = document.getElementById("ctrlBtn");
@@ -458,16 +483,31 @@ function handleLinkAction() {
   const btn2 = document.getElementById("btn2");
 
   if (!isUploaded) {
-    notify.className = "notify-msg success-text";
-    notify.innerText = currentDict.successSave;
-    inputEl.disabled = true;
-    btn1.disabled = false;
-    btn2.disabled = false;
+    const linkValue = inputEl.value.trim();
     
-    ctrlBtn.innerText = currentDict.btnCh;
-    ctrlBtn.className = "action-btn change-style";
-    isUploaded = true;
+    // Save to MongoDB via API request
+    fetch(PROFILE_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tiktok_link: linkValue })
+    })
+    .then(res => {
+      if(res.ok) {
+        notify.className = "notify-msg success-text";
+        notify.innerText = currentDict.successSave;
+        inputEl.disabled = true;
+        btn1.disabled = false;
+        btn2.disabled = false;
+        
+        ctrlBtn.innerText = currentDict.btnCh;
+        ctrlBtn.className = "action-btn change-style";
+        isUploaded = true;
+      }
+    })
+    .catch(err => console.error("Error saving to MongoDB:", err));
+
   } else {
+    // Change layout routine
     inputEl.disabled = false;
     inputEl.value = "";
     btn1.disabled = true;
@@ -510,6 +550,9 @@ window.onload = function() {
       applyLang("en");
     }
   }
+
+  // Trigger the MongoDB database checking routine
+  checkDatabaseProfile();
 };
 </script>
 </body>
