@@ -5,7 +5,7 @@ const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
-const fs = require("fs"); // Added to securely check file directory presence dynamically
+const fs = require("fs"); 
 
 const app = express();
 
@@ -38,13 +38,15 @@ mongoose
   });
 
 /* ---------------- USER MODEL ---------------- */
-// ✅ ONLY UPDATE: Added the tiktok_link property safely while leaving youtubeChannel completely untouched
+// ✅ SAFELY EXTENDED SCHEMA: Added instagram_link and facebook_link alongside your active keys
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   youtubeChannel: { type: String, default: "" },
-  tiktok_link: { type: String, default: "" }
+  tiktok_link: { type: String, default: "" },
+  instagram_link: { type: String, default: "" },
+  facebook_link: { type: String, default: "" }
 });
 
 const User = mongoose.model("User", userSchema);
@@ -117,10 +119,7 @@ app.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
-    // Log user in automatically with browser token
     const token = sendTokenCookie(res, username);
-    
-    // Redirect home passing the token as a query parameter for iframe support
     res.redirect(`/index.html?auth_token=${token}`);
 
   } catch (error) {
@@ -156,10 +155,7 @@ app.post("/login", async (req, res) => {
       return res.send("Incorrect username or password.");
     }
 
-    // Log user in with browser token
     const token = sendTokenCookie(res, username);
-    
-    // Redirect home passing the token as a query parameter for iframe support
     res.redirect(`/index.html?auth_token=${token}`);
 
   } catch (error) {
@@ -170,7 +166,6 @@ app.post("/login", async (req, res) => {
 
 /* ---------------- LOGIN CHECK API ---------------- */
 app.get("/me", (req, res) => {
-  // Checks for token inside cookies first, then falls back to URL token query parameter
   const token = req.cookies.token || req.query.token;
   if (!token) return res.json({ user: null, token: null });
 
@@ -189,9 +184,9 @@ app.get("/logout", (req, res) => {
 });
 
 
-/* ---------------- YOUTUBE & TIKTOK PROFILE ENDPOINTS ---------------- */
+/* ---------------- DYNAMIC ALL-IN-ONE PROFILE ENDPOINTS ---------------- */
 
-// 🟢 GET: Loads user's channel handle link configuration on application load
+// 🟢 GET: Loads user's channels links from MongoDB cluster
 app.get("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -201,48 +196,67 @@ app.get("/api/user/profile", async (req, res) => {
     const user = await User.findOne({ username: decoded.user });
     if (!user) return res.status(404).json({ error: "User context not found." });
 
+    // Returns all 4 link vectors back to their specific page engines
     res.json({ 
       youtubeChannel: user.youtubeChannel || "",
-      tiktok_link: user.tiktok_link || "" 
+      tiktok_link: user.tiktok_link || "",
+      instagram_link: user.instagram_link || "",
+      facebook_link: user.facebook_link || ""
     });
   } catch (err) {
     res.status(401).json({ error: "Session token signature expired." });
   }
 });
 
-// 🔵 POST: Saves input data handle securely while intercepting system wide duplicate channels
+// 🔵 POST: Saves input data handle securely while checking cluster-wide duplicates
 app.post("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const { youtubeChannel, tiktok_link } = req.body;
+    const { youtubeChannel, tiktok_link, instagram_link, facebook_link } = req.body;
 
     let updateData = {};
 
+    // 1. YouTube Validation Check
     if (youtubeChannel !== undefined) {
       if (youtubeChannel !== "") {
         const linkExists = await User.findOne({ youtubeChannel: youtubeChannel, username: { $ne: decoded.user } });
-        if (linkExists) {
-          return res.status(409).json({ isDuplicate: true, error: "Channel already exists!" });
-        }
+        if (linkExists) return res.status(409).json({ isDuplicate: true, error: "Channel already exists!" });
       }
       updateData.youtubeChannel = youtubeChannel;
     }
 
+    // 2. TikTok Validation Check
     if (tiktok_link !== undefined) {
       if (tiktok_link !== "") {
         const linkExists = await User.findOne({ tiktok_link: tiktok_link, username: { $ne: decoded.user } });
-        if (linkExists) {
-          return res.status(409).json({ isDuplicate: true, error: "TikTok link already exists!" });
-        }
+        if (linkExists) return res.status(409).json({ isDuplicate: true, error: "TikTok link already exists!" });
       }
       updateData.tiktok_link = tiktok_link;
     }
 
+    // 3. Instagram Validation Check
+    if (instagram_link !== undefined) {
+      if (instagram_link !== "") {
+        const linkExists = await User.findOne({ instagram_link: instagram_link, username: { $ne: decoded.user } });
+        if (linkExists) return res.status(409).json({ isDuplicate: true, error: "Instagram profile already exists!" });
+      }
+      updateData.instagram_link = instagram_link;
+    }
+
+    // 4. Facebook Validation Check
+    if (facebook_link !== undefined) {
+      if (facebook_link !== "") {
+        const linkExists = await User.findOne({ facebook_link: facebook_link, username: { $ne: decoded.user } });
+        if (linkExists) return res.status(409).json({ isDuplicate: true, error: "Facebook profile already exists!" });
+      }
+      updateData.facebook_link = facebook_link;
+    }
+
     if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({ error: "Required channel link parameters are missing." });
+      return res.status(400).json({ error: "Required link parameters are missing." });
     }
 
     await User.findOneAndUpdate({ username: decoded.user }, updateData);
@@ -252,7 +266,7 @@ app.post("/api/user/profile", async (req, res) => {
   }
 });
 
-// 🔴 DELETE: Wipes out profile entry tracking when users switch channel handles
+// 🔴 DELETE: Clears single fields based on query context params (?platform=instagram)
 app.delete("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -262,11 +276,10 @@ app.delete("/api/user/profile", async (req, res) => {
     const { platform } = req.query;
 
     let clearData = {};
-    if (platform === "tiktok") {
-      clearData.tiktok_link = "";
-    } else {
-      clearData.youtubeChannel = "";
-    }
+    if (platform === "tiktok") clearData.tiktok_link = "";
+    else if (platform === "instagram") clearData.instagram_link = "";
+    else if (platform === "facebook") clearData.facebook_link = "";
+    else clearData.youtubeChannel = "";
 
     await User.findOneAndUpdate({ username: decoded.user }, clearData);
     res.json({ success: true });
@@ -276,9 +289,8 @@ app.delete("/api/user/profile", async (req, res) => {
 });
 
 
-/* ---------------- AUTH MIDDLEWARE (REPAIRED & COMPLETED) ---------------- */
+/* ---------------- AUTH MIDDLEWARE ---------------- */
 function auth(req, res, next) {
-  // Looks for cookie or query parameter token string
   const token = req.cookies.token || req.query.auth_token || req.query.token;
   if (!token) {
     return res.redirect("/login.html");
@@ -292,8 +304,7 @@ function auth(req, res, next) {
   }
 }
 
-/* ------- DYNAMIC PAGE ROUTER LOOKING FOR FOLDERS INSIDE PRIVATE / PUBLIC / ROOT ------- */
-// ✅ FIXED: Checks exactly where the files are stored so it never triggers an ENOENT error again
+/* ---------------- DYNAMIC WORKSPACE FILE ROUTER ---------------- */
 app.get("/:page.html", auth, (req, res) => {
   const allowedPages = ["youtube", "tiktok", "instagram", "facebook"];
   const pageName = req.params.page;
@@ -304,22 +315,14 @@ app.get("/:page.html", auth, (req, res) => {
 
   const fileName = `${pageName}.html`;
 
-  // Path 1: Check inside the '/private' folder context
   const privatePath = path.join(__dirname, "private", fileName);
-  // Path 2: Check inside the base root folder context
   const rootPath = path.join(__dirname, fileName);
-  // Path 3: Check inside the '/public' folder context
   const publicPath = path.join(__dirname, "public", fileName);
 
-  if (fs.existsSync(privatePath)) {
-    res.sendFile(privatePath);
-  } else if (fs.existsSync(rootPath)) {
-    res.sendFile(rootPath);
-  } else if (fs.existsSync(publicPath)) {
-    res.sendFile(publicPath);
-  } else {
-    res.status(404).send(`Error: File ${fileName} cannot be located in any folder directory.`);
-  }
+  if (fs.existsSync(privatePath)) res.sendFile(privatePath);
+  else if (fs.existsSync(rootPath)) res.sendFile(rootPath);
+  else if (fs.existsSync(publicPath)) res.sendFile(publicPath);
+  else res.status(404).send(`Error: File ${fileName} cannot be located.`);
 });
 
 /* ---------------- START APPLICATION SERVER ---------------- */
