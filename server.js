@@ -224,7 +224,8 @@ app.get("/health", (req, res) => {
 });
 
 /* ---------------- START SERVER ---------------- */
-const PORT = 3000;
+// Changed port to 7860 to match Hugging Face's default load balancer expectations
+const PORT = process.env.PORT || 7860;
 const HOST = "0.0.0.0";
 
 app.listen(PORT, HOST, () => {
