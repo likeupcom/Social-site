@@ -202,20 +202,20 @@ function auth(req, res, next) {
   }
 }
 
-/* ---------------- PROTECTED PAGES ---------------- */
-app.get("/youtube", auth, (req, res) => {
+/* ---------------- PROTECTED PAGES (FIXED WITH EXTENSIONS) ---------------- */
+app.get("/youtube.html", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "private", "youtube.html"));
 });
 
-app.get("/instagram", auth, (req, res) => {
+app.get("/instagram.html", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "private", "instagram.html"));
 });
 
-app.get("/tiktok", auth, (req, res) => {
+app.get("/tiktok.html", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "private", "tiktok.html"));
 });
 
-app.get("/facebook", auth, (req, res) => {
+app.get("/facebook.html", auth, (req, res) => {
   res.sendFile(path.join(__dirname, "private", "facebook.html"));
 });
 
