@@ -25,6 +25,7 @@ if (!process.env.MONGODB_URI) {
   process.exit(1);
 }
 
+// Added tlsAllowInvalidCertificates to bypass the Hugging Face certificate validation error
 mongoose
   .connect(process.env.MONGODB_URI, {
     tlsAllowInvalidCertificates: true
@@ -36,7 +37,7 @@ mongoose
   });
 
 /* ---------------- USER MODEL ---------------- */
-// ✅ UPDATED: Added tiktokProfile property to save TikTok configurations securely into MongoDB
+// ✅ Updated Schema: Holds both your secure youtubeChannel and new tiktokProfile fields
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
@@ -115,7 +116,10 @@ app.post("/signup", async (req, res) => {
       password: hashedPassword,
     });
 
+    // Log user in automatically with browser token
     const token = sendTokenCookie(res, username);
+    
+    // Redirect home passing the token as a query parameter for iframe support
     res.redirect(`/index.html?auth_token=${token}`);
 
   } catch (error) {
@@ -151,7 +155,10 @@ app.post("/login", async (req, res) => {
       return res.send("Incorrect username or password.");
     }
 
+    // Log user in with browser token
     const token = sendTokenCookie(res, username);
+    
+    // Redirect home passing the token as a query parameter for iframe support
     res.redirect(`/index.html?auth_token=${token}`);
 
   } catch (error) {
@@ -162,6 +169,7 @@ app.post("/login", async (req, res) => {
 
 /* ---------------- LOGIN CHECK API ---------------- */
 app.get("/me", (req, res) => {
+  // Checks for token inside cookies first, then falls back to URL token query parameter
   const token = req.cookies.token || req.query.token;
   if (!token) return res.json({ user: null, token: null });
 
@@ -180,9 +188,9 @@ app.get("/logout", (req, res) => {
 });
 
 
-/* ---------------- UPDATED: INTEGRATED YOUTUBE & TIKTOK PROFILE ENDPOINTS ---------------- */
+/* ---------------- YOUTUBE & TIKTOK PROFILE ENDPOINTS ---------------- */
 
-// 🟢 GET: Loads user's channels links from MongoDB cluster
+// 🟢 GET: Loads user's channel handles configuration from MongoDB on load
 app.get("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -192,7 +200,6 @@ app.get("/api/user/profile", async (req, res) => {
     const user = await User.findOne({ username: decoded.user });
     if (!user) return res.status(404).json({ error: "User context not found." });
 
-    // Returns both profiles to whatever web page asks for them
     res.json({ 
       youtubeChannel: user.youtubeChannel || "",
       tiktok_link: user.tiktokProfile || "" 
@@ -202,7 +209,7 @@ app.get("/api/user/profile", async (req, res) => {
   }
 });
 
-// 🔵 POST: Saves data handle configuration securely into your MongoDB cluster collection
+// 🔵 POST: Saves input data handle securely while checking for cluster-wide duplicates
 app.post("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -213,7 +220,7 @@ app.post("/api/user/profile", async (req, res) => {
 
     let updateData = {};
 
-    // 1. Process TikTok Data Payload updates if present
+    // Check and update TikTok data if passed
     if (tiktok_link !== undefined) {
       if (tiktok_link !== "") {
         const linkExists = await User.findOne({ tiktokProfile: tiktok_link, username: { $ne: decoded.user } });
@@ -224,7 +231,7 @@ app.post("/api/user/profile", async (req, res) => {
       updateData.tiktokProfile = tiktok_link;
     }
 
-    // 2. Process YouTube Data Payload updates if present
+    // Check and update YouTube data if passed
     if (youtubeChannel !== undefined) {
       if (youtubeChannel !== "") {
         const linkExists = await User.findOne({ youtubeChannel: youtubeChannel, username: { $ne: decoded.user } });
@@ -236,7 +243,7 @@ app.post("/api/user/profile", async (req, res) => {
     }
 
     if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({ error: "Required parameters are missing." });
+      return res.status(400).json({ error: "Required channel link parameters are missing." });
     }
 
     await User.findOneAndUpdate({ username: decoded.user }, updateData);
@@ -246,14 +253,14 @@ app.post("/api/user/profile", async (req, res) => {
   }
 });
 
-// 🔴 DELETE: Wipes profile configuration strings from database records
+// 🔴 DELETE: Wipes out profile entry tracking when users change handles
 app.delete("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    const { platform } = req.query; // Send ?platform=tiktok or ?platform=youtube
+    const { platform } = req.query;
 
     let clearData = {};
     if (platform === "tiktok") {
@@ -270,8 +277,9 @@ app.delete("/api/user/profile", async (req, res) => {
 });
 
 
-/* ---------------- AUTH MIDDLEWARE ---------------- */
+/* ---------------- COMPLETE AUTH MIDDLEWARE ---------------- */
 function auth(req, res, next) {
+  // Looks for cookie or query parameter token string
   const token = req.cookies.token || req.query.auth_token;
   if (!token) {
     return res.redirect("/login.html");
