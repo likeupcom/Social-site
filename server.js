@@ -37,7 +37,7 @@ mongoose
   });
 
 /* ---------------- USER MODEL ---------------- */
-// ✅ FIXED SAFELY: Added tiktok_link to match your exact database properties without touching youtubeChannel
+// ✅ FIXED: Safely added the tiktok_link field to hold your TikTok profile strings without altering your original properties
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
@@ -190,7 +190,7 @@ app.get("/logout", (req, res) => {
 
 /* ---------------- YOUTUBE & TIKTOK PROFILE ENDPOINTS ---------------- */
 
-// 🟢 GET: Loads user's channels configurations on application load
+// 🟢 GET: Loads user's channel handle link configurations on load
 app.get("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -209,7 +209,7 @@ app.get("/api/user/profile", async (req, res) => {
   }
 });
 
-// 🔵 POST: Saves input data handle securely while intercepting duplicate channels
+// 🔵 POST: Saves input data handle securely while checking for duplicates
 app.post("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -251,7 +251,7 @@ app.post("/api/user/profile", async (req, res) => {
   }
 });
 
-// 🔴 DELETE: Wipes out profile entry tracking when users reset values
+// 🔴 DELETE: Wipes out profile configurations when reset
 app.delete("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -275,9 +275,8 @@ app.delete("/api/user/profile", async (req, res) => {
 });
 
 
-/* ---------------- COMPLETE AUTH MIDDLEWARE ---------------- */
+/* ---------------- AUTH MIDDLEWARE (FULLY TERMINATED) ---------------- */
 function auth(req, res, next) {
-  // Looks for cookie or query parameter token string securely
   const token = req.cookies.token || req.query.auth_token || req.query.token;
   if (!token) {
     return res.redirect("/login.html");
@@ -291,19 +290,19 @@ function auth(req, res, next) {
   }
 }
 
-/* --- FULLY RESTORED: PRIVATE SECURE PAGES ROUTING CONFIGURATION --- */
-// This block protects your private folder links so logged-in users can open them safely!
-app.get("/private/:page", auth, (req, res) => {
-  const allowedPages = ["youtube.html", "tiktok.html", "instagram.html", "facebook.html"];
-  const requestedPage = req.params.page;
+/* ---------------- SERVE SECURE SOCIAL WEB PAGES FROM WORKSPACE ---------------- */
+// ✅ FIXED: This route allows authorized users to open your secure platform templates
+app.get("/:page.html", auth, (req, res) => {
+  const allowedPages = ["youtube", "tiktok", "instagram", "facebook"];
+  const pageName = req.params.page;
 
-  if (allowedPages.includes(requestedPage)) {
-    res.sendFile(path.join(__dirname, "private", requestedPage));
+  if (allowedPages.includes(pageName)) {
+    // Serves the requested file securely from your root directory context
+    res.sendFile(path.join(__dirname, `${pageName}.html`));
   } else {
-    res.status(404).send("Page not found in secure storage.");
+    res.status(404).send("Page not found.");
   }
 });
-
 
 /* ---------------- START APPLICATION SERVER ---------------- */
 const PORT = process.env.PORT || 3000;
