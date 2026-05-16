@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
+const fs = require("fs"); // Added to securely check file directory presence dynamically
 
 const app = express();
 
@@ -37,7 +38,7 @@ mongoose
   });
 
 /* ---------------- USER MODEL ---------------- */
-// ✅ FIXED: Safely added the tiktok_link field to hold your TikTok profile strings without altering your original properties
+// ✅ ONLY UPDATE: Added the tiktok_link property safely while leaving youtubeChannel completely untouched
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
@@ -190,7 +191,7 @@ app.get("/logout", (req, res) => {
 
 /* ---------------- YOUTUBE & TIKTOK PROFILE ENDPOINTS ---------------- */
 
-// 🟢 GET: Loads user's channel handle link configurations on load
+// 🟢 GET: Loads user's channel handle link configuration on application load
 app.get("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -202,14 +203,14 @@ app.get("/api/user/profile", async (req, res) => {
 
     res.json({ 
       youtubeChannel: user.youtubeChannel || "",
-      tiktok_link: user.tiktok_link || ""
+      tiktok_link: user.tiktok_link || "" 
     });
   } catch (err) {
     res.status(401).json({ error: "Session token signature expired." });
   }
 });
 
-// 🔵 POST: Saves input data handle securely while checking for duplicates
+// 🔵 POST: Saves input data handle securely while intercepting system wide duplicate channels
 app.post("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -251,7 +252,7 @@ app.post("/api/user/profile", async (req, res) => {
   }
 });
 
-// 🔴 DELETE: Wipes out profile configurations when reset
+// 🔴 DELETE: Wipes out profile entry tracking when users switch channel handles
 app.delete("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -275,8 +276,9 @@ app.delete("/api/user/profile", async (req, res) => {
 });
 
 
-/* ---------------- AUTH MIDDLEWARE (FULLY TERMINATED) ---------------- */
+/* ---------------- AUTH MIDDLEWARE (REPAIRED & COMPLETED) ---------------- */
 function auth(req, res, next) {
+  // Looks for cookie or query parameter token string
   const token = req.cookies.token || req.query.auth_token || req.query.token;
   if (!token) {
     return res.redirect("/login.html");
@@ -290,17 +292,33 @@ function auth(req, res, next) {
   }
 }
 
-/* ---------------- SERVE SECURE SOCIAL WEB PAGES FROM WORKSPACE ---------------- */
-// ✅ FIXED: This route allows authorized users to open your secure platform templates
+/* ------- DYNAMIC PAGE ROUTER LOOKING FOR FOLDERS INSIDE PRIVATE / PUBLIC / ROOT ------- */
+// ✅ FIXED: Checks exactly where the files are stored so it never triggers an ENOENT error again
 app.get("/:page.html", auth, (req, res) => {
   const allowedPages = ["youtube", "tiktok", "instagram", "facebook"];
   const pageName = req.params.page;
 
-  if (allowedPages.includes(pageName)) {
-    // Serves the requested file securely from your root directory context
-    res.sendFile(path.join(__dirname, `${pageName}.html`));
+  if (!allowedPages.includes(pageName)) {
+    return res.status(404).send("Page not found.");
+  }
+
+  const fileName = `${pageName}.html`;
+
+  // Path 1: Check inside the '/private' folder context
+  const privatePath = path.join(__dirname, "private", fileName);
+  // Path 2: Check inside the base root folder context
+  const rootPath = path.join(__dirname, fileName);
+  // Path 3: Check inside the '/public' folder context
+  const publicPath = path.join(__dirname, "public", fileName);
+
+  if (fs.existsSync(privatePath)) {
+    res.sendFile(privatePath);
+  } else if (fs.existsSync(rootPath)) {
+    res.sendFile(rootPath);
+  } else if (fs.existsSync(publicPath)) {
+    res.sendFile(publicPath);
   } else {
-    res.status(404).send("Page not found.");
+    res.status(404).send(`Error: File ${fileName} cannot be located in any folder directory.`);
   }
 });
 
