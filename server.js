@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const session = require("express-session");
-const MongoStore = require("connect-mongo"); // Added to store sessions securely in MongoDB
+const MongoStore = require("connect-mongo");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
@@ -11,7 +11,7 @@ const app = express();
 // Required for Hugging Face Spaces reverse-proxy cookie tracking
 app.set("trust proxy", 1); 
 
-/* ---------------- FIX REPLIT & HUGGINGFACE SCRIPT BLOCKING (CSP) ---------------- */
+/* ---------------- FIX SCRIPT BLOCKING (CSP) ---------------- */
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
@@ -20,14 +20,35 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ---------------- MONGODB CONNECTION ---------------- */
-if (!process.env.MONGODB_URI) {
+/* ---------------- SAFE MONGODB CONNECTION ---------------- */
+let dbURI = process.env.MONGODB_URI;
+
+if (!dbURI) {
   console.error("ERROR: MONGODB_URI missing!");
   process.exit(1);
 }
 
+// Automatically fix special characters in passwords if they exist
+try {
+  if (dbURI.includes("://") && dbURI.includes("@")) {
+    const protocolParts = dbURI.split("://");
+    const credentialsAndHost = protocolParts[1].split("@");
+    const credentials = credentialsAndHost[0];
+    const host = credentialsAndHost.slice(1).join("@");
+    
+    if (credentials.includes(":")) {
+      const [username, password] = credentials.split(":");
+      const encodedPassword = encodeURIComponent(password);
+      dbURI = `${protocolParts[0]}://${username}:${encodedPassword}@${host}`;
+    }
+  }
+} catch (e) {
+  console.log("URI parsing skipped, using raw secret string.");
+}
+
+// Connect mongoose safely
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(dbURI)
   .then(() => console.log("✅ Database connected successfully"))
   .catch((err) => console.error("❌ Database connection failed:", err));
 
@@ -44,20 +65,20 @@ const User = mongoose.model("User", userSchema);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configured session tracking to write directly into MongoDB Atlas
+// Setup safe session storage using the cleaned connection string
 app.use(
   session({
     secret: "ns-platform-secret-key",
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI,
+      mongoUrl: dbURI,
       collectionName: "sessions"
     }),
     cookie: { 
-      secure: true, // Set to true to work over Hugging Face's HTTPS proxy
-      sameSite: "none", // Allows the session cookie to persist inside cross-site space iframes
-      maxAge: 1000 * 60 * 60 * 24 // Cookie expires in 24 hours
+      secure: true, 
+      sameSite: "none", 
+      maxAge: 1000 * 60 * 60 * 24 
     },
   }),
 );
@@ -113,7 +134,6 @@ app.post("/signup", async (req, res) => {
 
     req.session.user = username;
 
-    // Forces session save completion inside MongoDB before directing browser home
     req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);
@@ -157,7 +177,6 @@ app.post("/login", async (req, res) => {
 
     req.session.user = username;
 
-    // Forces session save completion inside MongoDB on log-in
     req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);
