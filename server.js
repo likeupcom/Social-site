@@ -37,7 +37,7 @@ mongoose
   });
 
 /* ---------------- USER MODEL ---------------- */
-// ✅ Updated Schema: Holds both your secure youtubeChannel and new tiktokProfile fields
+// ✅ UPDATED: Added tiktokProfile to hold the TikTok link string securely alongside youtubeChannel
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
@@ -188,9 +188,9 @@ app.get("/logout", (req, res) => {
 });
 
 
-/* ---------------- YOUTUBE & TIKTOK PROFILE ENDPOINTS ---------------- */
+/* ---------------- UPDATED PROFILE ENDPOINTS (YOUTUBE & TIKTOK) ---------------- */
 
-// 🟢 GET: Loads user's channel handles configuration from MongoDB on load
+// 🟢 GET: Loads user's channel configurations on application load
 app.get("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -200,16 +200,17 @@ app.get("/api/user/profile", async (req, res) => {
     const user = await User.findOne({ username: decoded.user });
     if (!user) return res.status(404).json({ error: "User context not found." });
 
+    // Returns both variables depending on which front-end requested it
     res.json({ 
       youtubeChannel: user.youtubeChannel || "",
-      tiktok_link: user.tiktokProfile || "" 
+      tiktok_link: user.tiktokProfile || ""
     });
   } catch (err) {
     res.status(401).json({ error: "Session token signature expired." });
   }
 });
 
-// 🔵 POST: Saves input data handle securely while checking for cluster-wide duplicates
+// 🔵 POST: Saves input configurations securely while preventing duplicates
 app.post("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -220,18 +221,18 @@ app.post("/api/user/profile", async (req, res) => {
 
     let updateData = {};
 
-    // Check and update TikTok data if passed
+    // Handle TikTok submission values
     if (tiktok_link !== undefined) {
       if (tiktok_link !== "") {
         const linkExists = await User.findOne({ tiktokProfile: tiktok_link, username: { $ne: decoded.user } });
         if (linkExists) {
-          return res.status(409).json({ isDuplicate: true, error: "TikTok profile already exists!" });
+          return res.status(409).json({ isDuplicate: true, error: "TikTok link already exists!" });
         }
       }
       updateData.tiktokProfile = tiktok_link;
     }
 
-    // Check and update YouTube data if passed
+    // Handle YouTube submission values
     if (youtubeChannel !== undefined) {
       if (youtubeChannel !== "") {
         const linkExists = await User.findOne({ youtubeChannel: youtubeChannel, username: { $ne: decoded.user } });
@@ -253,7 +254,7 @@ app.post("/api/user/profile", async (req, res) => {
   }
 });
 
-// 🔴 DELETE: Wipes out profile entry tracking when users change handles
+// 🔴 DELETE: Wipes out profile configurations when users reset options
 app.delete("/api/user/profile", async (req, res) => {
   const token = req.cookies.token || req.query.token || req.query.auth_token;
   if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
@@ -277,9 +278,9 @@ app.delete("/api/user/profile", async (req, res) => {
 });
 
 
-/* ---------------- COMPLETE AUTH MIDDLEWARE ---------------- */
+/* ---------------- AUTH MIDDLEWARE (COMPLETED) ---------------- */
 function auth(req, res, next) {
-  // Looks for cookie or query parameter token string
+  // Looks for cookie or query parameter token string securely
   const token = req.cookies.token || req.query.auth_token;
   if (!token) {
     return res.redirect("/login.html");
@@ -293,7 +294,7 @@ function auth(req, res, next) {
   }
 }
 
-/* ---------------- START APPLICATION SERVER ---------------- */
+/* ---------------- SERVER LISTEN SYSTEM INITIALIZATION ---------------- */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is listening securely on port ${PORT}`);
