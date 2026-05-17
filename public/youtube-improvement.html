@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>YouTube Improvement Dashboard</title>
 
 <!-- FontAwesome Icons Clean CDN Link -->
 <link rel="stylesheet" href="https://cloudflare.com"/>
@@ -19,12 +20,13 @@ body{
   background:#0b1220;
   color:#fff;
   min-height:100vh;
+  padding-bottom:120px;
   overflow-x:hidden;
 }
 
 header{
   display:flex;
-  justify-content:flex-end;
+  justify-content:space-between;
   align-items:center;
   padding:18px 40px;
   background:#111827;
@@ -33,27 +35,394 @@ header{
   z-index:1000;
 }
 
-/* Fresh Styled Back Button */
-.back-btn {
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid #38bdf8;
-  color: #38bdf8;
-  padding: 8px 16px;
-  border-radius: 20px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: bold;
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:bold;
+  color:#38bdf8;
+}
+
+.container{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+h1{
+  font-size:26px;
+  margin-bottom:25px;
+  color:#38bdf8;
+  text-align: center;
+}
+
+/* SECTION TITLES */
+.section-title {
+  font-size: 18px;
+  color: #cbd5e1;
+  margin-bottom: 15px;
+  text-align: left;
+  border-left: 4px solid #38bdf8;
+  padding-left: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* VIP GRID SYSTEM (4 parts: 2 left, 2 right) */
+.vip-section {
+  margin-bottom: 35px;
+}
+
+.vip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media(max-width: 768px) {
+  .vip-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* CARD LAYOUTS */
+.channel-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 16px 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   transition: 0.3s;
 }
 
-.back-btn:hover {
+.vip-card {
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%);
+}
+
+.card-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  background: #1f2937;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #38bdf8;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.vip-card .user-avatar {
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.1);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+}
+
+.username-txt {
+  font-weight: bold;
+  font-size: 15px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.raw-link-txt {
+  font-family: monospace;
+  font-size: 13px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.click-counter {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* REGULAR GRID SYSTEM (10 spaces) */
+.regular-section {
+  margin-bottom: 40px;
+}
+
+.regular-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+@media(max-width: 768px) {
+  .regular-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* INTERACTION BUTTONS */
+.action-btn {
+  padding: 10px 22px;
+  border-radius: 20px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.visit-style {
   background: #38bdf8;
   color: #0b1220;
 }
 
+.visit-style:hover:not(:disabled) {
+  background: #0ea5e9;
+}
+
+.appeal-style {
+  background: #ef4444;
+  color: #fff;
+}
+
+.appeal-style:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.action-btn:disabled {
+  opacity: 0.3;
+  background: #334155 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed;
+}
+
+/* TIMER COUNTDOWN CHIP */
+.timer-chip {
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.appeal-timer-global {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+/* BOTTOM GATEWAY INTERACTION ZONE */
+.gateway-box {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  padding: 30px;
+  text-align: center;
+}
+
+.gate-btn {
+  padding: 16px 32px;
+  font-size: 18px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  background: #38bdf8;
+  color: #0b1220;
+  font-weight: bold;
+  transition: 0.3s;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+}
+
+.gate-btn:hover {
+  background: #0ea5e9;
+  transform: translateY(-1px);
+}
+
+/* SYSTEM DYNAMIC LINK UPLOAD BOX */
+.upload-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.upload-form-container h3 {
+  font-size: 16px;
+  color: #cbd5e1;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.link-input {
+  flex: 1;
+  background: #0b1220;
+  border: 1px solid #38bdf8;
+  border-radius: 6px;
+  padding: 12px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.submit-link-btn {
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.submit-link-btn:hover {
+  background: #16a34a;
+}
+
+.submit-link-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #334155;
+}
+
+/* REGULATIONS INLINE OVERLAY MODAL */
+.regulations-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 18, 32, 0.95);
+  z-index: 2500;
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+
+.regulations-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  max-width: 700px;
+  margin: 0 auto;
+  border-radius: 16px;
+  padding: 30px;
+}
+
+.regulations-card h2 {
+  font-size: 22px;
+  color: #38bdf8;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.regulations-card p {
+  font-size: 14px;
+  color: #94a3b8;
+  text-align: center;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #0b1220;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+}
+
+.rule-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #38bdf8;
+  cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.rule-text {
+  font-size: 13.5px;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+
+.modal-action-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  background: #38bdf8;
+  color: #0b1220;
+  transition: 0.2s;
+}
+
+.modal-action-btn:disabled {
+  background: #334155;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* SYSTEM NOTIFICATION FEEDBACKS */
+.notify-msg {
+  font-size: 13px;
+  margin-top: 10px;
+  min-height: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+.error-text { color: #ef4444; }
+.success-text { color: #22c55e; }
+.info-text { color: #38bdf8; }
+
+/* BOTTOM FIXED NAVIGATION */
 .bottom-nav{
   position:fixed;
   bottom:0;
@@ -80,25 +449,237 @@ header{
 
 .nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
 .nav-item:hover{color:#38bdf8;}
+.nav-item.active{color:#38bdf8;}
+
+footer{
+  background:#111827;
+  padding:35px 20px;
+  text-align:center;
+  margin-top: 20px;
+}
+
+.footer-text{
+  max-width:900px;
+  margin:auto;
+  line-height:1.6;
+  color:#cbd5e1;
+  font-size: 14px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- 1. Fresh Back Button Only -->
 <header>
-  <a href="youtube.html" class="back-btn">
-    <i class="fa-solid fa-arrow-left"></i> Back
+  <div class="logo-container">
+    <div class="logo" id="headerLogo">YouTube Promotion Center</div>
+  </div>
+  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
+    →
   </a>
 </header>
 
-<!-- 2. Bottom Navigation Menu Only -->
-<div class="bottom-nav">
-  <a class="nav-item" href="index.html"><span>🏠</span><span class="nav-txt">Home</span></a>
-  <a class="nav-item" href="services.html"><span>🛠</span><span class="nav-txt">services</span></a>
-  <a class="nav-item" href="vip.html"><span>💎</span><span class="nav-txt">VIP Bonus</span></a>
-  <a class="nav-item" href="regulations.html"><span>📜</span><span class="nav-txt">Regulaionsand</span></a>
+<div class="container">
+  <h1>YouTube Channel Improver</h1>
+
+  <!-- VIP AREA (4 Slots) -->
+  <div class="vip-section">
+    <div class="section-title">
+      <span id="titleVipArea">VIP Promotion Spaces</span>
+    </div>
+    <div class="vip-grid" id="vipGridContainer">
+      <!-- Injected dynamically by MongoDB backend -->
+    </div>
+  </div>
+
+  <!-- REGULAR GRID SYSTEM (10 spaces) -->
+  <div class="regular-section">
+    <div class="section-title">Regular Promotion Spaces</div>
+    <div class="regular-grid" id="regularGridContainer">
+      <!-- Injected dynamically by MongoDB backend -->
+    </div>
+  </div>
+
+  <!-- BOTTOM GATEWAY INTERACTION ZONE -->
+  <div class="gateway-box">
+    <div id="initialGateZone">
+      <button class="gate-btn" onclick="openRegulations()">Add Your Channel</button>
+    </div>
+
+    <!-- SYSTEM DYNAMIC LINK UPLOAD BOX -->
+    <div class="upload-form-container" id="uploadFormZone" style="display: none;">
+      <h3>Submit Your YouTube Details</h3>
+      <div class="input-group">
+        <input type="text" id="channelUsername" class="link-input" placeholder="Enter Channel Name / Handle" required />
+        <input type="url" id="channelUrl" class="link-input" placeholder="https://youtube.com" required />
+        <button class="submit-link-btn" id="submitBtn" onclick="submitChannel()">Upload Space</button>
+      </div>
+      <div id="notifyMessage" class="notify-msg"></div>
+    </div>
+  </div>
 </div>
 
+<!-- REGULATIONS INLINE OVERLAY MODAL -->
+<div class="regulations-overlay" id="regulationsModal">
+  <div class="regulations-card">
+    <h2>Community Rules & Guidelines</h2>
+    <p>Please read and accept our conditions to safely join our improvement platform grid.</p>
+    
+    <div class="rules-list">
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="rule1" onchange="validateCheckboxes()" />
+        <label class="rule-text" for="rule1">I agree not to upload misleading, adult content, or broken YouTube channel links.</label>
+      </div>
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="rule2" onchange="validateCheckboxes()" />
+        <label class="rule-text" for="rule2">I understand that I must periodically visit other creators to remain active in the system.</label>
+      </div>
+    </div>
+
+    <button class="modal-action-btn" id="acceptRulesBtn" disabled onclick="acceptRegulations()">Accept & Proceed</button>
+  </div>
+</div>
+
+<!-- BOTTOM FIXED NAVIGATION -->
+<div class="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span><i class="fas fa-home"></i></span>
+    <span>Home</span>
+  </a>
+  <a href="youtube.html" class="nav-item">
+    <span><i class="fab fa-youtube"></i></span>
+    <span>YouTube</span>
+  </a>
+</div>
+
+<footer>
+  <div class="footer-text">
+    &copy; 2026 YouTube Promotion Center. Driven by MongoDB Dynamic Cluster Systems.
+  </div>
+</footer>
+
+<!-- BACKEND ENGINE CONNECTION SYSTEM -->
+<script>
+const API_BASE_URL = '/api/channels';
+
+// Load platform cards immediately on page load
+document.addEventListener('DOMContentLoaded', fetchGridSpaces);
+
+async function fetchGridSpaces() {
+  try {
+    const response = await fetch(API_BASE_URL);
+    const data = await response.json();
+    
+    renderGrid(data.vip || [], 'vipGridContainer', true);
+    renderGrid(data.regular || [], 'regularGridContainer', false);
+  } catch (err) {
+    console.error('Error connecting to backend database script:', err);
+  }
+}
+
+function renderGrid(channels, containerId, isVip) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+
+  if (channels.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:#64748b; padding:20px;">No active channels. Be the first to add yours!</div>`;
+    return;
+  }
+
+  channels.forEach(channel => {
+    const card = document.createElement('div');
+    card.className = `channel-card ${isVip ? 'vip-card' : ''}`;
+    
+    card.innerHTML = `
+      <div class="card-info">
+        <div class="user-avatar">
+          <i class="fas ${isVip ? 'fa-crown' : 'fa-user'}"></i>
+        </div>
+        <div class="user-details">
+          <span class="username-txt">${channel.username}</span>
+          <span class="raw-link-txt">${channel.youtubeLink}</span>
+          <span class="click-counter">${channel.clicks || 0} hits driven</span>
+        </div>
+      </div>
+      <button class="action-btn visit-style" onclick="redirectAndTrack('${channel._id}', '${channel.youtubeLink}')">
+        <i class="fas fa-external-link-alt"></i> Visit
+      </button>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Track view metrics inside MongoDB then redirect seamlessly
+async function redirectAndTrack(id, destinationUrl) {
+  try {
+    await fetch(`${API_BASE_URL}/${id}/click`, { method: 'PATCH' });
+    window.open(destinationUrl, '_blank');
+    fetchGridSpaces(); // Refresh screen UI metrics
+  } catch (error) {
+    window.open(destinationUrl, '_blank');
+  }
+}
+
+// Handle Form Submission Elements
+async function submitChannel() {
+  const usernameInput = document.getElementById('channelUsername');
+  const urlInput = document.getElementById('channelUrl');
+  const notify = document.getElementById('notifyMessage');
+  const submitBtn = document.getElementById('submitBtn');
+
+  if (!usernameInput.value || !urlInput.value) {
+    notify.className = "notify-msg error-text";
+    notify.innerText = "Please accurately fill out both text inputs.";
+    return;
+  }
+
+  try {
+    submitBtn.disabled = true;
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: usernameInput.value,
+        youtubeLink: urlInput.value
+      })
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      notify.className = "notify-msg success-text";
+      notify.innerText = "Channel attached successfully!";
+      usernameInput.value = '';
+      urlInput.value = '';
+      fetchGridSpaces(); // Instantly update view
+    } else {
+      notify.className = "notify-msg error-text";
+      notify.innerText = result.error || "Submission failure.";
+    }
+  } catch (err) {
+    notify.className = "notify-msg error-text";
+    notify.innerText = "Server connection lost.";
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+
+// Regulations Checklist Modal Operations
+function openRegulations() {
+  document.getElementById('regulationsModal').style.display = 'block';
+}
+
+function validateCheckboxes() {
+  const r1 = document.getElementById('rule1').checked;
+  const r2 = document.getElementById('rule2').checked;
+  document.getElementById('acceptRulesBtn').disabled = !(r1 && r2);
+}
+
+function acceptRegulations() {
+  document.getElementById('regulationsModal').style.display = 'none';
+  document.getElementById('initialGateZone').style.display = 'none';
+  document.getElementById('uploadFormZone').style.display = 'block';
+}
+</script>
 </body>
 </html>
