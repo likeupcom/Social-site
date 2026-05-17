@@ -6,7 +6,7 @@
 <title>Instagram Promotion Center</title>
 
 <!-- FontAwesome Icons Clean CDN Link -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cloudflare.com"/>
 
 <style>
 *{
@@ -263,9 +263,9 @@ footer{
 <body>
 
 <div class="sidebar" id="sidebar">
-  <button class="lang-btn" onclick="applyLang('en')">English</button>
-  <button class="lang-btn" onclick="applyLang('fr')">Français</button>
-  <button class="lang-btn" onclick="applyLang('rw')">Kinyarwanda</button>
+  <button class="lang-btn" onclick="selectLang('en')">English</button>
+  <button class="lang-btn" onclick="selectLang('fr')">Français</button>
+  <button class="lang-btn" onclick="selectLang('rw')">Kinyarwanda</button>
 </div>
 
 <header>
@@ -324,21 +324,23 @@ footer{
 </a>
 
 <script>
-// Strictly verifies the path layout format pattern rules: https://instagram.com
 const INSTAGRAM_HANDLE_REGEX = /^https:\/\/(www\.)?instagram\.com\/[A-Za-z0-9_\-\.]+$/;
 
 const urlParams = new URLSearchParams(window.location.search);
 const tokenQuery = urlParams.get("auth_token") || urlParams.get("token") || "";
-const urlLang = urlParams.get("lang") || "";
 
 const PROFILE_API_URL = tokenQuery ? `/api/user/profile?token=${tokenQuery}` : "/api/user/profile";
 
 let databaseUserChannel = null;
 let currentDict = {};
 let isUploaded = false;
-let currentLangCode = "en";
 
-function applyLang(langCode){
+function selectLang(lang){
+  localStorage.setItem("lang", lang);
+  applyLang(lang);
+}
+
+function applyLang(lang){
   const t={
     en:{
       title:"Instagram Promotion Center",
@@ -351,12 +353,12 @@ function applyLang(langCode){
       bonus:"Bonus",
       rules:"Regulations",
       boxTitle:"Enter Instagram Profile Link",
-      exText:"Example: https://www.instagram.com/username/",
-      ph: "https://www.instagram.com/username/",
+      exText:"Example: https://instagram.com",
+      ph: "https://instagram.com",
       hintText:"Remove everything after the username for the link to be accepted.",
       btnUp:"Upload",
       btnCh:"Change",
-      errExist:"Profile already exists!",
+      errExist:"This profile link already exists in the system!",
       errEmpty:"Please provide a valid link address first.",
       successSave:"Profile link saved successfully!",
       footer:"© 2026 Instagram Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
@@ -373,11 +375,11 @@ function applyLang(langCode){
       rules:"Règlements",
       boxTitle:"Entrez le lien du profil Instagram",
       exText:"Exemple: https://instagram.com",
-      ph: "https://www.instagram.com/username/",
+      ph: "https://instagram.com",
       hintText:"Supprimez tout après le nom d'utilisateur pour que le lien soit accepté.",
       btnUp:"Télécharger",
       btnCh:"Modifier",
-      errExist:"Le profil existe déjà!",
+      errExist:"Ce lien de profil existe déjà dans le système!",
       errEmpty:"Veuillez d'abord fournir un lien valide.",
       successSave:"Lien de profil enregistré avec succès!",
       footer:"© 2026 Centre de Promotion Instagram. Tous droits réservés.\nDéveloppez votre présence, augmentez l'engagement et atteignez plus de personnes."
@@ -393,20 +395,19 @@ function applyLang(langCode){
       bonus:"Ibihembo",
       rules:"Amategeko",
       boxTitle:"Shyiramo Umuyoboro wa Instagram (Link)",
-      exText:"Urugero: https://www.instagram.com/username/",
+      exText:"Urugero: https://instagram.com",
       ph: "https://instagram.com",
-      hintText:"Kuraho amagambo yose arinyuma y'izina ya account yawe kugirango link yemerwe.",
+      hintText:"Kuraho ibintu byose biri nyuma y'izina ry'uwakoresheje (username) kugira ngo link yakurwe.",
       btnUp:"Shyiraho",
       btnCh:"Hindura",
-      errExist:"Iyi account isanzwe ihari!",
-      errEmpty:"Banza ushyiremo link nshya mu buryo bwo kuyandika bwo kuryo.",
-      successSave:"account yawe yabitswe neza!",
+      errExist:"Iyi Profile isanzwe ihari muri system!",
+      errEmpty:"Banza ushyiremo link nshyo mu buryo bwo kuyandika bwo kuryo.",
+      successSave:"Profile yawe yabitswe neza!",
       footer:"© 2026 Instagram Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere account yawe no kongera abantu bagukurikirana."
     }
   };
 
-  currentLangCode = langCode;
-  currentDict = t[langCode] || t.en;
+  currentDict = t[lang] || t.en;
 
   document.getElementById("title").innerText=currentDict.title;
   document.getElementById("pageTitle").innerText=currentDict.pageTitle;
@@ -448,7 +449,6 @@ function validateLiveInput() {
   }
 }
 
-// Queries MongoDB cluster records for existing links
 function checkDatabaseProfile() {
   fetch(PROFILE_API_URL)
     .then(response => response.json())
@@ -485,14 +485,23 @@ function handleLinkAction() {
   if (!isUploaded) {
     const linkValue = inputEl.value.trim();
     
-    // Dispatches network payload to server.js endpoints
     fetch(PROFILE_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ instagram_link: linkValue })
     })
-    .then(res => {
-      if(res.ok) {
+    .then(async (res) => {
+      // ✅ INTERCEPT DUPLICATES: Checks if server sends 409 conflict code (Link owned by someone else)
+      if (res.status === 409) {
+        notify.className = "notify-msg error-text";
+        notify.innerText = currentDict.errExist || "Link already exists!";
+        btn1.disabled = true;
+        btn2.disabled = true;
+        isUploaded = false;
+        return;
+      }
+
+      if (res.ok) {
         notify.className = "notify-msg success-text";
         notify.innerText = currentDict.successSave;
         inputEl.disabled = true;
@@ -523,7 +532,6 @@ function handleLinkAction() {
 function buildTargetURL(pageName) {
   let params = [];
   if (tokenQuery) params.push(`token=${tokenQuery}`);
-  if (currentLangCode) params.push(`lang=${currentLangCode}`);
   return pageName + (params.length > 0 ? "?" + params.join("&") : "");
 }
 
@@ -536,19 +544,9 @@ function goToViews() {
 }
 
 window.onload = function() {
-  if (urlLang && (urlLang === "en" || urlLang === "fr" || urlLang === "rw")) {
-    applyLang(urlLang);
-  } else {
-    const userLang = navigator.language || navigator.userLanguage;
-    const shortLang = userLang.substring(0, 2);
-    if (shortLang === "fr") {
-      applyLang("fr");
-    } else if (shortLang === "rw") {
-      applyLang("rw");
-    } else {
-      applyLang("en");
-    }
-  }
+  // ✅ FIX: Restored the language configuration tracking loop to read directly from localStorage
+  let lang = localStorage.getItem("lang") || "en";
+  applyLang(lang);
 
   checkDatabaseProfile();
 };
