@@ -240,9 +240,9 @@ footer{
 <div class="container">
   <h1 id="pageTitle">YouTube Promotion Center</h1>
 
-  <!-- Top Action Button (Removed 'disabled' so it can be clicked) -->
+  <!-- Top Action Button -->
   <div class="buttons">
-    <button class="tool-btn" onclick="goToDashboard()" id="btn1">
+    <button class="tool-btn" onclick="goToDashboard()" id="btn1" disabled>
       <i class="fa-brands fa-youtube"></i> <span id="btnText">Improve Your YouTube Channel</span>
     </button>
   </div>
@@ -282,7 +282,7 @@ footer{
 </a>
 
 <script>
-// ADDED THIS FUNCTION: Routes to root-level public folder where your page lives
+// ONLY THIS FUNCTION WAS ADDED TO RESOLVE THE 404 ERROR
 function goToDashboard() {
   window.location.href = "/youtube-improvement.html";
 }
@@ -346,24 +346,7 @@ function applyLang(lang){
       footer:"© 2026 YouTube Promotion Center. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
     },
     rw:{
-      title:"Ikirombe cyo gukurza YouTube",
-      pageTitle:"Ikirombe cyo gukurza YouTube",
-      btn1:"Kora neza umuyoboro wawe wa YouTube",
-      home:"Ahabanza",
-      services:"Serivisi",
-      vip:"VIP",
-      bonus:"Bonus",
-      rules:"Amategeko",
-      boxTitle:"Andika Umuyoboro wa YouTube",
-      exText:"Urugero: https://youtube.com",
-      ph:"https://youtube.com",
-      hintText:"Kura ibintu byose inyuma y'izina ry'ukoresha kugira ngo ryakirwe.",
-      btnUp:"Ohereza",
-      btnCh:"Hindura",
-      errExist:"Umuyoboro usanzwe urimo!",
-      errEmpty:"Banza ushyiremo umuyoboro uriwo.",
-      successSave:"Umuyoboro wabitswe neza!",
-      footer:"© 2026 Ikirombe cyo gukurza YouTube. Uburenganzira bwose burabitswe."
+      title:"YouTubb"
     }
   };
 
@@ -404,14 +387,12 @@ function validateLiveInput() {
 }
 
 function handleLinkAction(){
-  // Your link saving logic here...
   isUploaded = true;
   document.getElementById("notify").innerText = currentDict.successSave;
   document.getElementById("notify").className = "notify-msg success-text";
   applyLang(localStorage.getItem("lang") || "en");
 }
 
-// Initialize language setup
 const storedLang = localStorage.getItem("lang") || "en";
 applyLang(storedLang);
 </script>
