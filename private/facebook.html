@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Facebook Promotion Center</title>
 
-<!-- FontAwesome Icons Clean CDN Link -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cloudflare.com"/>
 
 <style>
 *{
@@ -263,9 +262,9 @@ footer{
 <body>
 
 <div class="sidebar" id="sidebar">
-  <button class="lang-btn" onclick="applyLang('en')">English</button>
-  <button class="lang-btn" onclick="applyLang('fr')">Français</button>
-  <button class="lang-btn" onclick="applyLang('rw')">Kinyarwanda</button>
+  <button class="lang-btn" onclick="selectLang('en')">English</button>
+  <button class="lang-btn" onclick="selectLang('fr')">Français</button>
+  <button class="lang-btn" onclick="selectLang('rw')">Kinyarwanda</button>
 </div>
 
 <header>
@@ -324,21 +323,23 @@ footer{
 </a>
 
 <script>
-// Strictly verifies the structure rules pattern: https://facebook.com or pages paths
 const FACEBOOK_HANDLE_REGEX = /^https:\/\/(www\.)?facebook\.com\/[A-Za-z0-9_\-\.]+$/;
 
 const urlParams = new URLSearchParams(window.location.search);
 const tokenQuery = urlParams.get("auth_token") || urlParams.get("token") || "";
-const urlLang = urlParams.get("lang") || "";
 
 const PROFILE_API_URL = tokenQuery ? `/api/user/profile?token=${tokenQuery}` : "/api/user/profile";
 
 let databaseUserChannel = null;
 let currentDict = {};
 let isUploaded = false;
-let currentLangCode = "en";
 
-function applyLang(langCode){
+function selectLang(lang){
+  localStorage.setItem("lang", lang);
+  applyLang(lang);
+}
+
+function applyLang(lang){
   const t={
     en:{
       title:"Facebook Promotion Center",
@@ -351,12 +352,12 @@ function applyLang(langCode){
       bonus:"Bonus",
       rules:"Regulations",
       boxTitle:"Enter Facebook Profile Link",
-      exText:"Example: https://www.facebook.com/username",
-      ph: "https://www.facebook.com/username",
+      exText:"Example: https://facebook.com",
+      ph: "https://facebook.com",
       hintText:"Remove everything after the username for the link to be accepted.",
       btnUp:"Upload",
       btnCh:"Change",
-      errExist:"Profile already exists!",
+      errExist:"This profile link already exists in the system!",
       errEmpty:"Please provide a valid link address first.",
       successSave:"Profile link saved successfully!",
       footer:"© 2026 Facebook Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
@@ -372,15 +373,15 @@ function applyLang(langCode){
       bonus:"Bonus",
       rules:"Règlements",
       boxTitle:"Entrez le lien du profil Facebook",
-      exText:"Exemple: https://www.facebook.com/username",
-      ph: "https://www.facebook.com/username",
+      exText:"Exemple: https://facebook.com",
+      ph: "https://facebook.com",
       hintText:"Supprimez tout après le nom d'utilisateur pour que le lien soit accepté.",
       btnUp:"Télécharger",
       btnCh:"Modifier",
-      errExist:"Le profil existe déjà!",
+      errExist:"Ce lien de profil existe déjà dans le système!",
       errEmpty:"Veuillez d'abord fournir un lien valide.",
       successSave:"Lien de profil enregistré avec succès!",
-      footer:"© 2026 Centre de Promotion Facebook. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
+      footer:"© 2026 Facebook Promotion Center. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
     },
     rw:{
       title:"Facebook Promotion Center",
@@ -393,20 +394,19 @@ function applyLang(langCode){
       bonus:"Ibihembo",
       rules:"Amategeko",
       boxTitle:"Shyiramo Umuyoboro wa Facebook (Link)",
-      exText:"Urugero: https://www.facebook.com/username",
-      ph: "https://www.facebook.com/username",
-      hintText:"Kuraho amagambo yose arinyuma y'izina ya account yawe kugira ngo link yemerwe.",
+      exText:"Urugero: https://facebook.com",
+      ph: "https://facebook.com",
+      hintText:"Kuraho ibintu byose biri nyuma y'izina ry'uwakoresheje (username) kugira ngo link yakurwe.",
       btnUp:"Shyiraho",
       btnCh:"Hindura",
-      errExist:"Iyi Profile isanzwe ihari!",
+      errExist:"Iyi Profile isanzwe ihari muri system!",
       errEmpty:"Banza ushyiremo link nshyo mu buryo bwo kuyandika bwo kuryo.",
       successSave:"Profile yawe yabitswe neza!",
-      footer:"© 2026 Facebook Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere facebook page yawe no kongera abayikurikira."
+      footer:"© 2026 Facebook Promotion Center. Uburenganzira bwose burabitswe.\nGuteza imbere facebook page yawe no kongera abantu bayikurikira."
     }
   };
 
-  currentLangCode = langCode;
-  currentDict = t[langCode] || t.en;
+  currentDict = t[lang] || t.en;
 
   document.getElementById("title").innerText=currentDict.title;
   document.getElementById("pageTitle").innerText=currentDict.pageTitle;
@@ -448,7 +448,6 @@ function validateLiveInput() {
   }
 }
 
-// Automatically pulls user configurations directly from MongoDB cluster rows
 function checkDatabaseProfile() {
   fetch(PROFILE_API_URL)
     .then(response => response.json())
@@ -485,14 +484,23 @@ function handleLinkAction() {
   if (!isUploaded) {
     const linkValue = inputEl.value.trim();
     
-    // Synchronizes package body definitions cleanly to your secure schema endpoints
     fetch(PROFILE_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ facebook_link: linkValue })
     })
-    .then(res => {
-      if(res.ok) {
+    .then(async (res) => {
+      // ✅ NEW HANDLER: If server sends back 409, it means the link is already owned by someone else
+      if (res.status === 409) {
+        notify.className = "notify-msg error-text";
+        notify.innerText = currentDict.errExist || "Link already exists!";
+        btn1.disabled = true;
+        btn2.disabled = true;
+        isUploaded = false;
+        return;
+      }
+
+      if (res.ok) {
         notify.className = "notify-msg success-text";
         notify.innerText = currentDict.successSave;
         inputEl.disabled = true;
@@ -523,7 +531,6 @@ function handleLinkAction() {
 function buildTargetURL(pageName) {
   let params = [];
   if (tokenQuery) params.push(`token=${tokenQuery}`);
-  if (currentLangCode) params.push(`lang=${currentLangCode}`);
   return pageName + (params.length > 0 ? "?" + params.join("&") : "");
 }
 
@@ -536,19 +543,8 @@ function goToViews() {
 }
 
 window.onload = function() {
-  if (urlLang && (urlLang === "en" || urlLang === "fr" || urlLang === "rw")) {
-    applyLang(urlLang);
-  } else {
-    const userLang = navigator.language || navigator.userLanguage;
-    const shortLang = userLang.substring(0, 2);
-    if (shortLang === "fr") {
-      applyLang("fr");
-    } else if (shortLang === "rw") {
-      applyLang("rw");
-    } else {
-      applyLang("en");
-    }
-  }
+  let lang = localStorage.getItem("lang") || "en";
+  applyLang(lang);
 
   checkDatabaseProfile();
 };
