@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Facebook Promotion Center</title>
 
+<!-- FontAwesome Icons Clean CDN Link -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
@@ -34,39 +35,26 @@ header{
   z-index:1000;
 }
 
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
 .logo{
   font-size:22px;
   font-weight:bold;
   color:#38bdf8;
 }
 
-.menu-btn{
-  font-size:26px;
-  cursor:pointer;
-  color:white;
-}
-
-.auth{
-  display:flex;
-  gap:10px;
-}
-
-.auth a{
-  color:white;
-  text-decoration:none;
-  padding:6px 12px;
-  border:1px solid #38bdf8;
-  border-radius:6px;
-}
-
 .container{
   text-align:center;
-  padding:60px 20px;
+  padding:40px 20px;
 }
 
 h1{
   font-size:28px;
-  margin-bottom:40px;
+  margin-bottom:30px;
   color:#38bdf8;
 }
 
@@ -75,6 +63,7 @@ h1{
   flex-direction:column;
   gap:20px;
   align-items:center;
+  margin-bottom: 35px;
 }
 
 .tool-btn{
@@ -86,12 +75,113 @@ h1{
   background:rgba(255,255,255,0.1);
   color:#fff;
   transition:.3s;
-  width:260px;
+  width:320px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
 }
 
-.tool-btn:hover{
-  background:rgba(255,255,255,0.3);
+.tool-btn:hover:not(:disabled){
+  background:rgba(56, 189, 248, 0.2);
+  border: 1px solid #38bdf8;
 }
+
+.tool-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Link Input Area Styles */
+.link-box {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  max-width: 500px;
+  margin: 0 auto 40px;
+  padding: 25px;
+}
+
+.link-box h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #cbd5e1;
+}
+
+.example-txt {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.link-input {
+  flex: 1;
+  background: #0b1220;
+  border: 1px solid #38bdf8;
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.action-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.upload-style {
+  background: #38bdf8;
+  color: #0b1220;
+}
+
+.upload-style:hover:not(:disabled) {
+  background: #0ea5e9;
+}
+
+.upload-style:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.change-style {
+  background: #ef4444;
+  color: #fff;
+}
+
+.change-style:hover {
+  background: #dc2626;
+}
+
+.hint-txt {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 12px;
+  line-height: 1.4;
+  display: block;
+}
+
+.notify-msg {
+  font-size: 13px;
+  margin-top: 10px;
+  min-height: 18px;
+  font-weight: bold;
+}
+
+.error-text { color: #ef4444; }
+.success-text { color: #22c55e; }
 
 footer{
   background:#111827;
@@ -127,12 +217,14 @@ footer{
   color:#cbd5e1;
   font-weight:bold;
   font-size:12px;
+  transition: 0.2s;
 }
 
-.nav-item span:first-child{font-size:20px;}
+.nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
 .nav-item:hover{color:#38bdf8;}
 .nav-item.active{color:#38bdf8;}
 
+/* Sidebar Styles */
 .sidebar{
   position:fixed;
   left:-250px;
@@ -149,7 +241,6 @@ footer{
   transition:.3s;
   z-index:2000;
 }
-
 .sidebar.open{left:0;}
 
 .lang-btn{
@@ -162,27 +253,9 @@ footer{
   width:140px;
   text-align:center;
 }
-
 .lang-btn:hover{
   background:#38bdf8;
   color:#000;
-}
-
-.watermark{
-  position:fixed;
-  right:20px;
-  bottom:100px;
-  font-size:55px;
-  color:#fff;
-  opacity:0.75;
-  cursor:pointer;
-  z-index:3000;
-  transition:.3s;
-}
-
-.watermark:hover{
-  transform:scale(1.1);
-  opacity:1;
 }
 </style>
 </head>
@@ -190,14 +263,16 @@ footer{
 <body>
 
 <div class="sidebar" id="sidebar">
-  <button class="lang-btn" onclick="selectLang('en')">English</button>
-  <button class="lang-btn" onclick="selectLang('fr')">Français</button>
-  <button class="lang-btn" onclick="selectLang('rw')">Kinyarwanda</button>
+  <button class="lang-btn" onclick="applyLang('en')">English</button>
+  <button class="lang-btn" onclick="applyLang('fr')">Français</button>
+  <button class="lang-btn" onclick="applyLang('rw')">Kinyarwanda</button>
 </div>
 
 <header>
-  <div class="logo" id="title">Facebook Promotion Center</div>
-  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;margin-left:auto;display:flex;align-items:center;">
+  <div class="logo-container">
+    <div class="logo" id="title" style="cursor:pointer;" onclick="document.getElementById('sidebar').classList.toggle('open')">Facebook Promotion Center</div>
+  </div>
+  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
     →
   </a>
 </header>
@@ -206,13 +281,26 @@ footer{
   <h1 id="pageTitle">Facebook Promotion Center</h1>
 
   <div class="buttons">
-    <button class="tool-btn" onclick="location.href='improve-followers.html'" id="btn1">
-      Improve Your Followers
+    <button class="tool-btn" onclick="goToFollowers()" id="btn1" disabled>
+      <i class="fa-solid fa-users"></i> <span id="btn1Text">Improve Your Followers</span>
     </button>
+    <button class="tool-btn" onclick="goToViews()" id="btn2" disabled>
+      <i class="fa-solid fa-eye"></i> <span id="btn2Text">Get Comments & Views</span>
+    </button>
+  </div>
 
-    <button class="tool-btn" onclick="location.href='comments-views.html'" id="btn2">
-      Get Comments & Views
-    </button>
+  <!-- LINK SUBMISSION BOX -->
+  <div class="link-box">
+    <h3 id="inputLabel">Enter Facebook Profile Link</h3>
+    <span class="example-txt" id="exampleLabel">Example: https://facebook.com</span>
+    
+    <div class="input-group">
+      <input type="text" id="chanLink" class="link-input" oninput="validateLiveInput()" placeholder="https://facebook.com">
+      <button id="ctrlBtn" class="action-btn upload-style" onclick="handleLinkAction()" disabled>Upload</button>
+    </div>
+    
+    <span class="hint-txt" id="hintLabel">Remove everything after the username for the link to be accepted.</span>
+    <div id="notify" class="notify-msg"></div>
   </div>
 </div>
 
@@ -224,28 +312,37 @@ footer{
 </footer>
 
 <div class="bottom-nav">
-  <a class="nav-item" href="index.html"><span>🏠</span><span></span></a>
-  <a class="nav-item" href="services.html"><span>🛠</span><span></span></a>
-  <a class="nav-item" href="vip.html"><span>💎</span><span></span></a>
-  <a class="nav-item" href="bonus.html"><span>🎁</span><span></span></a>
-  <a class="nav-item" href="regulations.html"><span>📜</span><span></span></a>
+  <a class="nav-item active" href="index.html"><span>🏠</span><span class="nav-txt" id="navHome"></span></a>
+  <a class="nav-item" href="services.html"><span>🛠</span><span class="nav-txt" id="navServices"></span></a>
+  <a class="nav-item" href="vip.html"><span>💎</span><span class="nav-txt" id="navVip"></span></a>
+  <a class="nav-item" href="bonus.html"><span>🎁</span><span class="nav-txt" id="navBonus"></span></a>
+  <a class="nav-item" href="regulations.html"><span>📜</span><span class="nav-txt" id="navRules"></span></a>
 </div>
 
-<!-- ✅ ONLY ICON CHANGED -->
-<a href="facebook.html" class="watermark">
+<a href="facebook.html" class="watermark" style="position:fixed;right:20px;bottom:100px;font-size:55px;color:#fff;opacity:0.75;cursor:pointer;z-index:3000;transition:.3s;" onmouseover="this.style.color='#1877f2'" onmouseout="this.style.color='#fff'">
   <i class="fa-brands fa-facebook"></i>
 </a>
 
 <script>
-function selectLang(lang){
-  localStorage.setItem("lang", lang);
-  applyLang(lang);
-}
+// Strictly verifies the structure rules pattern: https://facebook.com or pages paths
+const FACEBOOK_HANDLE_REGEX = /^https:\/\/(www\.)?facebook\.com\/[A-Za-z0-9_\-\.]+$/;
 
-function applyLang(lang){
+const urlParams = new URLSearchParams(window.location.search);
+const tokenQuery = urlParams.get("auth_token") || urlParams.get("token") || "";
+const urlLang = urlParams.get("lang") || "";
+
+const PROFILE_API_URL = tokenQuery ? `/api/user/profile?token=${tokenQuery}` : "/api/user/profile";
+
+let databaseUserChannel = null;
+let currentDict = {};
+let isUploaded = false;
+let currentLangCode = "en";
+
+function applyLang(langCode){
   const t={
     en:{
       title:"Facebook Promotion Center",
+      pageTitle:"Facebook Promotion Center",
       btn1:"Improve Your Followers",
       btn2:"Get Comments & Views",
       home:"Home",
@@ -253,10 +350,20 @@ function applyLang(lang){
       vip:"VIP",
       bonus:"Bonus",
       rules:"Regulations",
+      boxTitle:"Enter Facebook Profile Link",
+      exText:"Example: https://www.facebook.com/username",
+      ph: "https://www.facebook.com/username",
+      hintText:"Remove everything after the username for the link to be accepted.",
+      btnUp:"Upload",
+      btnCh:"Change",
+      errExist:"Profile already exists!",
+      errEmpty:"Please provide a valid link address first.",
+      successSave:"Profile link saved successfully!",
       footer:"© 2026 Facebook Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
     },
     fr:{
       title:"Centre de Promotion Facebook",
+      pageTitle:"Centre de Promotion Facebook",
       btn1:"Améliorer vos abonnés",
       btn2:"Obtenir des commentaires et des vues",
       home:"Accueil",
@@ -264,10 +371,20 @@ function applyLang(lang){
       vip:"VIP",
       bonus:"Bonus",
       rules:"Règlements",
-      footer:"© 2026 Facebook Promotion Center. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
+      boxTitle:"Entrez le lien du profil Facebook",
+      exText:"Exemple: https://www.facebook.com/username",
+      ph: "https://www.facebook.com/username",
+      hintText:"Supprimez tout après le nom d'utilisateur pour que le lien soit accepté.",
+      btnUp:"Télécharger",
+      btnCh:"Modifier",
+      errExist:"Le profil existe déjà!",
+      errEmpty:"Veuillez d'abord fournir un lien valide.",
+      successSave:"Lien de profil enregistré avec succès!",
+      footer:"© 2026 Centre de Promotion Facebook. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
     },
     rw:{
       title:"Facebook Promotion Center",
+      pageTitle:"Facebook Promotion Center",
       btn1:"Ongera Abagukurikirana",
       btn2:"Shaka Comments na Views",
       home:"Ahabanza",
@@ -275,29 +392,166 @@ function applyLang(lang){
       vip:"VIP",
       bonus:"Ibihembo",
       rules:"Amategeko",
+      boxTitle:"Shyiramo Umuyoboro wa Facebook (Link)",
+      exText:"Urugero: https://www.facebook.com/username",
+      ph: "https://www.facebook.com/username",
+      hintText:"Kuraho amagambo yose arinyuma y'izina ya account yawe kugira ngo link yemerwe.",
+      btnUp:"Shyiraho",
+      btnCh:"Hindura",
+      errExist:"Iyi Profile isanzwe ihari!",
+      errEmpty:"Banza ushyiremo link nshyo mu buryo bwo kuyandika bwo kuryo.",
+      successSave:"Profile yawe yabitswe neza!",
       footer:"© 2026 Facebook Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere facebook page yawe no kongera abayikurikira."
     }
   };
 
-  document.getElementById("title").innerText=t[lang].title;
-  document.getElementById("pageTitle").innerText=t[lang].title;
-  document.getElementById("btn1").innerText=t[lang].btn1;
-  document.getElementById("btn2").innerText=t[lang].btn2;
-  document.getElementById("footerText").innerText=t[lang].footer;
+  currentLangCode = langCode;
+  currentDict = t[langCode] || t.en;
 
-  let nav=document.querySelectorAll(".bottom-nav .nav-item span:nth-child(2)");
-  nav[0].innerText=t[lang].home;
-  nav[1].innerText=t[lang].services;
-  nav[2].innerText=t[lang].vip;
-  nav[3].innerText=t[lang].bonus;
-  nav[4].innerText=t[lang].rules;
+  document.getElementById("title").innerText=currentDict.title;
+  document.getElementById("pageTitle").innerText=currentDict.pageTitle;
+  document.getElementById("btn1Text").innerText=currentDict.btn1;
+  document.getElementById("btn2Text").innerText=currentDict.btn2;
+  document.getElementById("inputLabel").innerText=currentDict.boxTitle;
+  document.getElementById("exampleLabel").innerText=currentDict.exText;
+  document.getElementById("hintLabel").innerText=currentDict.hintText;
+  document.getElementById("footerText").innerText=currentDict.footer;
+
+  document.getElementById("navHome").innerText=currentDict.home;
+  document.getElementById("navServices").innerText=currentDict.services;
+  document.getElementById("navVip").innerText=currentDict.vip;
+  document.getElementById("navBonus").innerText=currentDict.bonus;
+  document.getElementById("navRules").innerText=currentDict.rules;
+
+  const inputEl = document.getElementById("chanLink");
+  const ctrlBtn = document.getElementById("ctrlBtn");
+  
+  if(!isUploaded){
+    inputEl.placeholder = currentDict.ph;
+    if(!inputEl.value) ctrlBtn.innerText = currentDict.btnUp;
+  } else {
+    ctrlBtn.innerText = currentDict.btnCh;
+  }
+  
+  document.getElementById("sidebar").classList.remove("open");
 }
 
-window.onload=function(){
-  let lang=localStorage.getItem("lang")||"en";
-  applyLang(lang);
+function validateLiveInput() {
+  if (isUploaded) return;
+  const val = document.getElementById("chanLink").value.trim();
+  const ctrlBtn = document.getElementById("ctrlBtn");
+  
+  if (FACEBOOK_HANDLE_REGEX.test(val)) {
+    ctrlBtn.disabled = false;
+  } else {
+    ctrlBtn.disabled = true;
+  }
 }
+
+// Automatically pulls user configurations directly from MongoDB cluster rows
+function checkDatabaseProfile() {
+  fetch(PROFILE_API_URL)
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.facebook_link) { 
+        databaseUserChannel = data.facebook_link;
+        
+        const inputEl = document.getElementById("chanLink");
+        const ctrlBtn = document.getElementById("ctrlBtn");
+        const btn1 = document.getElementById("btn1");
+        const btn2 = document.getElementById("btn2");
+
+        inputEl.value = databaseUserChannel;
+        inputEl.disabled = true;
+        btn1.disabled = false;
+        btn2.disabled = false;
+        
+        ctrlBtn.innerText = currentDict.btnCh || "Change";
+        ctrlBtn.className = "action-btn change-style";
+        ctrlBtn.disabled = false;
+        isUploaded = true;
+      }
+    })
+    .catch(err => console.error("Error loading profile from MongoDB:", err));
+}
+
+function handleLinkAction() {
+  const inputEl = document.getElementById("chanLink");
+  const ctrlBtn = document.getElementById("ctrlBtn");
+  const notify = document.getElementById("notify");
+  const btn1 = document.getElementById("btn1");
+  const btn2 = document.getElementById("btn2");
+
+  if (!isUploaded) {
+    const linkValue = inputEl.value.trim();
+    
+    // Synchronizes package body definitions cleanly to your secure schema endpoints
+    fetch(PROFILE_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ facebook_link: linkValue })
+    })
+    .then(res => {
+      if(res.ok) {
+        notify.className = "notify-msg success-text";
+        notify.innerText = currentDict.successSave;
+        inputEl.disabled = true;
+        btn1.disabled = false;
+        btn2.disabled = false;
+        
+        ctrlBtn.innerText = currentDict.btnCh;
+        ctrlBtn.className = "action-btn change-style";
+        isUploaded = true;
+      }
+    })
+    .catch(err => console.error("Error saving to MongoDB:", err));
+
+  } else {
+    inputEl.disabled = false;
+    inputEl.value = "";
+    btn1.disabled = true;
+    btn2.disabled = true;
+    notify.innerText = "";
+    
+    ctrlBtn.innerText = currentDict.btnUp;
+    ctrlBtn.className = "action-btn upload-style";
+    ctrlBtn.disabled = true;
+    isUploaded = false;
+  }
+}
+
+function buildTargetURL(pageName) {
+  let params = [];
+  if (tokenQuery) params.push(`token=${tokenQuery}`);
+  if (currentLangCode) params.push(`lang=${currentLangCode}`);
+  return pageName + (params.length > 0 ? "?" + params.join("&") : "");
+}
+
+function goToFollowers() {
+  window.location.href = buildTargetURL("improve-followers.html");
+}
+
+function goToViews() {
+  window.location.href = buildTargetURL("comments-views.html");
+}
+
+window.onload = function() {
+  if (urlLang && (urlLang === "en" || urlLang === "fr" || urlLang === "rw")) {
+    applyLang(urlLang);
+  } else {
+    const userLang = navigator.language || navigator.userLanguage;
+    const shortLang = userLang.substring(0, 2);
+    if (shortLang === "fr") {
+      applyLang("fr");
+    } else if (shortLang === "rw") {
+      applyLang("rw");
+    } else {
+      applyLang("en");
+    }
+  }
+
+  checkDatabaseProfile();
+};
 </script>
-
 </body>
 </html>
