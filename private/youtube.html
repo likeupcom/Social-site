@@ -282,10 +282,6 @@ footer{
 </a>
 
 <script>
-function goToDashboard() {
-  window.location.href = "/youtube-improvement.html";
-}
-
 const YOUTUBE_HANDLE_REGEX = /^https:\/\/(www\.)?youtube\.com\/@[A-Za-z0-9_\-\.]+$/;
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -345,7 +341,24 @@ function applyLang(lang){
       footer:"© 2026 YouTube Promotion Center. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
     },
     rw:{
-      title:"YouTubb"
+      title:"Ikirombe cyo gukurza YouTube",
+      pageTitle:"Ikirombe cyo gukurza YouTube",
+      btn1:"Kora neza umuyoboro wawe wa YouTube",
+      home:"Ahabanza",
+      services:"Serivisi",
+      vip:"VIP",
+      bonus:"Bonus",
+      rules:"Amategeko",
+      boxTitle:"Andika Umuyoboro wa YouTube",
+      exText:"Urugero: https://youtube.com",
+      ph:"https://youtube.com",
+      hintText:"Kura ibintu byose inyuma y'izina ry'ukoresha kugira ngo ryakirwe.",
+      btnUp:"Ohereza",
+      btnCh:"Hindura",
+      errExist:"Umuyoboro usanzwe urimo!",
+      errEmpty:"Banza ushyiremo umuyoboro uriwo.",
+      successSave:"Umuyoboro wabitswe neza!",
+      footer:"© 2026 Ikirombe cyo gukurza YouTube. Uburenganzira bwose burabitswe."
     }
   };
 
@@ -386,12 +399,23 @@ function validateLiveInput() {
 }
 
 function handleLinkAction(){
+  const linkVal = document.getElementById("chanLink").value.trim();
+  if(!linkVal) return;
+
+  // Simulate save, switch button state, and unlock dashboard access button
   isUploaded = true;
+  document.getElementById("btn1").disabled = false;
+  
   document.getElementById("notify").innerText = currentDict.successSave;
   document.getElementById("notify").className = "notify-msg success-text";
   applyLang(localStorage.getItem("lang") || "en");
 }
 
+function goToDashboard() {
+  window.location.href = "/youtube-improvement.html" + (tokenQuery ? "?token=" + tokenQuery : "");
+}
+
+// Automatically load profile status and language configurations on launch
 const storedLang = localStorage.getItem("lang") || "en";
 applyLang(storedLang);
 </script>
