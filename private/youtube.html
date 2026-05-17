@@ -232,7 +232,6 @@ footer{
   <div class="logo-container">
     <div class="logo" id="title">YouTube Promotion Center</div>
   </div>
-  <!-- Original Text Back Arrow preserved exactly -->
   <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
     →
   </a>
@@ -271,11 +270,11 @@ footer{
 </footer>
 
 <div class="bottom-nav">
-  <a class="nav-item active" href="index.html"><span>🏠</span><span class="nav-txt"></span></a>
-  <a class="nav-item" href="services.html"><span>🛠</span><span class="nav-txt"></span></a>
-  <a class="nav-item" href="vip.html"><span>💎</span><span class="nav-txt"></span></a>
-  <a class="nav-item" href="bonus.html"><span>🎁</span><span class="nav-txt"></span></a>
-  <a class="nav-item" href="regulations.html"><span>📜</span><span class="nav-txt"></span></a>
+  <a class="nav-item active" href="index.html"><span>🏠</span><span class="nav-txt" id="navHome"></span></a>
+  <a class="nav-item" href="services.html"><span>🛠</span><span class="nav-txt" id="navServices"></span></a>
+  <a class="nav-item" href="vip.html"><span>💎</span><span class="nav-txt" id="navVip"></span></a>
+  <a class="nav-item" href="bonus.html"><span>🎁</span><span class="nav-txt" id="navBonus"></span></a>
+  <a class="nav-item" href="regulations.html"><span>📜</span><span class="nav-txt" id="navRules"></span></a>
 </div>
 
 <a href="youtube.html" class="watermark" style="position:fixed;right:20px;bottom:100px;font-size:55px;color:#fff;opacity:0.75;cursor:pointer;z-index:3000;transition:.3s;" onmouseover="this.style.color='#FF0000'" onmouseout="this.style.color='#fff'">
@@ -285,7 +284,6 @@ footer{
 <script>
 const YOUTUBE_HANDLE_REGEX = /^https:\/\/(www\.)?youtube\.com\/@[A-Za-z0-9_\-\.]+$/;
 
-// Automatically extract token strings if your platform handles inside custom iFrames
 const urlParams = new URLSearchParams(window.location.search);
 const tokenQuery = urlParams.get("auth_token") || urlParams.get("token") || "";
 
@@ -293,11 +291,18 @@ const PROFILE_API_URL = tokenQuery ? `/api/user/profile?token=${tokenQuery}` : "
 
 let databaseUserChannel = null;
 let currentDict = {};
+let isUploaded = false;
+
+function selectLang(lang){
+  localStorage.setItem("lang", lang);
+  applyLang(lang);
+}
 
 function applyLang(lang){
   const t={
     en:{
       title:"YouTube Promotion Center",
+      pageTitle:"YouTube Promotion Center",
       btn1:"Improve Your YouTube Channel",
       home:"Home",
       services:"Services",
@@ -310,13 +315,14 @@ function applyLang(lang){
       hintText:"Remove everything after the username for the link to be accepted.",
       btnUp:"Upload",
       btnCh:"Change",
-      errExist:"Channel already exists!",
+      errExist:"Channel already exists in the system!",
       errEmpty:"Please provide a valid link address first.",
       successSave:"Channel saved successfully!",
       footer:"© 2026 YouTube Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
     },
     fr:{
       title:"Centre de Promotion YouTube",
+      pageTitle:"Centre de Promotion YouTube",
       btn1:"Améliorer votre chaîne YouTube",
       home:"Accueil",
       services:"Services",
@@ -324,19 +330,20 @@ function applyLang(lang){
       bonus:"Bonus",
       rules:"Règlements",
       boxTitle:"Entrez le lien de la chaîne YouTube",
-      exText:"Example: https://youtube.com",
+      exText:"Exemple: https://youtube.com",
       ph:"https://youtube.com",
       hintText:"Supprimez tout après le nom d'utilisateur pour que le lien soit accepté.",
       btnUp:"Télécharger",
       btnCh:"Modifier",
-      errExist:"La chaîne existe déjà!",
+      errExist:"La chaîne existe déjà dans le système!",
       errEmpty:"Veuillez d'abord fournir un lien valide.",
       successSave:"Chaîne enregistrée avec succès!",
       footer:"© 2026 YouTube Promotion Center. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
     },
     rw:{
       title:"YouTube Promotion Center",
-      btn1:"zamura Channel yawe ya YouTube",
+      pageTitle:"YouTube Promotion Center",
+      btn1:"Zamura Channel yawe ya YouTube",
       home:"Ahabanza",
       services:"Serivisi",
       vip:"VIP",
@@ -345,153 +352,139 @@ function applyLang(lang){
       boxTitle:"Shyiramo Umuyoboro wa YouTube (Link)",
       exText:"Urugero: https://youtube.com",
       ph:"https://youtube.com",
-      hintText:"kuraho amagambo yose arinyuma y'izina ya channel yawe kugira ngo link yawe yemerwe.",
-      btnUp:"Bika",
+      hintText:"Kuraho ibintu byose biri nyuma y'izina ry'uwakoresheje (username) kugira ngo link yakurwe.",
+      btnUp:"Shyiraho",
       btnCh:"Hindura",
-      errExist:"Uyu muyoboro usanzwe urimo!",
-      errEmpty:"Banza ushyiremo link y'umuyoboro.",
-      successSave:"Umuyoboro ubikiwe neza!",
-      footer:"© 2026 YouTube Promotion Center. Urihano account yawe iratekanye.\nGuteza imbere channel yawe no kongera abakureba."
+      errExist:"Iyi Channel isanzwe ihari muri system!",
+      errEmpty:"Banza ushyiremo link nshyo mu buryo bwo kuyandika bwo kuryo.",
+      successSave:"Channel yawe yabitswe neza!",
+      footer:"© 2026 YouTube Promotion Center. Uburenganzira bwose burabitswe.\nKura ububashe bwawe, wongere imikoranire, kandi ugere kubantu benshi."
     }
   };
 
-  currentDict = t[lang];
+  currentDict = t[lang] || t.en;
 
-  document.getElementById("title").innerText=t[lang].title;
-  document.getElementById("pageTitle").innerText=t[lang].title;
-  document.getElementById("btnText").innerText=t[lang].btn1;
-  document.getElementById("footerText").innerText=t[lang].footer;
-  document.getElementById("inputLabel").innerText=t[lang].boxTitle;
-  document.getElementById("exampleLabel").innerText=t[lang].exText;
-  document.getElementById("hintLabel").innerText=t[lang].hintText;
+  document.getElementById("title").innerText = currentDict.title;
+  document.getElementById("pageTitle").innerText = currentDict.pageTitle;
+  document.getElementById("btnText").innerText = currentDict.btn1;
+  document.getElementById("inputLabel").innerText = currentDict.boxTitle;
+  document.getElementById("exampleLabel").innerText = currentDict.exText;
+  document.getElementById("hintLabel").innerText = currentDict.hintText;
+  document.getElementById("footerText").innerText = currentDict.footer;
+  
+  // Update Navbar text labels
+  document.getElementById("navHome").innerText = currentDict.home;
+  document.getElementById("navServices").innerText = currentDict.services;
+  document.getElementById("navVip").innerText = currentDict.vip;
+  document.getElementById("navBonus").innerText = currentDict.bonus;
+  document.getElementById("navRules").innerText = currentDict.rules;
 
-  let navs = document.querySelectorAll(".bottom-nav .nav-item .nav-txt");
-  if(navs.length >= 5) {
-    navs.innerText = t[lang].home;
-    navs.innerText = t[lang].services;
-    navs.innerText = t[lang].vip;
-    navs.innerText = t[lang].bonus;
-    navs.innerText = t[lang].rules;
-  }
-
-  syncInputStateUI();
-}
-
-function syncInputStateUI() {
   const inputEl = document.getElementById("chanLink");
-  const btnEl = document.getElementById("ctrlBtn");
-  const actionBtn = document.getElementById("btn1");
-
-  if(databaseUserChannel) {
-    inputEl.value = databaseUserChannel;
-    inputEl.disabled = true;
-    actionBtn.disabled = false;
-    btnEl.innerText = currentDict.btnCh;
-    btnEl.className = "action-btn change-style";
-    btnEl.disabled = false;
-  } else {
-    inputEl.disabled = false;
-    actionBtn.disabled = true;
-    btnEl.innerText = currentDict.btnUp;
-    btnEl.className = "action-btn upload-style";
+  const ctrlBtn = document.getElementById("ctrlBtn");
+  
+  if (!isUploaded) {
     inputEl.placeholder = currentDict.ph;
-    validateLiveInput();
+    if(!inputEl.value) ctrlBtn.innerText = currentDict.btnUp;
+  } else {
+    ctrlBtn.innerText = currentDict.btnCh;
   }
 }
 
 function validateLiveInput() {
-  if (databaseUserChannel) return;
-
-  const inputEl = document.getElementById("chanLink");
-  const btnEl = document.getElementById("ctrlBtn");
-  const urlValue = inputEl.value.trim();
-
-  if (YOUTUBE_HANDLE_REGEX.test(urlValue)) {
-    btnEl.disabled = false;
+  if (isUploaded) return;
+  const val = document.getElementById("chanLink").value.trim();
+  const ctrlBtn = document.getElementById("ctrlBtn");
+  
+  if (YOUTUBE_HANDLE_REGEX.test(val)) {
+    ctrlBtn.disabled = false;
   } else {
-    btnEl.disabled = true;
+    ctrlBtn.disabled = true;
+  }
+}
+
+function checkDatabaseProfile() {
+  fetch(PROFILE_API_URL)
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.youtubeChannel) { 
+        databaseUserChannel = data.youtubeChannel;
+        
+        const inputEl = document.getElementById("chanLink");
+        const ctrlBtn = document.getElementById("ctrlBtn");
+        const btn1 = document.getElementById("btn1");
+
+        inputEl.value = databaseUserChannel;
+        inputEl.disabled = true;
+        btn1.disabled = false;
+        
+        ctrlBtn.innerText = currentDict.btnCh || "Change";
+        ctrlBtn.className = "action-btn change-style";
+        ctrlBtn.disabled = false;
+        isUploaded = true;
+      }
+    })
+    .catch(err => console.error("Error loading profile from MongoDB:", err));
+}
+
+function handleLinkAction() {
+  const inputEl = document.getElementById("chanLink");
+  const ctrlBtn = document.getElementById("ctrlBtn");
+  const notify = document.getElementById("notify");
+  const btn1 = document.getElementById("btn1");
+
+  if (!isUploaded) {
+    const linkValue = inputEl.value.trim();
+    
+    fetch(PROFILE_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ youtubeChannel: linkValue })
+    })
+    .then(async (res) => {
+      if (res.status === 409) {
+        notify.className = "notify-msg error-text";
+        notify.innerText = currentDict.errExist || "Channel already exists!";
+        btn1.disabled = true;
+        isUploaded = false;
+        return;
+      }
+
+      if (res.ok) {
+        notify.className = "notify-msg success-text";
+        notify.innerText = currentDict.successSave;
+        inputEl.disabled = true;
+        btn1.disabled = false;
+        
+        ctrlBtn.innerText = currentDict.btnCh;
+        ctrlBtn.className = "action-btn change-style";
+        isUploaded = true;
+      }
+    })
+    .catch(err => console.error("Error saving to MongoDB:", err));
+
+  } else {
+    inputEl.disabled = false;
+    inputEl.value = "";
+    btn1.disabled = true;
+    notify.innerText = "";
+    
+    ctrlBtn.innerText = currentDict.btnUp;
+    ctrlBtn.className = "action-btn upload-style";
+    ctrlBtn.disabled = true;
+    isUploaded = false;
   }
 }
 
 function goToDashboard() {
-  if (tokenQuery) {
-    location.href = `improve-youtube.html?auth_token=${tokenQuery}`;
-  } else {
-    location.href = 'improve-youtube.html';
-  }
-}
-
-async function fetchUserProfileChannel() {
-  try {
-    const response = await fetch(PROFILE_API_URL, { method: "GET" });
-
-    if (response.ok) {
-      const data = await response.json();
-      if (data.youtubeChannel) {
-        databaseUserChannel = data.youtubeChannel;
-      }
-    }
-  } catch (err) {
-    console.error("Could not reach backend user profile:", err);
-  }
-  
-  let lang = localStorage.getItem("lang") || "en";
-  applyLang(lang);
-}
-
-async function handleLinkAction() {
-  const inputEl = document.getElementById("chanLink");
-  const notify = document.getElementById("notify");
-
-  notify.innerText = "";
-  notify.className = "notify-msg";
-
-  if(databaseUserChannel) {
-    try {
-      const response = await fetch(PROFILE_API_URL, { method: "DELETE" });
-
-      if (response.ok) {
-        databaseUserChannel = null;
-        inputEl.value = "";
-        syncInputStateUI();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  } else {
-    const urlValue = inputEl.value.trim();
-    
-    try {
-      const response = await fetch(PROFILE_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ youtubeChannel: urlValue })
-      });
-
-      const result = await response.json();
-
-      if (response.status === 409 || result.isDuplicate) {
-        notify.innerText = currentDict.errExist;
-        notify.className = "notify-msg error-text";
-        return;
-      }
-
-      if (response.ok) {
-        databaseUserChannel = urlValue;
-        notify.innerText = currentDict.successSave;
-        notify.className = "notify-msg success-text";
-        syncInputStateUI();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  window.location.href = "dashboard.html" + (tokenQuery ? `?token=${tokenQuery}` : "");
 }
 
 window.onload = function() {
-  fetchUserProfileChannel();
-}
-</script>
+  let lang = localStorage.getItem("lang") || "en";
+  applyLang(lang);
 
+  checkDatabaseProfile();
+};
+</script>
 </body>
 </html>
