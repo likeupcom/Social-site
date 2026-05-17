@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- FontAwesome Icons Clean CDN Link -->
+<link rel="stylesheet" href="https://cloudflare.com"/>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body{
+  background:#0b1220;
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+header{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  padding:18px 40px;
+  background:#111827;
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+
+/* Fresh Styled Back Button */
+.back-btn {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.3s;
+}
+
+.back-btn:hover {
+  background: #38bdf8;
+  color: #0b1220;
+}
+
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#111827;
+  display:flex;
+  justify-content:space-around;
+  padding:12px 0;
+  border-top:1px solid #1f2937;
+  z-index:1500;
+}
+
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-decoration:none;
+  color:#cbd5e1;
+  font-weight:bold;
+  font-size:12px;
+  transition: 0.2s;
+}
+
+.nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
+.nav-item:hover{color:#38bdf8;}
+</style>
+</head>
+
+<body>
+
+<!-- 1. Fresh Back Button Only -->
+<header>
+  <a href="youtube.html" class="back-btn">
+    <i class="fa-solid fa-arrow-left"></i> Back
+  </a>
+</header>
+
+<!-- 2. Bottom Navigation Menu Only -->
+<div class="bottom-nav">
+  <a class="nav-item" href="index.html"><span>🏠</span><span class="nav-txt">Home</span></a>
+  <a class="nav-item" href="services.html"><span>🛠</span><span class="nav-txt">services</span></a>
+  <a class="nav-item" href="vip.html"><span>💎</span><span class="nav-txt">VIP Bonus</span></a>
+  <a class="nav-item" href="regulations.html"><span>📜</span><span class="nav-txt">Regulaionsand</span></a>
+</div>
+
+</body>
+</html>
