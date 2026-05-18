@@ -474,212 +474,168 @@ footer{
   <div class="logo-container">
     <div class="logo" id="headerLogo">YouTube Promotion Center</div>
   </div>
-  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
-    →
-  </a>
+  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;"> → </a>
 </header>
 
 <div class="container">
-  <h1>YouTube Channel Improver</h1>
+  <h1 id="pageMainTitle">YouTube Improvement Dashboard</h1>
 
-  <!-- VIP AREA (4 Slots) -->
+  <!-- VIP PARTNER SECTIONS -->
   <div class="vip-section">
     <div class="section-title">
-      <span id="titleVipArea">VIP Promotion Spaces</span>
+      <span id="vipSectionTitle">VIP Premium Channels</span>
     </div>
-    <div class="vip-grid" id="vipGridContainer">
-      <!-- Injected dynamically by MongoDB backend -->
+    <div class="vip-grid">
+      <!-- Card 1 -->
+      <div class="channel-card vip-card">
+        <div class="card-info">
+          <div class="user-avatar"><i class="fa-brands fa-youtube"></i></div>
+          <div class="user-details">
+            <span class="username-txt">Alpha Creator</span>
+            <span class="raw-link-txt">://youtube.com</span>
+          </div>
+        </div>
+        <button class="action-btn visit-style"><span>Visit</span></button>
+      </div>
+      <!-- Card 2 -->
+      <div class="channel-card vip-card">
+        <div class="card-info">
+          <div class="user-avatar"><i class="fa-brands fa-youtube"></i></div>
+          <div class="user-details">
+            <span class="username-txt">Mega Streams</span>
+            <span class="raw-link-txt">://youtube.com</span>
+          </div>
+        </div>
+        <button class="action-btn visit-style"><span>Visit</span></button>
+      </div>
     </div>
   </div>
 
-  <!-- REGULAR GRID SYSTEM (10 spaces) -->
+  <!-- REGULAR SPACES SECTION -->
   <div class="regular-section">
-    <div class="section-title">Regular Promotion Spaces</div>
-    <div class="regular-grid" id="regularGridContainer">
-      <!-- Injected dynamically by MongoDB backend -->
+    <div class="section-title">
+      <span id="regularSectionTitle">Standard Exchange Slots</span>
+    </div>
+    <div class="regular-grid">
+      <!-- Example Standard Block Item -->
+      <div class="channel-card">
+        <div class="card-info">
+          <div class="user-avatar"><i class="fa-brands fa-youtube"></i></div>
+          <div class="user-details">
+            <span class="username-txt">Community Hub</span>
+            <span class="raw-link-txt">://youtube.com</span>
+          </div>
+        </div>
+        <button class="action-btn visit-style"><span>Visit</span></button>
+      </div>
     </div>
   </div>
 
-  <!-- BOTTOM GATEWAY INTERACTION ZONE -->
+  <!-- LOWER GATEWAY REGISTRATION AREA -->
   <div class="gateway-box">
-    <div id="initialGateZone">
-      <button class="gate-btn" onclick="openRegulations()">Add Your Channel</button>
-    </div>
-
-    <!-- SYSTEM DYNAMIC LINK UPLOAD BOX -->
-    <div class="upload-form-container" id="uploadFormZone" style="display: none;">
-      <h3>Submit Your YouTube Details</h3>
-      <div class="input-group">
-        <input type="text" id="channelUsername" class="link-input" placeholder="Enter Channel Name / Handle" required />
-        <input type="url" id="channelUrl" class="link-input" placeholder="https://youtube.com" required />
-        <button class="submit-link-btn" id="submitBtn" onclick="submitChannel()">Upload Space</button>
-      </div>
-      <div id="notifyMessage" class="notify-msg"></div>
-    </div>
+    <button class="gate-btn" id="actionGateBtn">Open Exchange Control</button>
   </div>
-</div>
-
-<!-- REGULATIONS INLINE OVERLAY MODAL -->
-<div class="regulations-overlay" id="regulationsModal">
-  <div class="regulations-card">
-    <h2>Community Rules & Guidelines</h2>
-    <p>Please read and accept our conditions to safely join our improvement platform grid.</p>
-    
-    <div class="rules-list">
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="rule1" onchange="validateCheckboxes()" />
-        <label class="rule-text" for="rule1">I agree not to upload misleading, adult content, or broken YouTube channel links.</label>
-      </div>
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="rule2" onchange="validateCheckboxes()" />
-        <label class="rule-text" for="rule2">I understand that I must periodically visit other creators to remain active in the system.</label>
-      </div>
-    </div>
-
-    <button class="modal-action-btn" id="acceptRulesBtn" disabled onclick="acceptRegulations()">Accept & Proceed</button>
-  </div>
-</div>
-
-<!-- BOTTOM FIXED NAVIGATION -->
-<div class="bottom-nav">
-  <a href="index.html" class="nav-item">
-    <span><i class="fas fa-home"></i></span>
-    <span>Home</span>
-  </a>
-  <a href="youtube.html" class="nav-item">
-    <span><i class="fab fa-youtube"></i></span>
-    <span>YouTube</span>
-  </a>
 </div>
 
 <footer>
-  <div class="footer-text">
-    &copy; 2026 YouTube Promotion Center. Driven by MongoDB Dynamic Cluster Systems.
+  <div class="footer-text" id="footerText">
+    © 2026 YouTube Promotion Center. All rights reserved.<br>Grow your presence, boost engagement, and reach more people.
   </div>
 </footer>
 
-<!-- BACKEND ENGINE CONNECTION SYSTEM -->
+<!-- SYSTEM BOTTOM LAYER NAVIGATION PANEL WITH FULL GRAPHIC ICONS -->
+<div class="bottom-nav">
+  <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt" id="lblHome">Home</span></a>
+  <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt" id="lblServices">Services</span></a>
+  <a class="nav-item" href="vip.html" id="navVipLink"><span>💎</span><span class="nav-txt" id="lblVip">VIP</span></a>
+  <a class="nav-item" href="bonus.html" id="navBonusLink"><span>🎁</span><span class="nav-txt" id="lblBonus">Bonus</span></a>
+  <a class="nav-item" href="regulations.html" id="navRulesLink"><span>📜</span><span class="nav-txt" id="lblRules">Regulations</span></a>
+</div>
+
 <script>
-const API_BASE_URL = '/api/channels';
+const urlParams = new URLSearchParams(window.location.search);
+const tokenQuery = urlParams.get("auth_token") || urlParams.get("token") || "";
 
-// Load platform cards immediately on page load
-document.addEventListener('DOMContentLoaded', fetchGridSpaces);
-
-async function fetchGridSpaces() {
-  try {
-    const response = await fetch(API_BASE_URL);
-    const data = await response.json();
-    
-    renderGrid(data.vip || [], 'vipGridContainer', true);
-    renderGrid(data.regular || [], 'regularGridContainer', false);
-  } catch (err) {
-    console.error('Error connecting to backend database script:', err);
-  }
-}
-
-function renderGrid(channels, containerId, isVip) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
-
-  if (channels.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:#64748b; padding:20px;">No active channels. Be the first to add yours!</div>`;
-    return;
-  }
-
-  channels.forEach(channel => {
-    const card = document.createElement('div');
-    card.className = `channel-card ${isVip ? 'vip-card' : ''}`;
-    
-    card.innerHTML = `
-      <div class="card-info">
-        <div class="user-avatar">
-          <i class="fas ${isVip ? 'fa-crown' : 'fa-user'}"></i>
-        </div>
-        <div class="user-details">
-          <span class="username-txt">${channel.username}</span>
-          <span class="raw-link-txt">${channel.youtubeLink}</span>
-          <span class="click-counter">${channel.clicks || 0} hits driven</span>
-        </div>
-      </div>
-      <button class="action-btn visit-style" onclick="redirectAndTrack('${channel._id}', '${channel.youtubeLink}')">
-        <i class="fas fa-external-link-alt"></i> Visit
-      </button>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// Track view metrics inside MongoDB then redirect seamlessly
-async function redirectAndTrack(id, destinationUrl) {
-  try {
-    await fetch(`${API_BASE_URL}/${id}/click`, { method: 'PATCH' });
-    window.open(destinationUrl, '_blank');
-    fetchGridSpaces(); // Refresh screen UI metrics
-  } catch (error) {
-    window.open(destinationUrl, '_blank');
-  }
-}
-
-// Handle Form Submission Elements
-async function submitChannel() {
-  const usernameInput = document.getElementById('channelUsername');
-  const urlInput = document.getElementById('channelUrl');
-  const notify = document.getElementById('notifyMessage');
-  const submitBtn = document.getElementById('submitBtn');
-
-  if (!usernameInput.value || !urlInput.value) {
-    notify.className = "notify-msg error-text";
-    notify.innerText = "Please accurately fill out both text inputs.";
-    return;
-  }
-
-  try {
-    submitBtn.disabled = true;
-    const response = await fetch(`${API_BASE_URL}/upload`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: usernameInput.value,
-        youtubeLink: urlInput.value
-      })
-    });
-
-    const result = await response.json();
-
-    if (response.ok) {
-      notify.className = "notify-msg success-text";
-      notify.innerText = "Channel attached successfully!";
-      usernameInput.value = '';
-      urlInput.value = '';
-      fetchGridSpaces(); // Instantly update view
-    } else {
-      notify.className = "notify-msg error-text";
-      notify.innerText = result.error || "Submission failure.";
+// Maintain active session token parameters down into lower secondary page submodules
+function anchorNavigationTokens() {
+    if (tokenQuery) {
+        const links = ["navHomeLink", "navServicesLink", "navVipLink", "navBonusLink", "navRulesLink"];
+        links.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const baseHref = el.getAttribute("href");
+                el.setAttribute("href", baseHref + `?token=${tokenQuery}`);
+            }
+        });
     }
-  } catch (err) {
-    notify.className = "notify-msg error-text";
-    notify.innerText = "Server connection lost.";
-  } finally {
-    submitBtn.disabled = false;
-  }
 }
 
-// Regulations Checklist Modal Operations
-function openRegulations() {
-  document.getElementById('regulationsModal').style.display = 'block';
+function applyPageLanguage(lang) {
+    const dictionary = {
+        en: {
+            header: "YouTube Promotion Center",
+            mainTitle: "YouTube Improvement Dashboard",
+            vipTitle: "VIP Premium Channels",
+            regTitle: "Standard Exchange Slots",
+            gateBtn: "Open Exchange Control",
+            home: "Home",
+            services: "Services",
+            vip: "VIP",
+            bonus: "Bonus",
+            rules: "Regulations",
+            footer: "© 2026 YouTube Promotion Center. All rights reserved.\nGrow your presence, boost engagement, and reach more people."
+        },
+        fr: {
+            header: "Centre de Promotion YouTube",
+            mainTitle: "Tableau de Bord d'Amélioration YouTube",
+            vipTitle: "Chaînes Premium VIP",
+            regTitle: "Emplacements d'Échange Standard",
+            gateBtn: "Ouvrir le Contrôle d'Échange",
+            home: "Accueil",
+            services: "Services",
+            vip: "VIP",
+            bonus: "Bonus",
+            rules: "Règlements",
+            footer: "© 2026 YouTube Promotion Center. Tous droits réservés.\nDéveloppez votre présence et atteignez plus de personnes."
+        },
+        rw: {
+            header: "Ikigo cyo Kwamamaza YouTube",
+            mainTitle: "Ibikoresho vugurura Channel ya YouTube",
+            vipTitle: "VIP Premium Channels",
+            regTitle: "Imyanya y'Imikoranire Isanzwe",
+            gateBtn: "Fungura Igenzura ry'Imikoranire",
+            home: "Ahabanza",
+            services: "Serivisi",
+            vip: "VIP",
+            bonus: "Imfashanyo",
+            rules: "Amategeko",
+            footer: "© 2026 Ikigo cyo Kwamamaza YouTube. Uburenganzira bwose buraboshywe.\nKura ubwiganze bwawe, wongere imikoranire, kandi ugere kubantu benshi."
+        }
+    };
+
+    const currentDict = dictionary[lang] || dictionary.en;
+
+    // Apply translations cleanly via Element IDs
+    document.getElementById("headerLogo").innerText = currentDict.header;
+    document.getElementById("pageMainTitle").innerText = currentDict.mainTitle;
+    document.getElementById("vipSectionTitle").innerText = currentDict.vipTitle;
+    document.getElementById("regularSectionTitle").innerText = currentDict.regTitle;
+    document.getElementById("actionGateBtn").innerText = currentDict.gateBtn;
+    document.getElementById("footerText").innerText = currentDict.footer;
+    
+    // Bottom navigation vector label syncing
+    document.getElementById("lblHome").innerText = currentDict.home;
+    document.getElementById("lblServices").innerText = currentDict.services;
+    document.getElementById("lblVip").innerText = currentDict.vip;
+    document.getElementById("lblBonus").innerText = currentDict.bonus;
+    document.getElementById("lblRules").innerText = currentDict.rules;
 }
 
-function validateCheckboxes() {
-  const r1 = document.getElementById('rule1').checked;
-  const r2 = document.getElementById('rule2').checked;
-  document.getElementById('acceptRulesBtn').disabled = !(r1 && r2);
-}
-
-function acceptRegulations() {
-  document.getElementById('regulationsModal').style.display = 'none';
-  document.getElementById('initialGateZone').style.display = 'none';
-  document.getElementById('uploadFormZone').style.display = 'block';
-}
+window.onload = function() {
+    const savedLang = localStorage.getItem("lang") || "en";
+    applyPageLanguage(savedLang);
+    anchorNavigationTokens();
+};
 </script>
 </body>
 </html>
