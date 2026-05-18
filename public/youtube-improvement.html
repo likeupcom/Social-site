@@ -485,29 +485,9 @@ footer{
     <div class="section-title">
       <span id="vipSectionTitle">VIP Premium Channels</span>
     </div>
-    <div class="vip-grid">
-      <!-- Card 1 -->
-      <div class="channel-card vip-card">
-        <div class="card-info">
-          <div class="user-avatar"><i class="fa-brands fa-youtube"></i></div>
-          <div class="user-details">
-            <span class="username-txt">Alpha Creator</span>
-            <span class="raw-link-txt">://youtube.com</span>
-          </div>
-        </div>
-        <button class="action-btn visit-style"><span>Visit</span></button>
-      </div>
-      <!-- Card 2 -->
-      <div class="channel-card vip-card">
-        <div class="card-info">
-          <div class="user-avatar"><i class="fa-brands fa-youtube"></i></div>
-          <div class="user-details">
-            <span class="username-txt">Mega Streams</span>
-            <span class="raw-link-txt">://youtube.com</span>
-          </div>
-        </div>
-        <button class="action-btn visit-style"><span>Visit</span></button>
-      </div>
+    <!-- Connected to dynamic database array payload injection mapping -->
+    <div class="vip-grid" id="realVipGrid">
+      <div style="color: #64748b; font-size: 14px; padding: 10px;">Loading live database accounts...</div>
     </div>
   </div>
 
@@ -516,18 +496,9 @@ footer{
     <div class="section-title">
       <span id="regularSectionTitle">Standard Exchange Slots</span>
     </div>
-    <div class="regular-grid">
-      <!-- Example Standard Block Item -->
-      <div class="channel-card">
-        <div class="card-info">
-          <div class="user-avatar"><i class="fa-brands fa-youtube"></i></div>
-          <div class="user-details">
-            <span class="username-txt">Community Hub</span>
-            <span class="raw-link-txt">://youtube.com</span>
-          </div>
-        </div>
-        <button class="action-btn visit-style"><span>Visit</span></button>
-      </div>
+    <!-- Connected to dynamic database array payload injection mapping -->
+    <div class="regular-grid" id="realRegularGrid">
+      <div style="color: #64748b; font-size: 14px; padding: 10px;">Loading live database accounts...</div>
     </div>
   </div>
 
@@ -567,6 +538,59 @@ function anchorNavigationTokens() {
                 el.setAttribute("href", baseHref + `?token=${tokenQuery}`);
             }
         });
+    }
+}
+
+// 🔵 REAL MONGO DATABASE LOADING INJECTION LOGIC
+async function fetchDatabaseChannels() {
+    const vipGrid = document.getElementById("realVipGrid");
+    const regularGrid = document.getElementById("realRegularGrid");
+
+    try {
+        const response = await fetch("/api/public/youtube-channels");
+        if (!response.ok) throw new Error("Could not connect to database endpoint.");
+
+        const channels = await response.json();
+
+        // If the database has no uploaded channels yet
+        if (channels.length === 0) {
+            vipGrid.innerHTML = `<div style="color:#64748b; font-size:14px; padding:10px;">No VIP channels loaded yet.</div>`;
+            regularGrid.innerHTML = `<div style="color:#64748b; font-size:14px; padding:10px;">No standard channels uploaded yet.</div>`;
+            return;
+        }
+
+        // Clear loading indicators out of grids
+        vipGrid.innerHTML = "";
+        regularGrid.innerHTML = "";
+
+        // Build HTML cards for each real account user in MongoDB
+        channels.forEach((item, index) => {
+            const cardHTML = `
+              <div class="channel-card ${index < 2 ? 'vip-card' : ''}">
+                <div class="card-info">
+                  <div class="user-avatar"><i class="fa-brands fa-youtube"></i></div>
+                  <div class="user-details">
+                    <span class="username-txt">${item.username}</span>
+                    <span class="raw-link-txt">${item.youtubeChannel.replace("https://", "")}</span>
+                  </div>
+                </div>
+                <button class="action-btn visit-style" onclick="window.open('${item.youtubeChannel}', '_blank')">
+                  <span>Visit</span>
+                </button>
+              </div>`;
+
+            // Sort the first 2 profiles to the Premium VIP section, and the rest to Standard Slots
+            if (index < 2) {
+                vipGrid.innerHTML += cardHTML;
+            } else {
+                regularGrid.innerHTML += cardHTML;
+            }
+        });
+
+    } catch (err) {
+        console.error("Database connection failure:", err);
+        vipGrid.innerHTML = `<div class="error-text" style="font-size:13px; padding:10px;">Database Connection Error</div>`;
+        regularGrid.innerHTML = `<div class="error-text" style="font-size:13px; padding:10px;">Database Connection Error</div>`;
     }
 }
 
@@ -635,6 +659,7 @@ window.onload = function() {
     const savedLang = localStorage.getItem("lang") || "en";
     applyPageLanguage(savedLang);
     anchorNavigationTokens();
+    fetchDatabaseChannels(); // Fires database loader engine instantly on launch
 };
 </script>
 </body>
