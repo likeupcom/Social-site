@@ -1,572 +1,253 @@
 <!DOCTYPE html>
-<html lang="rw">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NS Platform - Verification Hub</title>
-    <style>
-        /* Modern Dark & Neon Palette */
-        :root {
-            --bg-dark: #0a0b10;
-            --panel-glass: rgba(20, 22, 35, 0.65);
-            --border-glass: rgba(255, 255, 255, 0.08);
-            --neon-cyan: #00f2fe;
-            --neon-pink: #ff007f;
-            --text-main: #f1f2f6;
-            --text-muted: #8b92b0;
-            --space-locked: #1e2030;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
+<title>YouTube Improvement Dashboard</title>
 
-        body {
-            background: radial-gradient(circle at 50% 0%, #1a1528 0%, var(--bg-dark) 70%);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow-x: hidden;
-        }
+<style>
+body{
+    margin:0;
+    background:#0b1220;
+    color:white;
+    font-family:Arial;
+}
 
-        /* Glassmorphism Platform Container */
-        .platform-container {
-            background: var(--panel-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-glass);
-            border-radius: 24px;
-            width: 100%;
-            max-width: 650px;
-            padding: 40px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 
-                        0 0 40px rgba(0, 242, 254, 0.05);
-            position: relative;
-        }
+.container{
+    width:90%;
+    margin:auto;
+    padding:20px;
+}
 
-        .header {
-            text-align: center;
-            margin-bottom: 35px;
-        }
+h1{text-align:center;margin-bottom:30px;}
 
-        .header h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
+h2{margin-top:30px}
 
-        .header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
+/* VIP */
+.vip-area{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
 
-        /* Conditions Modal (Overlay) */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5, 5, 10, 0.85);
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 1;
-            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+.vip-box{
+    background:#111a30;
+    padding:20px;
+    border-radius:10px;
+    border:2px solid gold;
+    text-align:center;
+}
 
-        .modal-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+/* REGULAR */
+.regular-area{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:15px;
+}
 
-        .modal-box {
-            background: #121420;
-            border: 1px solid rgba(255, 0, 127, 0.2);
-            box-shadow: 0 0 30px rgba(255, 0, 127, 0.1);
-            width: 90%;
-            max-width: 480px;
-            border-radius: 20px;
-            padding: 30px;
-            transform: scale(1);
-            transition: transform 0.3s ease;
-        }
+.regular-box{
+    background:#111a30;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+}
 
-        .modal-overlay.hidden .modal-box {
-            transform: scale(0.9);
-        }
+button{
+    padding:10px 18px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    background:#00c853;
+    color:white;
+}
 
-        .modal-box h2 {
-            font-size: 1.4rem;
-            color: var(--neon-pink);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+/* CONDITIONS POPUP */
+.conditions{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#000000e6;
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
 
-        .modal-content {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-bottom: 25px;
-            padding-right: 10px;
-            border-bottom: 1px solid var(--border-glass);
-        }
-
-        .modal-content::-webkit-scrollbar {
-            width: 6px;
-        }
-        .modal-content::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-
-        /* Spaces Workspace Structure */
-        .spaces-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 35px;
-        }
-
-        .space-card {
-            background: var(--space-locked);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: relative;
-            opacity: 0.5;
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
-
-        .space-card.active {
-            opacity: 1;
-            pointer-events: auto;
-            background: rgba(255, 255, 255, 0.02);
-            border-color: rgba(0, 242, 254, 0.2);
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.03);
-        }
-
-        .space-card.completed {
-            opacity: 0.8;
-            pointer-events: none;
-            border-color: #00ff88;
-            background: rgba(0, 255, 136, 0.02);
-        }
-
-        .space-info h3 {
-            font-size: 1.1rem;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .space-info p {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        .action-zone {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .btn {
-            background: transparent;
-            color: var(--text-main);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-cyan {
-            background: linear-gradient(135deg, #00f2fe, #4facfe);
-            color: #000;
-            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
-        }
-
-        .btn-cyan:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
-        }
-
-        .btn-disabled {
-            background: #25283d !important;
-            color: var(--text-muted) !important;
-            box-shadow: none !important;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .timer-badge {
-            font-family: monospace;
-            font-size: 0.95rem;
-            color: var(--neon-pink);
-            font-weight: bold;
-            background: rgba(255, 0, 127, 0.1);
-            padding: 6px 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 0, 127, 0.2);
-            display: none;
-        }
-
-        .status-icon {
-            font-size: 1.2rem;
-        }
-
-        .unlock-panel {
-            border-top: 1px solid var(--border-glass);
-            padding-top: 30px;
-            text-align: center;
-        }
-
-        .btn-unlock {
-            width: 100%;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            background: #1a1c2e;
-            color: var(--text-muted);
-            border: 1px solid var(--border-glass);
-            pointer-events: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-unlock.ready {
-            background: linear-gradient(135deg, var(--neon-pink), #ff007f);
-            color: #fff;
-            border: none;
-            pointer-events: auto;
-            cursor: pointer;
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.4);
-        }
-
-        .btn-unlock.ready:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 35px rgba(255, 0, 127, 0.6);
-        }
-
-        .btn-unlock.loading {
-            background: #121420;
-            color: var(--neon-cyan);
-            pointer-events: none;
-            border: 1px solid var(--neon-cyan);
-        }
-
-        .success-message {
-            margin-top: 15px;
-            color: #00ff88;
-            font-size: 0.9rem;
-            display: none;
-            font-weight: 600;
-        }
-    </style>
+.conditions-content{
+    background:#111a30;
+    padding:30px;
+    border-radius:10px;
+    width:80%;
+    max-width:700px;
+}
+</style>
 </head>
+
 <body>
 
-    <!-- Conditions Modal Window -->
-    <div class="modal-overlay" id="conditionsModal">
-        <div class="modal-box">
-            <h2 id="modalTitle">🔥 Amategeko yo Kwemeza</h2>
-            <div class="modal-content" id="modalText">
-                <!-- Injected dynamically by language controller -->
-            </div>
-            <button class="btn btn-cyan" id="acceptConditionsBtn" style="width:100%;">Nemeye Amategeko & Tangira</button>
-        </div>
-    </div>
+<div class="container">
 
-    <!-- Main Platform Workspace -->
-    <div class="platform-container">
-        <div class="header">
-            <h1>NS PLATFORM</h1>
-            <p id="platformSubtitle">Ihuriro ryo Kwemeza Ibikorwa bya YouTube</p>
-        </div>
+<h1>Improve Your YouTube Channel</h1>
 
-        <!-- Sequential Spaces Structure -->
-        <div class="spaces-container">
-            
-            <!-- Space 1 -->
-            <div class="space-card" id="space1">
-                <div class="space-info">
-                    <h3><span class="status-icon" id="icon1">🔒</span> <span class="space-title" data-step="1">Umwanya Usanzwe 01</span></h3>
-                    <p id="desc1"></p>
-                </div>
-                <div class="action-zone">
-                    <span class="timer-badge" id="timer1">00:20</span>
-                    <a href="https://www.youtube.com" target="_blank" class="btn btn-cyan action-btn" id="actionBtn1" onclick="startVerificationStep(1)">Sura Urubuga</a>
-                </div>
-            </div>
+<!-- VIP -->
+<h2>⭐ VIP Place</h2>
+<div class="vip-area" id="vipSlots"></div>
 
-            <!-- Space 2 -->
-            <div class="space-card" id="space2">
-                <div class="space-info">
-                    <h3><span class="status-icon" id="icon2">🔒</span> <span class="space-title" data-step="2">Umwanya Usanzwe 02</span></h3>
-                    <p id="desc2"></p>
-                </div>
-                <div class="action-zone">
-                    <span class="timer-badge" id="timer2">00:20</span>
-                    <a href="https://www.youtube.com" target="_blank" class="btn btn-cyan action-btn" id="actionBtn2" onclick="startVerificationStep(2)">Sura Urubuga</a>
-                </div>
-            </div>
+<!-- REGULAR -->
+<h2>Regular Place</h2>
+<div class="regular-area" id="regularSlots"></div>
 
-            <!-- Space 3 -->
-            <div class="space-card" id="space3">
-                <div class="space-info">
-                    <h3><span class="status-icon" id="icon3">🔒</span> <span class="space-title" data-step="3">Umwanya Usanzwe 03</span></h3>
-                    <p id="desc3"></p>
-                </div>
-                <div class="action-zone">
-                    <span class="timer-badge" id="timer3">00:20</span>
-                    <a href="https://www.youtube.com" target="_blank" class="btn btn-cyan action-btn" id="actionBtn3" onclick="startVerificationStep(3)">Sura Urubuga</a>
-                </div>
-            </div>
+<br>
+<center>
+<button onclick="acceptConditions()">Accept Conditions</button>
+</center>
 
-        </div>
+</div>
 
-        <!-- Unlock & MongoDB Sync Zone -->
-        <div class="unlock-panel">
-            <button class="btn btn-unlock" id="finalUnlockBtn" onclick="submitToMongoDB()">Sisitemu Ifunze</button>
-            <div class="success-message" id="successMsg"></div>
-        </div>
-    </div>
+<!-- CONDITIONS -->
+<div class="conditions" id="conditionsBox">
+<div class="conditions-content">
 
-    <!-- Multi-Language Localization Engine -->
-    <script>
-        const translations = {
-            rw: {
-                modalTitle: "🔥 Amategeko yo Kwemeza",
-                modalContent: "<p>Kugira ngo ubashe kubona serivisi zo kuzamura imibare kuri NS Platform, ugomba gukurikiza uru rukurikirane rw'ibikorwa mu bupfura.</p><br><p>1. Buri hantu (Space) hagomba gusurwa hakurikijwe urutonde. Gusimbuka intambwe cyane cyane ukoresheje uturoroshi (scripts) bizatuma uhagarikwa ako kanya.</p><br><p>2. Ugomba kuguma ku rubuga wasuye mu gihe kitari munsi n'amasegonda 20. Sisitemu yacu igenzura niba utavuye kuri iyo page.</p>",
-                acceptBtn: "Nemeye Amategeko & Tangira",
-                subtitle: "Ihuriro ryo Kwemeza Ibikorwa bya YouTube",
-                spacePrefix: "Umwanya Usanzwe ",
-                desc1: "Sura urubuga rwa mbere urebe imiterere y'ibirimo.",
-                desc2: "Genzura uburyo abayoboke baguma ku muvuduko w'amashusho.",
-                desc3: "Genzura imisusire y'ibiganiro n'abanyamuryango.",
-                visitBtn: "Sura Urubuga",
-                monitoring: "Turagenzura...",
-                systemLocked: "Sisitemu Ifunze",
-                systemReady: "⚡ Fungura & Ohereza Amakuru",
-                systemLoading: "Turagenzura imikono no guhuza na DB...",
-                dbSuccess: "✦ Ibikorwa byoherejwe neza kandi birindwa muri MongoDB Atlas!",
-                localSuccess: "✦ Amakuru yabitswe by'agateganyo (Genzura neza URL ya Render API)"
-            },
-            en: {
-                modalTitle: "🔥 Verification Rules",
-                modalContent: "<p>To qualify for optimization metrics on NS Platform, you must complete the following engagement sequence honestly.</p><br><p>1. Each verification space must be visited sequentially. Skipping steps or using automated scripts will result in immediate session denial.</p><br><p>2. You must interact with the target resource for a minimum of 20 seconds. The unlock script monitors active tab engagement.</p>",
-                acceptBtn: "I Accept & Begin",
-                subtitle: "YouTube Channel Metrics Verification Hub",
-                spacePrefix: "Regular Space ",
-                desc1: "Analyze primary content structure and presentation.",
-                desc2: "Evaluate audience retention layouts.",
-                desc3: "Audit cross-interaction community threads.",
-                visitBtn: "Visit Target",
-                monitoring: "Monitoring...",
-                systemLocked: "System Locked",
-                systemReady: "⚡ Unlock & Submit Session",
-                systemLoading: "Verifying signatures & synchronizing DB...",
-                dbSuccess: "✦ Interaction Payload Successfully Transmitted to MongoDB Atlas!",
-                localSuccess: "✦ Session Saved Locally (Verify Render API Endpoint Configuration)"
-            },
-            fr: {
-                modalTitle: "🔥 Règles de Vérification",
-                modalContent: "<p>Pour bénéficier des services d'optimisation sur NS Platform, vous devez suivre cette séquence d'engagement avec honnêteté.</p><br><p>1. Chaque espace de vérification doit être visité de manière séquentielle. Le contournement des étapes entraînera un rejet immédiat.</p><br><p>2. Vous devez interagir avec la ressource cible pendant au moins 20 secondes. Notre système surveille l'engagement de l'onglet actif.</p>",
-                acceptBtn: "J'accepte & Commencer",
-                subtitle: "Centre de Vérification des Métriques YouTube",
-                spacePrefix: "Espace Régulier ",
-                desc1: "Analyser la structure du contenu principal et sa présentation.",
-                desc2: "Évaluer les structures de rétention de l'audience.",
-                desc3: "Auditer les fils d'interaction de la communauté.",
-                visitBtn: "Visiter le Site",
-                monitoring: "Vérification...",
-                systemLocked: "Système Verrouillé",
-                systemReady: "⚡ Déverrouiller & Soumettre",
-                systemLoading: "Vérification des signatures et synchronisation DB...",
-                dbSuccess: "✦ Données transmises avec succès à MongoDB Atlas!",
-                localSuccess: "✦ Données sauvegardées localement (Vérifiez l'API Render)"
-            }
-        };
+<h2>Platform Conditions</h2>
 
-        let currentLang = 'rw'; // Default language
-        let activeStep = 1;
-        const totalSteps = 3;
-        const targetDuration = 20; 
-        let countdownTimer = null;
+<p>1. Real users engagement only.</p>
+<p>2. Auto move waiting → live system.</p>
+<p>3. 20-second verified visits required.</p>
+<p>4. Sequential visit tracking enabled.</p>
+<p>5. 10 clicks detection active.</p>
+<p>6. Board wipe system removes inactive users.</p>
+<p>7. 2-minute appeal mode available.</p>
 
-        // Change this URL to your live Render endpoint when ready
-        const BACKEND_API_URL = "https://your-render-app-name.onrender.com/api/submit-interaction";
+<br>
+<button onclick="closeConditions()">Close</button>
 
-        // Auto Detect Language from Homepage URL parameters on load
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const langParam = urlParams.get('lang');
-            
-            if (langParam && translations[langParam]) {
-                currentLang = langParam;
-            }
-            applyLanguageTranslations(currentLang);
-        });
+</div>
+</div>
 
-        function applyLanguageTranslations(lang) {
-            document.getElementById('modalTitle').innerHTML = translations[lang].modalTitle;
-            document.getElementById('modalText').innerHTML = translations[lang].modalContent;
-            document.getElementById('acceptConditionsBtn').innerText = translations[lang].acceptBtn;
-            document.getElementById('platformSubtitle').innerText = translations[lang].subtitle;
-            
-            document.getElementById('desc1').innerText = translations[lang].desc1;
-            document.getElementById('desc2').innerText = translations[lang].desc2;
-            document.getElementById('desc3').innerText = translations[lang].desc3;
+<script>
 
-            document.querySelectorAll('.space-title').forEach(title => {
-                const step = title.getAttribute('data-step');
-                title.innerText = translations[lang].spacePrefix + "0" + step;
-            });
+/* ===========================
+   LOAD REAL SLOTS FROM SERVER
+=========================== */
 
-            for (let i = 1; i <= totalSteps; i++) {
-                const btn = document.getElementById(`actionBtn${i}`);
-                btn.innerText = translations[lang].visitBtn;
-            }
+async function loadSlots(){
 
-            document.getElementById('finalUnlockBtn').innerText = translations[lang].systemLocked;
-        }
+try{
 
-        // Logic Controls
-        document.getElementById('acceptConditionsBtn').addEventListener('click', () => {
-            document.getElementById('conditionsModal').classList.add('hidden');
-            initializeSystem();
-        });
+const response = await fetch("/api/slots");
+const data = await response.json();
 
-        function initializeSystem() {
-            document.getElementById('icon1').innerText = '⚡';
-            document.getElementById('space1').classList.add('active');
-        }
+renderVIP(data.vip);
+renderRegular(data.regular);
 
-        function startVerificationStep(stepNumber) {
-            if (stepNumber !== activeStep) return;
+}catch(err){
+console.log("Server not connected yet");
+}
 
-            const actionBtn = document.getElementById(`actionBtn${stepNumber}`);
-            const timerBadge = document.getElementById(`timer${stepNumber}`);
-            
-            actionBtn.classList.add('btn-disabled');
-            actionBtn.innerText = translations[currentLang].monitoring;
-            timerBadge.style.display = 'block';
+}
 
-            let secondsLeft = targetDuration;
+/* ===========================
+   RENDER VIP
+=========================== */
 
-            countdownTimer = setInterval(() => {
-                secondsLeft--;
-                timerBadge.innerText = `00:${secondsLeft < 10 ? '0' : ''}${secondsLeft}`;
+function renderVIP(vip){
 
-                if (secondsLeft <= 0) {
-                    clearInterval(countdownTimer);
-                    completeVerificationStep(stepNumber);
-                }
-            }, 1000);
-        }
+const container=document.getElementById("vipSlots");
+container.innerHTML="";
 
-        function completeVerificationStep(stepNumber) {
-            const currentCard = document.getElementById(`space${stepNumber}`);
-            const currentIcon = document.getElementById(`icon${stepNumber}`);
-            const currentBtn = document.getElementById(`actionBtn${stepNumber}`);
-            const currentTimer = document.getElementById(`timer${stepNumber}`);
+vip.forEach(slot=>{
+const div=document.createElement("div");
+div.className="vip-box";
 
-            currentCard.classList.remove('active');
-            currentCard.classList.add('completed');
-            currentIcon.innerText = '✓';
-            currentBtn.style.display = 'none';
-            currentTimer.style.display = 'none';
+div.innerHTML=`
+<h3>${slot.username || "Empty Slot"}</h3>
+${slot.channel ?
+`<button onclick="visitChannel('${slot.channel}',${slot.id})">Visit</button>`
+:"Waiting"}
+`;
 
-            if (stepNumber < totalSteps) {
-                activeStep++;
-                const nextCard = document.getElementById(`space${activeStep}`);
-                const nextIcon = document.getElementById(`icon${activeStep}`);
-                
-                nextCard.classList.add('active');
-                nextIcon.innerText = '⚡';
-            } else {
-                triggerUnlockSystem();
-            }
-        }
+container.appendChild(div);
+});
 
-        function triggerUnlockSystem() {
-            const unlockBtn = document.getElementById('finalUnlockBtn');
-            unlockBtn.classList.add('ready');
-            unlockBtn.innerText = translations[currentLang].systemReady;
-        }
+}
 
-        async function submitToMongoDB() {
-            const unlockBtn = document.getElementById('finalUnlockBtn');
-            const successMsg = document.getElementById('successMsg');
+/* ===========================
+   RENDER REGULAR
+=========================== */
 
-            unlockBtn.classList.remove('ready');
-            unlockBtn.classList.add('loading');
-            unlockBtn.innerText = translations[currentLang].systemLoading;
+function renderRegular(regular){
 
-            const interactionPayload = {
-                platformService: "YouTube Metrics",
-                completedStepsCount: totalSteps,
-                verificationRequiredTime: `${totalSteps * targetDuration}s`,
-                clientTimestamp: new Date().toISOString(),
-                status: "Verified_Unlock"
-            };
+const container=document.getElementById("regularSlots");
+container.innerHTML="";
 
-            try {
-                const response = await fetch(BACKEND_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(interactionPayload)
-                });
+regular.forEach(slot=>{
+const div=document.createElement("div");
+div.className="regular-box";
 
-                if (response.ok) {
-                    unlockBtn.style.display = 'none';
-                    successMsg.innerText = translations[currentLang].dbSuccess;
-                    successMsg.style.display = 'block';
-                } else {
-                    throw new Error('Database insertion failed.');
-                }
-            } catch (error) {
-                console.error("Network sync error:", error);
-                
-                setTimeout(() => {
-                    unlockBtn.style.display = 'none';
-                    successMsg.innerText = translations[currentLang].localSuccess;
-                    successMsg.style.display = 'block';
-                    successMsg.style.color = '#00f2fe';
-                }, 1500);
-            }
-        }
-    </script>
+div.innerHTML=`
+<h4>${slot.username || "Empty"}</h4>
+${slot.channel ?
+`<button onclick="visitChannel('${slot.channel}',${slot.id})">Visit</button>`
+:"Waiting"}
+`;
+
+container.appendChild(div);
+});
+
+}
+
+/* ===========================
+   VISIT VERIFICATION START
+=========================== */
+
+async function visitChannel(link,slotId){
+
+window.open(link,"_blank");
+
+/* notify backend visit started */
+await fetch("/api/visit/start",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({slotId})
+});
+
+/* 20 sec verification timer */
+setTimeout(async()=>{
+
+await fetch("/api/visit/complete",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({slotId})
+});
+
+alert("Visit verified!");
+
+},20000);
+
+}
+
+/* ===========================
+   CONDITIONS
+=========================== */
+
+function acceptConditions(){
+document.getElementById("conditionsBox").style.display="flex";
+}
+
+function closeConditions(){
+document.getElementById("conditionsBox").style.display="none";
+}
+
+/* ===========================
+   AUTO REFRESH BOARD
+=========================== */
+
+loadSlots();
+setInterval(loadSlots,10000);
+
+</script>
+
 </body>
 </html>
