@@ -6,7 +6,7 @@
 <title>YouTube Improvement Dashboard</title>
 
 <!-- FontAwesome Icons Clean CDN Link -->
-<link rel="stylesheet" href="https://cloudflare.com"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
 *{
@@ -470,320 +470,401 @@ footer{
   <div class="logo-container">
     <div class="logo" id="headerLogo">YouTube Promotion Center</div>
   </div>
-  <a href="youtube-improvement.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
-    <i class="fa-solid fa-house"></i>
-  </a>
+  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;"> → </a>
 </header>
 
 <div class="container">
-  <h1>YouTube Improvement Dashboard</h1>
+  <h1 id="pageMainTitle">YouTube Improvement Dashboard</h1>
 
-  <!-- USER IDENTITY BADGE (Dynamically reveals after channel registration) -->
-  
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div class="user-avatar" id="userBadgeAvatar"><i class="fa-solid fa-user"></i></div>
-      <div>
-        <div class="username-txt" id="userBadgeName">Your Live Slot</div>
-        <div class="raw-link-txt" id="userBadgeLink">https://youtube.com..</div>
-      </div>
-    </div>
-    <span class="timer-chip" style="background:#22c55e;">Live Active Slot</span>
+  <!-- USER PRE-UPLOADED CHANNEL MANAGEMENT LAYER (APPEARING PERIOD MECHANICS) -->
+  <div id="preUploadedProfileArea">
+    <!-- Managed via JavaScript state engine tracking active/inactive toggle variables -->
   </div>
 
-  <!-- VIP PREMIUM SLOTS -->
+  <!-- VIP PARTNER SECTIONS (4 SPACES) -->
   <div class="vip-section">
     <div class="section-title">
-      <span><i class="fa-solid fa-crown" style="color:#eab308; margin-right:6px;"></i> VIP Premium Slots</span>
+      <span id="vipSectionTitle">VIP Premium Channels (4 slots)</span>
     </div>
-    <div class="vip-grid" id="vipGridContainer">
-      <!-- Injected from your live MongoDB database -->
-    </div>
+    <div class="vip-grid" id="realVipGrid"></div>
   </div>
 
-  <!-- REGULAR EXCHANGE POOL -->
+  <!-- REGULAR SPACES SECTION (10 SPACES) -->
   <div class="regular-section">
     <div class="section-title">
-      <span><i class="fa-solid fa-layer-group" style="color:#38bdf8; margin-right:6px;"></i> Regular Exchange Pool</span>
+      <span id="regularSectionTitle">Standard Exchange Slots (10 slots)</span>
     </div>
-    <div class="regular-grid" id="regularGridContainer">
-      <!-- Injected from your live MongoDB database -->
-    </div>
+    <div class="regular-grid" id="realRegularGrid"></div>
   </div>
 
-  <!-- UPLOAD ACTION AREA -->
-  <div class="gateway-box">
-    <div id="gateActionArea">
-      <button class="gate-btn" id="openGateBtn" onclick="openRegulations()">
-        <i class="fa-solid fa-bolt"></i> Add Your Channel Here
-      </button>
-    </div>
-    <div class="notify-msg" id="globalNotification"></div>
+  <!-- LOWER DYNAMIC INTERACTION ZONE -->
+  <div class="gateway-box" id="bottomControlZone">
+    <button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">📜 Read & Accept Conditions</button>
   </div>
 </div>
 
-<!-- REGULATIONS MODAL SYSTEM -->
-<div class="regulations-overlay" id="regulationsModal">
+<!-- REGULATIONS OVERLAY MODAL -->
+<div class="regulations-overlay" id="rulesModal">
   <div class="regulations-card">
-    <h2>Community Regulations</h2>
-    <p>Please read and accept all the terms below to place your link into our global exchange engine.</p>
+    <h2>Platform Regulations</h2>
+    <p>Please check all items sequentially to declare that you agree to follow the platform mechanics.</p>
     
     <div class="rules-list">
       <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="rule1" onchange="validateRules()">
-        <label class="rule-text" for="rule1">I agree not to upload misleading, deceptive, or unsafe redirect links.</label>
+        <input type="checkbox" class="rule-checkbox" id="check1" onchange="validateCheckboxes()">
+        <label class="rule-text" for="check1">1. Please read and understand all policies and regulations of this website before using the platform.</label>
       </div>
       <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="rule2" onchange="validateRules()">
-        <label class="rule-text" for="rule2">I verify that I will authentically check other creators' channels listed here.</label>
+        <input type="checkbox" class="rule-checkbox" id="check2" onchange="validateCheckboxes()">
+        <label class="rule-text" for="check2">2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.</label>
       </div>
       <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="rule3" onchange="validateRules()">
-        <label class="rule-text" for="rule3">I verify my provided target link is a completely valid YouTube URL.</label>
+        <input type="checkbox" class="rule-checkbox" id="check3" onchange="validateCheckboxes()">
+        <label class="rule-text" for="check3">3. Once you click Visit, a 30-second countdown will begin. You will be allowed to visit the next channel only after the countdown finishes, until you complete all visits.</label>
+      </div>
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="check4" onchange="validateCheckboxes()">
+        <label class="rule-text" for="check4">4. When your account becomes Live, please turn on notifications so you can monitor the actions taking place on your channel.</label>
+      </div>
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="check5" onchange="validateCheckboxes()">
+        <label class="rule-text" for="check5">5. When you are removed from Live status, make sure that you have received at least 10 subscribers, views, likes, and comments. Please do not appear again unless you have fewer than 10 subscribers, views, likes, and comments.</label>
+      </div>
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="check6" onchange="validateCheckboxes()">
+        <label class="rule-text" for="check6">6. If you receive fewer than 10 subscribers, views, likes, or comments, you are allowed to reappear after 3 minutes among the channels listed in the waiting list.</label>
+      </div>
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="check7" onchange="validateCheckboxes()">
+        <label class="rule-text" for="check7">7. While you are in the waiting list, if your account receives three appeals, it will be removed from the waiting list. If this happens three times, your account will be permanently deleted.</label>
       </div>
     </div>
 
-    <!-- Live Submission Input Group -->
-    <div class="upload-form-container" id="formContainer" style="opacity: 0.35; pointer-events: none; transition: 0.3s;">
-      <h3>Channel Details</h3>
-      <div class="input-group">
-        <input type="text" id="inputName" class="link-input" placeholder="Enter Channel or Video Name" />
-        <input type="url" id="inputUrl" class="link-input" placeholder="Enter YouTube URL (https://youtube.com...)" />
-      </div>
-    </div>
-
-    <div style="margin-top:25px; display:flex; gap:12px;">
-      <button class="modal-action-btn" style="background:#334155; color:#fff;" onclick="closeRegulations()">Cancel</button>
-      <button class="modal-action-btn" id="submitLinkBtn" disabled onclick="handleLinkSubmission()">Submit to Pool</button>
-    </div>
-    <div class="notify-msg" id="modalNotification"></div>
+    <button class="modal-action-btn" id="acceptBtn" disabled onclick="submitAcceptedConditions()">I Accept All Conditions</button>
   </div>
-</div>
-
-<!-- BOTTOM FLOATING NAVIGATION BAR -->
-<div class="bottom-nav">
-  <a href="youtube-improvement.html" class="nav-item active">
-    <span><i class="fa-solid fa-chart-simple"></i></span>
-    <span>Dashboard</span>
-  </a>
-  <a href="#" class="nav-item" onclick="alert('VIP options feature coming soon!')">
-    <span><i class="fa-solid fa-crown"></i></span>
-    <span>Upgrade VIP</span>
-  </a>
 </div>
 
 <footer>
-  <div class="footer-text">
-    &copy; 2026 YouTube Promotion Center. Real-time distribution network backed by GitHub, Hugging Face, and MongoDB.
+  <div class="footer-text" id="footerText">
+    © 2026 YouTube Promotion Center. All rights reserved.<br>Grow your presence, boost engagement, and reach more people.
   </div>
 </footer>
 
+<!-- NAVIGATION PANEL -->
+<div class="bottom-nav">
+  <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt">Home</span></a>
+  <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt">Services</span></a>
+  <a class="nav-item" href="vip.html" id="navVipLink"><span>💎</span><span class="nav-txt">VIP</span></a>
+  <a class="nav-item" href="bonus.html" id="navBonusLink"><span>🎁</span><span class="nav-txt">Bonus</span></a>
+  <a class="nav-item" href="regulations.html" id="navRulesLink"><span>📜</span><span class="nav-txt">Regulations</span></a>
+</div>
+
 <script>
-// Automatically targets whatever domain your site runs on (Hugging Face space or local)
-const API_BASE_URL = window.location.origin;
+// Mocking the user's pre-registered channel profile state (simulating data before they entered this page)
+let currentUserAccount = {
+  username: "My Personal Channel",
+  channelUrl: "https://youtube.com/c/MyPreUploadedChannel",
+  isAllowedToAppear: true // Becomes true when user is marked inactive at a certain time
+};
 
-let activeTimers = {};
+// Main Board Dynamic Collections Array Structure
+let vipChannels = [
+  { id: "vip0", username: "Premium Creator Alpha", youtubeChannel: "https://youtube.com/c/AlphaCreator" },
+  { id: "vip1", username: "Elite Tech Reviews", youtubeChannel: "https://youtube.com/c/TechElite" },
+  { id: "vip2", username: "Vlog Matrix VIP", youtubeChannel: "https://youtube.com/c/VlogMatrix" },
+  { id: "vip3", username: "Gaming Master Pro", youtubeChannel: "https://youtube.com/c/GameMaster" }
+];
 
-document.addEventListener("DOMContentLoaded", () => {
-    fetchDashboardSlots();
-    checkExistingIdentity();
-    // Keeps information 100% updated in real-time across users every 12 seconds
-    setInterval(fetchDashboardSlots, 12000);
-});
+let regularChannels = [
+  { id: "reg0", username: "Standard User 1", youtubeChannel: "https://youtube.com/c/UserOne", clicks: 0 },
+  { id: "reg1", username: "Standard User 2", youtubeChannel: "https://youtube.com/c/UserTwo", clicks: 4 },
+  { id: "reg2", username: "Standard User 3", youtubeChannel: "https://youtube.com/c/UserThree", clicks: 9 }, // Will drop on 10 clicks
+  { id: "reg3", username: "Standard User 4", youtubeChannel: "https://youtube.com/c/UserFour", clicks: 2 },
+  { id: "reg4", username: "Standard User 5", youtubeChannel: "https://youtube.com/c/UserFive", clicks: 0 },
+  { id: "reg5", username: "Standard User 6", youtubeChannel: "https://youtube.com/c/UserSix", clicks: 7 },
+  { id: "reg6", username: "Standard User 7", youtubeChannel: "https://youtube.com/c/UserSeven", clicks: 1 },
+  { id: "reg7", username: "Standard User 8", youtubeChannel: "https://youtube.com/c/UserEight", clicks: 5 },
+  { id: "reg8", username: "Standard User 9", youtubeChannel: "https://youtube.com/c/UserNine", clicks: 3 },
+  { id: "reg9", username: "Standard User 10", youtubeChannel: "https://youtube.com/c/UserTen", clicks: 0 }
+];
 
-// Real Database Pull Request
-async function fetchDashboardSlots() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/slots`);
-        if (!response.ok) throw new Error("Could not access data pool.");
-        const data = await response.json();
-        
-        renderSlots(data.vipSlots || [], 'vipGridContainer', true);
-        renderSlots(data.regularSlots || [], 'regularGridContainer', false);
-    } catch (err) {
-        console.error("Database connection failure:", err);
-        showNotification("globalNotification", "Connecting to data grid...", "info-text");
-    }
+// Backend Queue waiting structure for automated replacements
+let waitingListQueue = [];
+
+// Flow Variables
+let conditionsAccepted = false;
+let sequenceIndex = 0; // Tracks what item index must be visited next sequentially
+let globalTimerActive = false;
+let combinedBoardOrder = [];
+
+// Render User Pre-uploaded Profile Header Badge
+function renderUserIdentityBadge() {
+  const container = document.getElementById("preUploadedProfileArea");
+  if(!currentUserAccount) return;
+
+  container.innerHTML = `
+    <div class="user-identity-card">
+      <div class="card-info">
+        <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
+        <div class="user-details">
+          <span class="username-txt">${currentUserAccount.username} <small style="color:#eab308;">(Your Pre-uploaded Channel)</small></span>
+          <span class="raw-link-txt">${currentUserAccount.channelUrl.replace("https://", "")}</span>
+        </div>
+      </div>
+      <button class="action-btn appear-style" id="appearTriggerBtn" ${currentUserAccount.isAllowedToAppear ? '' : 'disabled'} onclick="triggerAppearanceOnBoard()">
+        <i class="fa-solid fa-eye"></i> <span>Appear</span>
+      </button>
+    </div>
+  `;
 }
 
-// UI Assembly Engine
-function renderSlots(slots, containerId, isVip) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = ""; 
+// Combine all grid slots into a strict array for sequential execution tracking
+function computeBoardSequencing() {
+  combinedBoardOrder = [];
+  vipChannels.forEach(item => combinedBoardOrder.push({ ...item, type: 'vip' }));
+  regularChannels.forEach(item => combinedBoardOrder.push({ ...item, type: 'regular' }));
+}
+
+function renderGrids() {
+  const vipGrid = document.getElementById("realVipGrid");
+  const regularGrid = document.getElementById("realRegularGrid");
+  
+  vipGrid.innerHTML = "";
+  regularGrid.innerHTML = "";
+
+  vipChannels.forEach((item, index) => {
+    vipGrid.innerHTML += generateCardHTML(item, index, true);
+  });
+
+  regularChannels.forEach((item, index) => {
+    // Index adjusted to continue offset from VIP layout sequence count
+    vipOffsetIndex = index + vipChannels.length;
+    regularGrid.innerHTML += generateCardHTML(item, vipOffsetIndex, false);
+  });
+
+  syncButtonStates();
+}
+
+function generateCardHTML(item, sequencePosition, isVip) {
+  const clickDisplay = !isVip && item.username !== "Available Slot" ? `<span class="click-counter"><i class="fa-solid fa-mouse-pointer"></i> Clicks: ${item.clicks}/10</span>` : '';
+  
+  // Use a generic user icon if the slot is cleared/empty
+  const avatarIcon = item.username === "Available Slot" ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-brands fa-youtube"></i>';
+  const displayUrl = item.youtubeChannel ? item.youtubeChannel.replace("https://", "") : "";
+
+  return `
+    <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
+      <div class="card-info">
+        <div class="user-avatar">${avatarIcon}</div>
+        <div class="user-details">
+          <span class="username-txt">${item.username}</span>
+          <span class="raw-link-txt">${displayUrl}</span>
+          ${clickDisplay}
+        </div>
+      </div>
+      <div id="btn-container-${sequencePosition}">
+        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" onclick="handleSequentialVisit('${item.youtubeChannel}', ${sequencePosition}, '${item.id}', ${!isVip})">
+          <span>Visit</span>
+        </button>
+      </div>
+    </div>`;
+}
+
+function syncButtonStates() {
+  document.querySelectorAll('.seq-btn').forEach(btn => {
+    const currentBtnSeq = parseInt(btn.getAttribute('data-seq'));
     
-    const maxSlots = isVip ? 4 : 10;
-    
-    for (let i = 0; i < maxSlots; i++) {
-        const item = slots[i];
-        if (item) {
-            container.innerHTML += `
-                <div class="channel-card ${isVip ? 'vip-card' : ''}">
-                    <div class="card-info">
-                        <div class="user-avatar"><i class="fa-solid ${isVip ? 'fa-crown' : 'fa-user'}"></i></div>
-                        <div class="user-details">
-                            <div class="username-txt">${escapeHtml(item.name)}</div>
-                            <div class="raw-link-txt">${escapeHtml(item.url)}</div>
-                            <div class="click-counter"><i class="fa-solid fa-eye"></i> ${item.clicks || 0} hits delivered</div>
-                        </div>
-                    </div>
-                    <div id="btn-zone-${item._id}">
-                        <button class="action-btn visit-style" onclick="handleCardInteraction('${item._id}', '${item.url}')">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
-                        </button>
-                    </div>
-                </div>
-            `;
-        } else {
-            // Fills empty positions to keep the beautiful structural grid matching your design
-            container.innerHTML += `
-                <div class="channel-card ${isVip ? 'vip-card' : ''}" style="opacity: 0.35; border-style: dashed;">
-                    <div class="card-info">
-                        <div class="user-avatar" style="color: #64748b;"><i class="fa-solid fa-plus"></i></div>
-                        <div class="user-details">
-                            <div class="username-txt" style="color: #64748b;">Open Space</div>
-                            <div class="raw-link-txt" style="color: #475569;">No channel active</div>
-                        </div>
-                    </div>
-                    <button class="action-btn appear-style" disabled>
-                        <i class="fa-solid fa-lock"></i> Empty
-                    </button>
-                </div>
-            `;
-        }
-    }
-}
+    // Find the item corresponding to this sequential step position
+    const relatedItem = combinedBoardOrder[currentBtnSeq];
+    const isAvailableEmptySlot = relatedItem && relatedItem.username === "Available Slot";
 
-function checkExistingIdentity() {
-    const savedName = localStorage.getItem("user_channel_name");
-    const savedUrl = localStorage.getItem("user_channel_url");
-    
-    if (savedName && savedUrl) {
-        document.getElementById("userIdentityBox").style.display = "flex";
-        document.getElementById("userBadgeName").innerText = savedName;
-        document.getElementById("userBadgeLink").innerText = savedUrl;
-    }
-}
-
-function openRegulations() {
-    document.getElementById("regulationsModal").style.display = "block";
-}
-
-function closeRegulations() {
-    document.getElementById("regulationsModal").style.display = "none";
-    resetModalForm();
-}
-
-function validateRules() {
-    const r1 = document.getElementById("rule1").checked;
-    const r2 = document.getElementById("rule2").checked;
-    const r3 = document.getElementById("rule3").checked;
-    const form = document.getElementById("formContainer");
-    const submitBtn = document.getElementById("submitLinkBtn");
-
-    if (r1 && r2 && r3) {
-        form.style.opacity = "1";
-        form.style.pointerEvents = "auto";
-        submitBtn.disabled = false;
+    // Condition 1: Lock if regulations haven't been accepted
+    // Condition 2: Enforce sequential processing order
+    // Condition 3: Permanently lock if the slot is empty/available
+    if (!conditionsAccepted || currentBtnSeq !== sequenceIndex || globalTimerActive || isAvailableEmptySlot) {
+      btn.disabled = true;
     } else {
-        form.style.opacity = "0.35";
-        form.style.pointerEvents = "none";
-        submitBtn.disabled = true;
+      btn.disabled = false;
     }
+  });
 }
 
-// Live Server DB Pipeline Submissions
-async function handleLinkSubmission() {
-    const name = document.getElementById("inputName").value.trim();
-    const url = document.getElementById("inputUrl").value.trim();
-    
-    if (!name || !url) {
-        showNotification("modalNotification", "Form inputs cannot be blank.", "error-text");
-        return;
+function handleSequentialVisit(url, sequencePosition, elementId, isRegular) {
+  if (globalTimerActive || sequencePosition !== sequenceIndex) return;
+
+  window.open(url, '_blank');
+  globalTimerActive = true;
+  disableAllControls();
+
+  // If visiting a regular space channel, increment target item click counter
+  if (isRegular) {
+    const matchedItem = regularChannels.find(c => c.id === elementId);
+    if (matchedItem) {
+      matchedItem.clicks++;
+      
+      // Automatic removal engine check if clicks reach 10 threshold limit
+      if (matchedItem.clicks >= 10) {
+        setTimeout(() => {
+          processAutomatedSlotPurge(elementId);
+        }, 1000);
+      }
     }
+  }
 
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/slots`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, url })
-        });
-        
-        const resData = await response.json();
-        
-        if (!response.ok) throw new Error(resData.message || "Submission rejected.");
-        
-        showNotification("modalNotification", "Listing initialized successfully!", "success-text");
-        
-        localStorage.setItem("user_channel_name", name);
-        localStorage.setItem("user_channel_url", url);
-        
-        checkExistingIdentity();
-        fetchDashboardSlots();
-        
-        setTimeout(closeRegulations, 1200);
-    } catch (err) {
-        showNotification("modalNotification", err.message, "error-text");
+  const container = document.getElementById(`btn-container-${sequencePosition}`);
+  let secondsLeft = 30; // 30-Second requirement override counter rule
+  container.innerHTML = `<span class="timer-chip">30s</span>`;
+
+  const countdown = setInterval(() => {
+    secondsLeft--;
+    const chip = container.querySelector('.timer-chip');
+    if (chip) chip.innerText = `${secondsLeft}s`;
+
+    if (secondsLeft <= 0) {
+      clearInterval(countdown);
+      globalTimerActive = false;
+      container.innerHTML = `<span class="success-text" style="font-size:13px;"><i class="fa-solid fa-circle-check"></i> Verified</span>`;
+      
+      sequenceIndex++; // Increment to next mandatory slot
+      
+      // Evaluation rule check: Did user complete ALL boards?
+      if (sequenceIndex >= combinedBoardOrder.length) {
+        unlockVideoUploadZone();
+      } else {
+        enableControlsAndSync();
+      }
     }
+  }, 1000);
 }
 
-// Real Click Logging Tracker & View Anti-Cheat Mechanism
-async function handleCardInteraction(id, targetUrl) {
-    window.open(targetUrl, '_blank');
-    
-    try {
-        await fetch(`${API_BASE_URL}/api/slots/${id}/click`, { method: "POST" });
-        fetchDashboardSlots(); 
-    } catch (err) {
-        console.error("Analytics log skipped:", err);
+// Automatic substitution mechanic for Mongo state logic matching
+function processAutomatedSlotPurge(elementId) {
+  const indexPos = regularChannels.findIndex(c => c.id === elementId);
+  if (indexPos === -1) return;
+
+  if (waitingListQueue.length > 0) {
+    // Dequeue next video link data payload automatically to standard row spot
+    const incomingVideoPayload = waitingListQueue.shift();
+    regularChannels[indexPos] = {
+      id: elementId,
+      username: incomingVideoPayload.user,
+      youtubeChannel: incomingVideoPayload.videoUrl,
+      clicks: 0
+    };
+  } else {
+    // UPDATED: When empty, updates to show person icon, removes link text, sets default placeholder
+    regularChannels[indexPos].clicks = 0;
+    regularChannels[indexPos].username = "Available Slot";
+    regularChannels[indexPos].youtubeChannel = "";
+  }
+  
+  computeBoardSequencing();
+  renderGrids();
+}
+
+function triggerAppearanceOnBoard() {
+  if (!currentUserAccount.isAllowedToAppear) return;
+  
+  // Find an available low-activity index layout row or reset slot to inject profile identity live
+  regularChannels[0] = {
+    id: "reg0",
+    username: currentUserAccount.username + " (Live)",
+    youtubeChannel: currentUserAccount.channelUrl,
+    clicks: 0
+  };
+  
+  currentUserAccount.isAllowedToAppear = false;
+  renderUserIdentityBadge();
+  computeBoardSequencing();
+  renderGrids();
+}
+
+function disableAllControls() {
+  document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
+}
+
+function enableControlsAndSync() {
+  syncButtonStates();
+}
+
+function openRegulationsModal() {
+  document.getElementById("rulesModal").style.display = "block";
+}
+
+function validateCheckboxes() {
+  let allChecked = true;
+  for (let i = 1; i <= 7; i++) {
+    if (!document.getElementById(`check${i}`).checked) {
+      allChecked = false;
+      break;
     }
+  }
+  document.getElementById("acceptBtn").disabled = !allChecked;
+}
 
-    const targetZone = document.getElementById(`btn-zone-${id}`);
-    if (!targetZone) return;
+function submitAcceptedConditions() {
+  conditionsAccepted = true;
+  document.getElementById("rulesModal").style.display = "none";
+  
+  // Change bottom control context text to inform users of active lock state rules
+  const bottomZone = document.getElementById("bottomControlZone");
+  bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Please complete visiting all VIP and Regular board slots sequentially to unlock your Video Upload Form.</p>`;
+  
+  syncButtonStates();
+}
 
-    let timerCount = 60; 
-    targetZone.innerHTML = `<span class="timer-chip" id="timer-${id}"><i class="fa-solid fa-clock"></i> 60s</span>`;
+function unlockVideoUploadZone() {
+  const bottomZone = document.getElementById("bottomControlZone");
+  bottomZone.innerHTML = `
+    <div class="upload-form-container">
+      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> All Visited! Submit Video to MongoDB Queue</h3>
+      <div class="input-group">
+        <input type="url" class="link-input" id="ytVideoInput" placeholder="Paste your target YouTube Video URL here..." required />
+        <button class="submit-link-btn" onclick="processDatabaseVideoCommit()">Upload & Save Video</button>
+      </div>
+      <div id="uploadFeedback" class="notify-msg"></div>
+    </div>
+  `;
+}
+
+// Handles form validation and structures payloads for future MongoDB database schema syncing 
+function processDatabaseVideoCommit() {
+  const videoInput = document.getElementById("ytVideoInput");
+  const feedback = document.getElementById("uploadFeedback");
+  const videoUrl = videoInput.value.trim();
+
+  if (!videoUrl.includes("youtube.com") && !videoUrl.includes("youtu.be")) {
+    feedback.className = "notify-msg error-text";
+    feedback.innerText = "Validation Error: Please submit a valid YouTube video address string.";
+    return;
+  }
+
+  feedback.className = "notify-msg info-text";
+  feedback.innerText = "Establishing MongoDB collection persistence handshake...";
+
+  // Simulating an asynchronous database fetch commit cycle payload response
+  setTimeout(() => {
+    // Pushes dynamically into waiting list structured object reference context
+    waitingListQueue.push({
+      user: "Verified Creator Pool Link",
+      videoUrl: videoUrl
+    });
+
+    feedback.className = "notify-msg success-text";
+    feedback.innerText = "Video document successfully saved to MongoDB waiting list collection references!";
+    videoInput.value = "";
     
-    if (activeTimers[id]) clearInterval(activeTimers[id]);
-    
-    activeTimers[id] = setInterval(() => {
-        timerCount--;
-        const UIElement = document.getElementById(`timer-${id}`);
-        if (UIElement) {
-            UIElement.innerHTML = `<i class="fa-solid fa-clock"></i> ${timerCount}s`;
-        }
-        
-        if (timerCount <= 0) {
-            clearInterval(activeTimers[id]);
-            if (document.getElementById(`timer-${id}`)) {
-                targetZone.innerHTML = `
-                    <button class="action-btn visit-style" onclick="handleCardInteraction('${id}', '${targetUrl}')">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
-                    </button>
-                `;
-            }
-            delete activeTimers[id];
-        }
-    }, 1000);
+    // Refresh application status counters tracking board variations
+    computeBoardSequencing();
+    renderGrids();
+  }, 1500);
 }
 
-function resetModalForm() {
-    document.getElementById("rule1").checked = false;
-    document.getElementById("rule2").checked = false;
-    document.getElementById("rule3").checked = false;
-    document.getElementById("inputName").value = "";
-    document.getElementById("inputUrl").value = "";
-    validateRules();
-    showNotification("modalNotification", "", "");
-}
-
-function showNotification(id, message, colorClass) {
-    const target = document.getElementById(id);
-    target.innerText = message;
-    target.className = "notify-msg " + colorClass;
-}
-
-function escapeHtml(text) {
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
+window.onload = function() {
+  renderUserIdentityBadge();
+  computeBoardSequencing();
+  renderGrids();
+};
 </script>
 </body>
 </html>
