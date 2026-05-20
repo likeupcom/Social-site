@@ -1,232 +1,936 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NS Platform - Video Accelerator Engine</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Platform - Video Accelerator Engine</title>
+    <style>
+        /* Modern Web Aesthetic: Dark Theme, Neon Accents, Glassmorphism */
+        :root {
+            --bg-color: #0a0a12;
+            --surface-color: rgba(18, 18, 32, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-cyan: #00f2fe;
+            --neon-pink: #ff007f;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0bd;
+            --success-green: #39ff14;
+            --glass-blur: blur(16px);
+        }
 
-<style>
-/* ================= YOUR ORIGINAL STYLE (UNCHANGED) ================= */
-:root {
-    --bg-color: #0a0a12;
-    --surface-color: rgba(18, 18, 32, 0.6);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --neon-cyan: #00f2fe;
-    --neon-pink: #ff007f;
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0bd;
-    --success-green: #39ff14;
-    --glass-blur: blur(16px);
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
 
-* { margin:0; padding:0; box-sizing:border-box; font-family:Arial; }
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 0%, rgba(0, 242, 254, 0.15), transparent 50%),
+                              radial-gradient(circle at 0% 100%, rgba(255, 0, 127, 0.08), transparent 40%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            overflow-x: hidden;
+        }
 
-body {
-    background: var(--bg-color);
-    color: white;
-    padding: 20px;
-}
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
 
-.panel {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 12px;
-}
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
 
-.grid-layout {
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:10px;
-}
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(to right, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
 
-.card {
-    background: rgba(255,255,255,0.03);
-    padding: 10px;
-    border-radius: 10px;
-}
+        header p {
+            color: var(--text-secondary);
+        }
 
-.btn {
-    padding: 8px 12px;
-    border:1px solid cyan;
-    background:transparent;
-    color:cyan;
-}
+        /* Glassmorphism Panel Base Layout */
+        .panel {
+            background: var(--surface-color);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
 
-.btn-action {
-    background: linear-gradient(90deg, cyan, pink);
-    color:black;
-}
-</style>
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        /* Lockout / Block Screen Interface */
+        .lockout-view {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .lockout-timer {
+            font-size: 4rem;
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--neon-pink);
+            text-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+            margin: 1.5rem 0;
+        }
+
+        /* Phase Overlay Layer */
+        #appearingPeriodOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 5, 10, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 4px solid var(--neon-pink);
+            box-shadow: inset 0 0 50px rgba(255, 0, 127, 0.3);
+        }
+
+        .overlay-title {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--neon-pink);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .overlay-timer {
+            font-size: 6rem;
+            font-family: monospace;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 1rem 0;
+        }
+
+        /* Regulations Checkboxes Setup */
+        .regulation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border: 1px solid transparent;
+            transition: 0.2s ease;
+        }
+
+        .regulation-item.active-step {
+            border-color: rgba(0, 242, 254, 0.3);
+            background: rgba(0, 242, 254, 0.03);
+        }
+
+        .regulation-item input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--neon-cyan);
+            margin-top: 0.15rem;
+        }
+
+        .regulation-item label {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .regulation-item input:checked + label {
+            color: var(--text-primary);
+            text-decoration: line-through;
+            text-decoration-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Grid Configuration */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            position: relative;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 170px;
+        }
+
+        .card.locked {
+            opacity: 0.4;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .card.active-target {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+        }
+
+        .card-index {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-avatar svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-secondary);
+        }
+
+        .card.active-target .card-avatar svg, .card.verified .card-avatar svg {
+            fill: var(--neon-cyan);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 1.5rem;
+        }
+
+        .card-stats {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .card-stats span {
+            color: var(--neon-cyan);
+            font-weight: 600;
+        }
+
+        /* Actions Elements */
+        .btn {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+        }
+
+        .btn:disabled {
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+        }
+
+        .btn-action {
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            color: #000;
+            border: none;
+            font-weight: 700;
+        }
+
+        .btn-action:hover:not(:disabled) {
+            filter: brightness(1.1);
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+            color: #000;
+        }
+
+        .btn-appear {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            margin-top: 0.5rem;
+        }
+
+        .btn-appear:hover:not(:disabled) {
+            background: var(--neon-pink);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+        }
+
+        /* Countdown Badge Element */
+        .countdown-badge {
+            background: rgba(255, 0, 127, 0.15);
+            border: 1px solid var(--neon-pink);
+            color: var(--neon-pink);
+            font-weight: 700;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .verified-badge {
+            background: rgba(57, 255, 20, 0.1);
+            border: 1px solid var(--success-green);
+            color: var(--success-green);
+            font-weight: 700;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        /* Upload Container View */
+        .upload-form-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .input-field {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+        }
+
+        /* Animations Definition */
+        @keyframes pulse {
+            from { transform: scale(0.98); opacity: 0.9; }
+            to { transform: scale(1.02); opacity: 1; }
+        }
+
+        #regularWorkspace, #lockoutWorkspace {
+            display: none;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="panel">
-    <h2>NS PLATFORM</h2>
-</div>
-
-<!-- LOCKOUT -->
-<div id="lockoutWorkspace" class="panel" style="display:none;">
-    <h3>LOCKED</h3>
-    <div id="lockoutClock">03:00:00</div>
-</div>
-
-<!-- MAIN -->
-<div id="regularWorkspace">
-
-    <div class="panel">
-        <h3>Regulations</h3>
-        <div id="regulationsContainer"></div>
-        <button id="acceptRegulationsBtn" class="btn btn-action" disabled>Accept</button>
+    <!-- Appearing Period Global Lockout Screen -->
+    <div id="appearingPeriodOverlay">
+        <div class="overlay-title">Appearing Period Active</div>
+        <div style="color: var(--text-secondary); margin-top: 0.5rem;">Active users are voting. Processing line migration...</div>
+        <div class="overlay-timer" id="overlayTimerDisplay">60</div>
+        <div style="max-width: 500px; color: rgba(255,255,255,0.5); font-size: 0.9rem;" id="overlayQueueStats">
+            Loading dynamic queue conditions...
+        </div>
     </div>
 
-    <div class="panel">
-        <h3>Board</h3>
-        <div class="grid-layout" id="activeBoardGrid"></div>
+    <div class="container">
+        <header>
+            <h1>NS PLATFORM</h1>
+            <p>Digital Cross-Promotion Network</p>
+        </header>
+
+        <!-- WORKSPACE A: 3-HOUR BAN LOCKOUT DISPLAY -->
+        <div id="lockoutWorkspace" class="panel lockout-view">
+            <h2 style="font-size: 1.75rem; color: var(--text-primary);">Platform Timeout Active</h2>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">You recently migrated off the board. You are locked out for 3 hours before restarting.</p>
+            <div class="lockout-timer" id="lockoutClock">03:00:00</div>
+            <p style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.2);">Timeouts enforce fair distribution across the network.</p>
+        </div>
+
+        <!-- WORKSPACE B: REGULAR INTERACTION PLACE -->
+        <div id="regularWorkspace">
+            
+            <!-- SECTION 1: 7 PLATFORM CONDITIONS CHECKING PANEL -->
+            <div class="panel" id="regulationsPanel">
+                <div class="panel-title">1. Read & Accept Platform Regulations</div>
+                <div id="regulationsContainer"></div>
+                <button id="acceptRegulationsBtn" class="btn btn-action" style="margin-top: 1.25rem;" disabled>I Accept All Conditions</button>
+            </div>
+
+            <!-- SECTION 2: THE ACTIVE MAIN DASHBOARD GRID (10 SLOTS) -->
+            <div class="panel" id="dashboardPanel" style="opacity: 0.5; pointer-events: none;">
+                <div class="panel-title" style="justify-content: space-between;">
+                    <span>2. Main Acceleration Board</span>
+                    <span id="globalBoardProgress" style="font-size: 0.9rem; color: var(--text-secondary);">Progress: 0 / 10 Checked</span>
+                </div>
+                <div class="grid-layout" id="activeBoardGrid"></div>
+            </div>
+
+            <!-- SECTION 3: THE ACTIVE WAITING LIST QUEUE PANEL -->
+            <div class="panel" id="waitingListPanel">
+                <div class="panel-title" style="justify-content: space-between;">
+                    <span>3. Active Waiting List Queue</span>
+                    <span id="waitingCountBadge" style="font-size: 0.9rem; background: rgba(0,242,254,0.1); color: var(--neon-cyan); padding: 0.2rem 0.6rem; border-radius: 20px;">0 Users waiting</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                    Newly uploaded slots wait here. Active board members with 10 clicks can flag lines with "Appear" metrics to drop structural targets.
+                </p>
+                <div class="grid-layout" id="waitingListGrid"></div>
+            </div>
+
+            <!-- SECTION 4: THE VIDEO SUBMISSION TERMINAL -->
+            <div class="panel" id="uploadPanel" style="opacity: 0.5; pointer-events: none;">
+                <div class="panel-title">4. Secure Video Submission Terminal</div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Verification clear. Input your live channel or stream asset link below to commit onto the network sequence queue.</p>
+                <div class="upload-form-group">
+                    <input type="text" id="youtubeLinkInput" class="input-field" placeholder="https://www.youtube.com/watch?v=..." disabled>
+                    <button id="submitVideoBtn" class="btn btn-action" style="width: auto; padding: 0 2rem;" disabled>Upload Link</button>
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <div class="panel">
-        <h3>Waiting List</h3>
-        <div class="grid-layout" id="waitingListGrid"></div>
-    </div>
+    <script>
+        // --- SYSTEM VARIABLES & CONFIGURATIONS ---
+        let systemPhase = "REGULAR_PERIOD";
+        let activeBoard = []; 
+        let waitingList = []; 
+        let justBecameInactivePool = [];
+        let sequenceIndex = 0;
+        let localUserSessionId = "user_visitor_" + Math.floor(Math.random() * 100000);
+        let currentBoardIsFull = false;
 
-    <div class="panel">
-        <h3>Upload</h3>
-        <input id="youtubeLinkInput">
-        <button id="submitVideoBtn" class="btn btn-action">Upload</button>
-    </div>
+        // Seven Strict Regulations Configuration Array
+        const PLATFORM_REGULATIONS = [
+            "I verify that my submitted streaming content contains zero graphic, illegal, or malicious configurations.",
+            "I understand that attempting to bypass verification counts or using scripts triggers systematic ban loops.",
+            "I agree to keep external view tabs active for at least 30 seconds to preserve authentic retention metadata.",
+            "I accept that active board spots are fully performance-driven and dependent on community interaction clicks.",
+            "I acknowledge that receiving three 'Appear' flag assertions from active users drops my waiting list position.",
+            "I understand that when pushed off the active board, a strict 3-hour lockout ban executes across my engine parameters.",
+            "I verify that I will strictly follow all linear progression rules from top to bottom on the workspace board."
+        ];
 
-</div>
+        // --- PLATFORM TIMEOUT BINDINGS ---
+        function checkLockoutState() {
+            const lockoutExpiry = localStorage.getItem("ns_platform_lockout_expiry");
+            const lockoutWorkspace = document.getElementById("lockoutWorkspace");
+            const regularWorkspace = document.getElementById("regularWorkspace");
 
-<script>
+            if (lockoutExpiry) {
+                const timeLeft = parseInt(lockoutExpiry) - Date.now();
+                if (timeLeft > 0) {
+                    lockoutWorkspace.style.display = "block";
+                    regularWorkspace.style.display = "none";
+                    runLockoutClock(timeLeft);
+                    return true;
+                } else {
+                    localStorage.removeItem("ns_platform_lockout_expiry");
+                }
+            }
+            lockoutWorkspace.style.display = "none";
+            regularWorkspace.style.display = "block";
+            return false;
+        }
 
-/* ================= BACKEND CONNECTION ================= */
-const API_BASE = "http://localhost:3000/api";
+        function runLockoutClock(initialDuration) {
+            const clockDisplay = document.getElementById("lockoutClock");
+            
+            const timerInterval = setInterval(() => {
+                const expiry = parseInt(localStorage.getItem("ns_platform_lockout_expiry"));
+                const remaining = expiry - Date.now();
 
-/* ================= STATE ================= */
-let activeBoard = [];
-let waitingList = [];
-let localUserSessionId = null;
-let sequenceIndex = 0;
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    localStorage.removeItem("ns_platform_lockout_expiry");
+                    checkLockoutState();
+                    location.reload();
+                } else {
+                    let seconds = Math.floor((remaining / 1000) % 60);
+                    let minutes = Math.floor((remaining / (1000 * 60)) % 60);
+                    let hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
 
-/* ================= GET USER ================= */
-async function initUser() {
-    const token = localStorage.getItem("token");
+                    hours = (hours < 10) ? "0" + hours : hours;
+                    minutes = (minutes < 10) ? "0" + minutes : minutes;
+                    seconds = (seconds < 10) ? "0" + seconds : seconds;
 
-    const res = await fetch(`${API_BASE}/me`, {
-        headers: { Authorization: "Bearer " + token }
-    });
+                    clockDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+                }
+            }, 1000);
+        }
 
-    const data = await res.json();
-    localUserSessionId = data.userId;
-}
+        function forceLocalUserLockout() {
+            const targetTime = Date.now() + (3 * 60 * 60 * 1000);
+            localStorage.setItem("ns_platform_lockout_expiry", targetTime.toString());
+            checkLockoutState();
+        }
 
-/* ================= LOAD DATA ================= */
-async function loadSystemData() {
-    const res = await fetch(`${API_BASE}/state`);
-    const data = await res.json();
+        // --- CORE APPLICATION LIFECYCLE DATA SETUP ---
+        function loadSystemData() {
+            const cachedActive = localStorage.getItem("ns_db_active_board");
+            const cachedWaiting = localStorage.getItem("ns_db_waiting_list");
 
-    activeBoard = data.activeBoard;
-    waitingList = data.waitingList;
+            if (cachedActive) {
+                activeBoard = JSON.parse(cachedActive);
+            } else {
+                // Cold Start Step: Create 10 empty state structures with no links
+                activeBoard = [];
+                for(let i=0; i<10; i++) {
+                    activeBoard.push({ isEmptySlot: true });
+                }
+                saveStateToStorage();
+            }
 
-    render();
-}
+            // Check if all 10 slots have real human users assigned to them
+            let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+            currentBoardIsFull = (filledCount === 10);
 
-/* ================= SAVE ================= */
-async function save() {
-    await fetch(`${API_BASE}/state/save`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ activeBoard, waitingList })
-    });
-}
+            if (cachedWaiting) {
+                waitingList = JSON.parse(cachedWaiting);
+            } else {
+                waitingList = [];
+                saveStateToStorage();
+            }
+        }
 
-/* ================= RENDER ================= */
-function render() {
+        function saveStateToStorage() {
+            localStorage.setItem("ns_db_active_board", JSON.stringify(activeBoard));
+            localStorage.setItem("ns_db_waiting_list", JSON.stringify(waitingList));
+        }
 
-    const board = document.getElementById("activeBoardGrid");
-    const wait = document.getElementById("waitingListGrid");
+        // --- INTERFACE BUILDERS & RENDER ENGINES ---
+        function buildRegulationsPanel() {
+            const container = document.getElementById("regulationsContainer");
+            container.innerHTML = "";
 
-    board.innerHTML = "";
-    wait.innerHTML = "";
+            PLATFORM_REGULATIONS.forEach((text, idx) => {
+                const itemDiv = document.createElement("div");
+                itemDiv.className = `regulation-item ${idx === 0 ? 'active-step' : ''}`;
+                itemDiv.id = `regItem_${idx}`;
 
-    activeBoard.forEach((u, i) => {
-        const div = document.createElement("div");
-        div.className = "card";
+                itemDiv.innerHTML = `
+                    <input type="checkbox" id="chk_${idx}" data-index="${idx}" ${idx > 0 ? 'disabled' : ''}>
+                    <label for="chk_${idx}">${idx + 1}. ${text}</label>
+                `;
+                container.appendChild(itemDiv);
+            });
 
-        div.innerHTML = `
-            <p>${u.channelTitle}</p>
-            <button class="btn btn-action" onclick="view(${i})">Visit</button>
-        `;
-        board.appendChild(div);
-    });
+            setupRegulationListeners();
+        }
 
-    waitingList.forEach(u => {
-        const div = document.createElement("div");
-        div.className = "card";
+        function setupRegulationListeners() {
+            PLATFORM_REGULATIONS.forEach((_, idx) => {
+                const chk = document.getElementById(`chk_${idx}`);
+                chk.addEventListener("change", function() {
+                    if (this.checked) {
+                        const currentDiv = document.getElementById(`regItem_${idx}`);
+                        currentDiv.classList.remove("active-step");
 
-        div.innerHTML = `
-            <p>${u.channelTitle}</p>
-            <button onclick="vote('${u.userId}')">Vote</button>
-        `;
-        wait.appendChild(div);
-    });
-}
+                        const nextIdx = idx + 1;
+                        if (nextIdx < PLATFORM_REGULATIONS.length) {
+                            const nextChk = document.getElementById(`chk_${nextIdx}`);
+                            const nextDiv = document.getElementById(`regItem_${nextIdx}`);
+                            nextChk.removeAttribute("disabled");
+                            nextDiv.classList.add("active-step");
+                        } else {
+                            document.getElementById("acceptRegulationsBtn").removeAttribute("disabled");
+                        }
+                    }
+                });
+            });
 
-/* ================= VIEW CLICK ================= */
-async function view(i) {
-    const u = activeBoard[i];
+            document.getElementById("acceptRegulationsBtn").addEventListener("click", function() {
+                document.getElementById("regulationsPanel").style.display = "none";
+                const dashPanel = document.getElementById("dashboardPanel");
+                dashPanel.style.opacity = "1";
+                dashPanel.style.pointerEvents = "all";
+                
+                renderActiveBoard();
 
-    window.open(u.youtubeLink, "_blank");
+                // COLD START TRICK: If board is not full, accepting conditions unlocks the form directly
+                if (!currentBoardIsFull) {
+                    unlockVideoUploadTerminal();
+                }
+            });
+        }
 
-    await fetch(`${API_BASE}/click`, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ userId: u.userId })
-    });
+        // SVG Person Avatar Element String
+        const AVATAR_SVG = `<svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
 
-    loadSystemData();
-}
+        function renderActiveBoard() {
+            const grid = document.getElementById("activeBoardGrid");
+            grid.innerHTML = "";
+            
+            document.getElementById("globalBoardProgress").textContent = currentBoardIsFull 
+                ? `Progress: ${sequenceIndex} / 10 Checked`
+                : "Initial Board Filling Period Active";
 
-/* ================= VOTE ================= */
-async function vote(id) {
-    await fetch(`${API_BASE}/vote`, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-            targetUserId: id,
-            voterId: localUserSessionId
-        })
-    });
+            activeBoard.forEach((user, idx) => {
+                const card = document.createElement("div");
+                
+                if (user.isEmptySlot) {
+                    // Display Mode for first 10 users initialization framework
+                    card.className = "card locked";
+                    card.innerHTML = `
+                        <div class="card-index">#${idx + 1}</div>
+                        <div class="card-avatar">${AVATAR_SVG}</div>
+                        <div>
+                            <div class="card-title" style="color: var(--text-secondary); font-style: italic;">Empty Slot</div>
+                            <div class="card-stats">Waiting for User...</div>
+                        </div>
+                        <div>
+                            <button class="btn" disabled>Visit Link</button>
+                        </div>
+                    `;
+                } else {
+                    // Display Mode for Live assigned creators
+                    // If the board is still filling up, all visit buttons are completely disabled
+                    if (!currentBoardIsFull) {
+                        card.className = "card locked";
+                        card.innerHTML = `
+                            <div class="card-index">#${idx + 1}</div>
+                            <div class="card-avatar">${AVATAR_SVG}</div>
+                            <div>
+                                <div class="card-title">${user.channelTitle}</div>
+                                <div class="card-stats">Status: <span>Locked</span></div>
+                            </div>
+                            <div>
+                                <button class="btn" disabled>Visit Link</button>
+                            </div>
+                        `;
+                    } else {
+                        // Standard sequential processing logic for downstream visitors
+                        card.className = `card ${idx < sequenceIndex ? 'verified' : (idx === sequenceIndex ? 'active-target' : 'locked')}`;
+                        let actionMarkup = `<button class="btn btn-action" onclick="processVideoView(${idx})">Visit Link</button>`;
+                        if (idx < sequenceIndex) {
+                            actionMarkup = `<div class="verified-badge">✓ Verified</div>`;
+                        }
 
-    loadSystemData();
-}
+                        card.innerHTML = `
+                            <div class="card-index">#${idx + 1}</div>
+                            <div class="card-avatar">${AVATAR_SVG}</div>
+                            <div>
+                                <div class="card-title">${user.channelTitle}</div>
+                                <div class="card-stats">Traffic: <span id="clicks_display_${idx}">${user.clicks}</span> / 10 clicks</div>
+                            </div>
+                            <div id="card_action_container_${idx}">
+                                ${actionMarkup}
+                            </div>
+                        `;
+                    }
+                }
+                grid.appendChild(card);
+            });
+        }
 
-/* ================= SUBMIT VIDEO ================= */
-document.getElementById("submitVideoBtn").onclick = async () => {
+        function renderWaitingList() {
+            const grid = document.getElementById("waitingListGrid");
+            const badge = document.getElementById("waitingCountBadge");
+            grid.innerHTML = "";
 
-    const url = document.getElementById("youtubeLinkInput").value;
+            badge.textContent = `${waitingList.length} Users waiting`;
 
-    await fetch(`${API_BASE}/video/submit`, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({
-            userId: localUserSessionId,
-            youtubeLink: url
-        })
-    });
+            if (waitingList.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 2rem; font-size: 0.9rem;">The queue is empty. Submit a link below to claim a spot.</div>`;
+                return;
+            }
 
-    loadSystemData();
-};
+            waitingList.forEach((user, idx) => {
+                const card = document.createElement("div");
+                card.className = "card active-target";
+                const hasVotingPower = true;
 
-/* ================= START APP ================= */
-window.onload = async () => {
-    await initUser();
-    await loadSystemData();
-};
+                card.innerHTML = `
+                    <div class="card-index" style="color: var(--neon-pink)">Flags: ${user.appearsReceived}/3</div>
+                    <div>
+                        <div class="card-title">${user.channelTitle}</div>
+                        <div class="card-stats" style="font-size:0.8rem;">Target Object ID: <span style="color:var(--neon-pink); font-family:monospace;">${user.userId}</span></div>
+                    </div>
+                    <div>
+                        <button class="btn btn-appear" ${!hasVotingPower ? 'disabled' : ''} onclick="submitAppearVote('${user.userId}')">
+                            Cast 'Appear' Flag
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
 
-</script>
+        // --- TIMER & VERIFICATION ENGINE (PHASE 2 LOGIC) ---
+        function processVideoView(index) {
+            const targetCreator = activeBoard[index];
+            const actionContainer = document.getElementById(`card_action_container_${index}`);
+            
+            window.open(targetCreator.youtubeLink, '_blank');
 
+            let timeLeft = 30;
+            actionContainer.innerHTML = `<div class="countdown-badge">Watching: ${timeLeft}s</div>`;
+
+            const clockInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(clockInterval);
+                    
+                    targetCreator.clicks += 1;
+                    sequenceIndex += 1;
+                    saveStateToStorage();
+
+                    if (evaluateStateTransitions()) {
+                        return; 
+                    }
+
+                    renderActiveBoard();
+
+                    if (sequenceIndex >= 10) {
+                        unlockVideoUploadTerminal();
+                    }
+                } else {
+                    const badge = actionContainer.querySelector(".countdown-badge");
+                    if (badge) badge.textContent = `Watching: ${timeLeft}s`;
+                }
+            }, 1000);
+        }
+
+        function unlockVideoUploadTerminal() {
+            const uploadPanel = document.getElementById("uploadPanel");
+            const inputField = document.getElementById("youtubeLinkInput");
+            const submitBtn = document.getElementById("submitVideoBtn");
+
+            uploadPanel.style.opacity = "1";
+            uploadPanel.style.pointerEvents = "all";
+            inputField.removeAttribute("disabled");
+            submitBtn.removeAttribute("disabled");
+        }
+
+        // --- HIGH TURNOVER DUAL-TRIGGER PHASE HANDLING ---
+        function evaluateStateTransitions() {
+            if (!currentBoardIsFull) return false; // Block phase triggers while in filling period
+
+            const allActiveSlotsReachedTen = activeBoard.length > 0 && activeBoard.every(user => user.clicks >= 10);
+            const waitingListLimitReached = waitingList.length >= 10;
+
+            if ((allActiveSlotsReachedTen || waitingListLimitReached) && systemPhase !== "APPEARING_PERIOD") {
+                triggerAppearingPeriodState();
+                return true;
+            }
+            return false;
+        }
+
+        function triggerAppearingPeriodState() {
+            systemPhase = "APPEARING_PERIOD";
+            
+            const overlay = document.getElementById("appearingPeriodOverlay");
+            const timerDisplay = document.getElementById("overlayTimerDisplay");
+            const statsDisplay = document.getElementById("overlayQueueStats");
+            
+            overlay.style.display = "flex";
+            
+            let timeLimit = 60;
+            timerDisplay.textContent = timeLimit;
+            
+            const activeReadyCount = activeBoard.filter(u => u.clicks >= 10).length;
+            statsDisplay.innerHTML = `Active Slots Ready: <b>${activeReadyCount}/10</b> | Waiting Elements: <b>${waitingList.length}</b><br><br>Active users have 60 seconds to prune the waiting queue before migration executes.`;
+
+            const phaseCountdown = setInterval(() => {
+                timeLimit--;
+                timerDisplay.textContent = timeLimit;
+
+                if (timeLimit <= 0) {
+                    clearInterval(phaseCountdown);
+                    executeGlobalMigrationRoutine();
+                }
+            }, 1000);
+        }
+
+        function submitAppearVote(targetUserId) {
+            const targetNode = waitingList.find(user => user.userId === targetUserId);
+            if (!targetNode) return;
+
+            targetNode.appearsReceived += 1;
+            saveStateToStorage();
+            renderWaitingList();
+
+            if (targetNode.appearsReceived >= 3) {
+                alert(`Queue Alert: User ${targetNode.channelTitle} received 3 'Appear' flags and is scheduled for structural deletion on migration exit.`);
+            }
+        }
+
+        function executeGlobalMigrationRoutine() {
+            justBecameInactivePool = JSON.parse(JSON.stringify(activeBoard));
+            let localUserWasActive = activeBoard.some(u => u.userId === localUserSessionId);
+
+            let survivorsList = waitingList.filter(user => user.appearsReceived < 3);
+            let evictedTotalCount = waitingList.length - survivorsList.length;
+
+            if (evictedTotalCount > 0 && justBecameInactivePool.length > 0) {
+                for (let i = 0; i < evictedTotalCount; i++) {
+                    if (justBecameInactivePool.length === 0) break;
+                    
+                    const randomPickIndex = Math.floor(Math.random() * justBecameInactivePool.length);
+                    const fallbackReplacement = justBecameInactivePool.splice(randomPickIndex, 1)[0];
+                    
+                    fallbackReplacement.appearsReceived = 0;
+                    fallbackReplacement.clicks = 0;
+                    survivorsList.push(fallbackReplacement);
+                }
+            }
+
+            // If queue underfills, replace empty space with random system configurations
+            while (survivorsList.length < 10) {
+                survivorsList.push({
+                    userId: "system_node_" + Math.floor(Math.random() * 10000),
+                    channelTitle: "System Accelerated Feed",
+                    clicks: 0,
+                    youtubeLink: "https://youtube.com"
+                });
+            }
+
+            activeBoard = survivorsList.slice(0, 10).map(element => {
+                return {
+                    userId: element.userId,
+                    channelTitle: element.channelTitle,
+                    clicks: 0,
+                    youtubeLink: element.youtubeLink
+                };
+            });
+
+            waitingList = [];
+            justBecameInactivePool = [];
+            sequenceIndex = 0;
+            systemPhase = "REGULAR_PERIOD";
+
+            saveStateToStorage();
+            document.getElementById("appearingPeriodOverlay").style.display = "none";
+
+            if (localUserWasActive) {
+                forceLocalUserLockout();
+            } else {
+                location.reload();
+            }
+        }
+
+        // --- FORM TERMINAL UPLOAD GATEWAY LOGIC ---
+        document.getElementById("submitVideoBtn").addEventListener("click", function() {
+            const inputField = document.getElementById("youtubeLinkInput");
+            const urlValue = inputField.value.trim();
+
+            if (!urlValue || (!urlValue.includes("youtube.com") && !urlValue.includes("youtu.be"))) {
+                alert("Validation Exception: Please provide a structurally valid YouTube address.");
+                return;
+            }
+
+            // Find the first empty spot on the board if it's not full yet
+            let firstEmptyIndex = activeBoard.findIndex(slot => slot.isEmptySlot);
+
+            if (firstEmptyIndex !== -1 && !currentBoardIsFull) {
+                // --- FIRST 10 USERS DIRECT BOARD DIRECT PATHWAY ---
+                activeBoard[firstEmptyIndex] = {
+                    userId: localUserSessionId,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2],
+                    clicks: 0,
+                    youtubeLink: urlValue
+                };
+                
+                // Recalculate if that upload just fully completed the board space matrix
+                let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+                currentBoardIsFull = (filledCount === 10);
+                
+                saveStateToStorage();
+                renderActiveBoard();
+                
+                alert("Success: You are one of the first 10 users! Your channel has been placed directly onto the Main Acceleration Board.");
+                
+                // If it filled up right now, force page refresh to initiate sequential mode rules cleanly
+                if (currentBoardIsFull) {
+                    location.reload();
+                } else {
+                    // Lock input field until next reload cycle
+                    inputField.value = "";
+                    document.getElementById("uploadPanel").style.opacity = "0.5";
+                    document.getElementById("uploadPanel").style.pointerEvents = "none";
+                }
+            } else {
+                // --- NEXT USERS STANDARD PATHWAY (WAITING LIST ENTRY) ---
+                const freshQueueObject = {
+                    userId: localUserSessionId,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2],
+                    clicks: 0,
+                    youtubeLink: urlValue,
+                    appearsReceived: 0
+                };
+
+                waitingList.push(freshQueueObject);
+                saveStateToStorage();
+
+                inputField.value = "";
+                
+                if (!evaluateStateTransitions()) {
+                    renderWaitingList();
+                    alert("Success: Video committed onto the platform Waiting List successfully.");
+                    
+                    // Reset sequential process workflow requirements for standard visitors
+                    sequenceIndex = 0;
+                    renderActiveBoard();
+                    document.getElementById("uploadPanel").style.opacity = "0.5";
+                    document.getElementById("uploadPanel").style.pointerEvents = "none";
+                }
+            }
+        });
+
+        // --- PLATFORM INSTANTIATION LOOP ---
+        window.addEventListener("DOMContentLoaded", () => {
+            if (!checkLockoutState()) {
+                loadSystemData();
+                buildRegulationsPanel();
+                renderWaitingList();
+                evaluateStateTransitions();
+            }
+        });
+    </script>
 </body>
 </html>
