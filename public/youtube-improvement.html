@@ -1,253 +1,789 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>YouTube Improvement Dashboard</title>
 
+<!-- FontAwesome Icons Clean CDN Link -->
+<link rel="stylesheet" href="https://cloudflare.com"/>
+
 <style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
 body{
-    margin:0;
-    background:#0b1220;
-    color:white;
-    font-family:Arial;
+  background:#0b1220;
+  color:#fff;
+  min-height:100vh;
+  padding-bottom:120px;
+  overflow-x:hidden;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 40px;
+  background:#111827;
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+
+.logo-container{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:bold;
+  color:#38bdf8;
 }
 
 .container{
-    width:90%;
-    margin:auto;
-    padding:20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
 }
 
-h1{text-align:center;margin-bottom:30px;}
-
-h2{margin-top:30px}
-
-/* VIP */
-.vip-area{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
+h1{
+  font-size:26px;
+  margin-bottom:25px;
+  color:#38bdf8;
+  text-align: center;
 }
 
-.vip-box{
-    background:#111a30;
-    padding:20px;
-    border-radius:10px;
-    border:2px solid gold;
-    text-align:center;
+/* SECTION TITLES */
+.section-title {
+  font-size: 18px;
+  color: #cbd5e1;
+  margin-bottom: 15px;
+  text-align: left;
+  border-left: 4px solid #38bdf8;
+  padding-left: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* REGULAR */
-.regular-area{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:15px;
+/* VIP GRID SYSTEM (4 parts: 2 left, 2 right) */
+.vip-section {
+  margin-bottom: 35px;
 }
 
-.regular-box{
-    background:#111a30;
-    padding:15px;
-    border-radius:10px;
-    text-align:center;
+.vip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
-button{
-    padding:10px 18px;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    background:#00c853;
-    color:white;
+@media(max-width: 768px) {
+  .vip-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* CONDITIONS POPUP */
-.conditions{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:#000000e6;
-    display:none;
-    justify-content:center;
-    align-items:center;
+/* CARD LAYOUTS */
+.channel-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: 0.3s;
+  min-height: 80px;
 }
 
-.conditions-content{
-    background:#111a30;
-    padding:30px;
-    border-radius:10px;
-    width:80%;
-    max-width:700px;
+.vip-card {
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%);
+}
+
+.card-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  background: #1f2937;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #38bdf8;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.vip-card .user-avatar {
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.1);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+}
+
+.username-txt {
+  font-weight: bold;
+  font-size: 15px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.raw-link-txt {
+  font-family: monospace;
+  font-size: 13px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.click-counter {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* REGULAR GRID SYSTEM (10 spaces) */
+.regular-section {
+  margin-bottom: 40px;
+}
+
+.regular-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+@media(max-width: 768px) {
+  .regular-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* INTERACTION BUTTONS */
+.action-btn {
+  padding: 10px 22px;
+  border-radius: 20px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.visit-style {
+  background: #38bdf8;
+  color: #0b1220;
+}
+
+.visit-style:hover:not(:disabled) {
+  background: #0ea5e9;
+}
+
+.appear-style {
+  background: #eab308;
+  color: #0b1220;
+}
+
+.appear-style:hover:not(:disabled) {
+  background: #ca8a04;
+}
+
+.action-btn:disabled {
+  opacity: 0.15;
+  background: #334155 !important;
+  color: #94a3b8 !important;
+  cursor: not-allowed;
+}
+
+/* TIMER COUNTDOWN CHIP */
+.timer-chip {
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+/* BOTTOM GATEWAY INTERACTION ZONE */
+.gateway-box {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 0 auto 20px;
+  padding: 30px;
+  text-align: center;
+}
+
+.gate-btn {
+  padding: 16px 32px;
+  font-size: 18px;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  background: #eab308;
+  color: #0b1220;
+  font-weight: bold;
+  transition: 0.3s;
+  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.3);
+}
+
+.gate-btn:hover {
+  background: #ca8a04;
+  transform: translateY(-1px);
+}
+
+/* SYSTEM DYNAMIC LINK UPLOAD BOX */
+.upload-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.upload-form-container h3 {
+  font-size: 16px;
+  color: #cbd5e1;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.link-input {
+  flex: 1;
+  background: #0b1220;
+  border: 1px solid #38bdf8;
+  border-radius: 6px;
+  padding: 12px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+}
+
+.submit-link-btn {
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.submit-link-btn:hover {
+  background: #16a34a;
+}
+
+/* REGULATIONS INLINE OVERLAY MODAL */
+.regulations-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(11, 18, 32, 0.95);
+  z-index: 2500;
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+
+.regulations-card {
+  background: #111827;
+  border: 1px solid #1f2937;
+  max-width: 700px;
+  margin: 0 auto;
+  border-radius: 16px;
+  padding: 30px;
+}
+
+.regulations-card h2 {
+  font-size: 22px;
+  color: #38bdf8;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.regulations-card p {
+  font-size: 14px;
+  color: #94a3b8;
+  text-align: center;
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #0b1220;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+}
+
+.rule-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #38bdf8;
+  cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.rule-text {
+  font-size: 13.5px;
+  color: #e2e8f0;
+  line-height: 1.5;
+}
+
+.modal-action-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  background: #38bdf8;
+  color: #0b1220;
+  transition: 0.2s;
+}
+
+.modal-action-btn:disabled {
+  background: #334155;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.notify-msg {
+  font-size: 13px;
+  margin-top: 10px;
+  min-height: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+.error-text { color: #ef4444; }
+.success-text { color: #22c55e; }
+.info-text { color: #38bdf8; }
+
+/* USER PRE-UPLOADED PROFILE IDENTITY BADGE */
+.user-identity-card {
+  background: linear-gradient(135deg, #1e1b4b 0%, #111827 100%);
+  border: 1px solid #38bdf8;
+  border-radius: 12px;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+/* BOTTOM FIXED NAVIGATION */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#111827;
+  display:flex;
+  justify-content:space-around;
+  padding:12px 0;
+  border-top:1px solid #1f2937;
+  z-index:1500;
+}
+
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-decoration:none;
+  color:#cbd5e1;
+  font-weight:bold;
+  font-size:12px;
+  transition: 0.2s;
+}
+
+.nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
+.nav-item:hover{color:#38bdf8;}
+.nav-item.active{color:#38bdf8;}
+
+footer{
+  background:#111827;
+  padding:35px 20px;
+  text-align:center;
+  margin-top: 20px;
+}
+
+.footer-text{
+  max-width:900px;
+  margin:auto;
+  line-height:1.6;
+  color:#cbd5e1;
+  font-size: 14px;
 }
 </style>
 </head>
 
 <body>
 
+<header>
+  <div class="logo-container">
+    <div class="logo" id="headerLogo">YouTube Promotion Center</div>
+  </div>
+  <a href="youtube-improvement.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;">
+    <i class="fa-solid fa-house"></i>
+  </a>
+</header>
+
 <div class="container">
+  <h1>YouTube Improvement Dashboard</h1>
 
-<h1>Improve Your YouTube Channel</h1>
+  <!-- USER IDENTITY BADGE (Dynamically reveals after channel registration) -->
+  
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="user-avatar" id="userBadgeAvatar"><i class="fa-solid fa-user"></i></div>
+      <div>
+        <div class="username-txt" id="userBadgeName">Your Live Slot</div>
+        <div class="raw-link-txt" id="userBadgeLink">https://youtube.com..</div>
+      </div>
+    </div>
+    <span class="timer-chip" style="background:#22c55e;">Live Active Slot</span>
+  </div>
 
-<!-- VIP -->
-<h2>⭐ VIP Place</h2>
-<div class="vip-area" id="vipSlots"></div>
+  <!-- VIP PREMIUM SLOTS -->
+  <div class="vip-section">
+    <div class="section-title">
+      <span><i class="fa-solid fa-crown" style="color:#eab308; margin-right:6px;"></i> VIP Premium Slots</span>
+    </div>
+    <div class="vip-grid" id="vipGridContainer">
+      <!-- Injected from your live MongoDB database -->
+    </div>
+  </div>
 
-<!-- REGULAR -->
-<h2>Regular Place</h2>
-<div class="regular-area" id="regularSlots"></div>
+  <!-- REGULAR EXCHANGE POOL -->
+  <div class="regular-section">
+    <div class="section-title">
+      <span><i class="fa-solid fa-layer-group" style="color:#38bdf8; margin-right:6px;"></i> Regular Exchange Pool</span>
+    </div>
+    <div class="regular-grid" id="regularGridContainer">
+      <!-- Injected from your live MongoDB database -->
+    </div>
+  </div>
 
-<br>
-<center>
-<button onclick="acceptConditions()">Accept Conditions</button>
-</center>
-
+  <!-- UPLOAD ACTION AREA -->
+  <div class="gateway-box">
+    <div id="gateActionArea">
+      <button class="gate-btn" id="openGateBtn" onclick="openRegulations()">
+        <i class="fa-solid fa-bolt"></i> Add Your Channel Here
+      </button>
+    </div>
+    <div class="notify-msg" id="globalNotification"></div>
+  </div>
 </div>
 
-<!-- CONDITIONS -->
-<div class="conditions" id="conditionsBox">
-<div class="conditions-content">
+<!-- REGULATIONS MODAL SYSTEM -->
+<div class="regulations-overlay" id="regulationsModal">
+  <div class="regulations-card">
+    <h2>Community Regulations</h2>
+    <p>Please read and accept all the terms below to place your link into our global exchange engine.</p>
+    
+    <div class="rules-list">
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="rule1" onchange="validateRules()">
+        <label class="rule-text" for="rule1">I agree not to upload misleading, deceptive, or unsafe redirect links.</label>
+      </div>
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="rule2" onchange="validateRules()">
+        <label class="rule-text" for="rule2">I verify that I will authentically check other creators' channels listed here.</label>
+      </div>
+      <div class="rule-item">
+        <input type="checkbox" class="rule-checkbox" id="rule3" onchange="validateRules()">
+        <label class="rule-text" for="rule3">I verify my provided target link is a completely valid YouTube URL.</label>
+      </div>
+    </div>
 
-<h2>Platform Conditions</h2>
+    <!-- Live Submission Input Group -->
+    <div class="upload-form-container" id="formContainer" style="opacity: 0.35; pointer-events: none; transition: 0.3s;">
+      <h3>Channel Details</h3>
+      <div class="input-group">
+        <input type="text" id="inputName" class="link-input" placeholder="Enter Channel or Video Name" />
+        <input type="url" id="inputUrl" class="link-input" placeholder="Enter YouTube URL (https://youtube.com...)" />
+      </div>
+    </div>
 
-<p>1. Real users engagement only.</p>
-<p>2. Auto move waiting → live system.</p>
-<p>3. 20-second verified visits required.</p>
-<p>4. Sequential visit tracking enabled.</p>
-<p>5. 10 clicks detection active.</p>
-<p>6. Board wipe system removes inactive users.</p>
-<p>7. 2-minute appeal mode available.</p>
-
-<br>
-<button onclick="closeConditions()">Close</button>
-
+    <div style="margin-top:25px; display:flex; gap:12px;">
+      <button class="modal-action-btn" style="background:#334155; color:#fff;" onclick="closeRegulations()">Cancel</button>
+      <button class="modal-action-btn" id="submitLinkBtn" disabled onclick="handleLinkSubmission()">Submit to Pool</button>
+    </div>
+    <div class="notify-msg" id="modalNotification"></div>
+  </div>
 </div>
+
+<!-- BOTTOM FLOATING NAVIGATION BAR -->
+<div class="bottom-nav">
+  <a href="youtube-improvement.html" class="nav-item active">
+    <span><i class="fa-solid fa-chart-simple"></i></span>
+    <span>Dashboard</span>
+  </a>
+  <a href="#" class="nav-item" onclick="alert('VIP options feature coming soon!')">
+    <span><i class="fa-solid fa-crown"></i></span>
+    <span>Upgrade VIP</span>
+  </a>
 </div>
+
+<footer>
+  <div class="footer-text">
+    &copy; 2026 YouTube Promotion Center. Real-time distribution network backed by GitHub, Hugging Face, and MongoDB.
+  </div>
+</footer>
 
 <script>
+// Automatically targets whatever domain your site runs on (Hugging Face space or local)
+const API_BASE_URL = window.location.origin;
 
-/* ===========================
-   LOAD REAL SLOTS FROM SERVER
-=========================== */
+let activeTimers = {};
 
-async function loadSlots(){
-
-try{
-
-const response = await fetch("/api/slots");
-const data = await response.json();
-
-renderVIP(data.vip);
-renderRegular(data.regular);
-
-}catch(err){
-console.log("Server not connected yet");
-}
-
-}
-
-/* ===========================
-   RENDER VIP
-=========================== */
-
-function renderVIP(vip){
-
-const container=document.getElementById("vipSlots");
-container.innerHTML="";
-
-vip.forEach(slot=>{
-const div=document.createElement("div");
-div.className="vip-box";
-
-div.innerHTML=`
-<h3>${slot.username || "Empty Slot"}</h3>
-${slot.channel ?
-`<button onclick="visitChannel('${slot.channel}',${slot.id})">Visit</button>`
-:"Waiting"}
-`;
-
-container.appendChild(div);
+document.addEventListener("DOMContentLoaded", () => {
+    fetchDashboardSlots();
+    checkExistingIdentity();
+    // Keeps information 100% updated in real-time across users every 12 seconds
+    setInterval(fetchDashboardSlots, 12000);
 });
 
+// Real Database Pull Request
+async function fetchDashboardSlots() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/slots`);
+        if (!response.ok) throw new Error("Could not access data pool.");
+        const data = await response.json();
+        
+        renderSlots(data.vipSlots || [], 'vipGridContainer', true);
+        renderSlots(data.regularSlots || [], 'regularGridContainer', false);
+    } catch (err) {
+        console.error("Database connection failure:", err);
+        showNotification("globalNotification", "Connecting to data grid...", "info-text");
+    }
 }
 
-/* ===========================
-   RENDER REGULAR
-=========================== */
-
-function renderRegular(regular){
-
-const container=document.getElementById("regularSlots");
-container.innerHTML="";
-
-regular.forEach(slot=>{
-const div=document.createElement("div");
-div.className="regular-box";
-
-div.innerHTML=`
-<h4>${slot.username || "Empty"}</h4>
-${slot.channel ?
-`<button onclick="visitChannel('${slot.channel}',${slot.id})">Visit</button>`
-:"Waiting"}
-`;
-
-container.appendChild(div);
-});
-
+// UI Assembly Engine
+function renderSlots(slots, containerId, isVip) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = ""; 
+    
+    const maxSlots = isVip ? 4 : 10;
+    
+    for (let i = 0; i < maxSlots; i++) {
+        const item = slots[i];
+        if (item) {
+            container.innerHTML += `
+                <div class="channel-card ${isVip ? 'vip-card' : ''}">
+                    <div class="card-info">
+                        <div class="user-avatar"><i class="fa-solid ${isVip ? 'fa-crown' : 'fa-user'}"></i></div>
+                        <div class="user-details">
+                            <div class="username-txt">${escapeHtml(item.name)}</div>
+                            <div class="raw-link-txt">${escapeHtml(item.url)}</div>
+                            <div class="click-counter"><i class="fa-solid fa-eye"></i> ${item.clicks || 0} hits delivered</div>
+                        </div>
+                    </div>
+                    <div id="btn-zone-${item._id}">
+                        <button class="action-btn visit-style" onclick="handleCardInteraction('${item._id}', '${item.url}')">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Fills empty positions to keep the beautiful structural grid matching your design
+            container.innerHTML += `
+                <div class="channel-card ${isVip ? 'vip-card' : ''}" style="opacity: 0.35; border-style: dashed;">
+                    <div class="card-info">
+                        <div class="user-avatar" style="color: #64748b;"><i class="fa-solid fa-plus"></i></div>
+                        <div class="user-details">
+                            <div class="username-txt" style="color: #64748b;">Open Space</div>
+                            <div class="raw-link-txt" style="color: #475569;">No channel active</div>
+                        </div>
+                    </div>
+                    <button class="action-btn appear-style" disabled>
+                        <i class="fa-solid fa-lock"></i> Empty
+                    </button>
+                </div>
+            `;
+        }
+    }
 }
 
-/* ===========================
-   VISIT VERIFICATION START
-=========================== */
-
-async function visitChannel(link,slotId){
-
-window.open(link,"_blank");
-
-/* notify backend visit started */
-await fetch("/api/visit/start",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({slotId})
-});
-
-/* 20 sec verification timer */
-setTimeout(async()=>{
-
-await fetch("/api/visit/complete",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({slotId})
-});
-
-alert("Visit verified!");
-
-},20000);
-
+function checkExistingIdentity() {
+    const savedName = localStorage.getItem("user_channel_name");
+    const savedUrl = localStorage.getItem("user_channel_url");
+    
+    if (savedName && savedUrl) {
+        document.getElementById("userIdentityBox").style.display = "flex";
+        document.getElementById("userBadgeName").innerText = savedName;
+        document.getElementById("userBadgeLink").innerText = savedUrl;
+    }
 }
 
-/* ===========================
-   CONDITIONS
-=========================== */
-
-function acceptConditions(){
-document.getElementById("conditionsBox").style.display="flex";
+function openRegulations() {
+    document.getElementById("regulationsModal").style.display = "block";
 }
 
-function closeConditions(){
-document.getElementById("conditionsBox").style.display="none";
+function closeRegulations() {
+    document.getElementById("regulationsModal").style.display = "none";
+    resetModalForm();
 }
 
-/* ===========================
-   AUTO REFRESH BOARD
-=========================== */
+function validateRules() {
+    const r1 = document.getElementById("rule1").checked;
+    const r2 = document.getElementById("rule2").checked;
+    const r3 = document.getElementById("rule3").checked;
+    const form = document.getElementById("formContainer");
+    const submitBtn = document.getElementById("submitLinkBtn");
 
-loadSlots();
-setInterval(loadSlots,10000);
+    if (r1 && r2 && r3) {
+        form.style.opacity = "1";
+        form.style.pointerEvents = "auto";
+        submitBtn.disabled = false;
+    } else {
+        form.style.opacity = "0.35";
+        form.style.pointerEvents = "none";
+        submitBtn.disabled = true;
+    }
+}
 
+// Live Server DB Pipeline Submissions
+async function handleLinkSubmission() {
+    const name = document.getElementById("inputName").value.trim();
+    const url = document.getElementById("inputUrl").value.trim();
+    
+    if (!name || !url) {
+        showNotification("modalNotification", "Form inputs cannot be blank.", "error-text");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/slots`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, url })
+        });
+        
+        const resData = await response.json();
+        
+        if (!response.ok) throw new Error(resData.message || "Submission rejected.");
+        
+        showNotification("modalNotification", "Listing initialized successfully!", "success-text");
+        
+        localStorage.setItem("user_channel_name", name);
+        localStorage.setItem("user_channel_url", url);
+        
+        checkExistingIdentity();
+        fetchDashboardSlots();
+        
+        setTimeout(closeRegulations, 1200);
+    } catch (err) {
+        showNotification("modalNotification", err.message, "error-text");
+    }
+}
+
+// Real Click Logging Tracker & View Anti-Cheat Mechanism
+async function handleCardInteraction(id, targetUrl) {
+    window.open(targetUrl, '_blank');
+    
+    try {
+        await fetch(`${API_BASE_URL}/api/slots/${id}/click`, { method: "POST" });
+        fetchDashboardSlots(); 
+    } catch (err) {
+        console.error("Analytics log skipped:", err);
+    }
+
+    const targetZone = document.getElementById(`btn-zone-${id}`);
+    if (!targetZone) return;
+
+    let timerCount = 60; 
+    targetZone.innerHTML = `<span class="timer-chip" id="timer-${id}"><i class="fa-solid fa-clock"></i> 60s</span>`;
+    
+    if (activeTimers[id]) clearInterval(activeTimers[id]);
+    
+    activeTimers[id] = setInterval(() => {
+        timerCount--;
+        const UIElement = document.getElementById(`timer-${id}`);
+        if (UIElement) {
+            UIElement.innerHTML = `<i class="fa-solid fa-clock"></i> ${timerCount}s`;
+        }
+        
+        if (timerCount <= 0) {
+            clearInterval(activeTimers[id]);
+            if (document.getElementById(`timer-${id}`)) {
+                targetZone.innerHTML = `
+                    <button class="action-btn visit-style" onclick="handleCardInteraction('${id}', '${targetUrl}')">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Visit
+                    </button>
+                `;
+            }
+            delete activeTimers[id];
+        }
+    }, 1000);
+}
+
+function resetModalForm() {
+    document.getElementById("rule1").checked = false;
+    document.getElementById("rule2").checked = false;
+    document.getElementById("rule3").checked = false;
+    document.getElementById("inputName").value = "";
+    document.getElementById("inputUrl").value = "";
+    validateRules();
+    showNotification("modalNotification", "", "");
+}
+
+function showNotification(id, message, colorClass) {
+    const target = document.getElementById(id);
+    target.innerText = message;
+    target.className = "notify-msg " + colorClass;
+}
+
+function escapeHtml(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
 </script>
-
 </body>
 </html>
