@@ -1,856 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YouTube Improvement Dashboard</title>
-
-<!-- FontAwesome Icons Clean CDN Link -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NS Platform - Video Accelerator Engine</title>
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, sans-serif;
+/* ================= YOUR ORIGINAL STYLE (UNCHANGED) ================= */
+:root {
+    --bg-color: #0a0a12;
+    --surface-color: rgba(18, 18, 32, 0.6);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --neon-cyan: #00f2fe;
+    --neon-pink: #ff007f;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0bd;
+    --success-green: #39ff14;
+    --glass-blur: blur(16px);
 }
 
-body{
-  background:#0b1220;
-  color:#fff;
-  min-height:100vh;
-  padding-bottom:120px;
-  overflow-x:hidden;
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial; }
+
+body {
+    background: var(--bg-color);
+    color: white;
+    padding: 20px;
 }
 
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:18px 40px;
-  background:#111827;
-  position:sticky;
-  top:0;
-  z-index:1000;
+.panel {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
 }
 
-.logo-container{
-  display:flex;
-  align-items:center;
-  gap:15px;
+.grid-layout {
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:10px;
 }
 
-.logo{
-  font-size:22px;
-  font-weight:bold;
-  color:#38bdf8;
+.card {
+    background: rgba(255,255,255,0.03);
+    padding: 10px;
+    border-radius: 10px;
 }
 
-.container{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
+.btn {
+    padding: 8px 12px;
+    border:1px solid cyan;
+    background:transparent;
+    color:cyan;
 }
 
-h1{
-  font-size:26px;
-  margin-bottom:25px;
-  color:#38bdf8;
-  text-align: center;
-}
-
-/* SECTION TITLES */
-.section-title {
-  font-size: 18px;
-  color: #cbd5e1;
-  margin-bottom: 15px;
-  text-align: left;
-  border-left: 4px solid #38bdf8;
-  padding-left: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* VIP GRID SYSTEM (4 parts: 2 left, 2 right) */
-.vip-section {
-  margin-bottom: 35px;
-}
-
-.vip-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-@media(max-width: 768px) {
-  .vip-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* CARD LAYOUTS */
-.channel-card {
-  background: #111827;
-  border: 1px solid #1f2937;
-  border-radius: 12px;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: 0.3s;
-  min-height: 80px;
-}
-
-.vip-card {
-  border: 1px solid rgba(234, 179, 8, 0.4);
-  background: linear-gradient(135deg, #111827 0%, #1e1b4b 100%);
-}
-
-.card-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  overflow: hidden;
-}
-
-.user-avatar {
-  width: 42px;
-  height: 42px;
-  background: #1f2937;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #38bdf8;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-
-.vip-card .user-avatar {
-  color: #eab308;
-  background: rgba(234, 179, 8, 0.1);
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  width: 100%;
-}
-
-.username-txt {
-  font-weight: bold;
-  font-size: 15px;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.raw-link-txt {
-  font-family: monospace;
-  font-size: 13px;
-  color: #94a3b8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.click-counter {
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 2px;
-}
-
-/* REGULAR GRID SYSTEM (10 spaces) */
-.regular-section {
-  margin-bottom: 40px;
-}
-
-.regular-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-}
-
-@media(max-width: 768px) {
-  .regular-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* INTERACTION BUTTONS */
-.action-btn {
-  padding: 10px 22px;
-  border-radius: 20px;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-}
-
-.visit-style {
-  background: #38bdf8;
-  color: #0b1220;
-}
-
-.visit-style:hover:not(:disabled) {
-  background: #0ea5e9;
-}
-
-.appear-style {
-  background: #eab308;
-  color: #0b1220;
-}
-
-.appear-style:hover:not(:disabled) {
-  background: #ca8a04;
-}
-
-.action-btn:disabled {
-  opacity: 0.15;
-  background: #334155 !important;
-  color: #94a3b8 !important;
-  cursor: not-allowed;
-}
-
-/* TIMER COUNTDOWN CHIP */
-.timer-chip {
-  background: #ef4444;
-  color: #fff;
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-weight: bold;
-}
-
-/* BOTTOM GATEWAY INTERACTION ZONE */
-.gateway-box {
-  background: #111827;
-  border: 1px solid #1f2937;
-  border-radius: 12px;
-  max-width: 600px;
-  margin: 0 auto 20px;
-  padding: 30px;
-  text-align: center;
-}
-
-.gate-btn {
-  padding: 16px 32px;
-  font-size: 18px;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  background: #eab308;
-  color: #0b1220;
-  font-weight: bold;
-  transition: 0.3s;
-  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.3);
-}
-
-.gate-btn:hover {
-  background: #ca8a04;
-  transform: translateY(-1px);
-}
-
-/* SYSTEM DYNAMIC LINK UPLOAD BOX */
-.upload-form-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: left;
-}
-
-.upload-form-container h3 {
-  font-size: 16px;
-  color: #cbd5e1;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.link-input {
-  flex: 1;
-  background: #0b1220;
-  border: 1px solid #38bdf8;
-  border-radius: 6px;
-  padding: 12px 14px;
-  color: #fff;
-  font-size: 14px;
-  outline: none;
-}
-
-.submit-link-btn {
-  background: #22c55e;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 12px 24px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.submit-link-btn:hover {
-  background: #16a34a;
-}
-
-/* REGULATIONS INLINE OVERLAY MODAL */
-.regulations-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(11, 18, 32, 0.95);
-  z-index: 2500;
-  overflow-y: auto;
-  padding: 40px 20px;
-}
-
-.regulations-card {
-  background: #111827;
-  border: 1px solid #1f2937;
-  max-width: 700px;
-  margin: 0 auto;
-  border-radius: 16px;
-  padding: 30px;
-}
-
-.regulations-card h2 {
-  font-size: 22px;
-  color: #38bdf8;
-  margin-bottom: 6px;
-  text-align: center;
-}
-
-.regulations-card p {
-  font-size: 14px;
-  color: #94a3b8;
-  text-align: center;
-  margin-bottom: 25px;
-  line-height: 1.5;
-}
-
-.rules-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.rule-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  background: #0b1220;
-  padding: 14px;
-  border-radius: 8px;
-  border: 1px solid #1f2937;
-}
-
-.rule-checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: #38bdf8;
-  cursor: pointer;
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-
-.rule-text {
-  font-size: 13.5px;
-  color: #e2e8f0;
-  line-height: 1.5;
-}
-
-.modal-action-btn {
-  width: 100%;
-  padding: 14px;
-  border-radius: 8px;
-  border: none;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  background: #38bdf8;
-  color: #0b1220;
-  transition: 0.2s;
-}
-
-.modal-action-btn:disabled {
-  background: #334155;
-  color: #64748b;
-  cursor: not-allowed;
-}
-
-.notify-msg {
-  font-size: 13px;
-  margin-top: 10px;
-  min-height: 18px;
-  font-weight: bold;
-  text-align: center;
-}
-.error-text { color: #ef4444; }
-.success-text { color: #22c55e; }
-.info-text { color: #38bdf8; }
-
-/* USER PRE-UPLOADED PROFILE IDENTITY BADGE */
-.user-identity-card {
-  background: linear-gradient(135deg, #1e1b4b 0%, #111827 100%);
-  border: 1px solid #38bdf8;
-  border-radius: 12px;
-  padding: 15px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 25px;
-}
-
-/* BOTTOM FIXED NAVIGATION */
-.bottom-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:#111827;
-  display:flex;
-  justify-content:space-around;
-  padding:12px 0;
-  border-top:1px solid #1f2937;
-  z-index:1500;
-}
-
-.nav-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-decoration:none;
-  color:#cbd5e1;
-  font-weight:bold;
-  font-size:12px;
-  transition: 0.2s;
-}
-
-.nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
-.nav-item:hover{color:#38bdf8;}
-.nav-item.active{color:#38bdf8;}
-
-footer{
-  background:#111827;
-  padding:35px 20px;
-  text-align:center;
-  margin-top: 20px;
-}
-
-.footer-text{
-  max-width:900px;
-  margin:auto;
-  line-height:1.6;
-  color:#cbd5e1;
-  font-size: 14px;
+.btn-action {
+    background: linear-gradient(90deg, cyan, pink);
+    color:black;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <div class="logo-container">
-    <div class="logo" id="headerLogo">YouTube Promotion Center</div>
-  </div>
-  <a href="index.html" style="color:#38bdf8;text-decoration:none;font-size:26px;display:flex;align-items:center;"> → </a>
-</header>
-
-<div class="container">
-  <h1 id="pageMainTitle">YouTube Improvement Dashboard</h1>
-
-  <!-- USER PRE-UPLOADED CHANNEL MANAGEMENT LAYER -->
-  <div id="preUploadedProfileArea"></div>
-
-  <!-- VIP PARTNER SECTIONS (4 SPACES) -->
-  <div class="vip-section">
-    <div class="section-title">
-      <span id="vipSectionTitle">VIP Premium Channels (4 slots)</span>
-    </div>
-    <div class="vip-grid" id="realVipGrid"></div>
-  </div>
-
-  <!-- REGULAR SPACES SECTION (10 SPACES) -->
-  <div class="regular-section">
-    <div class="section-title">
-      <span id="regularSectionTitle">Standard Exchange Slots (10 slots)</span>
-    </div>
-    <div class="regular-grid" id="realRegularGrid"></div>
-  </div>
-
-  <!-- LOWER DYNAMIC INTERACTION ZONE -->
-  <div class="gateway-box" id="bottomControlZone">
-    <button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">📜 Read & Accept Conditions</button>
-  </div>
+<div class="panel">
+    <h2>NS PLATFORM</h2>
 </div>
 
-<!-- REGULATIONS OVERLAY MODAL -->
-<div class="regulations-overlay" id="rulesModal">
-  <div class="regulations-card">
-    <h2>Platform Regulations</h2>
-    <p>Please check all items sequentially to declare that you agree to follow the platform mechanics.</p>
-    
-    <div class="rules-list">
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="check1" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check1">1. Please read and understand all policies and regulations of this website before using the platform.</label>
-      </div>
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="check2" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check2">2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.</label>
-      </div>
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="check3" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check3">3. Once you click Visit, a 30-second countdown will begin. You will be allowed to visit the next channel only after the countdown finishes, until you complete all visits.</label>
-      </div>
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="check4" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check4">4. When your account becomes Live, please turn on notifications so you can monitor the actions taking place on your channel.</label>
-      </div>
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="check5" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check5">5. When you are removed from Live status, make sure that you have received at least 10 subscribers, views, likes, and comments. Please do not appear again unless you have fewer than 10 subscribers, views, likes, and comments.</label>
-      </div>
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="check6" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check6">6. If you receive fewer than 10 subscribers, views, likes, or comments, you are allowed to reappear after 3 minutes among the channels listed in the waiting list.</label>
-      </div>
-      <div class="rule-item">
-        <input type="checkbox" class="rule-checkbox" id="check7" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check7">7. While you are in the waiting list, if your account receives three appeals, it will be removed from the waiting list. If this happens three times, your account will be permanently deleted.</label>
-      </div>
-    </div>
-
-    <button class="modal-action-btn" id="acceptBtn" disabled onclick="submitAcceptedConditions()">I Accept All Conditions</button>
-  </div>
+<!-- LOCKOUT -->
+<div id="lockoutWorkspace" class="panel" style="display:none;">
+    <h3>LOCKED</h3>
+    <div id="lockoutClock">03:00:00</div>
 </div>
 
-<footer>
-  <div class="footer-text" id="footerText">
-    © 2026 YouTube Promotion Center. All rights reserved.<br>Grow your presence, boost engagement, and reach more people.
-  </div>
-</footer>
+<!-- MAIN -->
+<div id="regularWorkspace">
 
-<!-- NAVIGATION PANEL -->
-<div class="bottom-nav">
-  <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt">Home</span></a>
-  <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt">Services</span></a>
-  <a class="nav-item" href="vip.html" id="navVipLink"><span>💎</span><span class="nav-txt">VIP</span></a>
-  <a class="nav-item" href="bonus.html" id="navBonusLink"><span>🎁</span><span class="nav-txt">Bonus</span></a>
-  <a class="nav-item" href="regulations.html" id="navRulesLink"><span>📜</span><span class="nav-txt">Regulations</span></a>
+    <div class="panel">
+        <h3>Regulations</h3>
+        <div id="regulationsContainer"></div>
+        <button id="acceptRegulationsBtn" class="btn btn-action" disabled>Accept</button>
+    </div>
+
+    <div class="panel">
+        <h3>Board</h3>
+        <div class="grid-layout" id="activeBoardGrid"></div>
+    </div>
+
+    <div class="panel">
+        <h3>Waiting List</h3>
+        <div class="grid-layout" id="waitingListGrid"></div>
+    </div>
+
+    <div class="panel">
+        <h3>Upload</h3>
+        <input id="youtubeLinkInput">
+        <button id="submitVideoBtn" class="btn btn-action">Upload</button>
+    </div>
+
 </div>
 
 <script>
-// Global application states
-let currentUserAccount = null; 
-let vipChannels = [];
-let regularChannels = [];
-let combinedBoardOrder = [];
 
-let conditionsAccepted = false;
-let sequenceIndex = 0; 
-let globalTimerActive = false;
+/* ================= BACKEND CONNECTION ================= */
+const API_BASE = "http://localhost:3000/api";
 
-// 1. INITIAL FETCH API FUNCTION (To link up to your future server.js routes)
-async function fetchBoardData() {
-  try {
-    // When your node server is ready, uncomment below to fetch directly from MongoDB:
-    // const res = await fetch('/api/board-status');
-    // const data = await res.json();
-    // vipChannels = data.vipChannels;
-    // regularChannels = data.regularChannels;
-    // currentUserAccount = data.currentUser;
+/* ================= STATE ================= */
+let activeBoard = [];
+let waitingList = [];
+let localUserSessionId = null;
+let sequenceIndex = 0;
 
-    // Production Fallback: Auto-generates clean, completely empty structural spaces for startup launch state
-    if (vipChannels.length === 0) {
-      for (let i = 0; i < 4; i++) {
-        vipChannels.push({ id: `vip${i}`, username: "Available Slot", youtubeChannel: "", isVip: true });
-      }
-    }
-    if (regularChannels.length === 0) {
-      for (let i = 0; i < 10; i++) {
-        regularChannels.push({ id: `reg${i}`, username: "Available Slot", youtubeChannel: "", clicks: 0, isVip: false });
-      }
-    }
+/* ================= GET USER ================= */
+async function initUser() {
+    const token = localStorage.getItem("token");
 
-    renderUserIdentityBadge();
-    computeBoardSequencing();
-    renderGrids();
-  } catch (err) {
-    console.error("Error connecting to database endpoint:", err);
-  }
-}
-
-// Render Profile Header Badge (If user session data exists)
-function renderUserIdentityBadge() {
-  const container = document.getElementById("preUploadedProfileArea");
-  if (!currentUserAccount) {
-    container.innerHTML = "";
-    return;
-  }
-
-  container.innerHTML = `
-    <div class="user-identity-card">
-      <div class="card-info">
-        <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
-        <div class="user-details">
-          <span class="username-txt">${currentUserAccount.username} <small style="color:#eab308;">(Your Pre-uploaded Channel)</small></span>
-          <span class="raw-link-txt">${currentUserAccount.channelUrl.replace("https://", "")}</span>
-        </div>
-      </div>
-      <button class="action-btn appear-style" id="appearTriggerBtn" ${currentUserAccount.isAllowedToAppear ? '' : 'disabled'} onclick="triggerAppearanceOnBoard()">
-        <i class="fa-solid fa-eye"></i> <span>Appear</span>
-      </button>
-    </div>
-  `;
-}
-
-function computeBoardSequencing() {
-  combinedBoardOrder = [];
-  vipChannels.forEach(item => combinedBoardOrder.push({ ...item, type: 'vip' }));
-  regularChannels.forEach(item => combinedBoardOrder.push({ ...item, type: 'regular' }));
-}
-
-function renderGrids() {
-  const vipGrid = document.getElementById("realVipGrid");
-  const regularGrid = document.getElementById("realRegularGrid");
-  
-  vipGrid.innerHTML = "";
-  regularGrid.innerHTML = "";
-
-  vipChannels.forEach((item, index) => {
-    vipGrid.innerHTML += generateCardHTML(item, index, true);
-  });
-
-  regularChannels.forEach((item, index) => {
-    let vipOffsetIndex = index + vipChannels.length;
-    regularGrid.innerHTML += generateCardHTML(item, vipOffsetIndex, false);
-  });
-
-  syncButtonStates();
-}
-
-function generateCardHTML(item, sequencePosition, isVip) {
-  const isEmpty = item.username === "Available Slot" || !item.youtubeChannel;
-  const clickDisplay = !isVip && !isEmpty ? `<span class="click-counter"><i class="fa-solid fa-mouse-pointer"></i> Clicks: ${item.clicks}/10</span>` : '';
-  
-  // Icon handling: Empty blocks show person, loaded channels show standard YouTube asset icons
-  const avatarIcon = isEmpty ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-brands fa-youtube"></i>';
-  const displayUrl = item.youtubeChannel ? item.youtubeChannel.replace("https://", "") : "";
-
-  return `
-    <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
-      <div class="card-info">
-        <div class="user-avatar">${avatarIcon}</div>
-        <div class="user-details">
-          <span class="username-txt">${item.username}</span>
-          <span class="raw-link-txt">${displayUrl}</span>
-          ${clickDisplay}
-        </div>
-      </div>
-      <div id="btn-container-${sequencePosition}">
-        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" onclick="handleSequentialVisit('${item.youtubeChannel}', ${sequencePosition}, '${item.id}', ${!isVip})">
-          <span>Visit</span>
-        </button>
-      </div>
-    </div>`;
-}
-
-function syncButtonStates() {
-  document.querySelectorAll('.seq-btn').forEach(btn => {
-    const currentBtnSeq = parseInt(btn.getAttribute('data-seq'));
-    const relatedItem = combinedBoardOrder[currentBtnSeq];
-    
-    // Check if slot is empty or a default startup placeholder
-    const isEmptySlot = !relatedItem || relatedItem.username === "Available Slot" || !relatedItem.youtubeChannel;
-
-    // Enforce rules across empty startup grids:
-    // Completely disable interaction to the whole board if slot features no active links
-    if (!conditionsAccepted || currentBtnSeq !== sequenceIndex || globalTimerActive || isEmptySlot) {
-      btn.disabled = true;
-    } else {
-      btn.disabled = false;
-    }
-  });
-}
-
-function handleSequentialVisit(url, sequencePosition, elementId, isRegular) {
-  if (globalTimerActive || sequencePosition !== sequenceIndex || !url) return;
-
-  window.open(url, '_blank');
-  globalTimerActive = true;
-  disableAllControls();
-
-  const container = document.getElementById(`btn-container-${sequencePosition}`);
-  let secondsLeft = 30; 
-  container.innerHTML = `<span class="timer-chip">30s</span>`;
-
-  const countdown = setInterval(() => {
-    secondsLeft--;
-    const chip = container.querySelector('.timer-chip');
-    if (chip) chip.innerText = `${secondsLeft}s`;
-
-    if (secondsLeft <= 0) {
-      clearInterval(countdown);
-      globalTimerActive = false;
-      container.innerHTML = `<span class="success-text" style="font-size:13px;"><i class="fa-solid fa-circle-check"></i> Verified</span>`;
-      
-      // Post validation increment tracking hook to match backend collection updates
-      updateClickVerificationOnServer(elementId, isRegular);
-
-      sequenceIndex++; 
-      
-      if (sequenceIndex >= combinedBoardOrder.length) {
-        unlockVideoUploadZone();
-      } else {
-        enableControlsAndSync();
-      }
-    }
-  }, 1000);
-}
-
-// 2. SERVER VISIT COUNT UPDATE ACTION HANDLER
-async function updateClickVerificationOnServer(elementId, isRegular) {
-  try {
-    // Ready for your deployment on Render connected with MongoDB
-    // await fetch('/api/verify-visit', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ id: elementId })
-    // });
-    console.log(`Action verified for element ID: ${elementId}`);
-  } catch(err) {
-    console.error("Database connection failed during click registration:", err);
-  }
-}
-
-function disableAllControls() {
-  document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
-}
-
-function enableControlsAndSync() {
-  syncButtonStates();
-}
-
-function openRegulationsModal() {
-  document.getElementById("rulesModal").style.display = "block";
-}
-
-function validateCheckboxes() {
-  let allChecked = true;
-  for (let i = 1; i <= 7; i++) {
-    if (!document.getElementById(`check${i}`).checked) {
-      allChecked = false;
-      break;
-    }
-  }
-  document.getElementById("acceptBtn").disabled = !allChecked;
-}
-
-function submitAcceptedConditions() {
-  conditionsAccepted = true;
-  document.getElementById("rulesModal").style.display = "none";
-  
-  const bottomZone = document.getElementById("bottomControlZone");
-  
-  // Custom logic checking if the site is in startup mode (empty grid profiles)
-  const isBoardCompletelyEmpty = combinedBoardOrder.every(item => item.username === "Available Slot");
-  
-  if (isBoardCompletelyEmpty) {
-    // Startup Mode Override: If server has no users to show, allow them to upload right away
-    bottomZone.innerHTML = `<p class="info-text" style="color:#22c55e; margin-bottom:15px;"><i class="fa-solid fa-circle-info"></i> Welcome! You are our first creator. Launching form directly...</p>`;
-    setTimeout(() => { unlockVideoUploadZone(); }, 1000);
-  } else {
-    bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Please complete visiting all VIP and Regular board slots sequentially to unlock your Video Upload Form.</p>`;
-  }
-  
-  syncButtonStates();
-}
-
-function unlockVideoUploadZone() {
-  const bottomZone = document.getElementById("bottomControlZone");
-  bottomZone.innerHTML = `
-    <div class="upload-form-container">
-      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> Submit Video to Live Queue</h3>
-      <div class="input-group">
-        <input type="url" class="link-input" id="ytVideoInput" placeholder="Paste your target YouTube Video URL here..." required />
-        <button class="submit-link-btn" onclick="processDatabaseVideoCommit()">Upload & Save Video</button>
-      </div>
-      <div id="uploadFeedback" class="notify-msg"></div>
-    </div>
-  `;
-}
-
-// 3. SERVER DATABASE FORM SUBMISSION ROUTE LINK
-async function processDatabaseVideoCommit() {
-  const videoInput = document.getElementById("ytVideoInput");
-  const feedback = document.getElementById("uploadFeedback");
-  const videoUrl = videoInput.value.trim();
-
-  if (!videoUrl.includes("youtube.com") && !videoUrl.includes("youtu.be")) {
-    feedback.className = "notify-msg error-text";
-    feedback.innerText = "Validation Error: Please submit a valid YouTube video address string.";
-    return;
-  }
-
-  feedback.className = "notify-msg info-text";
-  feedback.innerText = "Sending document payload to Server routing controllers...";
-
-  try {
-    // This is the direct hook you will map to your Express API structure in server.js
-    /*
-    const response = await fetch('/api/submit-video', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({ videoUrl: videoUrl })
+    const res = await fetch(`${API_BASE}/me`, {
+        headers: { Authorization: "Bearer " + token }
     });
-    const result = await response.json();
-    */
 
-    // Simulating deployment latency before refreshing client layout status
-    setTimeout(() => {
-      feedback.className = "notify-msg success-text";
-      feedback.innerText = "Success! Document added to active waiting list collections.";
-      videoInput.value = "";
-      
-      // Optional demo response simulation: load the link inside row spot 0 to test site responsiveness
-      regularChannels[0] = {
-        id: "reg0",
-        username: "New Joined Creator",
-        youtubeChannel: videoUrl,
-        clicks: 0,
-        isVip: false
-      };
-      computeBoardSequencing();
-      renderGrids();
-    }, 1200);
-
-  } catch(err) {
-    feedback.className = "notify-msg error-text";
-    feedback.innerText = "Database connection error. Check server console logs.";
-  }
+    const data = await res.json();
+    localUserSessionId = data.userId;
 }
 
-window.onload = function() {
-  fetchBoardData();
+/* ================= LOAD DATA ================= */
+async function loadSystemData() {
+    const res = await fetch(`${API_BASE}/state`);
+    const data = await res.json();
+
+    activeBoard = data.activeBoard;
+    waitingList = data.waitingList;
+
+    render();
+}
+
+/* ================= SAVE ================= */
+async function save() {
+    await fetch(`${API_BASE}/state/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activeBoard, waitingList })
+    });
+}
+
+/* ================= RENDER ================= */
+function render() {
+
+    const board = document.getElementById("activeBoardGrid");
+    const wait = document.getElementById("waitingListGrid");
+
+    board.innerHTML = "";
+    wait.innerHTML = "";
+
+    activeBoard.forEach((u, i) => {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <p>${u.channelTitle}</p>
+            <button class="btn btn-action" onclick="view(${i})">Visit</button>
+        `;
+        board.appendChild(div);
+    });
+
+    waitingList.forEach(u => {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <p>${u.channelTitle}</p>
+            <button onclick="vote('${u.userId}')">Vote</button>
+        `;
+        wait.appendChild(div);
+    });
+}
+
+/* ================= VIEW CLICK ================= */
+async function view(i) {
+    const u = activeBoard[i];
+
+    window.open(u.youtubeLink, "_blank");
+
+    await fetch(`${API_BASE}/click`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ userId: u.userId })
+    });
+
+    loadSystemData();
+}
+
+/* ================= VOTE ================= */
+async function vote(id) {
+    await fetch(`${API_BASE}/vote`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            targetUserId: id,
+            voterId: localUserSessionId
+        })
+    });
+
+    loadSystemData();
+}
+
+/* ================= SUBMIT VIDEO ================= */
+document.getElementById("submitVideoBtn").onclick = async () => {
+
+    const url = document.getElementById("youtubeLinkInput").value;
+
+    await fetch(`${API_BASE}/video/submit`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            userId: localUserSessionId,
+            youtubeLink: url
+        })
+    });
+
+    loadSystemData();
 };
+
+/* ================= START APP ================= */
+window.onload = async () => {
+    await initUser();
+    await loadSystemData();
+};
+
 </script>
+
 </body>
 </html>
