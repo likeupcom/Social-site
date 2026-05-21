@@ -111,9 +111,42 @@
             border: 2px solid #ff007f;
             box-shadow: 0 0 30px rgba(255, 0, 127, 0.5);
         }
+        /* New Style Modules for Indicators */
+        .metric-badge-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .badge-node {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            padding: 4px;
+            font-size: 11px;
+            text-align: center;
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
+
+    <!-- ========================================================== -->
+    <!--             SEQUENTIAL TERMS VERIFICATION OVERLAY          -->
+    <!-- ========================================================== -->
+    <div id="termsVerificationOverlay" class="overlay">
+        <div class="glass-panel" style="max-width: 550px; width: 90%; border: 1px solid #ff007f; box-shadow: 0 0 25px rgba(255, 0, 127, 0.3);">
+            <h2 style="color: #ff007f; font-size: 20px; text-align: center; margin-bottom: 15px;">🛡️ PLATFORM COMPLIANCE PROTOCOL</h2>
+            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; margin-bottom: 20px;">
+                <p id="termsConditionPresenterText" style="line-height: 1.6; color: #ddd; font-size: 15px;"></p>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="termsStepIndicatorLabel" style="font-size: 13px; color: #888;">Condition 1 of 6</span>
+                <button id="termsAcceptButtonStep" class="action-btn" style="padding: 8px 20px; font-size: 14px;">I Understand & Accept</button>
+            </div>
+        </div>
+    </div>
+    <!-- ========================================================== -->
 
     <div class="container">
         <header style="margin-bottom: 40px; text-align: center;">
@@ -121,9 +154,7 @@
             <p style="color: #888;">Sequential Conversion Routing Protocol Active</p>
         </header>
 
-        <!-- ========================================================== -->
-        <!--             LIVE ACCUMULATED CONVERSION STREAM             -->
-        <!-- ========================================================== -->
+        <!-- LIVE ACCUMULATED CONVERSION STREAM -->
         <div class="glass-panel" style="border: 1px dashed #00ffff; display: flex; justify-content: space-around; align-items: center; text-align: center;">
             <div>
                 <div id="metricViews" style="font-size: 24px; font-weight: bold; color: #00ffff;">0 view</div>
@@ -142,7 +173,6 @@
                 <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Comments</div>
             </div>
         </div>
-        <!-- ========================================================== -->
 
         <!-- VIP ACCELERATION SUITE -->
         <h2 style="color: #ff007f; text-shadow: 0 0 10px rgba(255, 0, 127, 0.3);">👑 VIP ACCELERATION SUITE</h2>
@@ -213,8 +243,45 @@
         let currentBoardIsFull = false;
         let justBecameInactivePool = [];
 
-        // --- NEW METRICS COUNTER STATE ENGINE ---
         let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0");
+
+        // --- NEW REQUISITIONS GATEWAY PROTOCOL STATE ---
+        let mandatoryConditionsList = [
+            "1. Please read and understand all policies and regulations of this website before using the platform.",
+            "2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.",
+            "3. Once you click Visit, a 30-second countdown will begin. You will be allowed to visit the next channel only after the countdown finishes, until you complete all visits.",
+            "4. When your account becomes Live, please turn on notifications so you can monitor the actions taking place on your channel.",
+            "5. While you are in the waiting list, if your account receives three appeals, it will be removed from the waiting list. If this happens three times, your account will be permanently deleted.",
+            "6. Making an appeal will not return you back to the board, but it may affect another user who is currently in the waiting list."
+        ];
+        let currentConditionIndexPointer = 0;
+        let termsAcceptedFlag = localStorage.getItem("ns_conditions_verified") === "true";
+
+        function instantiateComplianceGateway() {
+            if (termsAcceptedFlag) {
+                document.getElementById("termsVerificationOverlay").style.display = "none";
+                return;
+            }
+            
+            document.getElementById("termsVerificationOverlay").style.display = "flex";
+            renderCurrentConditionStep();
+
+            document.getElementById("termsAcceptButtonStep").addEventListener("click", () => {
+                currentConditionIndexPointer++;
+                if (currentConditionIndexPointer < mandatoryConditionsList.length) {
+                    renderCurrentConditionStep();
+                } else {
+                    termsAcceptedFlag = true;
+                    localStorage.setItem("ns_conditions_verified", "true");
+                    document.getElementById("termsVerificationOverlay").style.display = "none";
+                }
+            });
+        }
+
+        function renderCurrentConditionStep() {
+            document.getElementById("termsConditionPresenterText").innerText = mandatoryConditionsList[currentConditionIndexPointer];
+            document.getElementById("termsStepIndicatorLabel").innerText = `Condition ${currentConditionIndexPointer + 1} of ${mandatoryConditionsList.length}`;
+        }
 
         function updateMetricsDisplayPanel() {
             document.getElementById("metricViews").innerText = `${currentCompletedHits} view`;
@@ -223,12 +290,8 @@
             document.getElementById("metricComments").innerText = `${currentCompletedHits} com`;
         }
 
-        // --- GLOBAL COUNTDOWN CONTROL FACTORY ---
         function runVerificationTimer(buttonElement, targetUrl, onCompleteRoutine) {
-            // Prevent duplicate actions while working
             buttonElement.style.pointerEvents = "none";
-            
-            // Explicitly open the YouTube video path target asset in a new viewport tab
             window.open(targetUrl, '_blank');
 
             let secondsRemaining = 30;
@@ -241,19 +304,16 @@
                 } else {
                     clearInterval(timerCountdownLoop);
                     
-                    // Increment and commit local state transformations
                     currentCompletedHits++;
                     localStorage.setItem("ns_completed_hits", currentCompletedHits.toString());
                     updateMetricsDisplayPanel();
 
-                    // Restore interactions and call the default sequencing callbacks
                     buttonElement.style.pointerEvents = "auto";
                     onCompleteRoutine();
                 }
             }, 1000);
         }
 
-        // --- FETCH DYNAMIC DATABASE VALUES FROM SERVER ---
         async function synchroniseWithLiveDatabase() {
             try {
                 const response = await fetch('/api/system-state', {
@@ -291,7 +351,7 @@
                 } else {
                     activeBoard = [];
                     for(let i = 0; i < 10; i++) {
-                        activeBoard.push({ isEmptySlot: true });
+                        activeBoard.push({ isEmptySlot: true, clicks: 0 });
                     }
                 }
                 waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
@@ -434,13 +494,19 @@
                 } else {
                     let absoluteIndex = index;
                     let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
+                    let displayClicks = slot.clicks || 0;
 
                     card.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
                             <span style="font-size: 24px; color: #00ffff; filter: drop-shadow(0 0 5px #00ffff);">👑</span>
-                            <div>
-                                <div style="font-weight: bold; color: #fff;">${slot.channelTitle}</div>
-                                <div style="font-size: 11px; color: #00ffff;">Clicks Received: ${slot.clicks}</div>
+                            <div style="width: 100%;">
+                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.channelTitle}</div>
+                                <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
+                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} view</span>
+                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} sub</span>
+                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} like</span>
+                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} com</span>
+                                </div>
                             </div>
                         </div>
                         <button class="vip-action-btn" data-vip-index="${absoluteIndex}" style="
@@ -459,7 +525,7 @@
                     if (isCurrentTarget) {
                         actionBtn.addEventListener("click", () => {
                             runVerificationTimer(actionBtn, slot.youtubeLink, () => {
-                                vipBoard[absoluteIndex].clicks++;
+                                vipBoard[absoluteIndex].clicks = displayClicks + 1;
                                 sequenceIndex++; 
                                 saveStateToStorage();
                                 renderVIPSpaces();
@@ -493,18 +559,25 @@
                 } else {
                     let absoluteIndex = vipOffset + index;
                     let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
+                    let displayClicks = slot.clicks || 0;
 
                     if (isCurrentTarget) {
                         elementNode.className += " active-target";
                     }
 
+                    // Embedded view sub like com structural mapping layout metrics grid blocks
                     elementNode.innerHTML = `
-                        <div style="font-weight: bold; font-size: 15px; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <div style="font-weight: bold; font-size: 15px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             ${slot.channelTitle}
                         </div>
-                        <div style="font-size: 12px; color: #00ffff; margin-bottom: 15px;">
-                            Clicks Recorded: <strong>${slot.clicks}</strong>
+                        
+                        <div class="metric-badge-row">
+                            <div class="badge-node">👁️ ${displayClicks} view</div>
+                            <div class="badge-node">❤️ ${displayClicks} like</div>
+                            <div class="badge-node">👤 ${displayClicks} sub</div>
+                            <div class="badge-node">💬 ${displayClicks} com</div>
                         </div>
+
                         <button class="active-redirect-anchor" style="
                             display: block; width: 100%; text-align: center; background: ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.05)'};
                             color: #fff; padding: 8px; border-radius: 4px; font-size: 13px; font-weight: bold;
@@ -518,7 +591,7 @@
                     if (isCurrentTarget) {
                         linkButton.addEventListener("click", () => {
                             runVerificationTimer(linkButton, slot.youtubeLink, () => {
-                                activeBoard[index].clicks++;
+                                activeBoard[index].clicks = displayClicks + 1;
                                 sequenceIndex++;
                                 saveStateToStorage();
                                 renderVIPSpaces();
@@ -708,6 +781,7 @@
         });
 
         window.addEventListener("DOMContentLoaded", async () => {
+            instantiateComplianceGateway();
             if (!checkLockoutState()) {
                 await loadSystemData();
                 buildRegulationsPanel();
