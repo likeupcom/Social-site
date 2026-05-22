@@ -49,6 +49,11 @@
             outline: none;
             box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
         }
+        .upload-input:disabled {
+            border-color: #444;
+            color: #666;
+            cursor: not-allowed;
+        }
         .action-btn {
             background: linear-gradient(45deg, #00ffff, #ff007f);
             color: #fff;
@@ -64,6 +69,13 @@
         .action-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 0 25px rgba(255, 0, 127, 0.6);
+        }
+        .action-btn:disabled {
+            background: #222 !important;
+            color: #555 !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+            transform: none !important;
         }
         .main-grid {
             display: grid;
@@ -243,11 +255,9 @@
         // ==========================================================
         //               MULTILINGUAL ENGINE DICTIONARY
         // ==========================================================
-        // Dual parsing strategy check: Checks both URL parameters (?lang=) and localStorage
         const urlParamsParser = new URLSearchParams(window.location.search);
         const targetLanguageSystem = urlParamsParser.get('lang') || localStorage.getItem("ns_selected_lang") || "en";
         
-        // Save back to local storage just in case it came through the query parameter
         localStorage.setItem("ns_selected_lang", targetLanguageSystem);
 
         const languageDictionary = {
@@ -374,7 +384,7 @@
                 placeholder: "Uzuza link ya video ya YouTube hano (ex: https://youtube.com/watch?v=...)",
                 commitBtn: "Emeza Video yawe",
                 waitingTitle: "⏳ Urutonde rw'Abategereje",
-                waitingEmpty: "Nta muntu uri ku rutonde rw'abategereje.",
+                waitingEmpty: "Nta muntu uri ku urutonde rw'abategereje.",
                 votes: "Amafo y'icyiciro cyo kugaragara",
                 appeal: "Kujurira",
                 complianceTitle: "🛡️ POROTOKORE YO KUBHIRIZA AMATEGEKO YA PLATFORM",
@@ -496,6 +506,55 @@
             document.getElementById("metricComments").innerText = `${localStorage.getItem("ns_completed_hits") || "0"} com`;
         }
 
+        // Dedicated Submission Terminal Protection Layer Engine
+        function updateUploadPanelState() {
+            const uploadPanel = document.getElementById("uploadPanel");
+            const submitBtn = document.getElementById("submitVideoBtn");
+            const inputField = document.getElementById("youtubeLinkInput");
+
+            if (!uploadPanel || !submitBtn || !inputField) return;
+
+            const isCurrentlyOnBoard = activeBoard.some(slot => slot.userId === localUserSessionId);
+            const isCurrentlyInQueue = waitingList.some(slot => slot.userId === localUserSessionId);
+            
+            const registrationTimestamp = localStorage.getItem("ns_upload_time");
+            let coolingPeriodExpired = true;
+            let statusSuffix = "";
+
+            if (registrationTimestamp) {
+                const elapsedDelta = Date.now() - parseInt(registrationTimestamp);
+                const threeHoursMs = 3 * 60 * 60 * 1000;
+                if (elapsedDelta < threeHoursMs) {
+                    coolingPeriodExpired = false;
+                    const remainingMs = threeHoursMs - elapsedDelta;
+                    let hrs = Math.floor(remainingMs / 3600000);
+                    let mins = Math.floor((remainingMs % 3600000) / 60000);
+                    let secs = Math.floor((remainingMs % 60000) / 1000);
+                    statusSuffix = ` [Locked: ${hrs}h ${mins}m ${secs}s]`;
+                }
+            }
+
+            if (isCurrentlyOnBoard || isCurrentlyInQueue || !coolingPeriodExpired) {
+                uploadPanel.style.opacity = "0.5";
+                inputField.disabled = true;
+                submitBtn.disabled = true;
+                submitBtn.style.pointerEvents = "none";
+                
+                let explanation = "";
+                if (isCurrentlyOnBoard) explanation = " (Active on Board)";
+                else if (isCurrentlyInQueue) explanation = " (In Waiting Queue)";
+                else explanation = statusSuffix;
+
+                submitBtn.innerText = `${activeDictionary.commitBtn}${explanation}`;
+            } else {
+                uploadPanel.style.opacity = "1";
+                inputField.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.style.pointerEvents = "auto";
+                submitBtn.innerText = activeDictionary.commitBtn;
+            }
+        }
+
         function runVerificationTimer(buttonElement, targetUrl, onCompleteRoutine) {
             executionTimerRunning = true; 
             buttonElement.style.pointerEvents = "none";
@@ -596,6 +655,7 @@
                 renderActiveBoard();
                 renderWaitingList();
                 updateMetricsDisplayPanel();
+                updateUploadPanelState();
                 evaluateStateTransitions();
             }, 3000); 
         }
@@ -950,6 +1010,7 @@
                 renderActiveBoard();
                 renderWaitingList();
                 updateMetricsDisplayPanel();
+                updateUploadPanelState();
             }
         }
 
@@ -995,11 +1056,13 @@
 
                 if (response.ok) {
                     const statusResult = await response.json();
+                    localStorage.setItem("ns_upload_time", Date.now().toString());
                     alert(statusResult.message || "Video Asset committed safely!");
                     await loadSystemData();
                     renderVIPSpaces();
                     renderActiveBoard();
                     renderWaitingList();
+                    updateUploadPanelState();
                     inputField.value = "";
                     return;
                 }
@@ -1022,8 +1085,10 @@
                 let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
                 currentBoardIsFull = (filledCount === 10);
                 
+                localStorage.setItem("ns_upload_time", Date.now().toString());
                 saveStateToStorage();
                 renderActiveBoard();
+                updateUploadPanelState();
                 
                 alert(activeDictionary.dbSuccessBoard);
                 
@@ -1031,8 +1096,6 @@
                     evaluateStateTransitions();
                 } else {
                     inputField.value = "";
-                    document.getElementById("uploadPanel").style.opacity = "0.5";
-                    document.getElementById("uploadPanel").style.pointerEvents = "none";
                 }
             } else {
                 const freshQueueObject = {
@@ -1046,19 +1109,19 @@
                 };
 
                 waitingList.push(freshQueueObject);
+                localStorage.setItem("ns_upload_time", Date.now().toString());
                 saveStateToStorage();
 
                 inputField.value = "";
                 
                 if (!evaluateStateTransitions()) {
                     renderWaitingList();
+                    updateUploadPanelState();
                     alert(activeDictionary.dbSuccessQueue);
                     
                     sequenceIndex = 0;
                     renderVIPSpaces();
                     renderActiveBoard();
-                    document.getElementById("uploadPanel").style.opacity = "0.5";
-                    document.getElementById("uploadPanel").style.pointerEvents = "none";
                 }
             }
         });
@@ -1072,6 +1135,7 @@
                 renderVIPSpaces();
                 renderActiveBoard();
                 renderWaitingList();
+                updateUploadPanelState();
                 evaluateStateTransitions();
                 initializeLiveUpdateEngine(); 
             }
