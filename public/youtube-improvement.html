@@ -4,793 +4,791 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NS Platform - YouTube Acceleration Engine</title>
+
     <style>
-        /* Modern Glassmorphic Dark-Mode Core Styling Styles */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+            font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
         }
-        body {
-            background-color: #0a0a12;
-            color: #ffffff;
-            padding: 20px;
-            overflow-x: hidden;
+
+        body{
+            background:#0a0a12;
+            color:#fff;
+            padding:20px;
+            overflow-x:hidden;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+
+        .container{
+            max-width:1200px;
+            margin:auto;
         }
-        h1, h2, h3 {
-            color: #00ffff;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-            margin-bottom: 20px;
+
+        h1,h2,h3{
+            color:#00ffff;
+            margin-bottom:20px;
+            text-shadow:0 0 10px rgba(0,255,255,.3);
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+        .glass-panel{
+            background:rgba(255,255,255,.03);
+            backdrop-filter:blur(10px);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:12px;
+            padding:20px;
+            margin-bottom:20px;
+            box-shadow:0 8px 32px rgba(0,0,0,.37);
         }
-        .upload-input {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #00ffff;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 16px;
-            margin-bottom: 15px;
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
+
+        .upload-input{
+            width:100%;
+            padding:12px;
+            background:rgba(0,0,0,.5);
+            border:1px solid #00ffff;
+            border-radius:6px;
+            color:#fff;
+            margin-bottom:15px;
+            outline:none;
+            font-size:16px;
         }
-        .action-btn {
-            background: linear-gradient(45deg, #00ffff, #ff007f);
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+
+        .action-btn{
+            background:linear-gradient(45deg,#00ffff,#ff007f);
+            border:none;
+            color:#fff;
+            padding:12px 24px;
+            border-radius:6px;
+            cursor:pointer;
+            font-weight:bold;
         }
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.6);
+
+        .main-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+            gap:20px;
         }
-        .main-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
+
+        .board-card{
+            background:rgba(255,255,255,.05);
+            border-radius:8px;
+            padding:15px;
+            border-top:3px solid #00ffff;
+            transition:.3s;
         }
-        .board-card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 15px;
-            border-top: 3px solid #00ffff;
-            transition: all 0.3s ease;
-            position: relative;
+
+        .board-card.active-target{
+            border-top:3px solid #ff007f;
+            box-shadow:0 0 15px rgba(255,0,127,.4);
         }
-        .board-card.active-target {
-            border-top: 3px solid #ff007f;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
-            background: rgba(255, 0, 127, 0.03);
+
+        .queue-list{
+            list-style:none;
         }
-        .queue-list {
-            list-style: none;
+
+        .queue-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:15px;
+            padding:14px;
+            border-bottom:1px solid rgba(255,255,255,.06);
         }
-        .queue-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+        .overlay{
+            position:fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:rgba(5,5,10,.95);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            z-index:10000;
         }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5, 5, 10, 0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
+
+        .metric-badge-row{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:6px;
+            margin-top:12px;
+            margin-bottom:12px;
         }
-        .lockout-box {
-            text-align: center;
-            max-width: 500px;
-            padding: 40px;
-            border: 2px solid #ff007f;
-            box-shadow: 0 0 30px rgba(255, 0, 127, 0.5);
+
+        .badge-node{
+            background:rgba(0,0,0,.4);
+            border:1px solid rgba(255,255,255,.05);
+            border-radius:4px;
+            padding:4px;
+            text-align:center;
+            font-size:11px;
+            color:#ccc;
         }
-        /* New Style Modules for Indicators */
-        .metric-badge-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            margin-bottom: 12px;
+
+        .user-row{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin-bottom:10px;
         }
-        .badge-node {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            padding: 4px;
-            font-size: 11px;
-            text-align: center;
-            color: #ccc;
+
+        .user-icon{
+            width:45px;
+            height:45px;
+            border-radius:50%;
+            background:linear-gradient(45deg,#00ffff,#ff007f);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:20px;
+            font-weight:bold;
+            color:#fff;
+            flex-shrink:0;
         }
+
+        .visit-btn{
+            width:100%;
+            padding:9px;
+            border:none;
+            border-radius:5px;
+            font-weight:bold;
+            color:#fff;
+            cursor:pointer;
+        }
+
+        .waiting-link{
+            color:#00ffff;
+            font-size:12px;
+            word-break:break-all;
+            margin-top:4px;
+        }
+
+        .appeal-btn{
+            background:#ff007f;
+            border:none;
+            color:#fff;
+            padding:8px 15px;
+            border-radius:5px;
+            cursor:pointer;
+            font-weight:bold;
+        }
+
     </style>
 </head>
+
 <body>
 
-    <!-- ========================================================== -->
-    <!--             SEQUENTIAL TERMS VERIFICATION OVERLAY          -->
-    <!-- ========================================================== -->
-    <div id="termsVerificationOverlay" class="overlay">
-        <div class="glass-panel" style="max-width: 550px; width: 90%; border: 1px solid #ff007f; box-shadow: 0 0 25px rgba(255, 0, 127, 0.3);">
-            <h2 style="color: #ff007f; font-size: 20px; text-align: center; margin-bottom: 15px;">🛡️ PLATFORM COMPLIANCE PROTOCOL</h2>
-            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; margin-bottom: 20px;">
-                <p id="termsConditionPresenterText" style="line-height: 1.6; color: #ddd; font-size: 15px;"></p>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="termsStepIndicatorLabel" style="font-size: 13px; color: #888;">Condition 1 of 6</span>
-                <button id="termsAcceptButtonStep" class="action-btn" style="padding: 8px 20px; font-size: 14px;">I Understand & Accept</button>
-            </div>
-        </div>
-    </div>
-    <!-- ========================================================== -->
+<div class="container">
 
-    <div class="container">
-        <header style="margin-bottom: 40px; text-align: center;">
-            <h1>NS PLATFORM: YOUTUBE ACCELERATION SYSTEM</h1>
-            <p style="color: #888;">Sequential Conversion Routing Protocol Active</p>
-        </header>
+    <header style="text-align:center;margin-bottom:40px;">
+        <h1>NS PLATFORM: YOUTUBE ACCELERATION SYSTEM</h1>
+        <p style="color:#888;">Sequential Conversion Routing Protocol Active</p>
+    </header>
 
-        <!-- LIVE ACCUMULATED CONVERSION STREAM -->
-        <div class="glass-panel" style="border: 1px dashed #00ffff; display: flex; justify-content: space-around; align-items: center; text-align: center;">
-            <div>
-                <div id="metricViews" style="font-size: 24px; font-weight: bold; color: #00ffff;">0 view</div>
-                <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Traffic Views</div>
-            </div>
-            <div>
-                <div id="metricSubs" style="font-size: 24px; font-weight: bold; color: #ff007f;">0 sub</div>
-                <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Subscribers</div>
-            </div>
-            <div>
-                <div id="metricLikes" style="font-size: 24px; font-weight: bold; color: #00ffff;">0 like</div>
-                <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Video Likes</div>
-            </div>
-            <div>
-                <div id="metricComments" style="font-size: 24px; font-weight: bold; color: #ff007f;">0 com</div>
-                <div style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Comments</div>
-            </div>
+    <div class="glass-panel" style="border:1px dashed #00ffff;display:flex;justify-content:space-around;text-align:center;">
+        <div>
+            <div id="metricViews" style="font-size:24px;font-weight:bold;color:#00ffff;">0 view</div>
+            <div style="font-size:11px;color:#888;">Traffic Views</div>
         </div>
 
-        <!-- VIP ACCELERATION SUITE -->
-        <h2 style="color: #ff007f; text-shadow: 0 0 10px rgba(255, 0, 127, 0.3);">👑 VIP ACCELERATION SUITE</h2>
-        <div id="vipContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-            <div class="vip-wing" id="vipLeftWing" style="display: flex; flex-direction: column; gap: 15px;"></div>
-            <div class="vip-wing" id="vipRightWing" style="display: flex; flex-direction: column; gap: 15px;"></div>
+        <div>
+            <div id="metricSubs" style="font-size:24px;font-weight:bold;color:#ff007f;">0 sub</div>
+            <div style="font-size:11px;color:#888;">Subscribers</div>
         </div>
 
-        <!-- Main Acceleration Board Configuration -->
-        <div class="glass-panel">
-            <h2>⚡ Main Acceleration Board</h2>
-            <div id="mainAccelerationBoard" class="main-grid"></div>
+        <div>
+            <div id="metricLikes" style="font-size:24px;font-weight:bold;color:#00ffff;">0 like</div>
+            <div style="font-size:11px;color:#888;">Likes</div>
         </div>
 
-        <!-- Submission Controls Terminal Box -->
-        <div class="glass-panel" id="uploadPanel">
-            <h2>📥 Submit Channel Into Platform Pipeline</h2>
-            <input type="text" id="youtubeLinkInput" class="upload-input" placeholder="Paste your YouTube Channel or Video Link here...">
-            <button id="submitVideoBtn" class="action-btn">Commit Asset to Network</button>
-        </div>
-
-        <!-- Waiting Queue Statistics Layout Panel -->
-        <div class="glass-panel">
-            <h2>⏳ Platform Waiting Queue List</h2>
-            <ul id="waitingQueueContainer" class="queue-list"></ul>
-        </div>
-
-        <!-- Rules and Guidelines Board Information Container -->
-        <div class="glass-panel" id="rulesAnchorPanel"></div>
-    </div>
-
-    <!-- Active Routine System Interruption Block Screen Layout -->
-    <div id="appearingPeriodOverlay" class="overlay" style="display: none;">
-        <div class="glass-panel" style="text-align: center; max-width: 600px; border: 1px solid #00ffff; box-shadow: 0 0 20px #00ffff;">
-            <h2 style="animation: pulse 1.5s infinite;">🔄 GLOBAL TRANSITION PERIOD ACTIVE</h2>
-            <p style="margin: 20px 0; color: #aaa; line-height: 1.6;">
-                The platform is currently running its global data synchronization routine. 
-                All nodes are tracking individual interaction matrices to update active placements. 
-                Please stand by; verification routines process momentarily.
-            </p>
+        <div>
+            <div id="metricComments" style="font-size:24px;font-weight:bold;color:#ff007f;">0 com</div>
+            <div style="font-size:11px;color:#888;">Comments</div>
         </div>
     </div>
 
-    <!-- Global Framework Logical Automation Routine Engines Script -->
-    <script>
-        const authToken = localStorage.getItem("ns_user_token") || "";
+    <div class="glass-panel">
+        <h2>⚡ Main Acceleration Board</h2>
+        <div id="mainAccelerationBoard" class="main-grid"></div>
+    </div>
 
-        const localUserSessionId = (function() {
-            let key = localStorage.getItem("ns_engine_token");
-            if (!key) {
-                key = "usr_token_" + Math.random().toString(36).substring(2, 15) + "_" + Date.now();
-                localStorage.setItem("ns_engine_token", key);
+    <div class="glass-panel" id="uploadPanel">
+        <h2>📥 Submit Video Into Platform Pipeline</h2>
+
+        <input 
+            type="text"
+            id="youtubeLinkInput"
+            class="upload-input"
+            placeholder="Paste YouTube Video Link Here..."
+        >
+
+        <button id="submitVideoBtn" class="action-btn">
+            Commit Asset To Network
+        </button>
+    </div>
+
+    <div class="glass-panel">
+        <h2>⏳ Platform Waiting Queue List</h2>
+        <ul id="waitingQueueContainer" class="queue-list"></ul>
+    </div>
+
+</div>
+
+<script>
+
+const authToken = localStorage.getItem("ns_user_token") || "";
+
+const localUserSessionId = (function(){
+    let key = localStorage.getItem("ns_engine_token");
+
+    if(!key){
+        key = "usr_token_" + Math.random().toString(36).substring(2,15) + "_" + Date.now();
+        localStorage.setItem("ns_engine_token",key);
+    }
+
+    return key;
+})();
+
+const signupUsername =
+    localStorage.getItem("username") ||
+    localStorage.getItem("ns_username") ||
+    localStorage.getItem("signup_username") ||
+    "User";
+
+const signupChannelLink =
+    localStorage.getItem("channel_link") ||
+    localStorage.getItem("youtube_channel_link") ||
+    localStorage.getItem("ns_channel_link") ||
+    "";
+
+let activeBoard = [];
+let waitingList = [];
+
+let sequenceIndex = 0;
+let currentBoardIsFull = false;
+
+let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0");
+
+function cleanYoutubeVideoLink(url){
+
+    try{
+
+        const parsed = new URL(url);
+
+        const validHost =
+            parsed.hostname.includes("youtube.com") ||
+            parsed.hostname.includes("youtu.be");
+
+        if(!validHost){
+            return null;
+        }
+
+        if(
+            parsed.hostname.includes("youtube.com") &&
+            !parsed.pathname.includes("/watch")
+        ){
+            return null;
+        }
+
+        parsed.searchParams.forEach((value,key)=>{
+
+            if(
+                key !== "v"
+            ){
+                parsed.searchParams.delete(key);
             }
-            return key;
-        })();
 
-        let activeBoard = [];
-        let waitingList = [];
-        let vipBoard = [
-            { isEmptySlot: true, slotPosition: "left_1" },
-            { isEmptySlot: true, slotPosition: "left_2" },
-            { isEmptySlot: true, slotPosition: "right_1" },
-            { isEmptySlot: true, slotPosition: "right_2" }
-        ];
+        });
 
-        let systemPhase = "REGULAR_PERIOD"; 
-        let sequenceIndex = 0; 
-        let currentBoardIsFull = false;
-        let justBecameInactivePool = [];
+        parsed.hash = "";
 
-        let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0");
+        return parsed.toString();
 
-        // --- NEW REQUISITIONS GATEWAY PROTOCOL STATE ---
-        let mandatoryConditionsList = [
-            "1. Please read and understand all policies and regulations of this website before using the platform.",
-            "2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.",
-            "3. Once you click Visit, a 30-second countdown will begin. You will be allowed to visit the next channel only after the countdown finishes, until you complete all visits.",
-            "4. When your account becomes Live, please turn on notifications so you can monitor the actions taking place on your channel.",
-            "5. While you are in the waiting list, if your account receives three appeals, it will be removed from the waiting list. If this happens three times, your account will be permanently deleted.",
-            "6. Making an appeal will not return you back to the board, but it may affect another user who is currently in the waiting list."
-        ];
-        let currentConditionIndexPointer = 0;
-        let termsAcceptedFlag = localStorage.getItem("ns_conditions_verified") === "true";
+    }catch(e){
+        return null;
+    }
 
-        function instantiateComplianceGateway() {
-            if (termsAcceptedFlag) {
-                document.getElementById("termsVerificationOverlay").style.display = "none";
-                return;
+}
+
+function updateMetricsDisplayPanel(){
+
+    document.getElementById("metricViews").innerText =
+        `${currentCompletedHits} view`;
+
+    document.getElementById("metricSubs").innerText =
+        `${currentCompletedHits} sub`;
+
+    document.getElementById("metricLikes").innerText =
+        `${currentCompletedHits} like`;
+
+    document.getElementById("metricComments").innerText =
+        `${currentCompletedHits} com`;
+
+}
+
+async function synchroniseWithLiveDatabase(){
+
+    try{
+
+        const response = await fetch('/api/system-state',{
+
+            method:'GET',
+
+            headers:{
+                'Authorization':`Bearer ${authToken}`,
+                'Content-Type':'application/json'
             }
-            
-            document.getElementById("termsVerificationOverlay").style.display = "flex";
-            renderCurrentConditionStep();
 
-            document.getElementById("termsAcceptButtonStep").addEventListener("click", () => {
-                currentConditionIndexPointer++;
-                if (currentConditionIndexPointer < mandatoryConditionsList.length) {
-                    renderCurrentConditionStep();
-                } else {
-                    termsAcceptedFlag = true;
-                    localStorage.setItem("ns_conditions_verified", "true");
-                    document.getElementById("termsVerificationOverlay").style.display = "none";
-                }
-            });
+        });
+
+        if(response.ok){
+
+            const data = await response.json();
+
+            activeBoard = data.activeBoard || activeBoard;
+            waitingList = data.waitingList || waitingList;
+            sequenceIndex = data.sequenceIndex || 0;
+            currentBoardIsFull = data.currentBoardIsFull || false;
+
+            return true;
+
         }
 
-        function renderCurrentConditionStep() {
-            document.getElementById("termsConditionPresenterText").innerText = mandatoryConditionsList[currentConditionIndexPointer];
-            document.getElementById("termsStepIndicatorLabel").innerText = `Condition ${currentConditionIndexPointer + 1} of ${mandatoryConditionsList.length}`;
-        }
+    }catch(error){
 
-        function updateMetricsDisplayPanel() {
-            document.getElementById("metricViews").innerText = `${currentCompletedHits} view`;
-            document.getElementById("metricSubs").innerText = `${currentCompletedHits} sub`;
-            document.getElementById("metricLikes").innerText = `${currentCompletedHits} like`;
-            document.getElementById("metricComments").innerText = `${currentCompletedHits} com`;
-        }
+        console.warn("Server offline.");
 
-        function runVerificationTimer(buttonElement, targetUrl, onCompleteRoutine) {
-            buttonElement.style.pointerEvents = "none";
-            window.open(targetUrl, '_blank');
+    }
 
-            let secondsRemaining = 30;
-            buttonElement.innerText = `Verifying... (${secondsRemaining}s)`;
+    return false;
 
-            const timerCountdownLoop = setInterval(() => {
-                secondsRemaining--;
-                if (secondsRemaining > 0) {
-                    buttonElement.innerText = `Verifying... (${secondsRemaining}s)`;
-                } else {
-                    clearInterval(timerCountdownLoop);
-                    
-                    currentCompletedHits++;
-                    localStorage.setItem("ns_completed_hits", currentCompletedHits.toString());
-                    updateMetricsDisplayPanel();
+}
 
-                    buttonElement.style.pointerEvents = "auto";
-                    onCompleteRoutine();
-                }
-            }, 1000);
-        }
+async function loadSystemData(){
 
-        async function synchroniseWithLiveDatabase() {
-            try {
-                const response = await fetch('/api/system-state', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    }
+    const usingServer = await synchroniseWithLiveDatabase();
+
+    if(!usingServer){
+
+        const storedBoard = localStorage.getItem("ns_active_board");
+
+        if(storedBoard){
+
+            activeBoard = JSON.parse(storedBoard);
+
+        }else{
+
+            activeBoard = [];
+
+            for(let i=0;i<10;i++){
+
+                activeBoard.push({
+                    isEmptySlot:true,
+                    clicks:0
                 });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    activeBoard = data.activeBoard || activeBoard;
-                    waitingList = data.waitingList || waitingList;
-                    vipBoard = data.vipBoard || vipBoard;
-                    systemPhase = data.systemPhase || systemPhase;
-                    sequenceIndex = data.sequenceIndex ?? sequenceIndex;
-                    currentBoardIsFull = data.currentBoardIsFull ?? currentBoardIsFull;
-                    justBecameInactivePool = data.justBecameInactivePool || justBecameInactivePool;
-                    return true;
-                }
-            } catch (error) {
-                console.warn("Backend API Offline or Unreachable. Operating in robust fallback storage mode.");
+
             }
-            return false;
+
         }
 
-        async function loadSystemData() {
-            const usingLiveServer = await synchroniseWithLiveDatabase();
-            
-            if (!usingLiveServer) {
-                const storedBoard = localStorage.getItem("ns_active_board");
-                if (storedBoard) {
-                    activeBoard = JSON.parse(storedBoard);
-                } else {
-                    activeBoard = [];
-                    for(let i = 0; i < 10; i++) {
-                        activeBoard.push({ isEmptySlot: true, clicks: 0 });
-                    }
-                }
-                waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
-                vipBoard = JSON.parse(localStorage.getItem("ns_vip_board")) || vipBoard;
-                systemPhase = localStorage.getItem("ns_system_phase") || "REGULAR_PERIOD";
-                sequenceIndex = parseInt(localStorage.getItem("ns_sequence_index") || "0");
-                currentBoardIsFull = (localStorage.getItem("ns_board_full") === "true");
-                justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
-            }
+        waitingList =
+            JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
 
-            let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
-            currentBoardIsFull = (filledCount === 10);
+        sequenceIndex =
+            parseInt(localStorage.getItem("ns_sequence_index") || "0");
+
+        currentBoardIsFull =
+            localStorage.getItem("ns_board_full") === "true";
+
+    }
+
+    updateMetricsDisplayPanel();
+
+}
+
+async function saveStateToStorage(){
+
+    localStorage.setItem(
+        "ns_active_board",
+        JSON.stringify(activeBoard)
+    );
+
+    localStorage.setItem(
+        "ns_waiting_list",
+        JSON.stringify(waitingList)
+    );
+
+    localStorage.setItem(
+        "ns_sequence_index",
+        sequenceIndex.toString()
+    );
+
+    localStorage.setItem(
+        "ns_board_full",
+        currentBoardIsFull.toString()
+    );
+
+    try{
+
+        await fetch('/api/system-state',{
+
+            method:'POST',
+
+            headers:{
+                'Authorization':`Bearer ${authToken}`,
+                'Content-Type':'application/json'
+            },
+
+            body:JSON.stringify({
+                activeBoard,
+                waitingList,
+                sequenceIndex,
+                currentBoardIsFull
+            })
+
+        });
+
+    }catch(e){
+
+        console.warn("Failed to sync.");
+
+    }
+
+}
+
+function runVerificationTimer(buttonElement,targetUrl,onCompleteRoutine){
+
+    buttonElement.style.pointerEvents = "none";
+
+    window.open(targetUrl,'_blank');
+
+    let secondsRemaining = 30;
+
+    buttonElement.innerText =
+        `Verifying... (${secondsRemaining}s)`;
+
+    const timer = setInterval(()=>{
+
+        secondsRemaining--;
+
+        if(secondsRemaining > 0){
+
+            buttonElement.innerText =
+                `Verifying... (${secondsRemaining}s)`;
+
+        }else{
+
+            clearInterval(timer);
+
+            currentCompletedHits++;
+
+            localStorage.setItem(
+                "ns_completed_hits",
+                currentCompletedHits.toString()
+            );
+
             updateMetricsDisplayPanel();
+
+            buttonElement.style.pointerEvents = "auto";
+
+            onCompleteRoutine();
+
         }
 
-        async function saveStateToStorage() {
-            localStorage.setItem("ns_active_board", JSON.stringify(activeBoard));
-            localStorage.setItem("ns_waiting_list", JSON.stringify(waitingList));
-            localStorage.setItem("ns_vip_board", JSON.stringify(vipBoard));
-            localStorage.setItem("ns_system_phase", systemPhase);
-            localStorage.setItem("ns_sequence_index", sequenceIndex.toString());
-            localStorage.setItem("ns_board_full", currentBoardIsFull.toString());
-            localStorage.setItem("ns_inactive_pool", JSON.stringify(justBecameInactivePool));
+    },1000);
 
-            try {
-                await fetch('/api/system-state', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        activeBoard, waitingList, vipBoard, systemPhase, sequenceIndex, currentBoardIsFull, justBecameInactivePool
-                    })
-                });
-            } catch(e) {
-                console.error("Failed to commit network mutation stream to remote database.");
-            }
-        }
+}
 
-        function checkLockoutState() {
-            const blockReleaseTimestamp = localStorage.getItem("ns_lockout_lift_time");
-            if (blockReleaseTimestamp) {
-                let delta = parseInt(blockReleaseTimestamp) - Date.now();
-                if (delta > 0) {
-                    renderLockoutInterfaceScreen(delta);
-                    return true;
-                } else {
-                    localStorage.removeItem("ns_lockout_lift_time");
-                }
-            }
-            return false;
-        }
+function renderActiveBoard(){
 
-        function forceLocalUserLockout() {
-            const lockoutDurationMs = 3 * 60 * 60 * 1000; 
-            const executionLiftTarget = Date.now() + lockoutDurationMs;
-            localStorage.setItem("ns_lockout_lift_time", executionLiftTarget.toString());
-            renderLockoutInterfaceScreen(lockoutDurationMs);
-        }
+    const boardContainer =
+        document.getElementById("mainAccelerationBoard");
 
-        function renderLockoutInterfaceScreen(remainingMs) {
-            document.body.innerHTML = `
-                <div class="overlay">
-                    <div class="glass-panel lockout-box">
-                        <h2 style="color: #ff007f;">⏳ SECURITY INTERVENTION ACCELERATION SYSTEM LOCKOUT</h2>
-                        <p style="margin: 20px 0; color: #ccc; line-height: 1.6;">
-                            Your session active allocation cycle has run out or an appearing phase reset has completed. 
-                            To ensure platform stability and genuine processing metrics, your account is in cold cooling storage.
-                        </p>
-                        <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">
-                            --:--:--
-                        </div>
-                    </div>
+    boardContainer.innerHTML = "";
+
+    activeBoard.forEach((slot,index)=>{
+
+        const card = document.createElement("div");
+
+        card.className = "board-card";
+
+        if(slot.isEmptySlot){
+
+            card.innerHTML = `
+                <div style="text-align:center;color:#666;padding:20px 0;">
+                    Empty Slot
                 </div>
             `;
 
-            let absoluteTarget = Date.now() + remainingMs;
-            const liveClockRoutine = setInterval(() => {
-                let currentDelta = absoluteTarget - Date.now();
-                if (currentDelta <= 0) {
-                    clearInterval(liveClockRoutine);
-                    location.reload();
-                } else {
-                    let hrs = Math.floor(currentDelta / (3600000));
-                    let mins = Math.floor((currentDelta % 3600000) / 60000);
-                    let secs = Math.floor((currentDelta % 60000) / 1000);
-                    document.getElementById("countdownTimerBox").innerText = 
-                        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                }
-            }, 1000);
-        }
+        }else{
 
-        function buildRegulationsPanel() {
-            const container = document.getElementById("rulesAnchorPanel");
-            container.innerHTML = `
-                <h3 style="color: #ff007f;">📋 Platform Conversion Regulations Protocol</h3>
-                <ol style="padding-left: 20px; line-height: 1.8; color: #ddd; margin-top: 10px;">
-                    <li>Channels must complete visits sequentially as tracked via active platform nodes.</li>
-                    <li>Skipping active targeted assets breaks validation streams and drops processing sync loops.</li>
-                    <li>When the platform triggers the <strong>Appearing Period</strong>, the data matrices rebuild entirely.</li>
-                    <li>Active elements are protected by anti-scrambling fallbacks to maintain pipeline speed.</li>
-                </ol>
+            let isCurrentTarget = sequenceIndex === index;
+
+            if(isCurrentTarget){
+                card.classList.add("active-target");
+            }
+
+            const clicks = slot.clicks || 0;
+
+            card.innerHTML = `
+
+                <div class="user-row">
+
+                    <div class="user-icon">
+                        👤
+                    </div>
+
+                    <div style="flex:1;overflow:hidden;">
+
+                        <div style="
+                            font-weight:bold;
+                            white-space:nowrap;
+                            overflow:hidden;
+                            text-overflow:ellipsis;
+                        ">
+                            ${slot.username}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="metric-badge-row">
+                    <div class="badge-node">👁️ ${clicks} view</div>
+                    <div class="badge-node">👤 ${clicks} sub</div>
+                    <div class="badge-node">❤️ ${clicks} like</div>
+                    <div class="badge-node">💬 ${clicks} com</div>
+                </div>
+
+                <button
+                    class="visit-btn"
+                    style="
+                        background:${isCurrentTarget ? '#ff007f' : '#222'};
+                        opacity:${isCurrentTarget ? '1' : '.4'};
+                        cursor:${isCurrentTarget ? 'pointer' : 'default'};
+                    "
+                >
+                    ${isCurrentTarget ? 'Visit' : 'Locked'}
+                </button>
+
             `;
-        }
 
-        function renderVIPSpaces() {
-            const leftWing = document.getElementById("vipLeftWing");
-            const rightWing = document.getElementById("vipRightWing");
-            
-            leftWing.innerHTML = "";
-            rightWing.innerHTML = "";
+            const btn = card.querySelector(".visit-btn");
 
-            vipBoard.forEach((slot, index) => {
-                let targetWing = (index < 2) ? leftWing : rightWing;
-                
-                let card = document.createElement("div");
-                card.className = "vip-card";
-                card.style.background = "rgba(255, 255, 255, 0.05)";
-                card.style.backdropFilter = "blur(10px)";
-                card.style.border = "1px solid #ff007f";
-                card.style.borderRadius = "8px";
-                card.style.padding = "15px";
-                card.style.display = "flex";
-                card.style.justifyContent = "space-between";
-                card.style.alignItems = "center";
-                card.style.boxShadow = "0 0 10px rgba(255, 0, 127, 0.2)";
+            if(isCurrentTarget){
 
-                if (slot.isEmptySlot) {
-                    card.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px; color: #888;">
-                            <span style="font-size: 24px;">👤</span>
-                            <div>
-                                <div style="font-weight: bold; color: #ff007f;">VIP SLOT RESERVED</div>
-                                <div style="font-size: 12px;">Position: ${slot.slotPosition.toUpperCase()}</div>
-                            </div>
-                        </div>
-                        <button disabled style="background: #333; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed;">Visit</button>
-                    `;
-                } else {
-                    let absoluteIndex = index;
-                    let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
-                    let displayClicks = slot.clicks || 0;
+                btn.addEventListener("click",()=>{
 
-                    card.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
-                            <span style="font-size: 24px; color: #00ffff; filter: drop-shadow(0 0 5px #00ffff);">👑</span>
-                            <div style="width: 100%;">
-                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.channelTitle}</div>
-                                <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
-                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} view</span>
-                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} sub</span>
-                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} like</span>
-                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} com</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="vip-action-btn" data-vip-index="${absoluteIndex}" style="
-                            background: ${isCurrentTarget ? '#ff007f' : '#222'};
-                            color: #fff;
-                            border: 1px solid #ff007f;
-                            padding: 8px 16px;
-                            border-radius: 4px;
-                            box-shadow: ${isCurrentTarget ? '0 0 10px #ff007f' : 'none'};
-                            cursor: ${isCurrentTarget ? 'pointer' : 'default'};
-                            opacity: ${isCurrentTarget ? '1' : '0.4'};
-                        ">${isCurrentTarget ? 'Visit' : 'Locked'}</button>
-                    `;
+                    runVerificationTimer(
+                        btn,
+                        slot.youtubeLink,
+                        ()=>{
 
-                    const actionBtn = card.querySelector(".vip-action-btn");
-                    if (isCurrentTarget) {
-                        actionBtn.addEventListener("click", () => {
-                            runVerificationTimer(actionBtn, slot.youtubeLink, () => {
-                                vipBoard[absoluteIndex].clicks = displayClicks + 1;
-                                sequenceIndex++; 
-                                saveStateToStorage();
-                                renderVIPSpaces();
-                                renderActiveBoard();
-                                evaluateStateTransitions();
-                            });
-                        });
-                    }
-                }
-                targetWing.appendChild(card);
-            });
-        }
+                            activeBoard[index].clicks = clicks + 1;
 
-        function renderActiveBoard() {
-            const boardContainer = document.getElementById("mainAccelerationBoard");
-            boardContainer.innerHTML = "";
+                            sequenceIndex++;
 
-            let vipOffset = 4;
+                            saveStateToStorage();
 
-            activeBoard.forEach((slot, index) => {
-                const elementNode = document.createElement("div");
-                elementNode.className = "board-card";
+                            renderActiveBoard();
 
-                if (slot.isEmptySlot) {
-                    elementNode.innerHTML = `
-                        <div style="color: #555; text-align: center; padding: 20px 0;">
-                            <div style="font-size: 24px;">📭</div>
-                            <div style="font-size: 12px; margin-top: 5px;">Slot Vacant</div>
-                        </div>
-                    `;
-                } else {
-                    let absoluteIndex = vipOffset + index;
-                    let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
-                    let displayClicks = slot.clicks || 0;
+                        }
+                    );
 
-                    if (isCurrentTarget) {
-                        elementNode.className += " active-target";
-                    }
-
-                    // Embedded view sub like com structural mapping layout metrics grid blocks
-                    elementNode.innerHTML = `
-                        <div style="font-weight: bold; font-size: 15px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            ${slot.channelTitle}
-                        </div>
-                        
-                        <div class="metric-badge-row">
-                            <div class="badge-node">👁️ ${displayClicks} view</div>
-                            <div class="badge-node">❤️ ${displayClicks} like</div>
-                            <div class="badge-node">👤 ${displayClicks} sub</div>
-                            <div class="badge-node">💬 ${displayClicks} com</div>
-                        </div>
-
-                        <button class="active-redirect-anchor" style="
-                            display: block; width: 100%; text-align: center; background: ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.05)'};
-                            color: #fff; padding: 8px; border-radius: 4px; font-size: 13px; font-weight: bold;
-                            border: 1px solid ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.1)'};
-                            cursor: ${isCurrentTarget ? 'pointer' : 'default'};
-                            opacity: ${isCurrentTarget ? '1' : '0.3'};
-                        ">${isCurrentTarget ? 'Accelerate Content' : 'Locked'}</button>
-                    `;
-
-                    const linkButton = elementNode.querySelector(".active-redirect-anchor");
-                    if (isCurrentTarget) {
-                        linkButton.addEventListener("click", () => {
-                            runVerificationTimer(linkButton, slot.youtubeLink, () => {
-                                activeBoard[index].clicks = displayClicks + 1;
-                                sequenceIndex++;
-                                saveStateToStorage();
-                                renderVIPSpaces();
-                                renderActiveBoard();
-                                evaluateStateTransitions();
-                            });
-                        });
-                    }
-                }
-                boardContainer.appendChild(elementNode);
-            });
-        }
-
-        function renderWaitingList() {
-            const container = document.getElementById("waitingQueueContainer");
-            container.innerHTML = "";
-
-            if (waitingList.length === 0) {
-                container.innerHTML = `<li style="color: #666; padding: 15px; text-align: center;">Waiting pool empty. System parameters stable.</li>`;
-                return;
-            }
-
-            waitingList.forEach((user, index) => {
-                const li = document.createElement("li");
-                li.className = "queue-item";
-                li.innerHTML = `
-                    <span style="color: #ddd;">${index + 1}. <strong>${user.channelTitle}</strong></span>
-                    <span style="color: #ff007f; font-size: 13px;">Appearing Cycle Votes: ${user.appearsReceived}/3</span>
-                `;
-                container.appendChild(li);
-            });
-        }
-
-        function evaluateStateTransitions() {
-            if (!currentBoardIsFull) return false;
-
-            let maxSequenceThreshold = 4 + activeBoard.length;
-
-            if (sequenceIndex >= maxSequenceThreshold) {
-                systemPhase = "APPEARING_PERIOD";
-                saveStateToStorage();
-                executeAppearingPhaseRoutine();
-                return true;
-            }
-            return false;
-        }
-
-        function executeAppearingPhaseRoutine() {
-            document.getElementById("appearingPeriodOverlay").style.display = "flex";
-            
-            waitingList.forEach(user => {
-                user.appearsReceived = (user.appearsReceived || 0) + 1;
-            });
-
-            let localUserWasActive = activeBoard.some(u => u.userId === localUserSessionId);
-            let survivorsList = waitingList.filter(user => user.appearsReceived < 3);
-            let evictedTotalCount = waitingList.length - survivorsList.length;
-
-            if (evictedTotalCount > 0 && justBecameInactivePool.length > 0) {
-                for (let i = 0; i < evictedTotalCount; i++) {
-                    if (justBecameInactivePool.length === 0) break;
-                    
-                    const randomPickIndex = Math.floor(Math.random() * justBecameInactivePool.length);
-                    const fallbackReplacement = justBecameInactivePool.splice(randomPickIndex, 1)[0];
-                    
-                    fallbackReplacement.appearsReceived = 0;
-                    fallbackReplacement.clicks = 0;
-                    survivorsList.push(fallbackReplacement);
-                }
-            }
-
-            while (survivorsList.length < 10) {
-                survivorsList.push({
-                    userId: "system_node_" + Math.floor(Math.random() * 10000),
-                    channelTitle: "System Accelerated Feed",
-                    clicks: 0,
-                    youtubeLink: "https://youtube.com"
                 });
+
             }
 
-            activeBoard = survivorsList.slice(0, 10).map(element => {
-                return {
-                    userId: element.userId,
-                    channelTitle: element.channelTitle,
-                    clicks: 0,
-                    youtubeLink: element.youtubeLink
-                };
-            });
+        }
 
-            waitingList = [];
-            justBecameInactivePool = [];
-            sequenceIndex = 0;
-            systemPhase = "REGULAR_PERIOD";
+        boardContainer.appendChild(card);
+
+    });
+
+}
+
+function renderWaitingList(){
+
+    const container =
+        document.getElementById("waitingQueueContainer");
+
+    container.innerHTML = "";
+
+    if(waitingList.length === 0){
+
+        container.innerHTML = `
+            <li style="padding:15px;color:#666;text-align:center;">
+                Waiting list empty
+            </li>
+        `;
+
+        return;
+
+    }
+
+    waitingList.forEach((user,index)=>{
+
+        const li = document.createElement("li");
+
+        li.className = "queue-item";
+
+        li.innerHTML = `
+
+            <div style="display:flex;align-items:center;gap:12px;flex:1;">
+
+                <div class="user-icon">
+                    👤
+                </div>
+
+                <div style="flex:1;">
+
+                    <div style="font-weight:bold;">
+                        ${user.username}
+                    </div>
+
+                    <div class="waiting-link">
+                        ${user.channelLink || "No channel link"}
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button class="appeal-btn">
+                Appeal
+            </button>
+
+        `;
+
+        const appealBtn = li.querySelector(".appeal-btn");
+
+        appealBtn.addEventListener("click",()=>{
+
+            waitingList[index].appeals =
+                (waitingList[index].appeals || 0) + 1;
 
             saveStateToStorage();
-            document.getElementById("appearingPeriodOverlay").style.display = "none";
 
-            if (localUserWasActive) {
-                forceLocalUserLockout();
-            } else {
-                location.reload();
-            }
+            alert("Appeal submitted.");
+
+        });
+
+        container.appendChild(li);
+
+    });
+
+}
+
+document.getElementById("submitVideoBtn").addEventListener("click",async()=>{
+
+    const input =
+        document.getElementById("youtubeLinkInput");
+
+    const rawLink =
+        input.value.trim();
+
+    const cleanLink =
+        cleanYoutubeVideoLink(rawLink);
+
+    if(!cleanLink){
+
+        alert("Please upload valid YouTube VIDEO link only.");
+
+        return;
+
+    }
+
+    try{
+
+        const response = await fetch('/api/submit-link',{
+
+            method:'POST',
+
+            headers:{
+                'Authorization':`Bearer ${authToken}`,
+                'Content-Type':'application/json'
+            },
+
+            body:JSON.stringify({
+
+                youtubeLink:cleanLink,
+                userId:localUserSessionId,
+                username:signupUsername,
+                channelLink:signupChannelLink
+
+            })
+
+        });
+
+        if(response.ok){
+
+            alert("Video uploaded successfully.");
+
         }
 
-        document.getElementById("submitVideoBtn").addEventListener("click", async function() {
-            const inputField = document.getElementById("youtubeLinkInput");
-            const urlValue = inputField.value.trim();
+    }catch(e){}
 
-            if (!urlValue || (!urlValue.includes("youtube.com") && !urlValue.includes("youtu.be"))) {
-                alert("Validation Exception: Please provide a structurally valid YouTube address.");
-                return;
-            }
+    let emptyIndex =
+        activeBoard.findIndex(slot=>slot.isEmptySlot);
 
-            try {
-                const response = await fetch('/api/submit-link', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        youtubeLink: urlValue,
-                        userId: localUserSessionId
-                    })
-                });
+    if(emptyIndex !== -1 && !currentBoardIsFull){
 
-                if (response.ok) {
-                    const statusResult = await response.json();
-                    alert(statusResult.message || "Asset committed successfully to database matrix!");
-                    location.reload();
-                    return;
-                }
-            } catch(err) {
-                console.warn("Backend pipeline down, migrating submission through localized storage architecture layers.");
-            }
+        activeBoard[emptyIndex] = {
 
-            let firstEmptyIndex = activeBoard.findIndex(slot => slot.isEmptySlot);
+            userId:localUserSessionId,
+            username:signupUsername,
+            channelLink:signupChannelLink,
+            youtubeLink:cleanLink,
+            clicks:0
 
-            if (firstEmptyIndex !== -1 && !currentBoardIsFull) {
-                activeBoard[firstEmptyIndex] = {
-                    userId: localUserSessionId,
-                    channelTitle: "User_" + localUserSessionId.split("_")[2],
-                    clicks: 0,
-                    youtubeLink: urlValue
-                };
-                
-                let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
-                currentBoardIsFull = (filledCount === 10);
-                
-                saveStateToStorage();
-                renderActiveBoard();
-                
-                alert("Success: You are one of the first 10 users! Placed onto the Main Acceleration Board.");
-                
-                if (currentBoardIsFull) {
-                    location.reload();
-                } else {
-                    inputField.value = "";
-                    document.getElementById("uploadPanel").style.opacity = "0.5";
-                    document.getElementById("uploadPanel").style.pointerEvents = "none";
-                }
-            } else {
-                const freshQueueObject = {
-                    userId: localUserSessionId,
-                    channelTitle: "User_" + localUserSessionId.split("_")[2],
-                    clicks: 0,
-                    youtubeLink: urlValue,
-                    appearsReceived: 0
-                };
+        };
 
-                waitingList.push(freshQueueObject);
-                saveStateToStorage();
+        let filledCount =
+            activeBoard.filter(slot=>!slot.isEmptySlot).length;
 
-                inputField.value = "";
-                
-                if (!evaluateStateTransitions()) {
-                    renderWaitingList();
-                    alert("Success: Video committed onto the platform Waiting List successfully.");
-                    
-                    sequenceIndex = 0;
-                    renderVIPSpaces();
-                    renderActiveBoard();
-                    document.getElementById("uploadPanel").style.opacity = "0.5";
-                    document.getElementById("uploadPanel").style.pointerEvents = "none";
-                }
-            }
+        currentBoardIsFull = filledCount === 10;
+
+        saveStateToStorage();
+
+        renderActiveBoard();
+
+        input.value = "";
+
+    }else{
+
+        waitingList.push({
+
+            userId:localUserSessionId,
+            username:signupUsername,
+            channelLink:signupChannelLink,
+            youtubeLink:cleanLink,
+            clicks:0,
+            appeals:0
+
         });
 
-        window.addEventListener("DOMContentLoaded", async () => {
-            instantiateComplianceGateway();
-            if (!checkLockoutState()) {
-                await loadSystemData();
-                buildRegulationsPanel();
-                renderVIPSpaces();
-                renderActiveBoard();
-                renderWaitingList();
-                evaluateStateTransitions();
-            }
-        });
-    </script>
+        saveStateToStorage();
+
+        renderWaitingList();
+
+        input.value = "";
+
+    }
+
+});
+
+window.addEventListener("DOMContentLoaded",async()=>{
+
+    await loadSystemData();
+
+    renderActiveBoard();
+
+    renderWaitingList();
+
+});
+
+</script>
+
 </body>
 </html>
