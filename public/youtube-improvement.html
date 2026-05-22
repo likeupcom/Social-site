@@ -67,7 +67,7 @@
         }
         .main-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Widened slightly to accommodate new layout */
             gap: 20px;
         }
         .board-card {
@@ -77,6 +77,9 @@
             border-top: 3px solid #00ffff;
             transition: all 0.3s ease;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .board-card.active-target {
             border-top: 3px solid #ff007f;
@@ -89,7 +92,8 @@
         .queue-item {
             display: flex;
             justify-content: space-between;
-            padding: 10px;
+            align-items: center;
+            padding: 15px 10px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
         .overlay {
@@ -111,28 +115,43 @@
             border: 2px solid #ff007f;
             box-shadow: 0 0 30px rgba(255, 0, 127, 0.5);
         }
-        /* New Style Modules for Indicators */
         .metric-badge-row {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 6px;
-            margin-bottom: 12px;
+            margin-top: 15px;
         }
         .badge-node {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 4px;
-            padding: 4px;
+            padding: 6px 2px;
             font-size: 11px;
             text-align: center;
             color: #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .badge-icon {
+            font-size: 14px;
+        }
+        .appeal-btn {
+            background: transparent; 
+            border: 1px solid #ff007f; 
+            color: #ff007f; 
+            box-shadow: none;
+        }
+        .appeal-btn:hover {
+            background: rgba(255, 0, 127, 0.1);
         }
     </style>
 </head>
 <body>
 
     <!-- ========================================================== -->
-    <!--             SEQUENTIAL TERMS VERIFICATION OVERLAY          -->
+    <!--            SEQUENTIAL TERMS VERIFICATION OVERLAY           -->
     <!-- ========================================================== -->
     <div id="termsVerificationOverlay" class="overlay">
         <div class="glass-panel" style="max-width: 550px; width: 90%; border: 1px solid #ff007f; box-shadow: 0 0 25px rgba(255, 0, 127, 0.3);">
@@ -183,15 +202,16 @@
 
         <!-- Main Acceleration Board Configuration -->
         <div class="glass-panel">
-            <h2>⚡ Main Acceleration Board</h2>
+            <h2>⚡ Main Acceleration Board (Live)</h2>
             <div id="mainAccelerationBoard" class="main-grid"></div>
         </div>
 
         <!-- Submission Controls Terminal Box -->
         <div class="glass-panel" id="uploadPanel">
-            <h2>📥 Submit Channel Into Platform Pipeline</h2>
-            <input type="text" id="youtubeLinkInput" class="upload-input" placeholder="Paste your YouTube Channel or Video Link here...">
-            <button id="submitVideoBtn" class="action-btn">Commit Asset to Network</button>
+            <h2>📥 Submit Video Into Platform Pipeline</h2>
+            <p style="color: #888; font-size: 13px; margin-bottom: 10px;">Please upload a YouTube <strong>Video</strong> link. Tracking parameters will be automatically removed securely.</p>
+            <input type="text" id="youtubeLinkInput" class="upload-input" placeholder="Paste your YouTube Video Link here (e.g. https://youtube.com/watch?v=...)">
+            <button id="submitVideoBtn" class="action-btn">Commit Video Asset</button>
         </div>
 
         <!-- Waiting Queue Statistics Layout Panel -->
@@ -229,6 +249,10 @@
             return key;
         })();
 
+        // Mock username retrieval for frontend demo purposes (Would be fetched from MongoDB session)
+        const activeUsername = localStorage.getItem("ns_username") || "User_" + localUserSessionId.split("_")[2].substring(0, 5);
+        const activeChannelLink = localStorage.getItem("ns_channel_link") || ("https://youtube.com/@" + activeUsername);
+
         let activeBoard = [];
         let waitingList = [];
         let vipBoard = [
@@ -245,7 +269,6 @@
 
         let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0");
 
-        // --- NEW REQUISITIONS GATEWAY PROTOCOL STATE ---
         let mandatoryConditionsList = [
             "1. Please read and understand all policies and regulations of this website before using the platform.",
             "2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.",
@@ -295,12 +318,12 @@
             window.open(targetUrl, '_blank');
 
             let secondsRemaining = 30;
-            buttonElement.innerText = `Verifying... (${secondsRemaining}s)`;
+            buttonElement.innerText = `... (${secondsRemaining}s)`;
 
             const timerCountdownLoop = setInterval(() => {
                 secondsRemaining--;
                 if (secondsRemaining > 0) {
-                    buttonElement.innerText = `Verifying... (${secondsRemaining}s)`;
+                    buttonElement.innerText = `... (${secondsRemaining}s)`;
                 } else {
                     clearInterval(timerCountdownLoop);
                     
@@ -500,7 +523,7 @@
                         <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
                             <span style="font-size: 24px; color: #00ffff; filter: drop-shadow(0 0 5px #00ffff);">👑</span>
                             <div style="width: 100%;">
-                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.channelTitle}</div>
+                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.username || slot.channelTitle}</div>
                                 <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
                                     <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} view</span>
                                     <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} sub</span>
@@ -509,13 +532,13 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="vip-action-btn" data-vip-index="${absoluteIndex}" style="
-                            background: ${isCurrentTarget ? '#ff007f' : '#222'};
+                        <button class="action-btn vip-action-btn" data-vip-index="${absoluteIndex}" style="
+                            background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : '#222'};
                             color: #fff;
-                            border: 1px solid #ff007f;
+                            border: ${isCurrentTarget ? 'none' : '1px solid #ff007f'};
                             padding: 8px 16px;
                             border-radius: 4px;
-                            box-shadow: ${isCurrentTarget ? '0 0 10px #ff007f' : 'none'};
+                            box-shadow: ${isCurrentTarget ? '0 0 10px rgba(255,0,127,0.5)' : 'none'};
                             cursor: ${isCurrentTarget ? 'pointer' : 'default'};
                             opacity: ${isCurrentTarget ? '1' : '0.4'};
                         ">${isCurrentTarget ? 'Visit' : 'Locked'}</button>
@@ -551,7 +574,7 @@
 
                 if (slot.isEmptySlot) {
                     elementNode.innerHTML = `
-                        <div style="color: #555; text-align: center; padding: 20px 0;">
+                        <div style="color: #555; text-align: center; padding: 20px 0; display: flex; flex-direction: column; justify-content: center; height: 100%;">
                             <div style="font-size: 24px;">📭</div>
                             <div style="font-size: 12px; margin-top: 5px;">Slot Vacant</div>
                         </div>
@@ -565,26 +588,33 @@
                         elementNode.className += " active-target";
                     }
 
-                    // Embedded view sub like com structural mapping layout metrics grid blocks
+                    // Person Icon + Username header, side Visit button, and bottom metric UI requirement
                     elementNode.innerHTML = `
-                        <div style="font-weight: bold; font-size: 15px; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            ${slot.channelTitle}
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
+                                    <span style="font-size: 28px; color: #00ffff; text-shadow: 0 0 5px rgba(0,255,255,0.4);">👤</span>
+                                    <div style="font-weight: bold; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
+                                        ${slot.username || slot.channelTitle}
+                                    </div>
+                                </div>
+                                <button class="active-redirect-anchor action-btn" style="
+                                    background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : 'rgba(255,255,255,0.05)'};
+                                    color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: bold;
+                                    border: ${isCurrentTarget ? 'none' : '1px solid rgba(255,255,255,0.1)'};
+                                    cursor: ${isCurrentTarget ? 'pointer' : 'default'};
+                                    opacity: ${isCurrentTarget ? '1' : '0.4'};
+                                    box-shadow: ${isCurrentTarget ? '0 0 10px rgba(0, 255, 255, 0.4)' : 'none'}
+                                ">${isCurrentTarget ? 'Visit' : 'Locked'}</button>
+                            </div>
                         </div>
                         
                         <div class="metric-badge-row">
-                            <div class="badge-node">👁️ ${displayClicks} view</div>
-                            <div class="badge-node">❤️ ${displayClicks} like</div>
-                            <div class="badge-node">👤 ${displayClicks} sub</div>
-                            <div class="badge-node">💬 ${displayClicks} com</div>
+                            <div class="badge-node"><span class="badge-icon">👁️</span><span>${displayClicks} views</span></div>
+                            <div class="badge-node"><span class="badge-icon">❤️</span><span>${displayClicks} like</span></div>
+                            <div class="badge-node"><span class="badge-icon">🔔</span><span>${displayClicks} sub</span></div>
+                            <div class="badge-node"><span class="badge-icon">💬</span><span>${displayClicks} com</span></div>
                         </div>
-
-                        <button class="active-redirect-anchor" style="
-                            display: block; width: 100%; text-align: center; background: ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.05)'};
-                            color: #fff; padding: 8px; border-radius: 4px; font-size: 13px; font-weight: bold;
-                            border: 1px solid ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.1)'};
-                            cursor: ${isCurrentTarget ? 'pointer' : 'default'};
-                            opacity: ${isCurrentTarget ? '1' : '0.3'};
-                        ">${isCurrentTarget ? 'Accelerate Content' : 'Locked'}</button>
                     `;
 
                     const linkButton = elementNode.querySelector(".active-redirect-anchor");
@@ -617,9 +647,26 @@
             waitingList.forEach((user, index) => {
                 const li = document.createElement("li");
                 li.className = "queue-item";
+                
+                // Person Icon + Previously Uploaded Channel Link + Appeal Button requirement
                 li.innerHTML = `
-                    <span style="color: #ddd;">${index + 1}. <strong>${user.channelTitle}</strong></span>
-                    <span style="color: #ff007f; font-size: 13px;">Appearing Cycle Votes: ${user.appearsReceived}/3</span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 15px; width: 75%;">
+                            <span style="font-size: 32px; color: #888;">👤</span>
+                            <div style="width: 100%;">
+                                <div style="color: #fff; font-weight: bold; font-size: 15px; margin-bottom: 3px;">
+                                    ${index + 1}. ${user.username || user.channelTitle}
+                                </div>
+                                <div style="color: #00ffff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8;">
+                                    🔗 ${user.channelLink || 'Channel Link Pre-Uploaded'}
+                                </div>
+                                <div style="color: #ff007f; font-size: 11px; margin-top: 4px; font-weight: bold;">
+                                    Appearing Cycle Votes: ${user.appearsReceived || 0}/3
+                                </div>
+                            </div>
+                        </div>
+                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;" onclick="alert('Appeal registered for user ${user.username || user.channelTitle}.')">Appeal</button>
+                    </div>
                 `;
                 container.appendChild(li);
             });
@@ -666,7 +713,9 @@
             while (survivorsList.length < 10) {
                 survivorsList.push({
                     userId: "system_node_" + Math.floor(Math.random() * 10000),
+                    username: "SystemNode",
                     channelTitle: "System Accelerated Feed",
+                    channelLink: "https://youtube.com/@system",
                     clicks: 0,
                     youtubeLink: "https://youtube.com"
                 });
@@ -675,7 +724,9 @@
             activeBoard = survivorsList.slice(0, 10).map(element => {
                 return {
                     userId: element.userId,
+                    username: element.username || element.channelTitle,
                     channelTitle: element.channelTitle,
+                    channelLink: element.channelLink || "https://youtube.com",
                     clicks: 0,
                     youtubeLink: element.youtubeLink
                 };
@@ -698,13 +749,31 @@
 
         document.getElementById("submitVideoBtn").addEventListener("click", async function() {
             const inputField = document.getElementById("youtubeLinkInput");
-            const urlValue = inputField.value.trim();
+            const rawUrlValue = inputField.value.trim();
 
-            if (!urlValue || (!urlValue.includes("youtube.com") && !urlValue.includes("youtu.be"))) {
-                alert("Validation Exception: Please provide a structurally valid YouTube address.");
+            if (!rawUrlValue) {
+                alert("Please provide a YouTube video link.");
                 return;
             }
 
+            // CORE REQUIREMENT: Strip tracking parameters and enforce VIDEO links only
+            let finalCleanedUrl = "";
+            try {
+                const urlObj = new URL(rawUrlValue);
+                if (urlObj.hostname.includes("youtube.com") && urlObj.pathname === "/watch" && urlObj.searchParams.has("v")) {
+                    finalCleanedUrl = "https://www.youtube.com/watch?v=" + urlObj.searchParams.get("v");
+                } else if (urlObj.hostname.includes("youtu.be")) {
+                    finalCleanedUrl = "https://youtu.be" + urlObj.pathname;
+                } else {
+                    alert("Validation Exception: You must upload a specific YouTube VIDEO link, not a channel or profile link.");
+                    return;
+                }
+            } catch(e) {
+                alert("Validation Exception: The provided text is not a valid URL structure.");
+                return;
+            }
+
+            // The URL provided to MongoDB will be the stripped version: finalCleanedUrl
             try {
                 const response = await fetch('/api/submit-link', {
                     method: 'POST',
@@ -713,19 +782,21 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        youtubeLink: urlValue,
-                        userId: localUserSessionId
+                        youtubeLink: finalCleanedUrl,
+                        userId: localUserSessionId,
+                        username: activeUsername,
+                        channelLink: activeChannelLink
                     })
                 });
 
                 if (response.ok) {
                     const statusResult = await response.json();
-                    alert(statusResult.message || "Asset committed successfully to database matrix!");
+                    alert(statusResult.message || "Video Asset committed safely to database without tracking parameters!");
                     location.reload();
                     return;
                 }
             } catch(err) {
-                console.warn("Backend pipeline down, migrating submission through localized storage architecture layers.");
+                console.warn("Backend pipeline offline, simulating local storage injection.");
             }
 
             let firstEmptyIndex = activeBoard.findIndex(slot => slot.isEmptySlot);
@@ -733,9 +804,11 @@
             if (firstEmptyIndex !== -1 && !currentBoardIsFull) {
                 activeBoard[firstEmptyIndex] = {
                     userId: localUserSessionId,
-                    channelTitle: "User_" + localUserSessionId.split("_")[2],
+                    username: activeUsername,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2], // legacy fallback
+                    channelLink: activeChannelLink,
                     clicks: 0,
-                    youtubeLink: urlValue
+                    youtubeLink: finalCleanedUrl // Stripped tracking link
                 };
                 
                 let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
@@ -744,7 +817,7 @@
                 saveStateToStorage();
                 renderActiveBoard();
                 
-                alert("Success: You are one of the first 10 users! Placed onto the Main Acceleration Board.");
+                alert("Success: You are placed onto the Main Acceleration Board!");
                 
                 if (currentBoardIsFull) {
                     location.reload();
@@ -756,9 +829,11 @@
             } else {
                 const freshQueueObject = {
                     userId: localUserSessionId,
-                    channelTitle: "User_" + localUserSessionId.split("_")[2],
+                    username: activeUsername,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2], // legacy fallback
+                    channelLink: activeChannelLink,
                     clicks: 0,
-                    youtubeLink: urlValue,
+                    youtubeLink: finalCleanedUrl, // Stripped tracking link
                     appearsReceived: 0
                 };
 
@@ -769,7 +844,7 @@
                 
                 if (!evaluateStateTransitions()) {
                     renderWaitingList();
-                    alert("Success: Video committed onto the platform Waiting List successfully.");
+                    alert("Success: Video safely committed onto the Waiting List without tracking links.");
                     
                     sequenceIndex = 0;
                     renderVIPSpaces();
