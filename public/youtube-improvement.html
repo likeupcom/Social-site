@@ -243,7 +243,12 @@
         // ==========================================================
         //               MULTILINGUAL ENGINE DICTIONARY
         // ==========================================================
-        const targetLanguageSystem = localStorage.getItem("ns_selected_lang") || "en";
+        // Dual parsing strategy check: Checks both URL parameters (?lang=) and localStorage
+        const urlParamsParser = new URLSearchParams(window.location.search);
+        const targetLanguageSystem = urlParamsParser.get('lang') || localStorage.getItem("ns_selected_lang") || "en";
+        
+        // Save back to local storage just in case it came through the query parameter
+        localStorage.setItem("ns_selected_lang", targetLanguageSystem);
 
         const languageDictionary = {
             en: {
@@ -453,7 +458,7 @@
         let sequenceIndex = 0; 
         let currentBoardIsFull = false;
         let justBecameInactivePool = [];
-        let executionTimerRunning = false; // Flag to pause UI re-rendering during active 30s timer
+        let executionTimerRunning = false; 
 
         let currentConditionIndexPointer = 0;
         let termsAcceptedFlag = localStorage.getItem("ns_conditions_verified") === "true";
@@ -492,7 +497,7 @@
         }
 
         function runVerificationTimer(buttonElement, targetUrl, onCompleteRoutine) {
-            executionTimerRunning = true; // Lock UI updates during dynamic timing verification
+            executionTimerRunning = true; 
             buttonElement.style.pointerEvents = "none";
             window.open(targetUrl, '_blank');
 
@@ -511,7 +516,7 @@
                     updateMetricsDisplayPanel();
 
                     buttonElement.style.pointerEvents = "auto";
-                    executionTimerRunning = false; // Release lock
+                    executionTimerRunning = false; 
                     onCompleteRoutine();
                 }
             }, 1000);
@@ -577,7 +582,6 @@
                 
                 const synced = await synchroniseWithLiveDatabase();
                 if (!synced) {
-                    // Pull freshest simulation frames directly from localStorage so parallel action streams display immediately
                     const storedBoard = localStorage.getItem("ns_active_board");
                     if (storedBoard) activeBoard = JSON.parse(storedBoard);
                     waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
@@ -593,7 +597,7 @@
                 renderWaitingList();
                 updateMetricsDisplayPanel();
                 evaluateStateTransitions();
-            }, 3000); // Checked every 3 seconds for immediate zero-delay layout shifts
+            }, 3000); 
         }
 
         async function saveStateToStorage() {
@@ -660,7 +664,6 @@
                 let currentDelta = absoluteTarget - Date.now();
                 if (currentDelta <= 0) {
                     clearInterval(liveClockRoutine);
-                    // System recovery complete, dynamically reset DOM frame layout
                     localStorage.removeItem("ns_lockout_lift_time");
                     window.location.reload();
                 } else {
@@ -943,7 +946,6 @@
             if (localUserWasActive) {
                 forceLocalUserLockout();
             } else {
-                // Instantly update layout dynamically without flashing the screen or refreshing
                 renderVIPSpaces();
                 renderActiveBoard();
                 renderWaitingList();
@@ -1062,7 +1064,7 @@
         });
 
         window.addEventListener("DOMContentLoaded", async () => {
-            applyDynamicLocalization(); // Initialize correct language mappings straight from local context
+            applyDynamicLocalization(); 
             instantiateComplianceGateway();
             if (!checkLockoutState()) {
                 await loadSystemData();
@@ -1071,7 +1073,7 @@
                 renderActiveBoard();
                 renderWaitingList();
                 evaluateStateTransitions();
-                initializeLiveUpdateEngine(); // Fire background dynamic check loops to capture real-time updates seamlessly
+                initializeLiveUpdateEngine(); 
             }
         });
     </script>
