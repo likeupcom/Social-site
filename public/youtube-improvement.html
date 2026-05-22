@@ -576,14 +576,24 @@
                 if (executionTimerRunning || systemPhase === "APPEARING_PERIOD") return; 
                 
                 const synced = await synchroniseWithLiveDatabase();
-                if (synced) {
-                    renderVIPSpaces();
-                    renderActiveBoard();
-                    renderWaitingList();
-                    updateMetricsDisplayPanel();
-                    evaluateStateTransitions();
+                if (!synced) {
+                    // Pull freshest simulation frames directly from localStorage so parallel action streams display immediately
+                    const storedBoard = localStorage.getItem("ns_active_board");
+                    if (storedBoard) activeBoard = JSON.parse(storedBoard);
+                    waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
+                    vipBoard = JSON.parse(localStorage.getItem("ns_vip_board")) || vipBoard;
+                    systemPhase = localStorage.getItem("ns_system_phase") || "REGULAR_PERIOD";
+                    sequenceIndex = parseInt(localStorage.getItem("ns_sequence_index") || "0");
+                    currentBoardIsFull = (localStorage.getItem("ns_board_full") === "true");
+                    justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
                 }
-            }, 4000); // Polls server state securely every 4 seconds
+                
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateMetricsDisplayPanel();
+                evaluateStateTransitions();
+            }, 3000); // Checked every 3 seconds for immediate zero-delay layout shifts
         }
 
         async function saveStateToStorage() {
@@ -650,7 +660,9 @@
                 let currentDelta = absoluteTarget - Date.now();
                 if (currentDelta <= 0) {
                     clearInterval(liveClockRoutine);
-                    location.reload();
+                    // System recovery complete, dynamically reset DOM frame layout
+                    localStorage.removeItem("ns_lockout_lift_time");
+                    window.location.reload();
                 } else {
                     let hrs = Math.floor(currentDelta / (3600000));
                     let mins = Math.floor((currentDelta % 3600000) / 60000);
@@ -931,7 +943,11 @@
             if (localUserWasActive) {
                 forceLocalUserLockout();
             } else {
-                location.reload();
+                // Instantly update layout dynamically without flashing the screen or refreshing
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateMetricsDisplayPanel();
             }
         }
 
@@ -978,7 +994,11 @@
                 if (response.ok) {
                     const statusResult = await response.json();
                     alert(statusResult.message || "Video Asset committed safely!");
-                    location.reload();
+                    await loadSystemData();
+                    renderVIPSpaces();
+                    renderActiveBoard();
+                    renderWaitingList();
+                    inputField.value = "";
                     return;
                 }
             } catch(err) {
@@ -1006,7 +1026,7 @@
                 alert(activeDictionary.dbSuccessBoard);
                 
                 if (currentBoardIsFull) {
-                    location.reload();
+                    evaluateStateTransitions();
                 } else {
                     inputField.value = "";
                     document.getElementById("uploadPanel").style.opacity = "0.5";
@@ -1051,7 +1071,7 @@
                 renderActiveBoard();
                 renderWaitingList();
                 evaluateStateTransitions();
-                initializeLiveUpdateEngine(); // Fire background dynamic database check loops
+                initializeLiveUpdateEngine(); // Fire background dynamic check loops to capture real-time updates seamlessly
             }
         });
     </script>
