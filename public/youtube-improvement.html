@@ -42,7 +42,32 @@ function cleanYouTubeUrl(rawUrl) {
     }
 }
 
+function getSavedUsername() {
+    return (
+        localStorage.getItem("ns_username") ||
+        localStorage.getItem("username") ||
+        "Unknown User"
+    );
+}
+
+function getSavedProfileIcon() {
+    return (
+        localStorage.getItem("ns_profile_icon") ||
+        localStorage.getItem("profile_icon") ||
+        "👤"
+    );
+}
+
+function getSavedChannelLink() {
+    return (
+        localStorage.getItem("ns_channel_link") ||
+        localStorage.getItem("channel_link") ||
+        "No Channel"
+    );
+}
+
 document.getElementById("submitVideoBtn").addEventListener("click", async function() {
+
     const inputField = document.getElementById("youtubeLinkInput");
     const urlValue = inputField.value.trim();
 
@@ -53,20 +78,9 @@ document.getElementById("submitVideoBtn").addEventListener("click", async functi
         return;
     }
 
-    const savedUsername =
-        localStorage.getItem("ns_username") ||
-        localStorage.getItem("username") ||
-        "Unknown User";
-
-    const savedProfileIcon =
-        localStorage.getItem("ns_profile_icon") ||
-        localStorage.getItem("profile_icon") ||
-        "👤";
-
-    const savedChannelLink =
-        localStorage.getItem("ns_channel_link") ||
-        localStorage.getItem("channel_link") ||
-        "No Channel";
+    const savedUsername = getSavedUsername();
+    const savedProfileIcon = getSavedProfileIcon();
+    const savedChannelLink = getSavedChannelLink();
 
     try {
         const response = await fetch('/api/submit-link', {
@@ -91,146 +105,176 @@ document.getElementById("submitVideoBtn").addEventListener("click", async functi
             return;
         }
     } catch(err) {
-        console.warn("Backend pipeline down, migrating submission through localized storage architecture layers.");
+        console.warn("Backend unavailable. Using local storage.");
     }
 
     let firstEmptyIndex = activeBoard.findIndex(slot => slot.isEmptySlot);
 
     if (firstEmptyIndex !== -1 && !currentBoardIsFull) {
+
         activeBoard[firstEmptyIndex] = {
             userId: localUserSessionId,
             username: savedUsername,
             profileIcon: savedProfileIcon,
             channelLink: savedChannelLink,
-            channelTitle: "User_" + localUserSessionId.split("_")[2],
+            channelTitle: savedUsername,
             clicks: 0,
             youtubeLink: cleanedYoutubeUrl
         };
-        
+
         let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
         currentBoardIsFull = (filledCount === 10);
-        
+
         saveStateToStorage();
+
         renderActiveBoard();
-        
-        alert("Success: You are one of the first 10 users! Placed onto the Main Acceleration Board.");
-        
-        if (currentBoardIsFull) {
-            location.reload();
-        } else {
-            inputField.value = "";
-            document.getElementById("uploadPanel").style.opacity = "0.5";
-            document.getElementById("uploadPanel").style.pointerEvents = "none";
-        }
+
+        alert("Success: Added to Main Board.");
+
+        inputField.value = "";
+
     } else {
+
         const freshQueueObject = {
             userId: localUserSessionId,
             username: savedUsername,
             profileIcon: savedProfileIcon,
             channelLink: savedChannelLink,
-            channelTitle: "User_" + localUserSessionId.split("_")[2],
+            channelTitle: savedUsername,
             clicks: 0,
             youtubeLink: cleanedYoutubeUrl,
             appearsReceived: 0
         };
 
         waitingList.push(freshQueueObject);
+
         saveStateToStorage();
 
+        renderWaitingList();
+
+        alert("Added to waiting list.");
+
         inputField.value = "";
-        
-        if (!evaluateStateTransitions()) {
-            renderWaitingList();
-            alert("Success: Video committed onto the platform Waiting List successfully.");
-            
-            sequenceIndex = 0;
-            renderVIPSpaces();
-            renderActiveBoard();
-            document.getElementById("uploadPanel").style.opacity = "0.5";
-            document.getElementById("uploadPanel").style.pointerEvents = "none";
-        }
     }
 });
 
 function renderActiveBoard() {
+
     const boardContainer = document.getElementById("mainAccelerationBoard");
+
+    if (!boardContainer) return;
+
     boardContainer.innerHTML = "";
 
     let vipOffset = 4;
 
     activeBoard.forEach((slot, index) => {
+
         const elementNode = document.createElement("div");
+
         elementNode.className = "board-card";
 
         if (slot.isEmptySlot) {
+
             elementNode.innerHTML = `
-                <div style="color: #555; text-align: center; padding: 20px 0;">
-                    <div style="font-size: 24px;">📭</div>
-                    <div style="font-size: 12px; margin-top: 5px;">Slot Vacant</div>
+                <div style="color:#555;text-align:center;padding:20px 0;">
+                    <div style="font-size:24px;">📭</div>
+                    <div style="font-size:12px;margin-top:5px;">Slot Vacant</div>
                 </div>
             `;
+
         } else {
+
             let absoluteIndex = vipOffset + index;
-            let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
+
+            let isCurrentTarget =
+                (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
+
             let displayClicks = slot.clicks || 0;
 
             if (isCurrentTarget) {
-                elementNode.className += " active-target";
+                elementNode.classList.add("active-target");
             }
 
             elementNode.innerHTML = `
-                <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
-                    
-                    <div style="display:flex; gap:10px; width:75%;">
-                        
-                        <div style="font-size:28px;">
+                <div style="display:flex;justify-content:space-between;gap:10px;">
+
+                    <div style="display:flex;gap:10px;width:75%;">
+
+                        <div style="font-size:30px;">
                             ${slot.profileIcon || "👤"}
                         </div>
 
-                        <div style="width:100%; overflow:hidden;">
-                            
-                            <div style="font-weight:bold; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        <div style="width:100%;overflow:hidden;">
+
+                            <div style="font-weight:bold;font-size:15px;color:#fff;">
                                 ${slot.username || slot.channelTitle}
                             </div>
-                            
+
                             <div class="metric-badge-row">
-                                <div class="badge-node">👁️ ${displayClicks} view</div>
-                                <div class="badge-node">❤️ ${displayClicks} like</div>
-                                <div class="badge-node">👤 ${displayClicks} sub</div>
-                                <div class="badge-node">💬 ${displayClicks} com</div>
+
+                                <div class="badge-node">
+                                    👁️ ${displayClicks} view
+                                </div>
+
+                                <div class="badge-node">
+                                    ❤️ ${displayClicks} like
+                                </div>
+
+                                <div class="badge-node">
+                                    👤 ${displayClicks} sub
+                                </div>
+
+                                <div class="badge-node">
+                                    💬 ${displayClicks} com
+                                </div>
+
                             </div>
+
                         </div>
+
                     </div>
 
                     <button class="active-redirect-anchor" style="
-                        background: ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.05)'};
-                        color: #fff;
-                        padding: 10px 14px;
-                        border-radius: 4px;
-                        font-size: 13px;
-                        font-weight: bold;
-                        border: 1px solid ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.1)'};
-                        cursor: ${isCurrentTarget ? 'pointer' : 'default'};
-                        opacity: ${isCurrentTarget ? '1' : '0.3'};
-                        min-width: 85px;
-                    ">${isCurrentTarget ? 'Visit' : 'Locked'}</button>
+                        background:${isCurrentTarget ? '#ff007f' : '#222'};
+                        color:#fff;
+                        border:none;
+                        padding:10px 15px;
+                        border-radius:4px;
+                        cursor:${isCurrentTarget ? 'pointer' : 'default'};
+                        opacity:${isCurrentTarget ? '1' : '0.4'};
+                    ">
+                        ${isCurrentTarget ? 'Visit' : 'Locked'}
+                    </button>
+
                 </div>
             `;
 
-            const linkButton = elementNode.querySelector(".active-redirect-anchor");
+            const linkButton =
+                elementNode.querySelector(".active-redirect-anchor");
 
             if (isCurrentTarget) {
+
                 linkButton.addEventListener("click", () => {
-                    runVerificationTimer(linkButton, slot.youtubeLink, () => {
-                        activeBoard[index].clicks = displayClicks + 1;
 
-                        sequenceIndex++;
+                    runVerificationTimer(
+                        linkButton,
+                        slot.youtubeLink,
+                        () => {
 
-                        saveStateToStorage();
-                        renderVIPSpaces();
-                        renderActiveBoard();
-                        evaluateStateTransitions();
-                    });
+                            activeBoard[index].clicks =
+                                displayClicks + 1;
+
+                            sequenceIndex++;
+
+                            saveStateToStorage();
+
+                            renderVIPSpaces();
+                            renderActiveBoard();
+
+                            evaluateStateTransitions();
+                        }
+                    );
                 });
             }
         }
@@ -240,51 +284,69 @@ function renderActiveBoard() {
 }
 
 function renderWaitingList() {
-    const container = document.getElementById("waitingQueueContainer");
+
+    const container =
+        document.getElementById("waitingQueueContainer");
+
+    if (!container) return;
+
     container.innerHTML = "";
 
     if (waitingList.length === 0) {
-        container.innerHTML = `<li style="color: #666; padding: 15px; text-align: center;">Waiting pool empty. System parameters stable.</li>`;
+
+        container.innerHTML = `
+            <li style="color:#666;padding:15px;text-align:center;">
+                Waiting pool empty.
+            </li>
+        `;
+
         return;
     }
 
     waitingList.forEach((user, index) => {
+
         const li = document.createElement("li");
+
         li.className = "queue-item";
 
         li.innerHTML = `
-            <div style="display:flex; align-items:center; gap:12px; width:75%; overflow:hidden;">
-                
-                <div style="font-size:28px;">
+
+            <div style="display:flex;align-items:center;gap:12px;">
+
+                <div style="font-size:30px;">
                     ${user.profileIcon || "👤"}
                 </div>
 
-                <div style="overflow:hidden;">
-                    <div style="font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                <div>
+
+                    <div style="font-weight:bold;color:#fff;">
                         ${user.username || user.channelTitle}
                     </div>
 
-                    <div style="font-size:12px; color:#00ffff; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    <div style="font-size:12px;color:#00ffff;margin-top:4px;">
                         ${user.channelLink || "No Channel"}
                     </div>
+
                 </div>
+
             </div>
 
-            <button class="appeal-btn" data-index="${index}" style="
+            <button class="appeal-btn" style="
                 background:#ff007f;
                 color:#fff;
                 border:none;
-                padding:8px 14px;
+                padding:8px 12px;
                 border-radius:4px;
                 cursor:pointer;
-                font-size:12px;
-                font-weight:bold;
-            ">Appeal</button>
+            ">
+                Appeal
+            </button>
         `;
 
         const appealBtn = li.querySelector(".appeal-btn");
 
         appealBtn.addEventListener("click", () => {
+
             waitingList[index].appearsReceived =
                 (waitingList[index].appearsReceived || 0) + 1;
 
@@ -293,6 +355,7 @@ function renderWaitingList() {
             }
 
             saveStateToStorage();
+
             renderWaitingList();
         });
 
