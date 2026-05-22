@@ -506,6 +506,20 @@
             document.getElementById("metricComments").innerText = `${localStorage.getItem("ns_completed_hits") || "0"} com`;
         }
 
+        // Sequential VIP Automated Skipping Engine Routine
+        function ensureValidSequenceTarget() {
+            let maxSequenceThreshold = 4 + activeBoard.length;
+            
+            // Look-ahead parser logic to automatically slide the index forward over vacant VIP positions
+            while (sequenceIndex < 4 && vipBoard[sequenceIndex] && vipBoard[sequenceIndex].isEmptySlot) {
+                sequenceIndex++;
+            }
+            
+            if (sequenceIndex >= maxSequenceThreshold) {
+                evaluateStateTransitions();
+            }
+        }
+
         // Dedicated Submission Terminal Protection Layer Engine
         function updateUploadPanelState() {
             const uploadPanel = document.getElementById("uploadPanel");
@@ -632,6 +646,7 @@
             let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
             currentBoardIsFull = (filledCount === 10);
             updateMetricsDisplayPanel();
+            ensureValidSequenceTarget();
         }
 
         // Real-Time Background Synchronization Loop without Re-loading page
@@ -651,6 +666,7 @@
                     justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
                 }
                 
+                ensureValidSequenceTarget();
                 renderVIPSpaces();
                 renderActiveBoard();
                 renderWaitingList();
@@ -815,6 +831,7 @@
                             runVerificationTimer(actionBtn, slot.youtubeLink, () => {
                                 vipBoard[absoluteIndex].clicks = displayClicks + 1;
                                 sequenceIndex++; 
+                                ensureValidSequenceTarget(); 
                                 saveStateToStorage();
                                 renderVIPSpaces();
                                 renderActiveBoard();
@@ -887,6 +904,7 @@
                             runVerificationTimer(linkButton, slot.youtubeLink, () => {
                                 activeBoard[index].clicks = displayClicks + 1;
                                 sequenceIndex++;
+                                ensureValidSequenceTarget(); 
                                 saveStateToStorage();
                                 renderVIPSpaces();
                                 renderActiveBoard();
@@ -949,6 +967,7 @@
             return false;
         }
 
+        // Chronological FIFO Waiting List & Advanced Transition Replacement Engine
         function executeAppearingPhaseRoutine() {
             document.getElementById("appearingPeriodOverlay").style.display = "flex";
             
@@ -957,24 +976,41 @@
             });
 
             let localUserWasActive = activeBoard.some(u => u.userId === localUserSessionId);
-            let survivorsList = waitingList.filter(user => user.appearsReceived < 3);
-            let evictedTotalCount = waitingList.length - survivorsList.length;
 
-            if (evictedTotalCount > 0 && justBecameInactivePool.length > 0) {
-                for (let i = 0; i < evictedTotalCount; i++) {
-                    if (justBecameInactivePool.length === 0) break;
-                    
-                    const randomPickIndex = Math.floor(Math.random() * justBecameInactivePool.length);
-                    const fallbackReplacement = justBecameInactivePool.splice(randomPickIndex, 1)[0];
-                    
-                    fallbackReplacement.appearsReceived = 0;
-                    fallbackReplacement.clicks = 0;
-                    survivorsList.push(fallbackReplacement);
+            // Populate the inactive users pool with the outgoing active board users before flushing
+            let oldActiveUsers = activeBoard.filter(slot => !slot.isEmptySlot);
+            justBecameInactivePool = [...justBecameInactivePool, ...oldActiveUsers];
+
+            let nextActiveBoard = [];
+            let remainingWaitingList = [];
+
+            // Chronological parsing loop: Top entries (uploaded earliest) move up. If evicted by 3 appeals, skip to the next in queue.
+            for (let i = 0; i < waitingList.length; i++) {
+                let currentCandidate = waitingList[i];
+                if (currentCandidate.appearsReceived >= 3) {
+                    continue; // Evicted! Skipped to let the next user in the waiting list slide forward
+                }
+                
+                if (nextActiveBoard.length < 10) {
+                    nextActiveBoard.push(currentCandidate);
+                } else {
+                    remainingWaitingList.push(currentCandidate);
                 }
             }
 
-            while (survivorsList.length < 10) {
-                survivorsList.push({
+            // Fallback Engine: If queue runs dry, pull randomly from the recently inactive pool
+            while (nextActiveBoard.length < 10 && justBecameInactivePool.length > 0) {
+                const randomPickIndex = Math.floor(Math.random() * justBecameInactivePool.length);
+                const fallbackReplacement = justBecameInactivePool.splice(randomPickIndex, 1)[0];
+                
+                fallbackReplacement.appearsReceived = 0;
+                fallbackReplacement.clicks = 0;
+                nextActiveBoard.push(fallbackReplacement);
+            }
+
+            // Hard Fallback: If pools are fully depleted, inject system core seed nodes
+            while (nextActiveBoard.length < 10) {
+                nextActiveBoard.push({
                     userId: "system_node_" + Math.floor(Math.random() * 10000),
                     username: "SystemNode",
                     channelTitle: "System Accelerated Feed",
@@ -984,7 +1020,8 @@
                 });
             }
 
-            activeBoard = survivorsList.slice(0, 10).map(element => {
+            // Reconstruct active board dataset
+            activeBoard = nextActiveBoard.map(element => {
                 return {
                     userId: element.userId,
                     username: element.username || element.channelTitle,
@@ -995,10 +1032,13 @@
                 };
             });
 
-            waitingList = [];
-            justBecameInactivePool = [];
+            waitingList = remainingWaitingList;
+            justBecameInactivePool = []; 
             sequenceIndex = 0;
             systemPhase = "REGULAR_PERIOD";
+
+            // Run look-ahead sweep immediately after reset to handle empty VIP blocks seamlessly
+            ensureValidSequenceTarget();
 
             saveStateToStorage();
             document.getElementById("appearingPeriodOverlay").style.display = "none";
@@ -1108,6 +1148,7 @@
                     appearsReceived: 0
                 };
 
+                // Array push naturally preserves FIFO rules by ordering earliest links at the front (index 0)
                 waitingList.push(freshQueueObject);
                 localStorage.setItem("ns_upload_time", Date.now().toString());
                 saveStateToStorage();
@@ -1119,7 +1160,7 @@
                     updateUploadPanelState();
                     alert(activeDictionary.dbSuccessQueue);
                     
-                    sequenceIndex = 0;
+                    ensureValidSequenceTarget();
                     renderVIPSpaces();
                     renderActiveBoard();
                 }
