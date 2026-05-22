@@ -1,794 +1,302 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NS Platform - YouTube Acceleration Engine</title>
-
-    <style>
-        *{
-            box-sizing:border-box;
-            margin:0;
-            padding:0;
-            font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-        }
-
-        body{
-            background:#0a0a12;
-            color:#fff;
-            padding:20px;
-            overflow-x:hidden;
-        }
-
-        .container{
-            max-width:1200px;
-            margin:auto;
-        }
-
-        h1,h2,h3{
-            color:#00ffff;
-            margin-bottom:20px;
-            text-shadow:0 0 10px rgba(0,255,255,.3);
-        }
-
-        .glass-panel{
-            background:rgba(255,255,255,.03);
-            backdrop-filter:blur(10px);
-            border:1px solid rgba(255,255,255,.08);
-            border-radius:12px;
-            padding:20px;
-            margin-bottom:20px;
-            box-shadow:0 8px 32px rgba(0,0,0,.37);
-        }
-
-        .upload-input{
-            width:100%;
-            padding:12px;
-            background:rgba(0,0,0,.5);
-            border:1px solid #00ffff;
-            border-radius:6px;
-            color:#fff;
-            margin-bottom:15px;
-            outline:none;
-            font-size:16px;
-        }
-
-        .action-btn{
-            background:linear-gradient(45deg,#00ffff,#ff007f);
-            border:none;
-            color:#fff;
-            padding:12px 24px;
-            border-radius:6px;
-            cursor:pointer;
-            font-weight:bold;
-        }
-
-        .main-grid{
-            display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-            gap:20px;
-        }
-
-        .board-card{
-            background:rgba(255,255,255,.05);
-            border-radius:8px;
-            padding:15px;
-            border-top:3px solid #00ffff;
-            transition:.3s;
-        }
-
-        .board-card.active-target{
-            border-top:3px solid #ff007f;
-            box-shadow:0 0 15px rgba(255,0,127,.4);
-        }
-
-        .queue-list{
-            list-style:none;
-        }
-
-        .queue-item{
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:15px;
-            padding:14px;
-            border-bottom:1px solid rgba(255,255,255,.06);
-        }
-
-        .overlay{
-            position:fixed;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
-            background:rgba(5,5,10,.95);
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            z-index:10000;
-        }
-
-        .metric-badge-row{
-            display:grid;
-            grid-template-columns:repeat(2,1fr);
-            gap:6px;
-            margin-top:12px;
-            margin-bottom:12px;
-        }
-
-        .badge-node{
-            background:rgba(0,0,0,.4);
-            border:1px solid rgba(255,255,255,.05);
-            border-radius:4px;
-            padding:4px;
-            text-align:center;
-            font-size:11px;
-            color:#ccc;
-        }
-
-        .user-row{
-            display:flex;
-            align-items:center;
-            gap:10px;
-            margin-bottom:10px;
-        }
-
-        .user-icon{
-            width:45px;
-            height:45px;
-            border-radius:50%;
-            background:linear-gradient(45deg,#00ffff,#ff007f);
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            font-size:20px;
-            font-weight:bold;
-            color:#fff;
-            flex-shrink:0;
-        }
-
-        .visit-btn{
-            width:100%;
-            padding:9px;
-            border:none;
-            border-radius:5px;
-            font-weight:bold;
-            color:#fff;
-            cursor:pointer;
-        }
-
-        .waiting-link{
-            color:#00ffff;
-            font-size:12px;
-            word-break:break-all;
-            margin-top:4px;
-        }
-
-        .appeal-btn{
-            background:#ff007f;
-            border:none;
-            color:#fff;
-            padding:8px 15px;
-            border-radius:5px;
-            cursor:pointer;
-            font-weight:bold;
-        }
-
-    </style>
-</head>
-
-<body>
-
-<div class="container">
-
-    <header style="text-align:center;margin-bottom:40px;">
-        <h1>NS PLATFORM: YOUTUBE ACCELERATION SYSTEM</h1>
-        <p style="color:#888;">Sequential Conversion Routing Protocol Active</p>
-    </header>
-
-    <div class="glass-panel" style="border:1px dashed #00ffff;display:flex;justify-content:space-around;text-align:center;">
-        <div>
-            <div id="metricViews" style="font-size:24px;font-weight:bold;color:#00ffff;">0 view</div>
-            <div style="font-size:11px;color:#888;">Traffic Views</div>
-        </div>
-
-        <div>
-            <div id="metricSubs" style="font-size:24px;font-weight:bold;color:#ff007f;">0 sub</div>
-            <div style="font-size:11px;color:#888;">Subscribers</div>
-        </div>
-
-        <div>
-            <div id="metricLikes" style="font-size:24px;font-weight:bold;color:#00ffff;">0 like</div>
-            <div style="font-size:11px;color:#888;">Likes</div>
-        </div>
-
-        <div>
-            <div id="metricComments" style="font-size:24px;font-weight:bold;color:#ff007f;">0 com</div>
-            <div style="font-size:11px;color:#888;">Comments</div>
-        </div>
-    </div>
-
-    <div class="glass-panel">
-        <h2>⚡ Main Acceleration Board</h2>
-        <div id="mainAccelerationBoard" class="main-grid"></div>
-    </div>
-
-    <div class="glass-panel" id="uploadPanel">
-        <h2>📥 Submit Video Into Platform Pipeline</h2>
-
-        <input 
-            type="text"
-            id="youtubeLinkInput"
-            class="upload-input"
-            placeholder="Paste YouTube Video Link Here..."
-        >
-
-        <button id="submitVideoBtn" class="action-btn">
-            Commit Asset To Network
-        </button>
-    </div>
-
-    <div class="glass-panel">
-        <h2>⏳ Platform Waiting Queue List</h2>
-        <ul id="waitingQueueContainer" class="queue-list"></ul>
-    </div>
-
-</div>
-
 <script>
+function cleanYouTubeUrl(rawUrl) {
+    try {
+        const parsed = new URL(rawUrl.trim());
 
-const authToken = localStorage.getItem("ns_user_token") || "";
+        const allowedHosts = [
+            "youtube.com",
+            "www.youtube.com",
+            "m.youtube.com",
+            "youtu.be"
+        ];
 
-const localUserSessionId = (function(){
-    let key = localStorage.getItem("ns_engine_token");
-
-    if(!key){
-        key = "usr_token_" + Math.random().toString(36).substring(2,15) + "_" + Date.now();
-        localStorage.setItem("ns_engine_token",key);
-    }
-
-    return key;
-})();
-
-const signupUsername =
-    localStorage.getItem("username") ||
-    localStorage.getItem("ns_username") ||
-    localStorage.getItem("signup_username") ||
-    "User";
-
-const signupChannelLink =
-    localStorage.getItem("channel_link") ||
-    localStorage.getItem("youtube_channel_link") ||
-    localStorage.getItem("ns_channel_link") ||
-    "";
-
-let activeBoard = [];
-let waitingList = [];
-
-let sequenceIndex = 0;
-let currentBoardIsFull = false;
-
-let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0");
-
-function cleanYoutubeVideoLink(url){
-
-    try{
-
-        const parsed = new URL(url);
-
-        const validHost =
-            parsed.hostname.includes("youtube.com") ||
-            parsed.hostname.includes("youtu.be");
-
-        if(!validHost){
+        if (!allowedHosts.includes(parsed.hostname)) {
             return null;
         }
 
-        if(
-            parsed.hostname.includes("youtube.com") &&
-            !parsed.pathname.includes("/watch")
-        ){
-            return null;
+        if (parsed.hostname === "youtu.be") {
+            const videoId = parsed.pathname.replace("/", "").split("?")[0];
+            return `https://youtu.be/${videoId}`;
         }
 
-        parsed.searchParams.forEach((value,key)=>{
+        if (parsed.pathname.startsWith("/watch")) {
+            const videoId = parsed.searchParams.get("v");
+            if (!videoId) return null;
 
-            if(
-                key !== "v"
-            ){
-                parsed.searchParams.delete(key);
-            }
+            return `https://www.youtube.com/watch?v=${videoId}`;
+        }
 
-        });
+        if (parsed.pathname.startsWith("/shorts/")) {
+            const shortsId = parsed.pathname.split("/shorts/")[1].split("/")[0];
+            return `https://www.youtube.com/shorts/${shortsId}`;
+        }
 
-        parsed.hash = "";
+        if (parsed.pathname.startsWith("/live/")) {
+            const liveId = parsed.pathname.split("/live/")[1].split("/")[0];
+            return `https://www.youtube.com/live/${liveId}`;
+        }
 
-        return parsed.toString();
-
-    }catch(e){
+        return null;
+    } catch {
         return null;
     }
-
 }
 
-function updateMetricsDisplayPanel(){
+document.getElementById("submitVideoBtn").addEventListener("click", async function() {
+    const inputField = document.getElementById("youtubeLinkInput");
+    const urlValue = inputField.value.trim();
 
-    document.getElementById("metricViews").innerText =
-        `${currentCompletedHits} view`;
+    const cleanedYoutubeUrl = cleanYouTubeUrl(urlValue);
 
-    document.getElementById("metricSubs").innerText =
-        `${currentCompletedHits} sub`;
-
-    document.getElementById("metricLikes").innerText =
-        `${currentCompletedHits} like`;
-
-    document.getElementById("metricComments").innerText =
-        `${currentCompletedHits} com`;
-
-}
-
-async function synchroniseWithLiveDatabase(){
-
-    try{
-
-        const response = await fetch('/api/system-state',{
-
-            method:'GET',
-
-            headers:{
-                'Authorization':`Bearer ${authToken}`,
-                'Content-Type':'application/json'
-            }
-
-        });
-
-        if(response.ok){
-
-            const data = await response.json();
-
-            activeBoard = data.activeBoard || activeBoard;
-            waitingList = data.waitingList || waitingList;
-            sequenceIndex = data.sequenceIndex || 0;
-            currentBoardIsFull = data.currentBoardIsFull || false;
-
-            return true;
-
-        }
-
-    }catch(error){
-
-        console.warn("Server offline.");
-
+    if (!cleanedYoutubeUrl) {
+        alert("Validation Exception: Please provide a valid YouTube VIDEO link.");
+        return;
     }
 
-    return false;
+    const savedUsername =
+        localStorage.getItem("ns_username") ||
+        localStorage.getItem("username") ||
+        "Unknown User";
 
-}
+    const savedProfileIcon =
+        localStorage.getItem("ns_profile_icon") ||
+        localStorage.getItem("profile_icon") ||
+        "👤";
 
-async function loadSystemData(){
+    const savedChannelLink =
+        localStorage.getItem("ns_channel_link") ||
+        localStorage.getItem("channel_link") ||
+        "No Channel";
 
-    const usingServer = await synchroniseWithLiveDatabase();
-
-    if(!usingServer){
-
-        const storedBoard = localStorage.getItem("ns_active_board");
-
-        if(storedBoard){
-
-            activeBoard = JSON.parse(storedBoard);
-
-        }else{
-
-            activeBoard = [];
-
-            for(let i=0;i<10;i++){
-
-                activeBoard.push({
-                    isEmptySlot:true,
-                    clicks:0
-                });
-
-            }
-
-        }
-
-        waitingList =
-            JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
-
-        sequenceIndex =
-            parseInt(localStorage.getItem("ns_sequence_index") || "0");
-
-        currentBoardIsFull =
-            localStorage.getItem("ns_board_full") === "true";
-
-    }
-
-    updateMetricsDisplayPanel();
-
-}
-
-async function saveStateToStorage(){
-
-    localStorage.setItem(
-        "ns_active_board",
-        JSON.stringify(activeBoard)
-    );
-
-    localStorage.setItem(
-        "ns_waiting_list",
-        JSON.stringify(waitingList)
-    );
-
-    localStorage.setItem(
-        "ns_sequence_index",
-        sequenceIndex.toString()
-    );
-
-    localStorage.setItem(
-        "ns_board_full",
-        currentBoardIsFull.toString()
-    );
-
-    try{
-
-        await fetch('/api/system-state',{
-
-            method:'POST',
-
-            headers:{
-                'Authorization':`Bearer ${authToken}`,
-                'Content-Type':'application/json'
+    try {
+        const response = await fetch('/api/submit-link', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Content-Type': 'application/json'
             },
-
-            body:JSON.stringify({
-                activeBoard,
-                waitingList,
-                sequenceIndex,
-                currentBoardIsFull
+            body: JSON.stringify({
+                youtubeLink: cleanedYoutubeUrl,
+                userId: localUserSessionId,
+                username: savedUsername,
+                profileIcon: savedProfileIcon,
+                channelLink: savedChannelLink
             })
-
         });
 
-    }catch(e){
-
-        console.warn("Failed to sync.");
-
+        if (response.ok) {
+            const statusResult = await response.json();
+            alert(statusResult.message || "Asset committed successfully to database matrix!");
+            location.reload();
+            return;
+        }
+    } catch(err) {
+        console.warn("Backend pipeline down, migrating submission through localized storage architecture layers.");
     }
 
-}
+    let firstEmptyIndex = activeBoard.findIndex(slot => slot.isEmptySlot);
 
-function runVerificationTimer(buttonElement,targetUrl,onCompleteRoutine){
-
-    buttonElement.style.pointerEvents = "none";
-
-    window.open(targetUrl,'_blank');
-
-    let secondsRemaining = 30;
-
-    buttonElement.innerText =
-        `Verifying... (${secondsRemaining}s)`;
-
-    const timer = setInterval(()=>{
-
-        secondsRemaining--;
-
-        if(secondsRemaining > 0){
-
-            buttonElement.innerText =
-                `Verifying... (${secondsRemaining}s)`;
-
-        }else{
-
-            clearInterval(timer);
-
-            currentCompletedHits++;
-
-            localStorage.setItem(
-                "ns_completed_hits",
-                currentCompletedHits.toString()
-            );
-
-            updateMetricsDisplayPanel();
-
-            buttonElement.style.pointerEvents = "auto";
-
-            onCompleteRoutine();
-
+    if (firstEmptyIndex !== -1 && !currentBoardIsFull) {
+        activeBoard[firstEmptyIndex] = {
+            userId: localUserSessionId,
+            username: savedUsername,
+            profileIcon: savedProfileIcon,
+            channelLink: savedChannelLink,
+            channelTitle: "User_" + localUserSessionId.split("_")[2],
+            clicks: 0,
+            youtubeLink: cleanedYoutubeUrl
+        };
+        
+        let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+        currentBoardIsFull = (filledCount === 10);
+        
+        saveStateToStorage();
+        renderActiveBoard();
+        
+        alert("Success: You are one of the first 10 users! Placed onto the Main Acceleration Board.");
+        
+        if (currentBoardIsFull) {
+            location.reload();
+        } else {
+            inputField.value = "";
+            document.getElementById("uploadPanel").style.opacity = "0.5";
+            document.getElementById("uploadPanel").style.pointerEvents = "none";
         }
+    } else {
+        const freshQueueObject = {
+            userId: localUserSessionId,
+            username: savedUsername,
+            profileIcon: savedProfileIcon,
+            channelLink: savedChannelLink,
+            channelTitle: "User_" + localUserSessionId.split("_")[2],
+            clicks: 0,
+            youtubeLink: cleanedYoutubeUrl,
+            appearsReceived: 0
+        };
 
-    },1000);
+        waitingList.push(freshQueueObject);
+        saveStateToStorage();
 
-}
+        inputField.value = "";
+        
+        if (!evaluateStateTransitions()) {
+            renderWaitingList();
+            alert("Success: Video committed onto the platform Waiting List successfully.");
+            
+            sequenceIndex = 0;
+            renderVIPSpaces();
+            renderActiveBoard();
+            document.getElementById("uploadPanel").style.opacity = "0.5";
+            document.getElementById("uploadPanel").style.pointerEvents = "none";
+        }
+    }
+});
 
-function renderActiveBoard(){
-
-    const boardContainer =
-        document.getElementById("mainAccelerationBoard");
-
+function renderActiveBoard() {
+    const boardContainer = document.getElementById("mainAccelerationBoard");
     boardContainer.innerHTML = "";
 
-    activeBoard.forEach((slot,index)=>{
+    let vipOffset = 4;
 
-        const card = document.createElement("div");
+    activeBoard.forEach((slot, index) => {
+        const elementNode = document.createElement("div");
+        elementNode.className = "board-card";
 
-        card.className = "board-card";
-
-        if(slot.isEmptySlot){
-
-            card.innerHTML = `
-                <div style="text-align:center;color:#666;padding:20px 0;">
-                    Empty Slot
+        if (slot.isEmptySlot) {
+            elementNode.innerHTML = `
+                <div style="color: #555; text-align: center; padding: 20px 0;">
+                    <div style="font-size: 24px;">📭</div>
+                    <div style="font-size: 12px; margin-top: 5px;">Slot Vacant</div>
                 </div>
             `;
+        } else {
+            let absoluteIndex = vipOffset + index;
+            let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
+            let displayClicks = slot.clicks || 0;
 
-        }else{
-
-            let isCurrentTarget = sequenceIndex === index;
-
-            if(isCurrentTarget){
-                card.classList.add("active-target");
+            if (isCurrentTarget) {
+                elementNode.className += " active-target";
             }
 
-            const clicks = slot.clicks || 0;
-
-            card.innerHTML = `
-
-                <div class="user-row">
-
-                    <div class="user-icon">
-                        👤
-                    </div>
-
-                    <div style="flex:1;overflow:hidden;">
-
-                        <div style="
-                            font-weight:bold;
-                            white-space:nowrap;
-                            overflow:hidden;
-                            text-overflow:ellipsis;
-                        ">
-                            ${slot.username}
+            elementNode.innerHTML = `
+                <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+                    
+                    <div style="display:flex; gap:10px; width:75%;">
+                        
+                        <div style="font-size:28px;">
+                            ${slot.profileIcon || "👤"}
                         </div>
 
+                        <div style="width:100%; overflow:hidden;">
+                            
+                            <div style="font-weight:bold; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                ${slot.username || slot.channelTitle}
+                            </div>
+                            
+                            <div class="metric-badge-row">
+                                <div class="badge-node">👁️ ${displayClicks} view</div>
+                                <div class="badge-node">❤️ ${displayClicks} like</div>
+                                <div class="badge-node">👤 ${displayClicks} sub</div>
+                                <div class="badge-node">💬 ${displayClicks} com</div>
+                            </div>
+                        </div>
                     </div>
 
+                    <button class="active-redirect-anchor" style="
+                        background: ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.05)'};
+                        color: #fff;
+                        padding: 10px 14px;
+                        border-radius: 4px;
+                        font-size: 13px;
+                        font-weight: bold;
+                        border: 1px solid ${isCurrentTarget ? '#ff007f' : 'rgba(255,255,255,0.1)'};
+                        cursor: ${isCurrentTarget ? 'pointer' : 'default'};
+                        opacity: ${isCurrentTarget ? '1' : '0.3'};
+                        min-width: 85px;
+                    ">${isCurrentTarget ? 'Visit' : 'Locked'}</button>
                 </div>
-
-                <div class="metric-badge-row">
-                    <div class="badge-node">👁️ ${clicks} view</div>
-                    <div class="badge-node">👤 ${clicks} sub</div>
-                    <div class="badge-node">❤️ ${clicks} like</div>
-                    <div class="badge-node">💬 ${clicks} com</div>
-                </div>
-
-                <button
-                    class="visit-btn"
-                    style="
-                        background:${isCurrentTarget ? '#ff007f' : '#222'};
-                        opacity:${isCurrentTarget ? '1' : '.4'};
-                        cursor:${isCurrentTarget ? 'pointer' : 'default'};
-                    "
-                >
-                    ${isCurrentTarget ? 'Visit' : 'Locked'}
-                </button>
-
             `;
 
-            const btn = card.querySelector(".visit-btn");
+            const linkButton = elementNode.querySelector(".active-redirect-anchor");
 
-            if(isCurrentTarget){
+            if (isCurrentTarget) {
+                linkButton.addEventListener("click", () => {
+                    runVerificationTimer(linkButton, slot.youtubeLink, () => {
+                        activeBoard[index].clicks = displayClicks + 1;
 
-                btn.addEventListener("click",()=>{
+                        sequenceIndex++;
 
-                    runVerificationTimer(
-                        btn,
-                        slot.youtubeLink,
-                        ()=>{
-
-                            activeBoard[index].clicks = clicks + 1;
-
-                            sequenceIndex++;
-
-                            saveStateToStorage();
-
-                            renderActiveBoard();
-
-                        }
-                    );
-
+                        saveStateToStorage();
+                        renderVIPSpaces();
+                        renderActiveBoard();
+                        evaluateStateTransitions();
+                    });
                 });
-
             }
-
         }
 
-        boardContainer.appendChild(card);
-
+        boardContainer.appendChild(elementNode);
     });
-
 }
 
-function renderWaitingList(){
-
-    const container =
-        document.getElementById("waitingQueueContainer");
-
+function renderWaitingList() {
+    const container = document.getElementById("waitingQueueContainer");
     container.innerHTML = "";
 
-    if(waitingList.length === 0){
-
-        container.innerHTML = `
-            <li style="padding:15px;color:#666;text-align:center;">
-                Waiting list empty
-            </li>
-        `;
-
+    if (waitingList.length === 0) {
+        container.innerHTML = `<li style="color: #666; padding: 15px; text-align: center;">Waiting pool empty. System parameters stable.</li>`;
         return;
-
     }
 
-    waitingList.forEach((user,index)=>{
-
+    waitingList.forEach((user, index) => {
         const li = document.createElement("li");
-
         li.className = "queue-item";
 
         li.innerHTML = `
-
-            <div style="display:flex;align-items:center;gap:12px;flex:1;">
-
-                <div class="user-icon">
-                    👤
+            <div style="display:flex; align-items:center; gap:12px; width:75%; overflow:hidden;">
+                
+                <div style="font-size:28px;">
+                    ${user.profileIcon || "👤"}
                 </div>
 
-                <div style="flex:1;">
-
-                    <div style="font-weight:bold;">
-                        ${user.username}
+                <div style="overflow:hidden;">
+                    <div style="font-weight:bold; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${user.username || user.channelTitle}
                     </div>
 
-                    <div class="waiting-link">
-                        ${user.channelLink || "No channel link"}
+                    <div style="font-size:12px; color:#00ffff; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                        ${user.channelLink || "No Channel"}
                     </div>
-
                 </div>
-
             </div>
 
-            <button class="appeal-btn">
-                Appeal
-            </button>
-
+            <button class="appeal-btn" data-index="${index}" style="
+                background:#ff007f;
+                color:#fff;
+                border:none;
+                padding:8px 14px;
+                border-radius:4px;
+                cursor:pointer;
+                font-size:12px;
+                font-weight:bold;
+            ">Appeal</button>
         `;
 
         const appealBtn = li.querySelector(".appeal-btn");
 
-        appealBtn.addEventListener("click",()=>{
+        appealBtn.addEventListener("click", () => {
+            waitingList[index].appearsReceived =
+                (waitingList[index].appearsReceived || 0) + 1;
 
-            waitingList[index].appeals =
-                (waitingList[index].appeals || 0) + 1;
+            if (waitingList[index].appearsReceived >= 3) {
+                waitingList.splice(index, 1);
+            }
 
             saveStateToStorage();
-
-            alert("Appeal submitted.");
-
+            renderWaitingList();
         });
 
         container.appendChild(li);
-
     });
-
 }
-
-document.getElementById("submitVideoBtn").addEventListener("click",async()=>{
-
-    const input =
-        document.getElementById("youtubeLinkInput");
-
-    const rawLink =
-        input.value.trim();
-
-    const cleanLink =
-        cleanYoutubeVideoLink(rawLink);
-
-    if(!cleanLink){
-
-        alert("Please upload valid YouTube VIDEO link only.");
-
-        return;
-
-    }
-
-    try{
-
-        const response = await fetch('/api/submit-link',{
-
-            method:'POST',
-
-            headers:{
-                'Authorization':`Bearer ${authToken}`,
-                'Content-Type':'application/json'
-            },
-
-            body:JSON.stringify({
-
-                youtubeLink:cleanLink,
-                userId:localUserSessionId,
-                username:signupUsername,
-                channelLink:signupChannelLink
-
-            })
-
-        });
-
-        if(response.ok){
-
-            alert("Video uploaded successfully.");
-
-        }
-
-    }catch(e){}
-
-    let emptyIndex =
-        activeBoard.findIndex(slot=>slot.isEmptySlot);
-
-    if(emptyIndex !== -1 && !currentBoardIsFull){
-
-        activeBoard[emptyIndex] = {
-
-            userId:localUserSessionId,
-            username:signupUsername,
-            channelLink:signupChannelLink,
-            youtubeLink:cleanLink,
-            clicks:0
-
-        };
-
-        let filledCount =
-            activeBoard.filter(slot=>!slot.isEmptySlot).length;
-
-        currentBoardIsFull = filledCount === 10;
-
-        saveStateToStorage();
-
-        renderActiveBoard();
-
-        input.value = "";
-
-    }else{
-
-        waitingList.push({
-
-            userId:localUserSessionId,
-            username:signupUsername,
-            channelLink:signupChannelLink,
-            youtubeLink:cleanLink,
-            clicks:0,
-            appeals:0
-
-        });
-
-        saveStateToStorage();
-
-        renderWaitingList();
-
-        input.value = "";
-
-    }
-
-});
-
-window.addEventListener("DOMContentLoaded",async()=>{
-
-    await loadSystemData();
-
-    renderActiveBoard();
-
-    renderWaitingList();
-
-});
-
 </script>
-
-</body>
-</html>
