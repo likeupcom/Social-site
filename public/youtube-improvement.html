@@ -310,17 +310,6 @@
         </div>
     </div>
 
-    <!-- System Lockout Layer Overlay container -->
-    <div id="systemLockoutOverlay" class="overlay" style="display: none;">
-        <div class="glass-panel lockout-box">
-            <h2 id="lockoutTitleText" style="color: #ff007f;">System Lockout Engaged</h2>
-            <p id="lockoutDescText" style="margin: 20px 0; color: #ccc; line-height: 1.6;">Your session token has rotated or you completed your execution loop. A standard cooling security window of 3 hours is mandatory before recycling allocations.</p>
-            <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">
-                00:00:00
-            </div>
-        </div>
-    </div>
-
     <header class="glass-panel">
         <div>
             <h1 style="font-size: 20px; font-weight: bold; letter-spacing: 0.5px;">ACCELERATION TERMINAL</h1>
@@ -396,7 +385,7 @@
     </section>
 
     <script>
-        // System Multilingual Localizations
+        // System Multilingual Multi-Dictionary Localizations
         const localizationEngine = {
             en: {
                 commitBtn: "Submit Asset Link",
@@ -413,7 +402,12 @@
                 waitingEmpty: "No pending data entries detected in FIFO buffer pipelines.",
                 votes: "Appeals Matrix",
                 appealRegistered: "Allocation validation appeal dispatched to node:",
-                appeal: "Appeal"
+                appeal: "Appeal",
+                provideUrlErr: "Null submission string intercepted. Provide an active asset string location.",
+                validationVideoErr: "Malformed host token pattern tracking detected. Re-verify URL parameters.",
+                validationUrlErr: "Invalid structural URL string signature. Parsing failure.",
+                dbSuccessBoard: "Asset committed cleanly to next open active node block storage trace.",
+                dbSuccessQueue: "Active block trace saturated. Pushed down to linear FIFO backlog buffers."
             },
             fr: {
                 commitBtn: "Soumettre le Lien d'Actif",
@@ -430,7 +424,12 @@
                 waitingEmpty: "Aucune entrée de données en attente détectée dans les pipelines FIFO.",
                 votes: "Matrice de Recours",
                 appealRegistered: "Appel de validation d'allocation envoyé au nœud:",
-                appeal: "Recours"
+                appeal: "Recours",
+                provideUrlErr: "Chaîne de soumission nulle interceptée. Fournissez un emplacement d'actif valide.",
+                validationVideoErr: "Modèle de jeton d'hôte malformé détecté. Ré-authentifier l'URL.",
+                validationUrlErr: "Signature de chaîne d'URL structurellement invalide. Échec d'analyse.",
+                dbSuccessBoard: "Actif engagé proprement dans la mémoire de trace du nœud actif ouvert.",
+                dbSuccessQueue: "Trace de bloc actif saturée. Repoussé vers les tampons d'arriéré linéaires FIFO."
             },
             rw: {
                 commitBtn: "Emeza Umuyoboro w'Ikintu",
@@ -447,24 +446,35 @@
                 waitingEmpty: "Nta madosiye ategereje muri pipeline ya FIFO ahari kugeza ubu.",
                 votes: "Urwego rw'Ubujurire",
                 appealRegistered: "Ubujurire bwo kwemeza umwanya bwoherejwe kuri node:",
-                appeal: "Jurira"
+                appeal: "Jurira",
+                provideUrlErr: "Nta kintu cyashizwemo. Shyiramo link ifite gihamya.",
+                validationVideoErr: "Imiterere ya link ya YouTube ntitemewe. Ongera ubyenzure.",
+                validationUrlErr: "Imiterere y'umuyoboro ntivunika neza. Verification yanze.",
+                dbSuccessBoard: "Ikintu cyanditswe neza mu mwanya ufunguye wa node nshya.",
+                dbSuccessQueue: "Imyanya yose y'agateganyo yuzuye. Bikaba bishizwe muri FIFO backlog buffer."
             }
         };
 
-        // UI-Only Configurations and Runtime State Flags
+        // Core Global Run-time State Fields
         let activeDictionary = localizationEngine.en;
         let executionTimerRunning = false;
-        let localUserSessionId = "";
-        let globalLockoutTicker = null;
-
-        function initializeUserGateway() {
-            if (!localStorage.getItem("ns_user_session_token")) {
-                localUserSessionId = "ns_user_node_" + Math.floor(Math.random() * 100000);
-                localStorage.setItem("ns_user_session_token", localUserSessionId);
-            } else {
-                localUserSessionId = localStorage.getItem("ns_user_session_token");
-            }
-        }
+        let authToken = "ns_local_fallback_token_secure_exchange";
+        let localUserSessionId = "ns_user_node_" + Math.floor(Math.random() * 100000);
+        let activeUsername = "Anonymous Creator";
+        let activeChannelLink = "https://youtube.com";
+        
+        let activeBoard = [];
+        let waitingList = [];
+        let vipBoard = [
+            { isEmptySlot: true, slotPosition: "alpha", clicks: 0 },
+            { isEmptySlot: true, slotPosition: "beta", clicks: 0 },
+            { isEmptySlot: true, slotPosition: "gamma", clicks: 0 },
+            { isEmptySlot: true, slotPosition: "delta", clicks: 0 }
+        ];
+        let systemPhase = "REGULAR_PERIOD";
+        let sequenceIndex = 0;
+        let currentBoardIsFull = false;
+        let justBecameInactivePool = [];
 
         function applyDynamicLocalization() {
             const currentLang = localStorage.getItem("ns_lang_context") || "en";
@@ -473,15 +483,281 @@
             
             document.getElementById("panelTitleText").innerText = activeDictionary.commitBtn;
             document.getElementById("submitVideoBtn").innerText = activeDictionary.commitBtn;
-            document.getElementById("lockoutTitleText").innerText = activeDictionary.lockoutTitle;
-            document.getElementById("lockoutDescText").innerText = activeDictionary.lockoutDesc;
+            document.getElementById("systemPhaseBadge").innerText = systemPhase;
         }
 
         function switchLanguageContext(selectedLang) {
             localStorage.setItem("ns_lang_context", selectedLang);
             applyDynamicLocalization();
             buildRegulationsPanel();
-            synchroniseWithLiveDatabase();
+            renderVIPSpaces();
+            renderActiveBoard();
+            renderWaitingList();
+            updateUploadPanelState();
+        }
+
+        function instantiateComplianceGateway() {
+            if (!localStorage.getItem("ns_user_session_token")) {
+                localStorage.setItem("ns_user_session_token", localUserSessionId);
+            } else {
+                localUserSessionId = localStorage.getItem("ns_user_session_token");
+            }
+            activeUsername = "Creator_" + localUserSessionId.split("_")[2];
+            activeChannelLink = "https://youtube.com/channel/" + localUserSessionId;
+        }
+
+        function updateMetricsDisplayPanel() {
+            document.getElementById("metricCompletedHits").innerText = localStorage.getItem("ns_completed_hits") || "0";
+            document.getElementById("systemPhaseBadge").innerText = systemPhase;
+            
+            let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+            document.getElementById("metricBoardCount").innerText = `${filledCount}/10`;
+            document.getElementById("metricQueueCount").innerText = waitingList.length;
+        }
+
+        function ensureValidSequenceTarget() {
+            let maxSequenceThreshold = 4 + activeBoard.length;
+            if (sequenceIndex >= maxSequenceThreshold) return;
+
+            // Look-ahead sweep routing logic to bypass non-instantiated system resource configurations
+            if (sequenceIndex < 4) {
+                if (vipBoard[sequenceIndex] && vipBoard[sequenceIndex].isEmptySlot) {
+                    sequenceIndex++;
+                    ensureValidSequenceTarget();
+                }
+            } else {
+                let shiftedBoardIndex = sequenceIndex - 4;
+                if (activeBoard[shiftedBoardIndex] && activeBoard[shiftedBoardIndex].isEmptySlot) {
+                    sequenceIndex++;
+                    ensureValidSequenceTarget();
+                }
+            }
+        }
+
+        function updateUploadPanelState() {
+            const uploadPanel = document.getElementById("videoSubmissionPanel");
+            const inputField = document.getElementById("youtubeLinkInput");
+            const submitBtn = document.getElementById("submitVideoBtn");
+
+            let isCurrentlyOnBoard = activeBoard.some(slot => !slot.isEmptySlot && slot.userId === localUserSessionId);
+            let isCurrentlyInQueue = waitingList.some(user => user.userId === localUserSessionId);
+            
+            const cooldownPeriod = 3 * 60 * 60 * 1000;
+            const lastUpload = localStorage.getItem("ns_upload_time");
+            let coolingActive = false;
+            let statusSuffix = "";
+
+            if (lastUpload) {
+                let passedTime = Date.now() - parseInt(lastUpload);
+                if (passedTime < cooldownPeriod) {
+                    coolingActive = true;
+                    let remainingMin = Math.ceil((cooldownPeriod - passedTime) / 60000);
+                    statusSuffix = ` (Cooldown: ${remainingMin}m)`;
+                }
+            }
+
+            if (isCurrentlyOnBoard || isCurrentlyInQueue || coolingActive) {
+                uploadPanel.style.opacity = "0.6";
+                inputField.disabled = true;
+                submitBtn.disabled = true;
+                submitBtn.style.pointerEvents = "none";
+                
+                let explanation = "";
+                if (isCurrentlyOnBoard) explanation = " (Active on Board)";
+                else if (isCurrentlyInQueue) explanation = " (In Waiting Queue)";
+                else explanation = statusSuffix;
+
+                submitBtn.innerText = `${activeDictionary.commitBtn}${explanation}`;
+            } else {
+                uploadPanel.style.opacity = "1";
+                inputField.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.style.pointerEvents = "auto";
+                submitBtn.innerText = activeDictionary.commitBtn;
+            }
+        }
+
+        function runVerificationTimer(buttonElement, targetUrl, onCompleteRoutine) {
+            executionTimerRunning = true; 
+            buttonElement.style.pointerEvents = "none";
+            window.open(targetUrl, '_blank');
+
+            let secondsRemaining = 30;
+            buttonElement.innerText = `... (${secondsRemaining}s)`;
+
+            const timerCountdownLoop = setInterval(() => {
+                secondsRemaining--;
+                if (secondsRemaining > 0) {
+                    buttonElement.innerText = `... (${secondsRemaining}s)`;
+                } else {
+                    clearInterval(timerCountdownLoop);
+                    
+                    let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0") + 1;
+                    localStorage.setItem("ns_completed_hits", currentCompletedHits.toString());
+                    updateMetricsDisplayPanel();
+
+                    buttonElement.style.pointerEvents = "auto";
+                    executionTimerRunning = false; 
+                    onCompleteRoutine();
+                }
+            }, 1000);
+        }
+
+        async function synchroniseWithLiveDatabase() {
+            try {
+                const response = await fetch('/api/system-state', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    activeBoard = data.activeBoard || activeBoard;
+                    waitingList = data.waitingList || waitingList;
+                    vipBoard = data.vipBoard || vipBoard;
+                    systemPhase = data.systemPhase || systemPhase;
+                    sequenceIndex = data.sequenceIndex ?? sequenceIndex;
+                    currentBoardIsFull = data.currentBoardIsFull ?? currentBoardIsFull;
+                    justBecameInactivePool = data.justBecameInactivePool || justBecameInactivePool;
+                    return true;
+                }
+            } catch (error) {
+                console.warn("Backend API Offline or Unreachable. Operating in robust fallback storage mode.");
+            }
+            return false;
+        }
+
+        async function loadSystemData() {
+            const usingLiveServer = await synchroniseWithLiveDatabase();
+            
+            if (!usingLiveServer) {
+                const storedBoard = localStorage.getItem("ns_active_board");
+                if (storedBoard) {
+                    activeBoard = JSON.parse(storedBoard);
+                } else {
+                    activeBoard = [];
+                    for(let i = 0; i < 10; i++) {
+                        activeBoard.push({ isEmptySlot: true, clicks: 0 });
+                    }
+                }
+                waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
+                vipBoard = JSON.parse(localStorage.getItem("ns_vip_board")) || vipBoard;
+                systemPhase = localStorage.getItem("ns_system_phase") || "REGULAR_PERIOD";
+                sequenceIndex = parseInt(localStorage.getItem("ns_sequence_index") || "0");
+                currentBoardIsFull = (localStorage.getItem("ns_board_full") === "true");
+                justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
+            }
+
+            let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+            currentBoardIsFull = (filledCount === 10);
+            updateMetricsDisplayPanel();
+            ensureValidSequenceTarget();
+        }
+
+        // Real-Time Background Synchronization Loop without Re-loading page
+        function initializeLiveUpdateEngine() {
+            setInterval(async () => {
+                if (executionTimerRunning || systemPhase === "APPEARING_PERIOD") return; 
+                
+                const synced = await synchroniseWithLiveDatabase();
+                if (!synced) {
+                    const storedBoard = localStorage.getItem("ns_active_board");
+                    if (storedBoard) activeBoard = JSON.parse(storedBoard);
+                    waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
+                    vipBoard = JSON.parse(localStorage.getItem("ns_vip_board")) || vipBoard;
+                    systemPhase = localStorage.getItem("ns_system_phase") || "REGULAR_PERIOD";
+                    sequenceIndex = parseInt(localStorage.getItem("ns_sequence_index") || "0");
+                    currentBoardIsFull = (localStorage.getItem("ns_board_full") === "true");
+                    justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
+                }
+                
+                ensureValidSequenceTarget();
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateMetricsDisplayPanel();
+                updateUploadPanelState();
+                evaluateStateTransitions();
+            }, 3000); 
+        }
+
+        async function saveStateToStorage() {
+            localStorage.setItem("ns_active_board", JSON.stringify(activeBoard));
+            localStorage.setItem("ns_waiting_list", JSON.stringify(waitingList));
+            localStorage.setItem("ns_vip_board", JSON.stringify(vipBoard));
+            localStorage.setItem("ns_system_phase", systemPhase);
+            localStorage.setItem("ns_sequence_index", sequenceIndex.toString());
+            localStorage.setItem("ns_board_full", currentBoardIsFull.toString());
+            localStorage.setItem("ns_inactive_pool", JSON.stringify(justBecameInactivePool));
+
+            try {
+                await fetch('/api/system-state', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        activeBoard, waitingList, vipBoard, systemPhase, sequenceIndex, currentBoardIsFull, justBecameInactivePool
+                    })
+                });
+            } catch(e) {
+                console.error("Failed to commit network mutation stream to remote database.");
+            }
+        }
+
+        function checkLockoutState() {
+            const blockReleaseTimestamp = localStorage.getItem("ns_lockout_lift_time");
+            if (blockReleaseTimestamp) {
+                let delta = parseInt(blockReleaseTimestamp) - Date.now();
+                if (delta > 0) {
+                    renderLockoutInterfaceScreen(delta);
+                    return true;
+                } else {
+                    localStorage.removeItem("ns_lockout_lift_time");
+                }
+            }
+            return false;
+        }
+
+        function forceLocalUserLockout() {
+            const lockoutDurationMs = 3 * 60 * 60 * 1000; 
+            const executionLiftTarget = Date.now() + lockoutDurationMs;
+            localStorage.setItem("ns_lockout_lift_time", executionLiftTarget.toString());
+            renderLockoutInterfaceScreen(lockoutDurationMs);
+        }
+
+        function renderLockoutInterfaceScreen(remainingMs) {
+            document.body.innerHTML = `
+                <div class="overlay">
+                    <div class="glass-panel lockout-box">
+                        <h2 style="color: #ff007f;">${activeDictionary.lockoutTitle}</h2>
+                        <p style="margin: 20px 0; color: #ccc; line-height: 1.6;">${activeDictionary.lockoutDesc}</p>
+                        <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">
+                            --:--:--
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let absoluteTarget = Date.now() + remainingMs;
+            const liveClockRoutine = setInterval(() => {
+                let currentDelta = absoluteTarget - Date.now();
+                if (currentDelta <= 0) {
+                    clearInterval(liveClockRoutine);
+                    localStorage.removeItem("ns_lockout_lift_time");
+                    window.location.reload();
+                } else {
+                    let hrs = Math.floor(currentDelta / (3600000));
+                    let mins = Math.floor((currentDelta % 3600000) / 60000);
+                    let secs = Math.floor((currentDelta % 60000) / 1000);
+                    document.getElementById("countdownTimerBox").innerText = 
+                        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
         }
 
         function buildRegulationsPanel() {
@@ -494,128 +770,18 @@
             `;
         }
 
-        // Frontend Action: Timer verification execution loop
-        function runVerificationTimer(buttonElement, targetUrl, absoluteIndex, isVip) {
-            executionTimerRunning = true; 
-            buttonElement.style.pointerEvents = "none";
-            window.open(targetUrl, '_blank');
-
-            let secondsRemaining = 30;
-            buttonElement.innerText = `... (${secondsRemaining}s)`;
-
-            const timerCountdownLoop = setInterval(async () => {
-                secondsRemaining--;
-                if (secondsRemaining > 0) {
-                    buttonElement.innerText = `... (${secondsRemaining}s)`;
-                } else {
-                    clearInterval(timerCountdownLoop);
-                    buttonElement.style.pointerEvents = "auto";
-                    executionTimerRunning = false; 
-
-                    // Forward transaction event confirmation directly to backend
-                    try {
-                        await fetch('/api/click-complete', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                userId: localUserSessionId,
-                                targetIndex: absoluteIndex,
-                                isVip: isVip
-                            })
-                        });
-                    } catch(err) {
-                        console.error("Failed to forward validation event context to upstream backend systems.", err);
-                    }
-                    
-                    synchroniseWithLiveDatabase();
-                }
-            }, 1000);
-        }
-
-        // Central State Engine Syncing Loop
-        async function synchroniseWithLiveDatabase() {
-            if (executionTimerRunning) return;
-
-            try {
-                const response = await fetch(`/api/system-state?userId=${localUserSessionId}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    renderApplicationState(data);
-                }
-            } catch (error) {
-                console.error("Synchronization execution failure against target cluster endpoint.", error);
-            }
-        }
-
-        function renderApplicationState(state) {
-            // Render Phase and Metrics
-            document.getElementById("systemPhaseBadge").innerText = state.systemPhase;
-            document.getElementById("metricCompletedHits").innerText = state.metrics.completedHits;
-            document.getElementById("metricBoardCount").innerText = state.metrics.boardCount;
-            document.getElementById("metricQueueCount").innerText = state.metrics.queueCount;
-
-            // Handle Phase Transitions Phase Overlay Rendering
-            if (state.systemPhase === "APPEARING_PERIOD") {
-                document.getElementById("appearingPeriodOverlay").style.display = "flex";
-                return;
-            } else {
-                document.getElementById("appearingPeriodOverlay").style.display = "none";
-            }
-
-            // Handle Lockout Rendering
-            if (state.userStatus.lockoutActive) {
-                document.getElementById("systemLockoutOverlay").style.display = "flex";
-                startLockoutCountdownTicker(state.userStatus.lockoutRemainingMs);
-                return;
-            } else {
-                document.getElementById("systemLockoutOverlay").style.display = "none";
-                if (globalLockoutTicker) clearInterval(globalLockoutTicker);
-            }
-
-            // Render Slots
-            renderVIPSpaces(state.vipBoard);
-            renderActiveBoard(state.activeBoard);
-            renderWaitingList(state.waitingList);
-
-            // Render Inputs Upload Frame configurations
-            updateUploadPanelState(state.userStatus);
-        }
-
-        function startLockoutCountdownTicker(remainingMs) {
-            if (globalLockoutTicker) clearInterval(globalLockoutTicker);
-            let absoluteTarget = Date.now() + remainingMs;
-
-            function updateDisplay() {
-                let currentDelta = absoluteTarget - Date.now();
-                if (currentDelta <= 0) {
-                    clearInterval(globalLockoutTicker);
-                    document.getElementById("systemLockoutOverlay").style.display = "none";
-                    synchroniseWithLiveDatabase();
-                } else {
-                    let hrs = Math.floor(currentDelta / 3600000);
-                    let mins = Math.floor((currentDelta % 3600000) / 60000);
-                    let secs = Math.floor((currentDelta % 60000) / 1000);
-                    document.getElementById("countdownTimerBox").innerText = 
-                        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                }
-            }
-            updateDisplay();
-            globalLockoutTicker = setInterval(updateDisplay, 1000);
-        }
-
-        function renderVIPSpaces(vipBoardData) {
+        function renderVIPSpaces() {
             const leftWing = document.getElementById("vipLeftWing");
             const rightWing = document.getElementById("vipRightWing");
+            
             leftWing.innerHTML = "";
             rightWing.innerHTML = "";
 
-            vipBoardData.forEach((slot, index) => {
+            vipBoard.forEach((slot, index) => {
                 let targetWing = (index < 2) ? leftWing : rightWing;
+                
                 let card = document.createElement("div");
+                card.className = "vip-card";
                 card.style.background = "rgba(255, 255, 255, 0.05)";
                 card.style.backdropFilter = "blur(10px)";
                 card.style.border = "1px solid #ff007f";
@@ -638,7 +804,8 @@
                         <button disabled style="background: #333; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed;">${activeDictionary.visit}</button>
                     `;
                 } else {
-                    let isCurrentTarget = slot.isCurrentTarget;
+                    let absoluteIndex = index;
+                    let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
                     let displayClicks = slot.clicks || 0;
 
                     card.innerHTML = `
@@ -654,7 +821,7 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="action-btn vip-action-btn" style="
+                        <button class="action-btn vip-action-btn" data-vip-index="${absoluteIndex}" style="
                             background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : '#222'};
                             color: #fff;
                             border: ${isCurrentTarget ? 'none' : '1px solid #ff007f'};
@@ -669,7 +836,15 @@
                     const actionBtn = card.querySelector(".vip-action-btn");
                     if (isCurrentTarget) {
                         actionBtn.addEventListener("click", () => {
-                            runVerificationTimer(actionBtn, slot.youtubeLink, slot.absoluteIndex, true);
+                            runVerificationTimer(actionBtn, slot.youtubeLink, () => {
+                                vipBoard[absoluteIndex].clicks = displayClicks + 1;
+                                sequenceIndex++; 
+                                ensureValidSequenceTarget(); 
+                                saveStateToStorage();
+                                renderVIPSpaces();
+                                renderActiveBoard();
+                                evaluateStateTransitions();
+                            });
                         });
                     }
                 }
@@ -677,11 +852,13 @@
             });
         }
 
-        function renderActiveBoard(activeBoardData) {
+        function renderActiveBoard() {
             const boardContainer = document.getElementById("mainAccelerationBoard");
             boardContainer.innerHTML = "";
 
-            activeBoardData.forEach((slot) => {
+            let vipOffset = 4;
+
+            activeBoard.forEach((slot, index) => {
                 const elementNode = document.createElement("div");
                 elementNode.className = "board-card";
 
@@ -693,7 +870,8 @@
                         </div>
                     `;
                 } else {
-                    let isCurrentTarget = slot.isCurrentTarget;
+                    let absoluteIndex = vipOffset + index;
+                    let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
                     let displayClicks = slot.clicks || 0;
 
                     if (isCurrentTarget) {
@@ -731,7 +909,15 @@
                     const linkButton = elementNode.querySelector(".active-redirect-anchor");
                     if (isCurrentTarget) {
                         linkButton.addEventListener("click", () => {
-                            runVerificationTimer(linkButton, slot.youtubeLink, slot.absoluteIndex, false);
+                            runVerificationTimer(linkButton, slot.youtubeLink, () => {
+                                activeBoard[index].clicks = displayClicks + 1;
+                                sequenceIndex++;
+                                ensureValidSequenceTarget(); 
+                                saveStateToStorage();
+                                renderVIPSpaces();
+                                renderActiveBoard();
+                                evaluateStateTransitions();
+                            });
                         });
                     }
                 }
@@ -739,16 +925,16 @@
             });
         }
 
-        function renderWaitingList(waitingListData) {
+        function renderWaitingList() {
             const container = document.getElementById("waitingQueueContainer");
             container.innerHTML = "";
 
-            if (!waitingListData || waitingListData.length === 0) {
+            if (waitingList.length === 0) {
                 container.innerHTML = `<li style="color: #666; padding: 15px; text-align: center;">${activeDictionary.waitingEmpty}</li>`;
                 return;
             }
 
-            waitingListData.forEach((user, index) => {
+            waitingList.forEach((user, index) => {
                 const li = document.createElement("li");
                 li.className = "queue-item";
                 
@@ -768,89 +954,240 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;">${activeDictionary.appeal}</button>
+                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;" onclick="alert('${activeDictionary.appealRegistered} ${user.username || user.channelTitle}.')">${activeDictionary.appeal}</button>
                     </div>
                 `;
-
-                li.querySelector(".appeal-btn").addEventListener("click", async () => {
-                    try {
-                        const response = await fetch('/api/appeal-node', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId: localUserSessionId, targetUserId: user.userId })
-                        });
-                        if (response.ok) {
-                            const resData = await response.json();
-                            alert(`${activeDictionary.appealRegistered} ${user.username || user.channelTitle}`);
-                            synchroniseWithLiveDatabase();
-                        }
-                    } catch(err) {
-                        console.error(err);
-                    }
-                });
-
                 container.appendChild(li);
             });
         }
 
-        function updateUploadPanelState(userStatus) {
-            const uploadPanel = document.getElementById("videoSubmissionPanel");
-            const inputField = document.getElementById("youtubeLinkInput");
-            const submitBtn = document.getElementById("submitVideoBtn");
+        function evaluateStateTransitions() {
+            if (!currentBoardIsFull) return false;
 
-            if (!userStatus.canUpload) {
-                uploadPanel.style.opacity = "0.6";
-                inputField.disabled = true;
-                submitBtn.disabled = true;
-                submitBtn.style.pointerEvents = "none";
-                submitBtn.innerText = `${activeDictionary.commitBtn} (${userStatus.uploadStatusReason})`;
+            let maxSequenceThreshold = 4 + activeBoard.length;
+
+            if (sequenceIndex >= maxSequenceThreshold) {
+                systemPhase = "APPEARING_PERIOD";
+                saveStateToStorage();
+                executeAppearingPhaseRoutine();
+                return true;
+            }
+            return false;
+        }
+
+        // Chronological FIFO Waiting List & Advanced Transition Replacement Engine
+        function executeAppearingPhaseRoutine() {
+            document.getElementById("appearingPeriodOverlay").style.display = "flex";
+            
+            waitingList.forEach(user => {
+                user.appearsReceived = (user.appearsReceived || 0) + 1;
+            });
+
+            let localUserWasActive = activeBoard.some(u => u.userId === localUserSessionId);
+
+            // Populate the inactive users pool with the outgoing active board users before flushing
+            let oldActiveUsers = activeBoard.filter(slot => !slot.isEmptySlot);
+            justBecameInactivePool = [...justBecameInactivePool, ...oldActiveUsers];
+
+            let nextActiveBoard = [];
+            let remainingWaitingList = [];
+
+            // Chronological parsing loop: Top entries (uploaded earliest) move up. If evicted by 3 appeals, skip to the next in queue.
+            for (let i = 0; i < waitingList.length; i++) {
+                let currentCandidate = waitingList[i];
+                if (currentCandidate.appearsReceived >= 3) {
+                    continue; // Evicted! Skipped to let the next user in the waiting list slide forward
+                }
+                
+                if (nextActiveBoard.length < 10) {
+                    nextActiveBoard.push(currentCandidate);
+                } else {
+                    remainingWaitingList.push(currentCandidate);
+                }
+            }
+
+            // Fallback Engine: If queue runs dry, pull randomly from the recently inactive pool
+            while (nextActiveBoard.length < 10 && justBecameInactivePool.length > 0) {
+                const randomPickIndex = Math.floor(Math.random() * justBecameInactivePool.length);
+                const fallbackReplacement = justBecameInactivePool.splice(randomPickIndex, 1)[0];
+                
+                fallbackReplacement.appearsReceived = 0;
+                fallbackReplacement.clicks = 0;
+                nextActiveBoard.push(fallbackReplacement);
+            }
+
+            // Hard Fallback: If pools are fully depleted, inject system core seed nodes
+            while (nextActiveBoard.length < 10) {
+                nextActiveBoard.push({
+                    userId: "system_node_" + Math.floor(Math.random() * 10000),
+                    username: "SystemNode",
+                    channelTitle: "System Accelerated Feed",
+                    channelLink: "https://youtube.com/@system",
+                    clicks: 0,
+                    youtubeLink: "https://youtube.com"
+                });
+            }
+
+            // Reconstruct active board dataset
+            activeBoard = nextActiveBoard.map(element => {
+                return {
+                    userId: element.userId,
+                    username: element.username || element.channelTitle,
+                    channelTitle: element.channelTitle,
+                    channelLink: element.channelLink || "https://youtube.com",
+                    clicks: 0,
+                    youtubeLink: element.youtubeLink
+                };
+            });
+
+            waitingList = remainingWaitingList;
+            justBecameInactivePool = []; 
+            sequenceIndex = 0;
+            systemPhase = "REGULAR_PERIOD";
+
+            // Run look-ahead sweep immediately after reset to handle empty VIP blocks seamlessly
+            ensureValidSequenceTarget();
+
+            saveStateToStorage();
+            document.getElementById("appearingPeriodOverlay").style.display = "none";
+
+            if (localUserWasActive) {
+                forceLocalUserLockout();
             } else {
-                uploadPanel.style.opacity = "1";
-                inputField.disabled = false;
-                submitBtn.disabled = false;
-                submitBtn.style.pointerEvents = "auto";
-                submitBtn.innerText = activeDictionary.commitBtn;
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateMetricsDisplayPanel();
+                updateUploadPanelState();
             }
         }
 
-        // Forward raw text string asset records to back-end pipeline directly
         document.getElementById("submitVideoBtn").addEventListener("click", async function() {
             const inputField = document.getElementById("youtubeLinkInput");
             const rawUrlValue = inputField.value.trim();
 
+            if (!rawUrlValue) {
+                alert(activeDictionary.provideUrlErr);
+                return;
+            }
+
+            let finalCleanedUrl = "";
+            try {
+                const urlObj = new URL(rawUrlValue);
+                if (urlObj.hostname.includes("youtube.com") && urlObj.pathname === "/watch" && urlObj.searchParams.has("v")) {
+                    finalCleanedUrl = "https://www.youtube.com/watch?v=" + urlObj.searchParams.get("v");
+                } else if (urlObj.hostname.includes("youtu.be")) {
+                    finalCleanedUrl = "https://youtu.be" + urlObj.pathname;
+                } else {
+                    alert(activeDictionary.validationVideoErr);
+                    return;
+                }
+            } catch(e) {
+                alert(activeDictionary.validationUrlErr);
+                return;
+            }
+
             try {
                 const response = await fetch('/api/submit-link', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
-                        youtubeLink: rawUrlValue,
-                        userId: localUserSessionId
+                        youtubeLink: finalCleanedUrl,
+                        userId: localUserSessionId,
+                        username: activeUsername,
+                        channelLink: activeChannelLink
                     })
                 });
 
-                const statusResult = await response.json();
-                
                 if (response.ok) {
+                    const statusResult = await response.json();
+                    localStorage.setItem("ns_upload_time", Date.now().toString());
                     alert(statusResult.message || "Video Asset committed safely!");
+                    await loadSystemData();
+                    renderVIPSpaces();
+                    renderActiveBoard();
+                    renderWaitingList();
+                    updateUploadPanelState();
                     inputField.value = "";
-                    synchroniseWithLiveDatabase();
-                } else {
-                    alert(statusResult.error || "Submission rejected by system validation rules.");
+                    return;
                 }
             } catch(err) {
-                console.error("Error committing raw link telemetry to database endpoints.", err);
+                console.warn("Backend pipeline offline, simulating local storage injection.");
+            }
+
+            let firstEmptyIndex = activeBoard.findIndex(slot => slot.isEmptySlot);
+
+            if (firstEmptyIndex !== -1 && !currentBoardIsFull) {
+                activeBoard[firstEmptyIndex] = {
+                    userId: localUserSessionId,
+                    username: activeUsername,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2], 
+                    channelLink: activeChannelLink,
+                    clicks: 0,
+                    youtubeLink: finalCleanedUrl 
+                };
+                
+                let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+                currentBoardIsFull = (filledCount === 10);
+                
+                localStorage.setItem("ns_upload_time", Date.now().toString());
+                saveStateToStorage();
+                renderActiveBoard();
+                updateUploadPanelState();
+                
+                alert(activeDictionary.dbSuccessBoard);
+                
+                if (currentBoardIsFull) {
+                    evaluateStateTransitions();
+                } else {
+                    inputField.value = "";
+                }
+            } else {
+                const freshQueueObject = {
+                    userId: localUserSessionId,
+                    username: activeUsername,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2], 
+                    channelLink: activeChannelLink,
+                    clicks: 0,
+                    youtubeLink: finalCleanedUrl, 
+                    appearsReceived: 0
+                };
+
+                // Array push naturally preserves FIFO rules by ordering earliest links at the front (index 0)
+                waitingList.push(freshQueueObject);
+                localStorage.setItem("ns_upload_time", Date.now().toString());
+                saveStateToStorage();
+
+                inputField.value = "";
+                
+                if (!evaluateStateTransitions()) {
+                    renderWaitingList();
+                    updateUploadPanelState();
+                    alert(activeDictionary.dbSuccessQueue);
+                    
+                    ensureValidSequenceTarget();
+                    renderVIPSpaces();
+                    renderActiveBoard();
+                }
             }
         });
 
-        // Initialize and long-poll network system state vectors
-        window.addEventListener("DOMContentLoaded", () => {
-            initializeUserGateway();
+        window.addEventListener("DOMContentLoaded", async () => {
             applyDynamicLocalization(); 
-            buildRegulationsPanel();
-            synchroniseWithLiveDatabase();
-            
-            // Core network monitoring heartbeat pipeline interval loop
-            setInterval(synchroniseWithLiveDatabase, 3000); 
+            instantiateComplianceGateway();
+            if (!checkLockoutState()) {
+                await loadSystemData();
+                buildRegulationsPanel();
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateUploadPanelState();
+                evaluateStateTransitions();
+                initializeLiveUpdateEngine(); 
+            }
         });
     </script>
 </body>
