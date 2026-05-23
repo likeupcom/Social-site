@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+is any difference       <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -74,7 +74,6 @@
             -webkit-text-fill-color: transparent;
             text-transform: uppercase;
             letter-spacing: 2px;
-            filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.3));
         }
 
         /* Metrics Panel Styles */
@@ -95,7 +94,6 @@
             font-size: 18px;
             font-weight: bold;
             color: var(--cyan-glow);
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
 
         .metric-card .label {
@@ -134,8 +132,8 @@
 
         .board-card.active-target {
             border-color: var(--cyan-glow);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.25);
-            background: rgba(0, 255, 255, 0.04);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+            background: rgba(0, 255, 255, 0.02);
         }
 
         .board-grid {
@@ -171,7 +169,7 @@
         .action-btn {
             font-weight: 600;
             letter-spacing: 0.5px;
-            transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.2s ease, filter 0.2s ease;
             outline: none;
         }
 
@@ -199,12 +197,11 @@
             padding: 12px 16px;
             color: #fff;
             font-size: 14px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: border-color 0.3s ease;
         }
 
         .glass-input:focus {
             border-color: var(--cyan-glow);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
             outline: none;
         }
 
@@ -216,7 +213,6 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 0 15px rgba(0, 127, 255, 0.3);
         }
 
         .submit-btn:disabled {
@@ -224,7 +220,6 @@
             color: #555;
             cursor: not-allowed;
             border: 1px solid #333;
-            box-shadow: none;
         }
 
         /* Queue List Elements */
@@ -251,12 +246,6 @@
             border: 1px solid #ff007f;
             color: #ff007f;
             cursor: pointer;
-            box-shadow: 0 0 8px rgba(255, 0, 127, 0.1);
-        }
-
-        .appeal-btn:hover {
-            background: rgba(255, 0, 127, 0.1);
-            box-shadow: 0 0 12px rgba(255, 0, 127, 0.3);
         }
 
         /* Fullscreen Overlay Modes */
@@ -269,7 +258,7 @@
             background: rgba(5, 5, 10, 0.9);
             backdrop-filter: blur(20px);
             z-index: 9999;
-            display: none; 
+            display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -279,7 +268,7 @@
             max-width: 500px;
             text-align: center;
             border: 1px solid rgba(255, 0, 127, 0.3);
-            box-shadow: 0 0 30px rgba(255, 0, 127, 0.2);
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.1);
         }
 
         .appearing-overlay {
@@ -305,7 +294,6 @@
             border-top-color: var(--cyan-glow);
             border-radius: 50%;
             animation: spin 1s infinite linear;
-            filter: drop-shadow(0 0 8px var(--cyan-glow));
         }
 
         @keyframes spin {
@@ -315,19 +303,10 @@
 </head>
 <body>
 
-    <!-- Lockout Screen Element Template Structure -->
-    <div id="securityLockoutOverlay" class="overlay">
-        <div class="glass-panel lockout-box">
-            <h2 id="lockoutTitle" style="color: #ff007f; text-shadow: 0 0 10px rgba(255,0,127,0.5);">Lockout Active</h2>
-            <p id="lockoutDescription" style="margin: 20px 0; color: #ccc; line-height: 1.6;"></p>
-            <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px; text-shadow: 0 0 10px rgba(0,255,255,0.5);">--:--:--</div>
-        </div>
-    </div>
-
-    <!-- Transition Synchronisation Overlay Element -->
+    <!-- Appearing Period Synchronisation Overlay Element -->
     <div id="appearingPeriodOverlay" class="appearing-overlay">
         <div class="spinner"></div>
-        <h2 id="appearingOverlayTitle" style="color: var(--cyan-glow); letter-spacing: 1px; text-transform: uppercase; font-size: 18px; text-shadow: 0 0 8px rgba(0,255,255,0.4);">Advancing Engine Framework Phase...</h2>
+        <h2 style="color: var(--cyan-glow); letter-spacing: 1px; text-transform: uppercase; font-size: 18px;">Advancing Engine Framework Phase...</h2>
     </div>
 
     <header class="glass-panel">
@@ -337,26 +316,26 @@
         <div class="metrics-bar">
             <div class="metric-card">
                 <div id="metricGlobalHits" class="value">0</div>
-                <div id="metricGlobalHitsLabel" class="label">Completed Hits</div>
+                <div class="label">Completed Hits</div>
             </div>
             <div class="metric-card">
-                <div id="metricEngineStatus" class="value" style="color: #ff007f;">-</div>
-                <div id="metricEngineStatusLabel" class="label">System Phase</div>
+                <div id="metricEngineStatus" class="value" style="color: #ff007f;">Regular</div>
+                <div class="label">System Phase</div>
             </div>
         </div>
     </header>
 
     <div class="container">
-        <!-- Left Wing: VIP Allocation Panel Section 1 (2 Slots) -->
+        <!-- Left Wing: VIP Allocation Panel Section 1 -->
         <aside class="side-wing">
             <div class="glass-panel">
-                <h3 id="vipLeftWingTitle" style="color: var(--cyan-glow); margin-bottom: 15px; text-shadow: 0 0 8px rgba(0,255,255,0.3);">VIP Left Wing</h3>
+                <h3 style="color: var(--cyan-glow); margin-bottom: 15px;">VIP Left Wing</h3>
                 <div id="vipLeftWing" style="display: flex; flex-direction: column; gap: 12px;"></div>
             </div>
             <div id="rulesAnchorPanel" class="glass-panel"></div>
         </aside>
 
-        <!-- Center Stage: Core Active Board Grid Component (10 Slots Max) -->
+        <!-- Center Stage: Core Active Board Grid Component -->
         <main class="main-content">
             <div id="uploadPanel" class="glass-panel">
                 <h3 id="uploadPanelTitle" style="color: #fff;">Accelerate Your Video Node</h3>
@@ -368,132 +347,397 @@
 
             <div class="glass-panel">
                 <h3 style="color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                    <span id="activeBoardTitle">Active Acceleration Grid</span>
-                    <span id="activeBoardBadge" style="font-size: 12px; background: rgba(0,255,255,0.1); color: var(--cyan-glow); padding: 2px 8px; border-radius: 20px;">10 Slots Max</span>
+                    <span>Active Acceleration Grid</span>
+                    <span style="font-size: 12px; background: rgba(0,255,255,0.1); color: var(--cyan-glow); padding: 2px 8px; border-radius: 20px;">10 Slots Max</span>
                 </h3>
                 <div id="mainAccelerationBoard" class="board-grid"></div>
             </div>
         </main>
 
-        <!-- Right Wing: VIP Space Section 2 (2 Slots) & FIFO Queue Panel -->
+        <!-- Right Wing: VIP Space Section 2 & FIFO Queue Panel -->
         <aside class="side-wing">
             <div class="glass-panel">
-                <h3 id="vipRightWingTitle" style="color: var(--cyan-glow); margin-bottom: 15px; text-shadow: 0 0 8px rgba(0,255,255,0.3);">VIP Right Wing</h3>
+                <h3 style="color: var(--cyan-glow); margin-bottom: 15px;">VIP Right Wing</h3>
                 <div id="vipRightWing" style="display: flex; flex-direction: column; gap: 12px;"></div>
             </div>
 
             <div class="glass-panel">
-                <h3 id="waitingQueueTitle">Waiting Queue (FIFO)</h3>
+                <h3 style="color: #fff;">Waiting Queue (FIFO)</h3>
                 <ul id="waitingQueueContainer" class="queue-list"></ul>
             </div>
         </aside>
     </div>
 
     <script>
-        // System Session Parameters (Read-only configurations passed to backend request headers)
+        // System Engine State Initialisation
+        let activeBoard = [];
+        let waitingList = [];
+        let vipBoard = [
+            { isEmptySlot: true, slotPosition: "alpha", clicks: 0 },
+            { isEmptySlot: true, slotPosition: "beta", clicks: 0 },
+            { isEmptySlot: true, slotPosition: "gamma", clicks: 0 },
+            { isEmptySlot: true, slotPosition: "delta", clicks: 0 }
+        ];
+        let systemPhase = "REGULAR_PERIOD"; 
+        let sequenceIndex = 0; 
+        let currentBoardIsFull = false;
+        let justBecameInactivePool = [];
+        let executionTimerRunning = false;
+
+        // Sandbox/Production Credentials Mock Injection 
         const authToken = "ns_sec_token_prod_stream_771a";
         const localUserSessionId = "user_node_9942_client";
-        const userLanguageCode = navigator.language || navigator.userLanguage || "en";
+        const activeUsername = "AlphaCreator";
+        const activeChannelLink = "https://youtube.com/@alphacreator";
 
-        // Performance state blocker flag to prevent overlapping pipeline requests during active loops
-        let countdownTimerActive = false;
+        // Advanced Multilingual Multidirectional Engine Dictionary Object
+        const localizationDbs = {
+            en: {
+                commitBtn: "Commit Node",
+                lockoutTitle: "Cool-down Protection Active",
+                lockoutDesc: "Your video has completed its active acceleration life-cycle. To protect network integrity and maintain equal visibility distribution across all channels, your terminal has been placed in a temporary security lockout.",
+                regTitle: "System Operations Framework",
+                regulationsText: "<li>You must watch the current actively target-highlighted system node for a full 30 seconds to trigger cross-verification.</li><li>The application tracking algorithm parses view, like, comment, and sub requirements procedurally.</li><li>Submitting malicious schemas, broken redirects, or explicit links instantly drops your local node reputation to zero.</li>",
+                vipReserved: "VIP Space Unallocated",
+                vipPosition: "Node Designation",
+                visit: "Acquire Hit",
+                views: "Clicks",
+                locked: "Sequence Locked",
+                slotVacant: "Empty Board Sector",
+                waitingEmpty: "No nodes pending in verification pipeline.",
+                votes: "Eviction Flags",
+                appealRegistered: "Disciplinary review request flagged for",
+                appeal: "Flag / Appeal",
+                provideUrlErr: "Aborted. Target context string cannot be empty.",
+                validationVideoErr: "Validation error. Input string does not map to signature watch structures.",
+                validationUrlErr: "Security intercept. Parsing error on domain structure.",
+                dbSuccessBoard: "Success. Your node has successfully allocated space inside the active live sector.",
+                dbSuccessQueue: "Active sectors full. Node successfully queued into Chronological FIFO pipeline array."
+            },
+            fr: {
+                commitBtn: "Engager le Nœud",
+                lockoutTitle: "Protection de Refroidissement Active",
+                lockoutDesc: "Votre vidéo a terminé son cycle d'accélération actif. Pour protéger l'intégrité du réseau et maintenir une distribution équitable de la visibilité, votre terminal a été temporairement verrouillé.",
+                regTitle: "Cadre d'Opérations du Système",
+                regulationsText: "<li>Vous devez regarder le nœud actif surbrillant pendant 30 secondes pour déclencher la vérification.</li><li>L'algorithme analyse de manière procédurale les vues, likes, commentaires et abonnements.</li><li>La soumission de liens brisés ou malveillants réduit instantanément votre réputation locale à zéro.</li>",
+                vipReserved: "Espace VIP Non Alloué",
+                vipPosition: "Désignation du Nœud",
+                visit: "Acquérir le Hit",
+                views: "Clics",
+                locked: "Séquence Verrouillée",
+                slotVacant: "Secteur de Carte Vide",
+                waitingEmpty: "Aucun nœud en attente dans le pipeline.",
+                votes: "Signaux d'Éviction",
+                appealRegistered: "Demande de révision disciplinaire signalée pour",
+                appeal: "Signaler / Appel",
+                provideUrlErr: "Avorté. La chaîne de contexte cible ne peut pas être vide.",
+                validationVideoErr: "Erreur de validation. L'URL ne correspond pas aux structures de visionnage standard.",
+                validationUrlErr: "Interception de sécurité. Erreur d'analyse de la structure du domaine.",
+                dbSuccessBoard: "Succès. Votre nœud a alloué une place dans le secteur actif en direct.",
+                dbSuccessQueue: "Secteurs actifs pleins. Nœud mis en attente dans le pipeline chronologique FIFO."
+            },
+            rw: {
+                commitBtn: "Emeza Node",
+                lockoutTitle: "Gahunda yo Guhagarika By'agateganyo Ikoreshwa",
+                lockoutDesc: "Video yawe yarangije igihe cyayo cyo kwihuta. Muri gahunda yo kurinda uburenganzira bw'abakoresha bose no gutanga amahirwe angana, imashini yawe yashizwe mu muhezo w'agateganyo.",
+                regTitle: "Amategeko Agenga Sisitemu",
+                regulationsText: "<li>Ugomba kureba video yashizweho ikimenyetso iminsi mirongo itatatu (30s) ngo sisitemu yemeze ko wayirebye.</li><li>Algorithm isuzuma ibyerekeye views, likes, comments na subs mu buryo bukurikirana.</li><li>Gushyiraho ama-link mabi cyangwa amapfa bihita biba impamvu yo gufungirwa hano burundu.</li>",
+                vipReserved: "Umwanya wa VIP Nturaboneka",
+                vipPosition: "Icyiciro cya Node",
+                visit: "Fata Hit",
+                views: "Gukanda",
+                locked: "Yafunzwe",
+                slotVacant: "Umwanya uracyari urwega",
+                waitingEmpty: " Nta masezerano ategereje mu murongo wo kugenzurwa.",
+                votes: "Gukurwaho",
+                appealRegistered: "Isuzuma ryasabwe kuri",
+                appeal: "Raporta / Ubujurire",
+                provideUrlErr: "Bihagaritswe. Ntabwo wakwemeza link isize ubusa.",
+                validationVideoErr: "Ikosa ryo kwemeza. Iyi link ntihuye n'izisanzwe za YouTube.",
+                validationUrlErr: "Ikosa rya Tekiniki. Reba neza niba URL yawe yanditse neza.",
+                dbSuccessBoard: "Byakunze. Video yawe yashizwe mu gice cy'abari gukurikiranwa live.",
+                dbSuccessQueue: "Imyanya yose yafashwe. Video yawe gushyizwe mu murongo utegereje wa FIFO."
+            }
+        };
 
-        /**
-         * Orchestrator function querying current server configurations, layout values, matrices metrics,
-         * localized terminology strings, and running state metrics.
-         */
-        async function synchroniseFrontendView() {
-            if (countdownTimerActive) return;
+        let activeDictionary = localizationDbs.en; // System default initialization fallback
 
+        function applyDynamicLocalization() {
+            const userLocale = navigator.language || navigator.userLanguage;
+            if (userLocale.startsWith("rw")) {
+                activeDictionary = localizationDbs.rw;
+            } else if (userLocale.startsWith("fr")) {
+                activeDictionary = localizationDbs.fr;
+            } else {
+                activeDictionary = localizationDbs.en;
+            }
+        }
+
+        function instantiateComplianceGateway() {
+            console.log("Compliance system monitoring initiated under remote verification schemas.");
+        }
+
+        function updateMetricsDisplayPanel() {
+            const totalHits = localStorage.getItem("ns_completed_hits") || "0";
+            document.getElementById("metricGlobalHits").innerText = totalHits;
+            document.getElementById("metricEngineStatus").innerText = systemPhase === "REGULAR_PERIOD" ? "Regular" : "Appearing";
+            document.getElementById("metricEngineStatus").style.color = systemPhase === "REGULAR_PERIOD" ? "#00ffff" : "#ff007f";
+        }
+
+        function ensureValidSequenceTarget() {
+            let maxThreshold = 4 + activeBoard.length;
+            if (sequenceIndex >= maxThreshold) return;
+
+            if (sequenceIndex < 4) {
+                if (!vipBoard[sequenceIndex] || vipBoard[sequenceIndex].isEmptySlot) {
+                    sequenceIndex++;
+                    ensureValidSequenceTarget();
+                }
+            } else {
+                let boardIdx = sequenceIndex - 4;
+                if (!activeBoard[boardIdx] || activeBoard[boardIdx].isEmptySlot) {
+                    sequenceIndex++;
+                    ensureValidSequenceTarget();
+                }
+            }
+        }
+
+        function updateUploadPanelState() {
+            const inputField = document.getElementById("youtubeLinkInput");
+            const submitBtn = document.getElementById("submitVideoBtn");
+            const uploadPanel = document.getElementById("uploadPanel");
+
+            let isCurrentlyOnBoard = activeBoard.some(slot => slot.userId === localUserSessionId);
+            let isCurrentlyInQueue = waitingList.some(user => user.userId === localUserSessionId);
+            let statusSuffix = "";
+
+            if (isCurrentlyOnBoard || isCurrentlyInQueue) {
+                uploadPanel.style.opacity = "0.6";
+                inputField.disabled = true;
+                submitBtn.disabled = true;
+                submitBtn.style.pointerEvents = "none";
+
+                let explanation = "";
+                if (isCurrentlyOnBoard) explanation = " (Active on Board)";
+                else if (isCurrentlyInQueue) explanation = " (In Waiting Queue)";
+                else explanation = statusSuffix;
+
+                submitBtn.innerText = `${activeDictionary.commitBtn}${explanation}`;
+            } else {
+                uploadPanel.style.opacity = "1";
+                inputField.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.style.pointerEvents = "auto";
+                submitBtn.innerText = activeDictionary.commitBtn;
+            }
+        }
+
+        function runVerificationTimer(buttonElement, targetUrl, onCompleteRoutine) {
+            executionTimerRunning = true; 
+            buttonElement.style.pointerEvents = "none";
+            window.open(targetUrl, '_blank');
+
+            let secondsRemaining = 30;
+            buttonElement.innerText = `... (${secondsRemaining}s)`;
+
+            const timerCountdownLoop = setInterval(() => {
+                secondsRemaining--;
+                if (secondsRemaining > 0) {
+                    buttonElement.innerText = `... (${secondsRemaining}s)`;
+                } else {
+                    clearInterval(timerCountdownLoop);
+                    
+                    let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0") + 1;
+                    localStorage.setItem("ns_completed_hits", currentCompletedHits.toString());
+                    updateMetricsDisplayPanel();
+
+                    buttonElement.style.pointerEvents = "auto";
+                    executionTimerRunning = false; 
+                    onCompleteRoutine();
+                }
+            }, 1000);
+        }
+
+        async function synchroniseWithLiveDatabase() {
             try {
-                const response = await fetch(`/api/system-state?userId=${localUserSessionId}&lang=${userLanguageCode}`, {
+                const response = await fetch('/api/system-state', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
                     }
                 });
-
-                if (!response.ok) return;
-                const stateData = await response.json();
-
-                renderMetricsAndPhases(stateData);
-                renderLockoutsAndOverlays(stateData);
-                renderLocalizationLabels(stateData.localization);
-                renderVIPGrid(stateData.vipBoard, stateData.systemPhase, stateData.sequenceIndex, stateData.localization);
-                renderActiveAccelerationGrid(stateData.activeBoard, stateData.systemPhase, stateData.sequenceIndex, stateData.localization);
-                renderFIFOQueue(stateData.waitingList, stateData.localization);
-                applyUploadPanelState(stateData.userStatus);
-
-            } catch (error) {
-                console.error("View synchronization sequence interrupted:", error);
-            }
-        }
-
-        function renderMetricsAndPhases(state) {
-            document.getElementById("metricGlobalHits").innerText = state.metrics.globalHits;
-            document.getElementById("metricEngineStatus").innerText = state.metrics.phaseText;
-            document.getElementById("metricEngineStatus").style.color = state.systemPhase === "REGULAR_PERIOD" ? "#00ffff" : "#ff007f";
-        }
-
-        function renderLockoutsAndOverlays(state) {
-            const lockoutOverlay = document.getElementById("securityLockoutOverlay");
-            const appearingOverlay = document.getElementById("appearingPeriodOverlay");
-
-            // Handle Phase Overlay
-            appearingOverlay.style.display = state.systemPhase === "APPEARING_PERIOD" ? "flex" : "none";
-
-            // Handle Security Lockout View
-            if (state.userStatus.isLockedOut) {
-                lockoutOverlay.style.display = "flex";
-                document.getElementById("lockoutTitle").innerText = state.localization.lockoutTitle;
-                document.getElementById("lockoutDescription").innerText = state.localization.lockoutDesc;
                 
-                let remainingMs = state.userStatus.lockoutTimeRemainingMs;
-                let hrs = Math.floor(remainingMs / 3600000);
-                let mins = Math.floor((remainingMs % 3600000) / 60000);
-                let secs = Math.floor((remainingMs % 60000) / 1000);
-                document.getElementById("countdownTimerBox").innerText = 
-                    `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            } else {
-                lockoutOverlay.style.display = "none";
+                if (response.ok) {
+                    const data = await response.json();
+                    activeBoard = data.activeBoard || activeBoard;
+                    waitingList = data.waitingList || waitingList;
+                    vipBoard = data.vipBoard || vipBoard;
+                    systemPhase = data.systemPhase || systemPhase;
+                    sequenceIndex = data.sequenceIndex ?? sequenceIndex;
+                    currentBoardIsFull = data.currentBoardIsFull ?? currentBoardIsFull;
+                    justBecameInactivePool = data.justBecameInactivePool || justBecameInactivePool;
+                    return true;
+                }
+            } catch (error) {
+                console.warn("Backend API Offline or Unreachable. Operating in robust fallback storage mode.");
+            }
+            return false;
+        }
+
+        async function loadSystemData() {
+            const usingLiveServer = await synchroniseWithLiveDatabase();
+            
+            if (!usingLiveServer) {
+                const storedBoard = localStorage.getItem("ns_active_board");
+                if (storedBoard) {
+                    activeBoard = JSON.parse(storedBoard);
+                } else {
+                    activeBoard = [];
+                    for(let i = 0; i < 10; i++) {
+                        activeBoard.push({ isEmptySlot: true, clicks: 0 });
+                    }
+                }
+                waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
+                vipBoard = JSON.parse(localStorage.getItem("ns_vip_board")) || vipBoard;
+                systemPhase = localStorage.getItem("ns_system_phase") || "REGULAR_PERIOD";
+                sequenceIndex = parseInt(localStorage.getItem("ns_sequence_index") || "0");
+                currentBoardIsFull = (localStorage.getItem("ns_board_full") === "true");
+                justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
+            }
+
+            let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+            currentBoardIsFull = (filledCount === 10);
+            updateMetricsDisplayPanel();
+            ensureValidSequenceTarget();
+        }
+
+        // Real-Time Background Synchronization Loop without Re-loading page
+        function initializeLiveUpdateEngine() {
+            setInterval(async () => {
+                if (executionTimerRunning || systemPhase === "APPEARING_PERIOD") return; 
+                
+                const synced = await synchroniseWithLiveDatabase();
+                if (!synced) {
+                    const storedBoard = localStorage.getItem("ns_active_board");
+                    if (storedBoard) activeBoard = JSON.parse(storedBoard);
+                    waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
+                    vipBoard = JSON.parse(localStorage.getItem("ns_vip_board")) || vipBoard;
+                    systemPhase = localStorage.getItem("ns_system_phase") || "REGULAR_PERIOD";
+                    sequenceIndex = parseInt(localStorage.getItem("ns_sequence_index") || "0");
+                    currentBoardIsFull = (localStorage.getItem("ns_board_full") === "true");
+                    justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
+                }
+                
+                ensureValidSequenceTarget();
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateMetricsDisplayPanel();
+                updateUploadPanelState();
+                evaluateStateTransitions();
+            }, 3000); 
+        }
+
+        async function saveStateToStorage() {
+            localStorage.setItem("ns_active_board", JSON.stringify(activeBoard));
+            localStorage.setItem("ns_waiting_list", JSON.stringify(waitingList));
+            localStorage.setItem("ns_vip_board", JSON.stringify(vipBoard));
+            localStorage.setItem("ns_system_phase", systemPhase);
+            localStorage.setItem("ns_sequence_index", sequenceIndex.toString());
+            localStorage.setItem("ns_board_full", currentBoardIsFull.toString());
+            localStorage.setItem("ns_inactive_pool", JSON.stringify(justBecameInactivePool));
+
+            try {
+                await fetch('/api/system-state', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                    body: JSON.stringify({
+                        activeBoard, waitingList, vipBoard, systemPhase, sequenceIndex, currentBoardIsFull, justBecameInactivePool
+                    })
+                });
+            } catch(e) {
+                console.error("Failed to commit network mutation stream to remote database.");
             }
         }
 
-        function renderLocalizationLabels(loc) {
-            document.getElementById("metricGlobalHitsLabel").innerText = loc.completedHitsLabel || "Completed Hits";
-            document.getElementById("metricEngineStatusLabel").innerText = loc.systemPhaseLabel || "System Phase";
-            document.getElementById("vipLeftWingTitle").innerText = loc.vipLeftWingTitle || "VIP Left Wing";
-            document.getElementById("vipRightWingTitle").innerText = loc.vipRightWingTitle || "VIP Right Wing";
-            document.getElementById("uploadPanelTitle").innerText = loc.uploadPanelTitle || "Accelerate Your Video Node";
-            document.getElementById("youtubeLinkInput").placeholder = loc.inputPlaceholder || "Paste standard YouTube watch URL here...";
-            document.getElementById("activeBoardTitle").innerText = loc.activeBoardTitle || "Active Acceleration Grid";
-            document.getElementById("activeBoardBadge").innerText = loc.activeBoardBadge || "10 Slots Max";
-            document.getElementById("waitingQueueTitle").innerText = loc.waitingQueueTitle || "Waiting Queue (FIFO)";
-            document.getElementById("appearingOverlayTitle").innerText = loc.appearingOverlayTitle || "Advancing Engine Framework Phase...";
+        function checkLockoutState() {
+            const blockReleaseTimestamp = localStorage.getItem("ns_lockout_lift_time");
+            if (blockReleaseTimestamp) {
+                let delta = parseInt(blockReleaseTimestamp) - Date.now();
+                if (delta > 0) {
+                    renderLockoutInterfaceScreen(delta);
+                    return true;
+                } else {
+                    localStorage.removeItem("ns_lockout_lift_time");
+                }
+            }
+            return false;
+        }
 
-            // Rules Panel Generation
-            const rulesContainer = document.getElementById("rulesAnchorPanel");
-            rulesContainer.innerHTML = `
-                <h3 style="color: #ff007f; text-shadow: 0 0 8px rgba(255,0,127,0.3);">${loc.regTitle}</h3>
+        function forceLocalUserLockout() {
+            const lockoutDurationMs = 3 * 60 * 60 * 1000; 
+            const executionLiftTarget = Date.now() + lockoutDurationMs;
+            localStorage.setItem("ns_lockout_lift_time", executionLiftTarget.toString());
+            renderLockoutInterfaceScreen(lockoutDurationMs);
+        }
+
+        function renderLockoutInterfaceScreen(remainingMs) {
+            document.body.innerHTML = `
+                <div class="overlay">
+                    <div class="glass-panel lockout-box">
+                        <h2 style="color: #ff007f;">${activeDictionary.lockoutTitle}</h2>
+                        <p style="margin: 20px 0; color: #ccc; line-height: 1.6;">${activeDictionary.lockoutDesc}</p>
+                        <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">
+                            --:--:--
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            let absoluteTarget = Date.now() + remainingMs;
+            const liveClockRoutine = setInterval(() => {
+                let currentDelta = absoluteTarget - Date.now();
+                if (currentDelta <= 0) {
+                    clearInterval(liveClockRoutine);
+                    localStorage.removeItem("ns_lockout_lift_time");
+                    window.location.reload();
+                } else {
+                    let hrs = Math.floor(currentDelta / (3600000));
+                    let mins = Math.floor((currentDelta % 3600000) / 60000);
+                    let secs = Math.floor((currentDelta % 60000) / 1000);
+                    document.getElementById("countdownTimerBox").innerText = 
+                        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        function buildRegulationsPanel() {
+            const container = document.getElementById("rulesAnchorPanel");
+            container.innerHTML = `
+                <h3 style="color: #ff007f;">${activeDictionary.regTitle}</h3>
                 <ol style="padding-left: 20px; line-height: 1.8; color: #ddd; margin-top: 10px;">
-                    ${loc.regulationsText}
+                    ${activeDictionary.regulationsText}
                 </ol>
             `;
         }
 
-        function renderVIPGrid(vipBoard, phase, sequenceIndex, loc) {
+        function renderVIPSpaces() {
             const leftWing = document.getElementById("vipLeftWing");
             const rightWing = document.getElementById("vipRightWing");
+            
             leftWing.innerHTML = "";
             rightWing.innerHTML = "";
 
             vipBoard.forEach((slot, index) => {
-                // Split perfectly: Slots 0 and 1 go to Left Wing, 2 and 3 go to Right Wing
                 let targetWing = (index < 2) ? leftWing : rightWing;
+                
                 let card = document.createElement("div");
                 card.className = "vip-card";
-                card.style.background = "rgba(255, 255, 255, 0.04)";
+                card.style.background = "rgba(255, 255, 255, 0.05)";
                 card.style.backdropFilter = "blur(10px)";
                 card.style.border = "1px solid #ff007f";
                 card.style.borderRadius = "8px";
@@ -501,54 +745,61 @@
                 card.style.display = "flex";
                 card.style.justifyContent = "space-between";
                 card.style.alignItems = "center";
-                card.style.boxShadow = "0 0 10px rgba(255, 0, 127, 0.15)";
+                card.style.boxShadow = "0 0 10px rgba(255, 0, 127, 0.2)";
 
                 if (slot.isEmptySlot) {
                     card.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px; color: #666;">
+                        <div style="display: flex; align-items: center; gap: 10px; color: #888;">
                             <span style="font-size: 24px;">👤</span>
                             <div>
-                                <div style="font-weight: bold; color: #ff007f; opacity: 0.7;">${loc.vipReserved}</div>
-                                <div style="font-size: 12px; color: #555;">${loc.vipPosition}: ${slot.slotPosition.toUpperCase()}</div>
+                                <div style="font-weight: bold; color: #ff007f;">${activeDictionary.vipReserved}</div>
+                                <div style="font-size: 12px;">${activeDictionary.vipPosition}: ${slot.slotPosition.toUpperCase()}</div>
                             </div>
                         </div>
-                        <button disabled style="background: #222; color: #444; border: 1px solid #333; padding: 8px 16px; border-radius: 4px; cursor: not-allowed;">${loc.visit}</button>
+                        <button disabled style="background: #333; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed;">${activeDictionary.visit}</button>
                     `;
                 } else {
-                    let isCurrentTarget = (phase === "REGULAR_PERIOD" && sequenceIndex === index);
-                    let clicks = slot.clicks || 0;
-
-                    if (isCurrentTarget) {
-                        card.style.borderColor = "var(--cyan-glow)";
-                        card.style.boxShadow = "0 0 15px rgba(0, 255, 255, 0.3)";
-                    }
+                    let absoluteIndex = index;
+                    let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
+                    let displayClicks = slot.clicks || 0;
 
                     card.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
-                            <span style="font-size: 24px; color: ${isCurrentTarget ? '#00ffff' : '#ff007f'}; filter: drop-shadow(0 0 5px ${isCurrentTarget ? '#00ffff' : '#ff007f'});">👑</span>
+                            <span style="font-size: 24px; color: #00ffff; filter: drop-shadow(0 0 5px #00ffff);">👑</span>
                             <div style="width: 100%;">
-                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.username}</div>
+                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.username || slot.channelTitle}</div>
                                 <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
-                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${clicks} ${loc.views.toLowerCase()}</span>
-                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${clicks} sub</span>
-                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${clicks} like</span>
-                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${clicks} com</span>
+                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} ${activeDictionary.views.toLowerCase()}</span>
+                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} sub</span>
+                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} like</span>
+                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} com</span>
                                 </div>
                             </div>
                         </div>
-                        <button class="action-btn vip-action-btn" style="
-                            background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : 'transparent'};
-                            color: #fff; border: 1px solid ${isCurrentTarget ? 'transparent' : '#ff007f'};
-                            padding: 8px 16px; border-radius: 4px;
-                            box-shadow: ${isCurrentTarget ? '0 0 10px rgba(255,0,127,0.4)' : 'none'};
+                        <button class="action-btn vip-action-btn" data-vip-index="${absoluteIndex}" style="
+                            background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : '#222'};
+                            color: #fff;
+                            border: ${isCurrentTarget ? 'none' : '1px solid #ff007f'};
+                            padding: 8px 16px;
+                            border-radius: 4px;
+                            box-shadow: ${isCurrentTarget ? '0 0 10px rgba(255,0,127,0.5)' : 'none'};
                             cursor: ${isCurrentTarget ? 'pointer' : 'default'};
                             opacity: ${isCurrentTarget ? '1' : '0.4'};
-                        ">${isCurrentTarget ? loc.visit : loc.locked}</button>
+                        ">${isCurrentTarget ? activeDictionary.visit : activeDictionary.locked}</button>
                     `;
 
+                    const actionBtn = card.querySelector(".vip-action-btn");
                     if (isCurrentTarget) {
-                        card.querySelector(".vip-action-btn").addEventListener("click", function() {
-                            triggerVerificationTimer(this, slot.youtubeLink, 'vip', index);
+                        actionBtn.addEventListener("click", () => {
+                            runVerificationTimer(actionBtn, slot.youtubeLink, () => {
+                                vipBoard[absoluteIndex].clicks = displayClicks + 1;
+                                sequenceIndex++; 
+                                ensureValidSequenceTarget(); 
+                                saveStateToStorage();
+                                renderVIPSpaces();
+                                renderActiveBoard();
+                                evaluateStateTransitions();
+                            });
                         });
                     }
                 }
@@ -556,11 +807,11 @@
             });
         }
 
-        function renderActiveAccelerationGrid(activeBoard, phase, sequenceIndex, loc) {
+        function renderActiveBoard() {
             const boardContainer = document.getElementById("mainAccelerationBoard");
             boardContainer.innerHTML = "";
 
-            let vipOffset = 4; // Absolute internal index mapping offset
+            let vipOffset = 4;
 
             activeBoard.forEach((slot, index) => {
                 const elementNode = document.createElement("div");
@@ -568,17 +819,19 @@
 
                 if (slot.isEmptySlot) {
                     elementNode.innerHTML = `
-                        <div style="color: #444; text-align: center; padding: 20px 0; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                        <div style="color: #555; text-align: center; padding: 20px 0; display: flex; flex-direction: column; justify-content: center; height: 100%;">
                             <div style="font-size: 24px;">📭</div>
-                            <div style="font-size: 12px; margin-top: 5px; color: #555;">${loc.slotVacant}</div>
+                            <div style="font-size: 12px; margin-top: 5px;">${activeDictionary.slotVacant}</div>
                         </div>
                     `;
                 } else {
                     let absoluteIndex = vipOffset + index;
-                    let isCurrentTarget = (phase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
-                    let clicks = slot.clicks || 0;
+                    let isCurrentTarget = (systemPhase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
+                    let displayClicks = slot.clicks || 0;
 
-                    if (isCurrentTarget) elementNode.className += " active-target";
+                    if (isCurrentTarget) {
+                        elementNode.className += " active-target";
+                    }
 
                     elementNode.innerHTML = `
                         <div>
@@ -586,30 +839,40 @@
                                 <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
                                     <span style="font-size: 28px; color: #00ffff; text-shadow: 0 0 5px rgba(0,255,255,0.4);">👤</span>
                                     <div style="font-weight: bold; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
-                                        ${slot.username}
+                                        ${slot.username || slot.channelTitle}
                                     </div>
                                 </div>
                                 <button class="active-redirect-anchor action-btn" style="
-                                    background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : 'rgba(255,255,255,0.02)'};
+                                    background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : 'rgba(255,255,255,0.05)'};
                                     color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: bold;
-                                    border: 1px solid ${isCurrentTarget ? 'transparent' : 'rgba(255,255,255,0.1)'};
-                                    box-shadow: ${isCurrentTarget ? '0 0 10px rgba(0, 255, 255, 0.4)' : 'none'};
+                                    border: ${isCurrentTarget ? 'none' : '1px solid rgba(255,255,255,0.1)'};
                                     cursor: ${isCurrentTarget ? 'pointer' : 'default'};
                                     opacity: ${isCurrentTarget ? '1' : '0.4'};
-                                ">${isCurrentTarget ? loc.visit : loc.locked}</button>
+                                    box-shadow: ${isCurrentTarget ? '0 0 10px rgba(0, 255, 255, 0.4)' : 'none'}
+                                ">${isCurrentTarget ? activeDictionary.visit : activeDictionary.locked}</button>
                             </div>
                         </div>
+                        
                         <div class="metric-badge-row">
-                            <div class="badge-node"><span class="badge-icon">👁️</span><span>${clicks} ${loc.views.toLowerCase()}</span></div>
-                            <div class="badge-node"><span class="badge-icon">❤️</span><span>${clicks} like</span></div>
-                            <div class="badge-node"><span class="badge-icon">🔔</span><span>${clicks} sub</span></div>
-                            <div class="badge-node"><span class="badge-icon">💬</span><span>${clicks} com</span></div>
+                            <div class="badge-node"><span class="badge-icon">👁️</span><span>${displayClicks} ${activeDictionary.views.toLowerCase()}</span></div>
+                            <div class="badge-node"><span class="badge-icon">❤️</span><span>${displayClicks} like</span></div>
+                            <div class="badge-node"><span class="badge-icon">🔔</span><span>${displayClicks} sub</span></div>
+                            <div class="badge-node"><span class="badge-icon">💬</span><span>${displayClicks} com</span></div>
                         </div>
                     `;
 
+                    const linkButton = elementNode.querySelector(".active-redirect-anchor");
                     if (isCurrentTarget) {
-                        elementNode.querySelector(".active-redirect-anchor").addEventListener("click", function() {
-                            triggerVerificationTimer(this, slot.youtubeLink, 'main', index);
+                        linkButton.addEventListener("click", () => {
+                            runVerificationTimer(linkButton, slot.youtubeLink, () => {
+                                activeBoard[index].clicks = displayClicks + 1;
+                                sequenceIndex++;
+                                ensureValidSequenceTarget(); 
+                                saveStateToStorage();
+                                renderVIPSpaces();
+                                renderActiveBoard();
+                                evaluateStateTransitions();
+                            });
                         });
                     }
                 }
@@ -617,112 +880,167 @@
             });
         }
 
-        function renderFIFOQueue(waitingList, loc) {
+        function renderWaitingList() {
             const container = document.getElementById("waitingQueueContainer");
             container.innerHTML = "";
 
             if (waitingList.length === 0) {
-                container.innerHTML = `<li style="color: #555; padding: 15px; text-align: center; border: 1px dashed rgba(255,255,255,0.03); border-radius: 8px;">${loc.waitingEmpty}</li>`;
+                container.innerHTML = `<li style="color: #666; padding: 15px; text-align: center;">${activeDictionary.waitingEmpty}</li>`;
                 return;
             }
 
             waitingList.forEach((user, index) => {
                 const li = document.createElement("li");
                 li.className = "queue-item";
+                
                 li.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <div style="display: flex; align-items: center; gap: 15px; width: 75%;">
-                            <span style="font-size: 32px; color: #555;">👤</span>
+                            <span style="font-size: 32px; color: #888;">👤</span>
                             <div style="width: 100%;">
                                 <div style="color: #fff; font-weight: bold; font-size: 15px; margin-bottom: 3px;">
-                                    ${index + 1}. ${user.username}
+                                    ${index + 1}. ${user.username || user.channelTitle}
                                 </div>
-                                <div style="color: #00ffff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.7;">
-                                    🔗 ${user.channelLink}
+                                <div style="color: #00ffff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8;">
+                                    🔗 ${user.channelLink || 'Channel Link Pre-Uploaded'}
                                 </div>
                                 <div style="color: #ff007f; font-size: 11px; margin-top: 4px; font-weight: bold;">
-                                    ${loc.votes}: ${user.appearsReceived || 0}/3
+                                    ${activeDictionary.votes}: ${user.appearsReceived || 0}/3
                                 </div>
                             </div>
                         </div>
-                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;">${loc.appeal}</button>
+                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;" onclick="alert('${activeDictionary.appealRegistered} ${user.username || user.channelTitle}.')">${activeDictionary.appeal}</button>
                     </div>
                 `;
-
-                li.querySelector(".appeal-btn").addEventListener("click", () => {
-                    executeFlagAppealAction(user.userId, user.username, loc);
-                });
-
                 container.appendChild(li);
             });
         }
 
-        function applyUploadPanelState(userStatus) {
-            const inputField = document.getElementById("youtubeLinkInput");
-            const submitBtn = document.getElementById("submitVideoBtn");
-            const uploadPanel = document.getElementById("uploadPanel");
+        function evaluateStateTransitions() {
+            if (!currentBoardIsFull) return false;
 
-            inputField.disabled = userStatus.isButtonDisabled;
-            submitBtn.disabled = userStatus.isButtonDisabled;
-            submitBtn.innerText = userStatus.buttonText;
-            uploadPanel.style.opacity = userStatus.isButtonDisabled ? "0.5" : "1";
-            submitBtn.style.pointerEvents = userStatus.isButtonDisabled ? "none" : "auto";
+            let maxSequenceThreshold = 4 + activeBoard.length;
+
+            if (sequenceIndex >= maxSequenceThreshold) {
+                systemPhase = "APPEARING_PERIOD";
+                saveStateToStorage();
+                executeAppearingPhaseRoutine();
+                return true;
+            }
+            return false;
         }
 
-        /**
-         * Pure UI countdown sequence handling view updates. Dispatches action validation
-         * queries directly to the backend layer on expiration.
-         */
-        function triggerVerificationTimer(buttonElement, targetUrl, boardType, index) {
-            countdownTimerActive = true;
-            buttonElement.style.pointerEvents = "none";
-            window.open(targetUrl, '_blank');
+        // Chronological FIFO Waiting List & Advanced Transition Replacement Engine
+        function executeAppearingPhaseRoutine() {
+            document.getElementById("appearingPeriodOverlay").style.display = "flex";
+            
+            waitingList.forEach(user => {
+                user.appearsReceived = (user.appearsReceived || 0) + 1;
+            });
 
-            let remaining = 30;
-            buttonElement.innerText = `... (${remaining}s)`;
+            let localUserWasActive = activeBoard.some(u => u.userId === localUserSessionId);
 
-            const timerLoop = setInterval(async () => {
-                remaining--;
-                if (remaining > 0) {
-                    buttonElement.innerText = `... (${remaining}s)`;
-                } else {
-                    clearInterval(timerLoop);
-                    buttonElement.innerText = "Verifying...";
+            // Populate the inactive users pool with the outgoing active board users before flushing
+            let oldActiveUsers = activeBoard.filter(slot => !slot.isEmptySlot);
+            justBecameInactivePool = [...justBecameInactivePool, ...oldActiveUsers];
 
-                    try {
-                        const response = await fetch('/api/complete-hit', {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${authToken}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                userId: localUserSessionId,
-                                boardType: boardType,
-                                targetIndex: index
-                            })
-                        });
+            let nextActiveBoard = [];
+            let remainingWaitingList = [];
 
-                        if (response.ok) {
-                            console.log("Hit registered successfully.");
-                        }
-                    } catch (err) {
-                        console.error("Failed to commit target hit registration stream:", err);
-                    }
-
-                    buttonElement.style.pointerEvents = "auto";
-                    countdownTimerActive = false;
-                    await synchroniseFrontendView();
+            // Chronological parsing loop: Top entries (uploaded earliest) move up. If evicted by 3 appeals, skip to the next in queue.
+            for (let i = 0; i < waitingList.length; i++) {
+                let currentCandidate = waitingList[i];
+                if (currentCandidate.appearsReceived >= 3) {
+                    continue; // Evicted! Skipped to let the next user in the waiting list slide forward
                 }
-            }, 1000);
+                
+                if (nextActiveBoard.length < 10) {
+                    nextActiveBoard.push(currentCandidate);
+                } else {
+                    remainingWaitingList.push(currentCandidate);
+                }
+            }
+
+            // Fallback Engine: If queue runs dry, pull randomly from the recently inactive pool
+            while (nextActiveBoard.length < 10 && justBecameInactivePool.length > 0) {
+                const randomPickIndex = Math.floor(Math.random() * justBecameInactivePool.length);
+                const fallbackReplacement = justBecameInactivePool.splice(randomPickIndex, 1)[0];
+                
+                fallbackReplacement.appearsReceived = 0;
+                fallbackReplacement.clicks = 0;
+                nextActiveBoard.push(fallbackReplacement);
+            }
+
+            // Hard Fallback: If pools are fully depleted, inject system core seed nodes
+            while (nextActiveBoard.length < 10) {
+                nextActiveBoard.push({
+                    userId: "system_node_" + Math.floor(Math.random() * 10000),
+                    username: "SystemNode",
+                    channelTitle: "System Accelerated Feed",
+                    channelLink: "https://youtube.com/@system",
+                    clicks: 0,
+                    youtubeLink: "https://youtube.com"
+                });
+            }
+
+            // Reconstruct active board dataset
+            activeBoard = nextActiveBoard.map(element => {
+                return {
+                    userId: element.userId,
+                    username: element.username || element.channelTitle,
+                    channelTitle: element.channelTitle,
+                    channelLink: element.channelLink || "https://youtube.com",
+                    clicks: 0,
+                    youtubeLink: element.youtubeLink
+                };
+            });
+
+            waitingList = remainingWaitingList;
+            justBecameInactivePool = []; 
+            sequenceIndex = 0;
+            systemPhase = "REGULAR_PERIOD";
+
+            // Run look-ahead sweep immediately after reset to handle empty VIP blocks seamlessly
+            ensureValidSequenceTarget();
+
+            saveStateToStorage();
+            document.getElementById("appearingPeriodOverlay").style.display = "none";
+
+            if (localUserWasActive) {
+                forceLocalUserLockout();
+            } else {
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateMetricsDisplayPanel();
+                updateUploadPanelState();
+            }
         }
 
-        /**
-         * Submits target video node payload maps to the core platform endpoints.
-         */
         document.getElementById("submitVideoBtn").addEventListener("click", async function() {
             const inputField = document.getElementById("youtubeLinkInput");
-            const inputVal = inputField.value.trim();
+            const rawUrlValue = inputField.value.trim();
+
+            if (!rawUrlValue) {
+                alert(activeDictionary.provideUrlErr);
+                return;
+            }
+
+            let finalCleanedUrl = "";
+            try {
+                const urlObj = new URL(rawUrlValue);
+                if (urlObj.hostname.includes("youtube.com") && urlObj.pathname === "/watch" && urlObj.searchParams.has("v")) {
+                    finalCleanedUrl = "https://www.youtube.com/watch?v=" + urlObj.searchParams.get("v");
+                } else if (urlObj.hostname.includes("youtu.be")) {
+                    finalCleanedUrl = "https://youtu.be" + urlObj.pathname;
+                } else {
+                    alert(activeDictionary.validationVideoErr);
+                    return;
+                }
+            } catch(e) {
+                alert(activeDictionary.validationUrlErr);
+                return;
+            }
 
             try {
                 const response = await fetch('/api/submit-link', {
@@ -732,54 +1050,99 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        youtubeLink: inputVal,
+                        youtubeLink: finalCleanedUrl,
                         userId: localUserSessionId,
-                        lang: userLanguageCode
+                        username: activeUsername,
+                        channelLink: activeChannelLink
                     })
                 });
 
-                const data = await response.json();
-                alert(data.message);
-
                 if (response.ok) {
+                    const statusResult = await response.json();
+                    localStorage.setItem("ns_upload_time", Date.now().toString());
+                    alert(statusResult.message || "Video Asset committed safely!");
+                    await loadSystemData();
+                    renderVIPSpaces();
+                    renderActiveBoard();
+                    renderWaitingList();
+                    updateUploadPanelState();
                     inputField.value = "";
-                    await synchroniseFrontendView();
+                    return;
                 }
-            } catch (err) {
-                alert("Critical network failure submitting target link.");
+            } catch(err) {
+                console.warn("Backend pipeline offline, simulating local storage injection.");
+            }
+
+            let firstEmptyIndex = activeBoard.findIndex(slot => slot.isEmptySlot);
+
+            if (firstEmptyIndex !== -1 && !currentBoardIsFull) {
+                activeBoard[firstEmptyIndex] = {
+                    userId: localUserSessionId,
+                    username: activeUsername,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2], 
+                    channelLink: activeChannelLink,
+                    clicks: 0,
+                    youtubeLink: finalCleanedUrl 
+                };
+                
+                let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+                currentBoardIsFull = (filledCount === 10);
+                
+                localStorage.setItem("ns_upload_time", Date.now().toString());
+                saveStateToStorage();
+                renderActiveBoard();
+                updateUploadPanelState();
+                
+                alert(activeDictionary.dbSuccessBoard);
+                
+                if (currentBoardIsFull) {
+                    evaluateStateTransitions();
+                } else {
+                    inputField.value = "";
+                }
+            } else {
+                const freshQueueObject = {
+                    userId: localUserSessionId,
+                    username: activeUsername,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2], 
+                    channelLink: activeChannelLink,
+                    clicks: 0,
+                    youtubeLink: finalCleanedUrl, 
+                    appearsReceived: 0
+                };
+
+                // Array push naturally preserves FIFO rules by ordering earliest links at the front (index 0)
+                waitingList.push(freshQueueObject);
+                localStorage.setItem("ns_upload_time", Date.now().toString());
+                saveStateToStorage();
+
+                inputField.value = "";
+                
+                if (!evaluateStateTransitions()) {
+                    renderWaitingList();
+                    updateUploadPanelState();
+                    alert(activeDictionary.dbSuccessQueue);
+                    
+                    ensureValidSequenceTarget();
+                    renderVIPSpaces();
+                    renderActiveBoard();
+                }
             }
         });
 
-        /**
-         * Commits user report actions down to disciplinary pipeline.
-         */
-        async function executeFlagAppealAction(targetUserId, targetUsername, loc) {
-            try {
-                const response = await fetch('/api/appeal-node', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        reporterUserId: localUserSessionId,
-                        targetUserId: targetUserId
-                    })
-                });
-
-                if (response.ok) {
-                    alert(`${loc.appealRegistered} ${targetUsername}`);
-                    await synchroniseFrontendView();
-                }
-            } catch (err) {
-                console.error("Failed to commit node appeal transaction stream:", err);
+        window.addEventListener("DOMContentLoaded", async () => {
+            applyDynamicLocalization(); 
+            instantiateComplianceGateway();
+            if (!checkLockoutState()) {
+                await loadSystemData();
+                buildRegulationsPanel();
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateUploadPanelState();
+                evaluateStateTransitions();
+                initializeLiveUpdateEngine(); 
             }
-        }
-
-        // Live Dynamic State Sync Loop
-        window.addEventListener("DOMContentLoaded", () => {
-            synchroniseFrontendView();
-            setInterval(synchroniseFrontendView, 3000);
         });
     </script>
 </body>
