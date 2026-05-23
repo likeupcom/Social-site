@@ -3,283 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Acceleration Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>NS Platform - YouTube Acceleration Engine</title>
     <style>
         :root {
-            --bg-glow: #0b0813;
-            --panel-bg: rgba(20, 16, 35, 0.45);
-            --panel-border: rgba(255, 255, 255, 0.06);
-            --cyan-accent: #00ffff;
-            --pink-accent: #ff007f;
-            --text-main: #f3f1f6;
-            --text-muted: #aaa4b8;
+            --bg-color: #0a0a12;
+            --panel-bg: rgba(255, 255, 255, 0.03);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --cyan-glow: #00ffff;
+            --pink-glow: #ff007f;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: radial-gradient(circle at 50% 0%, #1a1235 0%, var(--bg-glow) 70%);
+            background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
             overflow-x: hidden;
+            background: radial-gradient(circle at 50% 0%, #1a1528 0%, #0a0a12 70%);
         }
 
-        .dashboard-container {
+        /* Glassmorphic Panel Base Styles */
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .container {
             max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
             display: grid;
-            grid-template-columns: 300px 1fr 320px;
-            gap: 20px;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 24px;
         }
 
         @media (max-width: 1100px) {
-            .dashboard-container {
+            .container {
                 grid-template-columns: 1fr;
             }
         }
 
-        .glass-panel {
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--panel-border);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        h2, h3 {
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-        .panel-title {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 10px;
-        }
-
-        /* Lang Selector */
-        .lang-bar {
+        header {
             grid-column: 1 / -1;
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-bottom: -10px;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--panel-border);
+            margin-bottom: 10px;
         }
 
-        .lang-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--panel-border);
-            color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
+        .logo-area h1 {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--cyan-glow), var(--pink-glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        .lang-btn.active {
-            border-color: var(--cyan-accent);
-            color: var(--cyan-accent);
-            background: rgba(0, 255, 255, 0.05);
-        }
-
-        /* Metrics Display Panel */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
+        /* Metrics Panel Styles */
+        .metrics-bar {
+            display: flex;
+            gap: 20px;
         }
 
         .metric-card {
             background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
         }
 
-        .metric-value {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--cyan-accent);
-            margin-top: 4px;
+        .metric-card .value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--cyan-glow);
         }
 
-        /* Center Column Layout */
-        .center-column {
+        .metric-card .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* Layout Columns */
+        .side-wing {
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        .vip-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .vip-wing {
+        .main-content {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 24px;
         }
 
-        /* Main Board Cards layout */
-        .board-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 15px;
+        /* Component Node Structure UI */
+        .vip-card, .board-card {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
         }
 
         .board-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--panel-bg);
             border: 1px solid var(--panel-border);
             border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            padding: 20px;
             min-height: 140px;
-            transition: all 0.3s ease;
         }
 
         .board-card.active-target {
-            border-color: var(--cyan-accent);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+            border-color: var(--cyan-glow);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
             background: rgba(0, 255, 255, 0.02);
-            animation: pulseGlow 2s infinite alternate;
         }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.1); }
-            100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.25); }
-        }
-
-        .metric-badge-row {
+        .board-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-top: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        /* Metric Badge Elements */
+        .metric-badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
         }
 
         .badge-node {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 4px 6px;
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 8px;
             border-radius: 4px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
             display: flex;
             align-items: center;
             gap: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
         }
 
-        /* Terminal Upload Panel */
-        .terminal-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .badge-icon {
+            opacity: 0.8;
         }
 
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .terminal-input {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--panel-border);
-            padding: 12px;
-            border-radius: 8px;
-            color: #fff;
-            outline: none;
-            transition: border 0.2s;
-        }
-
-        .terminal-input:focus {
-            border-color: var(--pink-accent);
-        }
-
+        /* Action Buttons */
         .action-btn {
-            background: #222;
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: transform 0.2s ease, filter 0.2s ease;
+            outline: none;
         }
 
         .action-btn:hover:not(:disabled) {
             transform: translateY(-1px);
+            filter: brightness(1.1);
         }
 
-        /* Queue List & Rules Elements */
+        .action-btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        /* Upload / Input Components */
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .glass-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .glass-input:focus {
+            border-color: var(--cyan-glow);
+            outline: none;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #007fff, #00ffff);
+            color: #fff;
+            border: none;
+            padding: 0 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .submit-btn:disabled {
+            background: #222;
+            color: #555;
+            cursor: not-allowed;
+            border: 1px solid #333;
+        }
+
+        /* Queue List Elements */
         .queue-list {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .queue-item {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--panel-border);
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
             padding: 12px;
-            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Overlay Layout systems */
+        .appeal-btn {
+            background: transparent;
+            border: 1px solid #ff007f;
+            color: #ff007f;
+            cursor: pointer;
+        }
+
+        /* Fullscreen Overlay Modes */
         .overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(5, 3, 10, 0.85);
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 5, 10, 0.9);
             backdrop-filter: blur(20px);
-            z-index: 1000;
-            display: flex;
+            z-index: 9999;
+            display: none; /* Controlled dynamically by data fields */
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
 
         .lockout-box {
-            max-width: 450px;
+            max-width: 500px;
             text-align: center;
-            border: 1px solid rgba(255, 0, 127, 0.2);
+            border: 1px solid rgba(255, 0, 127, 0.3);
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.1);
         }
 
-        #appearingPeriodOverlay {
+        .appearing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 255, 255, 0.02);
+            backdrop-filter: blur(15px);
+            z-index: 10000;
             display: none;
+            justify-content: center;
+            align-items: center;
             flex-direction: column;
-            gap: 15px;
-            color: var(--cyan-accent);
-            font-weight: bold;
+            gap: 20px;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(0,255,255,0.1);
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 255, 255, 0.1);
+            border-top-color: var(--cyan-glow);
             border-radius: 50%;
-            border-top-color: var(--cyan-accent);
-            animation: spin 1s linear infinite;
+            animation: spin 1s infinite linear;
         }
 
         @keyframes spin {
@@ -289,497 +303,407 @@
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <!-- Language Switcher Bar Element -->
-        <div class="lang-bar">
-            <button class="lang-btn active" onclick="switchSystemLanguage('en')">EN</button>
-            <button class="lang-btn" onclick="switchSystemLanguage('fr')">FR</button>
-            <button class="lang-btn" onclick="switchSystemLanguage('rw')">RW</button>
-        </div>
-
-        <!-- Left Column: Local Account Analytics and VIP Acceleration Hub -->
-        <div class="glass-panel">
-            <div class="panel-title">📊 <span id="lblMetricsTitle">Analytics Node</span></div>
-            <div class="metrics-grid" id="metricsDisplayContainer">
-                <div class="metric-card">
-                    <span style="font-size: 0.8rem; color: var(--text-muted);" id="lblMetricHits">Verification Actions</span>
-                    <div class="metric-value" id="valCompletedHits">0</div>
-                </div>
-                <div class="metric-card">
-                    <span style="font-size: 0.8rem; color: var(--text-muted);" id="lblMetricPhase">System Phase</span>
-                    <div class="metric-value" id="valSystemPhase" style="font-size: 1.1rem; color: var(--pink-accent);">REGULAR_PERIOD</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Center Column: Main Stream and Content Asset Submissions Form -->
-        <div class="center-column">
-            <div class="glass-panel">
-                <div class="panel-title">👑 <span id="lblVipTitle">VIP Premium Accel-Deck</span></div>
-                <div class="vip-wrapper">
-                    <div class="vip-wing" id="vipLeftWing"></div>
-                    <div class="vip-wing" id="vipRightWing"></div>
-                </div>
-            </div>
-
-            <div class="glass-panel" style="flex: 1;">
-                <div class="panel-title">⚡ <span id="lblBoardTitle">Live Board Matrix</span></div>
-                <div class="board-grid" id="mainAccelerationBoard"></div>
-            </div>
-
-            <div class="glass-panel" id="uploadTerminalPanel">
-                <div class="panel-title">🚀 <span id="lblUploadTitle">Link Submission Terminal</span></div>
-                <div class="terminal-panel">
-                    <div class="input-group">
-                        <input type="text" class="terminal-input" id="youtubeLinkInput" placeholder="https://www.youtube.com/watch?v=..." />
-                        <button class="action-btn" id="submitVideoBtn" style="background: linear-gradient(45deg, var(--pink-accent), #b00056); border: none;">Commit Asset</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column: Verification Queue Pipeline & Core System Compliance Regulations -->
-        <div class="glass-panel">
-            <div class="panel-title">⏳ <span id="lblQueueTitle">Waiting Pipeline (FIFO)</span></div>
-            <ul class="queue-list" id="waitingQueueContainer"></ul>
-            
-            <div class="glass-panel" id="rulesAnchorPanel" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.15);"></div>
+    <!-- Lockout Screen Element Template Structure -->
+    <div id="securityLockoutOverlay" class="overlay">
+        <div class="glass-panel lockout-box">
+            <h2 id="lockoutTitle" style="color: #ff007f;">Lockout Active</h2>
+            <p id="lockoutDescription" style="margin: 20px 0; color: #ccc; line-height: 1.6;"></p>
+            <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">--:--:--</div>
         </div>
     </div>
 
-    <!-- State Transition Screening Overlay Element -->
-    <div class="overlay" id="appearingPeriodOverlay">
+    <!-- Transition Synchronisation Overlay Element -->
+    <div id="appearingPeriodOverlay" class="appearing-overlay">
         <div class="spinner"></div>
-        <div id="lblTransitionMsg">Processing array synchronization blocks...</div>
+        <h2 id="appearingOverlayTitle" style="color: var(--cyan-glow); letter-spacing: 1px; text-transform: uppercase; font-size: 18px;">Advancing Engine Framework Phase...</h2>
     </div>
 
-    <!-- Interactive Logic Execution Engine Pipeline Scripts -->
+    <header class="glass-panel">
+        <div class="logo-area">
+            <h1>NS Platform</h1>
+        </div>
+        <div class="metrics-bar">
+            <div class="metric-card">
+                <div id="metricGlobalHits" class="value">0</div>
+                <div id="metricGlobalHitsLabel" class="label">Completed Hits</div>
+            </div>
+            <div class="metric-card">
+                <div id="metricEngineStatus" class="value" style="color: #ff007f;">-</div>
+                <div id="metricEngineStatusLabel" class="label">System Phase</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Left Wing: VIP Allocation Panel Section 1 -->
+        <aside class="side-wing">
+            <div class="glass-panel">
+                <h3 id="vipLeftWingTitle" style="color: var(--cyan-glow); margin-bottom: 15px;">VIP Left Wing</h3>
+                <div id="vipLeftWing" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+            <div id="rulesAnchorPanel" class="glass-panel"></div>
+        </aside>
+
+        <!-- Center Stage: Core Active Board Grid Component -->
+        <main class="main-content">
+            <div id="uploadPanel" class="glass-panel">
+                <h3 id="uploadPanelTitle" style="color: #fff;">Accelerate Your Video Node</h3>
+                <div class="input-group">
+                    <input type="text" id="youtubeLinkInput" class="glass-input" placeholder="Paste standard YouTube watch URL here...">
+                    <button id="submitVideoBtn" class="action-btn submit-btn">Commit Node</button>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <h3 style="color: #fff; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <span id="activeBoardTitle">Active Acceleration Grid</span>
+                    <span id="activeBoardBadge" style="font-size: 12px; background: rgba(0,255,255,0.1); color: var(--cyan-glow); padding: 2px 8px; border-radius: 20px;">10 Slots Max</span>
+                </h3>
+                <div id="mainAccelerationBoard" class="board-grid"></div>
+            </div>
+        </main>
+
+        <!-- Right Wing: VIP Space Section 2 & FIFO Queue Panel -->
+        <aside class="side-wing">
+            <div class="glass-panel">
+                <h3 id="vipRightWingTitle" style="color: var(--cyan-glow); margin-bottom: 15px;">VIP Right Wing</h3>
+                <div id="vipRightWing" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div class="glass-panel">
+                <h3 id="waitingQueueTitle">Waiting Queue (FIFO)</h3>
+                <ul id="waitingQueueContainer" class="queue-list"></ul>
+            </div>
+        </aside>
+    </div>
+
     <script>
-        // Copy/Text Translation Matrices (Purely Presentation Layer)
-        const systemLocalizationMatrix = {
-            en: {
-                metricsTitle: "Analytics Node",
-                metricHits: "Verification Actions",
-                metricPhase: "System Phase",
-                vipTitle: "VIP Premium Accel-Deck",
-                boardTitle: "Live Board Matrix",
-                uploadTitle: "Link Submission Terminal",
-                queueTitle: "Waiting Pipeline (FIFO)",
-                commitBtn: "Commit Asset",
-                lockoutTitle: "Access Interrupted",
-                lockoutDesc: "Your local deployment cycle allocation has been exhausted because your asset completed its rotation. Please try again after the timeout cooling step down finishes.",
-                regTitle: "Compliance Regulations",
-                regulationsText: "<li>You must inspect the active sequence target video for 30s before moving forward.</li><li>Tampering with tracking loops triggers automatic instance locking mechanisms.</li><li>The processing chain defaults to precise chronologically parsed logic.</li>",
-                vipReserved: "Slot Vacant",
-                vipPosition: "Position",
-                visit: "Inspect Target",
-                locked: "Encrypted",
-                slotVacant: "Slot Empty",
-                waitingEmpty: "No assets currently pending processing inside FIFO lines.",
-                votes: "Network Sweeps",
-                appeal: "Verify Link",
-                views: "Views"
-            },
-            fr: {
-                metricsTitle: "Nœud Analytique",
-                metricHits: "Actions de Vérification",
-                metricPhase: "Phase du Système",
-                vipTitle: "Pont Premium VIP",
-                boardTitle: "Matrice du Tableau",
-                uploadTitle: "Terminal de Soumission",
-                queueTitle: "File d'attente (FIFO)",
-                commitBtn: "Soumettre l'Actif",
-                lockoutTitle: "Accès Interrompu",
-                lockoutDesc: "Votre allocation de cycle locale a été épuisée car votre actif a terminé sa rotation. Veuillez réessayer après la période de refroidissement.",
-                regTitle: "Règlements de Conformité",
-                regulationsText: "<li>Vous devez inspecter la vidéo cible pendant 30s avant de continuer.</li><li>Toute altération des boucles verrouille automatiquement l'instance.</li><li>La chaîne utilise par défaut une logique chronologique stricte.</li>",
-                vipReserved: "Emplacement Vacant",
-                vipPosition: "Position",
-                visit: "Inspecter",
-                locked: "Chiffré",
-                slotVacant: "Emplacement Vide",
-                waitingEmpty: "Aucun actif en attente dans la file FIFO.",
-                votes: "Balayages Réseau",
-                appeal: "Vérifier",
-                views: "Vues"
-            },
-            rw: {
-                metricsTitle: "Ibyegeranyo",
-                metricHits: "Ibikorwa byo Kugenzura",
-                metricPhase: "Icyiciro cy'Iburyo",
-                vipTitle: "Imyanya Yihariye ya VIP",
-                boardTitle: "Imbonerahamwe Nkuru",
-                uploadTitle: "Uburyo bwo Cohereza",
-                queueTitle: "Urutonde Dutegereje (FIFO)",
-                commitBtn: "Bika Umurongo",
-                lockoutTitle: "Guhagarika Gukoresha",
-                lockoutDesc: "Igihe cyawe cyo gukoresha sisitemu kirarangiye kuko video yawe yarangije igihe cyayo. Ongera ugerageze nyuma y'akaruhuko k'isaha.",
-                regTitle: "Amategeko Agenga Sisitemu",
-                regulationsText: "<li>Ugomba kureba video yatoranyijwe imsegonda 30 mbere yo gukomeza.</li><li>Kuvanga amakuru ya sisitemu bituma ifungwa mu buryo bwikora.</li><li>Gukurikirana bikorwa hakurikijwe igihe buri kintu cyinjiriye.</li>",
-                vipReserved: "Umwanya Uracyari Mwiza",
-                vipPosition: "Umwanya",
-                visit: "Sura Umwanya",
-                locked: "Rufunze",
-                slotVacant: "Nta muntu urimo",
-                waitingEmpty: "Nta bintu biracyategereje ku rutonde rwa FIFO.",
-                votes: "Gusubiramo",
-                appeal: "Genzura",
-                views: "Views"
-            }
-        };
+        // System Session Parameters (Read-only configurations passed to backend request headers)
+        const authToken = "ns_sec_token_prod_stream_771a";
+        const localUserSessionId = "user_node_9942_client";
+        const userLanguageCode = navigator.language || navigator.userLanguage || "en";
 
-        let currentSystemLanguage = "en";
-        let activeDictionary = systemLocalizationMatrix[currentSystemLanguage];
-        let authToken = "mock_auth_token_2026";
-        
-        let localUserSessionId = localStorage.getItem("ns_user_session_id");
-        if (!localUserSessionId) {
-            localUserSessionId = "usr_sess_" + Math.random().toString(36).substring(2, 9);
-            localStorage.setItem("ns_user_session_id", localUserSessionId);
-        }
-        
-        // Static user profile details to send up on link registration requests
-        let activeUsername = "Creator_Node_" + Math.floor(Math.random() * 900);
-        let activeChannelLink = "https://youtube.com/@local_creator";
+        // Performance state blocker flag to prevent overlapping pipeline requests
+        let countdownTimerActive = false;
 
-        function applyDynamicLocalization() {
-            activeDictionary = systemLocalizationMatrix[currentSystemLanguage];
-            document.getElementById("lblMetricsTitle").innerText = activeDictionary.metricsTitle;
-            document.getElementById("lblMetricHits").innerText = activeDictionary.metricHits;
-            document.getElementById("lblMetricPhase").innerText = activeDictionary.metricPhase;
-            document.getElementById("lblVipTitle").innerText = activeDictionary.vipTitle;
-            document.getElementById("lblBoardTitle").innerText = activeDictionary.boardTitle;
-            document.getElementById("lblUploadTitle").innerText = activeDictionary.uploadTitle;
-            document.getElementById("lblQueueTitle").innerText = activeDictionary.queueTitle;
-            document.getElementById("submitVideoBtn").innerText = activeDictionary.commitBtn;
-        }
+        /**
+         * Orchestrator function querying current server configurations, layout values, matrices metrics,
+         * localized terminology strings, and running state metrics.
+         */
+        async function synchroniseFrontendView() {
+            if (countdownTimerActive) return;
 
-        function switchSystemLanguage(langCode) {
-            currentSystemLanguage = langCode;
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            applyDynamicLocalization();
-            buildRegulationsPanel();
-            fetchAndRenderSystemState();
-        }
-
-        function buildRegulationsPanel() {
-            const container = document.getElementById("rulesAnchorPanel");
-            container.innerHTML = `
-                <h3 style="color: #ff007f;">${activeDictionary.regTitle}</h3>
-                <ol style="padding-left: 20px; line-height: 1.8; color: #ddd; margin-top: 10px;">
-                    ${activeDictionary.regulationsText}
-                </ol>
-            `;
-        }
-
-        // Send Click Action directly to backend brain. No client timing checks.
-        async function handleTargetVerificationClick(slotIndex, slotType, targetUrl) {
-            window.open(targetUrl, '_blank');
-            
             try {
-                const response = await fetch('/api/verify-action', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        userId: localUserSessionId,
-                        slotIndex: slotIndex,
-                        slotType: slotType
-                    })
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    renderFullDashboardState(data);
-                }
-            } catch (error) {
-                console.error("Action transmission failure.", error);
-            }
-        }
-
-        // PURE FRONTEND RENDERING ENGINE (Reads structures explicitly computed by server)
-        function renderFullDashboardState(state) {
-            // 1. Direct evaluation of Lockout view from Backend status block
-            if (state.userStatus && state.userStatus.isLockedOut) {
-                renderLockoutInterfaceScreen(state.userStatus.lockoutRemaining);
-                return;
-            }
-
-            // 2. Map standard string values metrics
-            document.getElementById("valCompletedHits").innerText = state.metrics?.completedHits ?? "0";
-            document.getElementById("valSystemPhase").innerText = state.systemPhase || "REGULAR_PERIOD";
-
-            // 3. System Phase visibility configurations
-            const appearingOverlay = document.getElementById("appearingPeriodOverlay");
-            if (state.systemPhase === "APPEARING_PERIOD") {
-                appearingOverlay.style.display = "flex";
-                return; 
-            } else {
-                appearingOverlay.style.display = "none";
-            }
-
-            // 4. Render VIP Premium Wing Interfaces (2 slots Left, 2 slots Right)
-            const leftWing = document.getElementById("vipLeftWing");
-            const rightWing = document.getElementById("vipRightWing");
-            leftWing.innerHTML = "";
-            rightWing.innerHTML = "";
-
-            if (state.vipBoard) {
-                state.vipBoard.forEach((slot, index) => {
-                    let targetWing = (index < 2) ? leftWing : rightWing;
-                    let card = document.createElement("div");
-                    card.className = "vip-card";
-                    card.style.background = "rgba(255, 255, 255, 0.05)";
-                    card.style.backdropFilter = "blur(10px)";
-                    card.style.border = "1px solid #ff007f";
-                    card.style.borderRadius = "8px";
-                    card.style.padding = "15px";
-                    card.style.display = "flex";
-                    card.style.justifyContent = "space-between";
-                    card.style.alignItems = "center";
-                    card.style.boxShadow = "0 0 10px rgba(255, 0, 127, 0.2)";
-
-                    if (slot.isEmptySlot) {
-                        card.innerHTML = `
-                            <div style="display: flex; align-items: center; gap: 10px; color: #888;">
-                                <span style="font-size: 24px;">👤</span>
-                                <div>
-                                    <div style="font-weight: bold; color: #ff007f;">${activeDictionary.vipReserved}</div>
-                                    <div style="font-size: 12px;">${activeDictionary.vipPosition}: V${index + 1}</div>
-                                </div>
-                            </div>
-                            <button disabled style="background: #333; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed;">${activeDictionary.visit}</button>
-                        `;
-                    } else {
-                        // Backend explicitly determines if this slot is the active user target loop
-                        let isCurrentTarget = slot.isCurrentTarget || false;
-                        let displayClicks = slot.clicks || 0;
-
-                        card.innerHTML = `
-                            <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
-                                <span style="font-size: 24px; color: #00ffff; filter: drop-shadow(0 0 5px #00ffff);">👑</span>
-                                <div style="width: 100%;">
-                                    <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.username || slot.channelTitle}</div>
-                                    <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
-                                        <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} ${activeDictionary.views.toLowerCase()}</span>
-                                        <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} sub</span>
-                                        <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} like</span>
-                                        <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} com</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="action-btn vip-action-btn" style="
-                                background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : '#222'};
-                                color: #fff;
-                                border: ${isCurrentTarget ? 'none' : '1px solid #ff007f'};
-                                padding: 8px 16px;
-                                border-radius: 4px;
-                                box-shadow: ${isCurrentTarget ? '0 0 10px rgba(255,0,127,0.5)' : 'none'};
-                                cursor: ${isCurrentTarget ? 'pointer' : 'default'};
-                                opacity: ${isCurrentTarget ? '1' : '0.4'};
-                            ">${isCurrentTarget ? activeDictionary.visit : activeDictionary.locked}</button>
-                        `;
-
-                        if (isCurrentTarget) {
-                            card.querySelector(".vip-action-btn").addEventListener("click", () => {
-                                handleTargetVerificationClick(index, 'vip', slot.youtubeLink);
-                            });
-                        }
-                    }
-                    targetWing.appendChild(card);
-                });
-            }
-
-            // 5. Render Active Main Acceleration Matrix Cards (10 Slots Layout)
-            const boardContainer = document.getElementById("mainAccelerationBoard");
-            boardContainer.innerHTML = "";
-
-            if (state.activeBoard) {
-                state.activeBoard.forEach((slot, index) => {
-                    const elementNode = document.createElement("div");
-                    elementNode.className = "board-card";
-
-                    if (slot.isEmptySlot) {
-                        elementNode.innerHTML = `
-                            <div style="color: #555; text-align: center; padding: 20px 0; display: flex; flex-direction: column; justify-content: center; height: 100%;">
-                                <div style="font-size: 24px;">📭</div>
-                                <div style="font-size: 12px; margin-top: 5px;">${activeDictionary.slotVacant}</div>
-                            </div>
-                        `;
-                    } else {
-                        // Backend explicitly states if this regular card index is target
-                        let isCurrentTarget = slot.isCurrentTarget || false;
-                        let displayClicks = slot.clicks || 0;
-
-                        if (isCurrentTarget) {
-                            elementNode.className += " active-target";
-                        }
-
-                        elementNode.innerHTML = `
-                            <div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
-                                        <span style="font-size: 28px; color: #00ffff; text-shadow: 0 0 5px rgba(0,255,255,0.4);">👤</span>
-                                        <div style="font-weight: bold; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
-                                            ${slot.username || slot.channelTitle}
-                                        </div>
-                                    </div>
-                                    <button class="active-redirect-anchor action-btn" style="
-                                        background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : 'rgba(255,255,255,0.05)'};
-                                        color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: bold;
-                                        border: ${isCurrentTarget ? 'none' : '1px solid rgba(255,255,255,0.1)'};
-                                        cursor: ${isCurrentTarget ? 'pointer' : 'default'};
-                                        opacity: ${isCurrentTarget ? '1' : '0.4'};
-                                        box-shadow: ${isCurrentTarget ? '0 0 10px rgba(0, 255, 255, 0.4)' : 'none'}
-                                    ">${isCurrentTarget ? activeDictionary.visit : activeDictionary.locked}</button>
-                                </div>
-                            </div>
-                            
-                            <div class="metric-badge-row">
-                                <div class="badge-node"><span class="badge-icon">👁️</span><span>${displayClicks} ${activeDictionary.views.toLowerCase()}</span></div>
-                                <div class="badge-node"><span class="badge-icon">❤️</span><span>${displayClicks} like</span></div>
-                                <div class="badge-node"><span class="badge-icon">🔔</span><span>${displayClicks} sub</span></div>
-                                <div class="badge-node"><span class="badge-icon">💬</span><span>${displayClicks} com</span></div>
-                            </div>
-                        `;
-
-                        if (isCurrentTarget) {
-                            elementNode.querySelector(".active-redirect-anchor").addEventListener("click", () => {
-                                handleTargetVerificationClick(index, 'regular', slot.youtubeLink);
-                            });
-                        }
-                    }
-                    boardContainer.appendChild(elementNode);
-                });
-            }
-
-            // 6. Render Waiting Pipeline Line Items (FIFO Array Elements)
-            const queueContainer = document.getElementById("waitingQueueContainer");
-            queueContainer.innerHTML = "";
-
-            if (!state.waitingList || state.waitingList.length === 0) {
-                queueContainer.innerHTML = `<li style="color: #666; padding: 15px; text-align: center;">${activeDictionary.waitingEmpty}</li>`;
-            } else {
-                state.waitingList.forEach((user, index) => {
-                    const li = document.createElement("li");
-                    li.className = "queue-item";
-                    
-                    li.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <div style="display: flex; align-items: center; gap: 15px; width: 75%;">
-                                <span style="font-size: 32px; color: #888;">👤</span>
-                                <div style="width: 100%;">
-                                    <div style="color: #fff; font-weight: bold; font-size: 15px; margin-bottom: 3px;">
-                                        ${index + 1}. ${user.username || user.channelTitle}
-                                    </div>
-                                    <div style="color: #00ffff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8;">
-                                        🔗 ${user.channelLink || 'Channel Attached'}
-                                    </div>
-                                    <div style="color: #ff007f; font-size: 11px; margin-top: 4px; font-weight: bold;">
-                                        ${activeDictionary.votes}: ${user.appearsReceived || 0}/3
-                                    </div>
-                                </div>
-                            </div>
-                            <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;">${activeDictionary.appeal}</button>
-                        </div>
-                    `;
-                    
-                    li.querySelector(".appeal-btn").addEventListener("click", async () => {
-                        try {
-                            const resp = await fetch('/api/appeal-action', {
-                                method: 'POST',
-                                headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ userId: localUserSessionId, targetUserId: user.userId })
-                            });
-                            if (resp.ok) {
-                                const freshState = await resp.json();
-                                renderFullDashboardState(freshState);
-                            }
-                        } catch(e) { console.error(e); }
-                    });
-
-                    queueContainer.appendChild(li);
-                });
-            }
-
-            // 7. Input Transmission Terminal Field Attributes (Disabled criteria determined by server state)
-            const uploadPanel = document.getElementById("uploadTerminalPanel");
-            const inputField = document.getElementById("youtubeLinkInput");
-            const submitBtn = document.getElementById("submitVideoBtn");
-
-            if (state.userStatus?.uploadDisabled) {
-                uploadPanel.style.opacity = "0.7";
-                inputField.disabled = true;
-                submitBtn.disabled = true;
-                submitBtn.style.pointerEvents = "none";
-                submitBtn.innerText = state.userStatus.buttonExplanation || activeDictionary.commitBtn;
-            } else {
-                uploadPanel.style.opacity = "1";
-                inputField.disabled = false;
-                submitBtn.disabled = false;
-                submitBtn.style.pointerEvents = "auto";
-                submitBtn.innerText = activeDictionary.commitBtn;
-            }
-        }
-
-        // Continually pull synced payload frames from the backend authority
-        async function fetchAndRenderSystemState() {
-            try {
-                const response = await fetch(`/api/system-state?userId=${localUserSessionId}`, {
+                const response = await fetch(`/api/system-state?userId=${localUserSessionId}&lang=${userLanguageCode}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
                     }
                 });
-                if (response.ok) {
-                    const data = await response.json();
-                    renderFullDashboardState(data);
-                }
+
+                if (!response.ok) return;
+                const stateData = await response.json();
+
+                renderMetricsAndPhases(stateData);
+                renderLockoutsAndOverlays(stateData);
+                renderLocalizationLabels(stateData.localization);
+                renderVIPGrid(stateData.vipBoard, stateData.systemPhase, stateData.sequenceIndex, stateData.localization);
+                renderActiveAccelerationGrid(stateData.activeBoard, stateData.systemPhase, stateData.sequenceIndex, stateData.localization);
+                renderFIFOQueue(stateData.waitingList, stateData.localization);
+                applyUploadPanelState(stateData.userStatus);
+
             } catch (error) {
-                console.warn("Backend state frame sync offline.");
+                console.error("View synchronization sequence interrupted:", error);
             }
         }
 
-        function initializeLiveUpdateEngine() {
-            setInterval(fetchAndRenderSystemState, 3000); 
+        function renderMetricsAndPhases(state) {
+            document.getElementById("metricGlobalHits").innerText = state.metrics.globalHits;
+            document.getElementById("metricEngineStatus").innerText = state.metrics.phaseText;
+            document.getElementById("metricEngineStatus").style.color = state.systemPhase === "REGULAR_PERIOD" ? "#00ffff" : "#ff007f";
         }
 
-        function renderLockoutInterfaceScreen(remainingMs) {
-            document.body.innerHTML = `
-                <div class="overlay">
-                    <div class="glass-panel lockout-box">
-                        <h2 style="color: #ff007f;">${activeDictionary.lockoutTitle}</h2>
-                        <p style="margin: 20px 0; color: #ccc; line-height: 1.6;">${activeDictionary.lockoutDesc}</p>
-                        <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">
-                            --:--:--
-                        </div>
-                    </div>
-                </div>
-            `;
+        function renderLockoutsAndOverlays(state) {
+            const lockoutOverlay = document.getElementById("securityLockoutOverlay");
+            const appearingOverlay = document.getElementById("appearingPeriodOverlay");
 
-            let absoluteTarget = Date.now() + remainingMs;
-            const liveClockRoutine = setInterval(() => {
-                let currentDelta = absoluteTarget - Date.now();
-                if (currentDelta <= 0) {
-                    clearInterval(liveClockRoutine);
-                    window.location.reload();
+            // Handle Phase Overlay
+            appearingOverlay.style.display = state.systemPhase === "APPEARING_PERIOD" ? "flex" : "none";
+
+            // Handle Security Lockout View
+            if (state.userStatus.isLockedOut) {
+                lockoutOverlay.style.display = "flex";
+                document.getElementById("lockoutTitle").innerText = state.localization.lockoutTitle;
+                document.getElementById("lockoutDescription").innerText = state.localization.lockoutDesc;
+                
+                let remainingMs = state.userStatus.lockoutTimeRemainingMs;
+                let hrs = Math.floor(remainingMs / 3600000);
+                let mins = Math.floor((remainingMs % 3600000) / 60000);
+                let secs = Math.floor((remainingMs % 60000) / 1000);
+                document.getElementById("countdownTimerBox").innerText = 
+                    `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            } else {
+                lockoutOverlay.style.display = "none";
+            }
+        }
+
+        function renderLocalizationLabels(loc) {
+            document.getElementById("metricGlobalHitsLabel").innerText = loc.completedHitsLabel || "Completed Hits";
+            document.getElementById("metricEngineStatusLabel").innerText = loc.systemPhaseLabel || "System Phase";
+            document.getElementById("vipLeftWingTitle").innerText = loc.vipLeftWingTitle || "VIP Left Wing";
+            document.getElementById("vipRightWingTitle").innerText = loc.vipRightWingTitle || "VIP Right Wing";
+            document.getElementById("uploadPanelTitle").innerText = loc.uploadPanelTitle || "Accelerate Your Video Node";
+            document.getElementById("youtubeLinkInput").placeholder = loc.inputPlaceholder || "Paste standard YouTube watch URL here...";
+            document.getElementById("activeBoardTitle").innerText = loc.activeBoardTitle || "Active Acceleration Grid";
+            document.getElementById("activeBoardBadge").innerText = loc.activeBoardBadge || "10 Slots Max";
+            document.getElementById("waitingQueueTitle").innerText = loc.waitingQueueTitle || "Waiting Queue (FIFO)";
+            document.getElementById("appearingOverlayTitle").innerText = loc.appearingOverlayTitle || "Advancing Engine Framework Phase...";
+
+            // Rules Panel Generation
+            const rulesContainer = document.getElementById("rulesAnchorPanel");
+            rulesContainer.innerHTML = `
+                <h3 style="color: #ff007f;">${loc.regTitle}</h3>
+                <ol style="padding-left: 20px; line-height: 1.8; color: #ddd; margin-top: 10px;">
+                    ${loc.regulationsText}
+                </ol>
+            `;
+        }
+
+        function renderVIPGrid(vipBoard, phase, sequenceIndex, loc) {
+            const leftWing = document.getElementById("vipLeftWing");
+            const rightWing = document.getElementById("vipRightWing");
+            leftWing.innerHTML = "";
+            rightWing.innerHTML = "";
+
+            vipBoard.forEach((slot, index) => {
+                let targetWing = (index < 2) ? leftWing : rightWing;
+                let card = document.createElement("div");
+                card.className = "vip-card";
+                card.style.background = "rgba(255, 255, 255, 0.05)";
+                card.style.backdropFilter = "blur(10px)";
+                card.style.border = "1px solid #ff007f";
+                card.style.borderRadius = "8px";
+                card.style.padding = "15px";
+                card.style.display = "flex";
+                card.style.justifyContent = "space-between";
+                card.style.alignItems = "center";
+                card.style.boxShadow = "0 0 10px rgba(255, 0, 127, 0.2)";
+
+                if (slot.isEmptySlot) {
+                    card.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px; color: #888;">
+                            <span style="font-size: 24px;">👤</span>
+                            <div>
+                                <div style="font-weight: bold; color: #ff007f;">${loc.vipReserved}</div>
+                                <div style="font-size: 12px;">${loc.vipPosition}: ${slot.slotPosition.toUpperCase()}</div>
+                            </div>
+                        </div>
+                        <button disabled style="background: #333; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed;">${loc.visit}</button>
+                    `;
                 } else {
-                    let hrs = Math.floor(currentDelta / 3600000);
-                    let mins = Math.floor((currentDelta % 3600000) / 60000);
-                    let secs = Math.floor((currentDelta % 60000) / 1000);
-                    document.getElementById("countdownTimerBox").innerText = 
-                        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    let isCurrentTarget = (phase === "REGULAR_PERIOD" && sequenceIndex === index);
+                    let clicks = slot.clicks || 0;
+
+                    card.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
+                            <span style="font-size: 24px; color: #00ffff; filter: drop-shadow(0 0 5px #00ffff);">👑</span>
+                            <div style="width: 100%;">
+                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.username}</div>
+                                <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
+                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${clicks} ${loc.views.toLowerCase()}</span>
+                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${clicks} sub</span>
+                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${clicks} like</span>
+                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${clicks} com</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="action-btn vip-action-btn" style="
+                            background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : '#222'};
+                            color: #fff; border: ${isCurrentTarget ? 'none' : '1px solid #ff007f'};
+                            padding: 8px 16px; border-radius: 4px; opacity: ${isCurrentTarget ? '1' : '0.4'};
+                            box-shadow: ${isCurrentTarget ? '0 0 10px rgba(255,0,127,0.5)' : 'none'};
+                            cursor: ${isCurrentTarget ? 'pointer' : 'default'};
+                        ">${isCurrentTarget ? loc.visit : loc.locked}</button>
+                    `;
+
+                    if (isCurrentTarget) {
+                        card.querySelector(".vip-action-btn").addEventListener("click", function() {
+                            triggerVerificationTimer(this, slot.youtubeLink, 'vip', index);
+                        });
+                    }
+                }
+                targetWing.appendChild(card);
+            });
+        }
+
+        function renderActiveAccelerationGrid(activeBoard, phase, sequenceIndex, loc) {
+            const boardContainer = document.getElementById("mainAccelerationBoard");
+            boardContainer.innerHTML = "";
+
+            let vipOffset = 4;
+
+            activeBoard.forEach((slot, index) => {
+                const elementNode = document.createElement("div");
+                elementNode.className = "board-card";
+
+                if (slot.isEmptySlot) {
+                    elementNode.innerHTML = `
+                        <div style="color: #555; text-align: center; padding: 20px 0; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                            <div style="font-size: 24px;">📭</div>
+                            <div style="font-size: 12px; margin-top: 5px;">${loc.slotVacant}</div>
+                        </div>
+                    `;
+                } else {
+                    let absoluteIndex = vipOffset + index;
+                    let isCurrentTarget = (phase === "REGULAR_PERIOD" && sequenceIndex === absoluteIndex);
+                    let clicks = slot.clicks || 0;
+
+                    if (isCurrentTarget) elementNode.className += " active-target";
+
+                    elementNode.innerHTML = `
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
+                                    <span style="font-size: 28px; color: #00ffff; text-shadow: 0 0 5px rgba(0,255,255,0.4);">👤</span>
+                                    <div style="font-weight: bold; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
+                                        ${slot.username}
+                                    </div>
+                                </div>
+                                <button class="active-redirect-anchor action-btn" style="
+                                    background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : 'rgba(255,255,255,0.05)'};
+                                    color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: bold;
+                                    border: ${isCurrentTarget ? 'none' : '1px solid rgba(255,255,255,0.1)'};
+                                    opacity: ${isCurrentTarget ? '1' : '0.4'};
+                                    box-shadow: ${isCurrentTarget ? '0 0 10px rgba(0, 255, 255, 0.4)' : 'none'};
+                                    cursor: ${isCurrentTarget ? 'pointer' : 'default'};
+                                ">${isCurrentTarget ? loc.visit : loc.locked}</button>
+                            </div>
+                        </div>
+                        <div class="metric-badge-row">
+                            <div class="badge-node"><span class="badge-icon">👁️</span><span>${clicks} ${loc.views.toLowerCase()}</span></div>
+                            <div class="badge-node"><span class="badge-icon">❤️</span><span>${clicks} like</span></div>
+                            <div class="badge-node"><span class="badge-icon">🔔</span><span>${clicks} sub</span></div>
+                            <div class="badge-node"><span class="badge-icon">💬</span><span>${clicks} com</span></div>
+                        </div>
+                    `;
+
+                    if (isCurrentTarget) {
+                        elementNode.querySelector(".active-redirect-anchor").addEventListener("click", function() {
+                            triggerVerificationTimer(this, slot.youtubeLink, 'main', index);
+                        });
+                    }
+                }
+                boardContainer.appendChild(elementNode);
+            });
+        }
+
+        function renderFIFOQueue(waitingList, loc) {
+            const container = document.getElementById("waitingQueueContainer");
+            container.innerHTML = "";
+
+            if (waitingList.length === 0) {
+                container.innerHTML = `<li style="color: #666; padding: 15px; text-align: center;">${loc.waitingEmpty}</li>`;
+                return;
+            }
+
+            waitingList.forEach((user, index) => {
+                const li = document.createElement("li");
+                li.className = "queue-item";
+                li.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <div style="display: flex; align-items: center; gap: 15px; width: 75%;">
+                            <span style="font-size: 32px; color: #888;">👤</span>
+                            <div style="width: 100%;">
+                                <div style="color: #fff; font-weight: bold; font-size: 15px; margin-bottom: 3px;">
+                                    ${index + 1}. ${user.username}
+                                </div>
+                                <div style="color: #00ffff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8;">
+                                    🔗 ${user.channelLink}
+                                </div>
+                                <div style="color: #ff007f; font-size: 11px; margin-top: 4px; font-weight: bold;">
+                                    ${loc.votes}: ${user.appearsReceived || 0}/3
+                                </div>
+                            </div>
+                        </div>
+                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;">${loc.appeal}</button>
+                    </div>
+                `;
+
+                li.querySelector(".appeal-btn").addEventListener("click", () => {
+                    executeFlagAppealAction(user.userId, user.username, loc);
+                });
+
+                container.appendChild(li);
+            });
+        }
+
+        function applyUploadPanelState(userStatus) {
+            const inputField = document.getElementById("youtubeLinkInput");
+            const submitBtn = document.getElementById("submitVideoBtn");
+            const uploadPanel = document.getElementById("uploadPanel");
+
+            inputField.disabled = userStatus.isButtonDisabled;
+            submitBtn.disabled = userStatus.isButtonDisabled;
+            submitBtn.innerText = userStatus.buttonText;
+            uploadPanel.style.opacity = userStatus.isButtonDisabled ? "0.6" : "1";
+            submitBtn.style.pointerEvents = userStatus.isButtonDisabled ? "none" : "auto";
+        }
+
+        /**
+         * Pure UI countdown visual representation. Does not calculate logic mutations locally.
+         * Dispatches action logging verification directly to the backend layer on completion.
+         */
+        function triggerVerificationTimer(buttonElement, targetUrl, boardType, index) {
+            countdownTimerActive = true;
+            buttonElement.style.pointerEvents = "none";
+            window.open(targetUrl, '_blank');
+
+            let remaining = 30;
+            buttonElement.innerText = `... (${remaining}s)`;
+
+            const timerLoop = setInterval(async () => {
+                remaining--;
+                if (remaining > 0) {
+                    buttonElement.innerText = `... (${remaining}s)`;
+                } else {
+                    clearInterval(timerLoop);
+                    buttonElement.innerText = "Verifying...";
+
+                    try {
+                        const response = await fetch('/api/complete-hit', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                userId: localUserSessionId,
+                                boardType: boardType,
+                                targetIndex: index
+                            })
+                        });
+
+                        if (response.ok) {
+                            console.log("Hit registration accepted by server core.");
+                        }
+                    } catch (err) {
+                        console.error("Network communication failure logging completed hit:", err);
+                    }
+
+                    buttonElement.style.pointerEvents = "auto";
+                    countdownTimerActive = false;
+                    await synchroniseFrontendView();
                 }
             }, 1000);
         }
 
-        // Direct submission hook. No client-side link validation rules.
+        /**
+         * Dispatches input links payload arrays to the backend pipeline.
+         */
         document.getElementById("submitVideoBtn").addEventListener("click", async function() {
             const inputField = document.getElementById("youtubeLinkInput");
-            const rawUrlValue = inputField.value.trim();
+            const inputVal = inputField.value.trim();
 
             try {
                 const response = await fetch('/api/submit-link', {
@@ -789,31 +713,54 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        youtubeLink: rawUrlValue, // Raw text submission directly to brain
+                        youtubeLink: inputVal,
                         userId: localUserSessionId,
-                        username: activeUsername,
-                        channelLink: activeChannelLink
+                        lang: userLanguageCode
                     })
                 });
 
                 const data = await response.json();
-                
+                alert(data.message);
+
                 if (response.ok) {
                     inputField.value = "";
-                    renderFullDashboardState(data);
-                } else {
-                    alert(data.message || "Submission rejected by server rules.");
+                    await synchroniseFrontendView();
                 }
-            } catch(err) {
-                console.error("Communication pipeline exception with server brain.", err);
+            } catch (err) {
+                alert("Critical network failure submitting target link.");
             }
         });
 
-        window.addEventListener("DOMContentLoaded", async () => {
-            applyDynamicLocalization(); 
-            buildRegulationsPanel();
-            await fetchAndRenderSystemState();
-            initializeLiveUpdateEngine(); 
+        /**
+         * Dispatches disciplinary flag appeal commands to the backend.
+         */
+        async function executeFlagAppealAction(targetUserId, targetUsername, loc) {
+            try {
+                const response = await fetch('/api/appeal-node', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        reporterUserId: localUserSessionId,
+                        targetUserId: targetUserId
+                    })
+                });
+
+                if (response.ok) {
+                    alert(`${loc.appealRegistered} ${targetUsername}`);
+                    await synchroniseFrontendView();
+                }
+            } catch (err) {
+                console.error("Failed to commit node appeal transaction stream:", err);
+            }
+        }
+
+        // Live Real-Time Polling Clock Loop Intitialisation
+        window.addEventListener("DOMContentLoaded", () => {
+            synchroniseFrontendView();
+            setInterval(synchroniseFrontendView, 3000);
         });
     </script>
 </body>
