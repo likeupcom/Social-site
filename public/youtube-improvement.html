@@ -3,288 +3,598 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Acceleration Engine Dashboard</title>
+    <title>NS Platform - YouTube Acceleration Engine</title>
     <style>
-        :root {
-            --bg-color: #0b0c10;
-            --panel-bg: rgba(255, 255, 255, 0.03);
-            --border-color: rgba(255, 0, 127, 0.3);
-            --cyan-glow: #00ffff;
-            --pink-glow: #ff007f;
-            --text-color: #eee;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* Modern Glassmorphic Dark-Mode Core Styling Styles */
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        body {
+            background-color: #0a0a12;
+            color: #ffffff;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            margin-bottom: 20px;
+        }
         .glass-panel {
-            background: var(--panel-bg);
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
             padding: 20px;
+            margin-bottom: 20px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-
-        .dashboard-layout {
-            display: grid;
-            grid-template-columns: 300px 1fr 300px;
-            gap: 20px;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .wing-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        #mainAccelerationBoard {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .board-card {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .board-card.active-target {
-            border-color: var(--cyan-glow);
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
-            background: rgba(0, 255, 255, 0.02);
-        }
-
-        .metric-badge-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
-        .badge-node {
-            font-size: 11px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .action-btn {
-            transition: all 0.2s ease;
-        }
-
-        .action-btn:hover:not(:disabled) {
-            transform: translateY(-1px);
-            filter: brightness(1.2);
-        }
-
-        #uploadPanel {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            transition: opacity 0.3s ease;
-        }
-
-        input[type="text"] {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            padding: 10px;
-            border-radius: 6px;
-            outline: none;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--pink-glow);
-        }
-
-        button.primary-submit {
-            background: linear-gradient(45deg, var(--pink-glow), #ff55a3);
-            color: white;
-            border: none;
+        .upload-input {
+            width: 100%;
             padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ffff;
             border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 255, 255, 0.2);
         }
-
-        button:disabled {
+        .upload-input:disabled {
+            border-color: #444;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .action-btn {
+            background: linear-gradient(45deg, #00ffff, #ff007f);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.6);
+        }
+        .action-btn:disabled {
             background: #222 !important;
             color: #555 !important;
-            border: 1px solid #333 !important;
-            cursor: not-allowed !important;
             box-shadow: none !important;
+            cursor: not-allowed;
+            transform: none !important;
         }
-
-        #waitingQueueContainer {
-            list-style: none;
-            padding: 0;
-            margin: 0;
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px;
+        }
+        .board-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            border-top: 3px solid #00ffff;
+            transition: all 0.3s ease;
+            position: relative;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            justify-content: space-between;
         }
-
+        .board-card.active-target {
+            border-top: 3px solid #ff007f;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+            background: rgba(255, 0, 127, 0.03);
+        }
+        .queue-list {
+            list-style: none;
+        }
         .queue-item {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 12px;
-            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-
         .overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(5, 5, 10, 0.85);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 10, 0.95);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 10000;
         }
-
         .lockout-box {
-            max-width: 450px;
             text-align: center;
-            border: 1px solid var(--pink-glow);
+            max-width: 500px;
+            padding: 40px;
+            border: 2px solid #ff007f;
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.5);
         }
-
-        .metrics-summary {
+        .metric-badge-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-top: 15px;
+        }
+        .badge-node {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            padding: 6px 2px;
+            font-size: 11px;
+            text-align: center;
+            color: #ccc;
             display: flex;
-            justify-content: space-around;
-            background: rgba(255, 255, 255, 0.02);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        .badge-icon {
             font-size: 14px;
+        }
+        .appeal-btn {
+            background: transparent; 
+            border: 1px solid #ff007f; 
+            color: #ff007f; 
+            box-shadow: none;
+        }
+        .appeal-btn:hover {
+            background: rgba(255, 0, 127, 0.1);
         }
     </style>
 </head>
 <body>
 
-    <!-- Metrics and Control Status Bar -->
-    <div class="glass-panel">
-        <div class="metrics-summary" id="globalMetricsDisplay">
-            <div>System Phase: <span id="systemPhaseBadge" style="color: var(--cyan-glow);">LOADING</span></div>
-            <div>Completed Hits: <span id="completedHitsBadge" style="color: var(--pink-glow);">0</span></div>
-            <div>Queue Target Index: <span id="sequenceIndexBadge">0</span></div>
+    <!-- ========================================================== -->
+    <!--            SEQUENTIAL TERMS VERIFICATION OVERLAY           -->
+    <!-- ========================================================== -->
+    <div id="termsVerificationOverlay" class="overlay">
+        <div class="glass-panel" style="max-width: 550px; width: 90%; border: 1px solid #ff007f; box-shadow: 0 0 25px rgba(255, 0, 127, 0.3);">
+            <h2 id="txtComplianceTitle" style="color: #ff007f; font-size: 20px; text-align: center; margin-bottom: 15px;">🛡️ PLATFORM COMPLIANCE PROTOCOL</h2>
+            <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); min-height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; margin-bottom: 20px;">
+                <p id="termsConditionPresenterText" style="line-height: 1.6; color: #ddd; font-size: 15px;"></p>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="termsStepIndicatorLabel" style="font-size: 13px; color: #888;">Condition 1 of 6</span>
+                <button id="termsAcceptButtonStep" class="action-btn" style="padding: 8px 20px; font-size: 14px;">I Understand & Accept</button>
+            </div>
         </div>
     </div>
+    <!-- ========================================================== -->
 
-    <!-- Main Workspace Dashboard Layout -->
-    <div class="dashboard-layout">
-        
-        <!-- Left Wing: VIP Space 1 & 2 -->
-        <div class="wing-panel glass-panel">
-            <h3 style="color: var(--cyan-glow); margin-top: 0;">VIP Wing Alpha</h3>
-            <div id="vipLeftWing" style="display: flex; flex-direction: column; gap: 12px;"></div>
-            
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 15px 0;">
-            
-            <!-- Upload Panel Section -->
-            <div id="uploadPanel">
-                <h4 style="margin: 0 0 5px 0;">Accelerate Content</h4>
-                <input type="text" id="youtubeLinkInput" placeholder="Paste YouTube Video URL...">
-                <button id="submitVideoBtn" class="primary-submit">Submit Content Asset</button>
+    <div class="container">
+        <header style="margin-bottom: 40px; text-align: center;">
+            <h1 id="txtTitle">NS PLATFORM: YOUTUBE ACCELERATION SYSTEM</h1>
+            <p id="txtSubtitle" style="color: #888;">Sequential Conversion Routing Protocol Active</p>
+        </header>
+
+        <!-- LIVE ACCUMULATED CONVERSION STREAM -->
+        <div class="glass-panel" style="border: 1px dashed #00ffff; display: flex; justify-content: space-around; align-items: center; text-align: center;">
+            <div>
+                <div id="metricViews" style="font-size: 24px; font-weight: bold; color: #00ffff;">0 view</div>
+                <div id="lblViewsText" style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Traffic Views</div>
+            </div>
+            <div>
+                <div id="metricSubs" style="font-size: 24px; font-weight: bold; color: #ff007f;">0 sub</div>
+                <div id="lblSubsText" style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Subscribers</div>
+            </div>
+            <div>
+                <div id="metricLikes" style="font-size: 24px; font-weight: bold; color: #00ffff;">0 like</div>
+                <div id="lblLikesText" style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Video Likes</div>
+            </div>
+            <div>
+                <div id="metricComments" style="font-size: 24px; font-weight: bold; color: #ff007f;">0 com</div>
+                <div id="lblCommentsText" style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 4px;">Comments</div>
             </div>
         </div>
 
-        <!-- Center Stage: The 10-Slot Processing Area -->
+        <!-- VIP ACCELERATION SUITE -->
+        <h2 id="txtVipTitle" style="color: #ff007f; text-shadow: 0 0 10px rgba(255, 0, 127, 0.3);">👑 VIP ACCELERATION SUITE</h2>
+        <div id="vipContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div class="vip-wing" id="vipLeftWing" style="display: flex; flex-direction: column; gap: 15px;"></div>
+            <div class="vip-wing" id="vipRightWing" style="display: flex; flex-direction: column; gap: 15px;"></div>
+        </div>
+
+        <!-- Main Acceleration Board Configuration -->
         <div class="glass-panel">
-            <h2 style="margin-top: 0; background: linear-gradient(45deg, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                Live Acceleration Matrix
-            </h2>
-            <div id="mainAccelerationBoard"></div>
+            <h2 id="txtMainBoardTitle">⚡ Main Acceleration Board (Live)</h2>
+            <div id="mainAccelerationBoard" class="main-grid"></div>
         </div>
 
-        <!-- Right Wing: VIP Space 3 & 4 + Real-Time Queue Pool -->
-        <div class="wing-panel glass-panel">
-            <h3 style="color: var(--cyan-glow); margin-top: 0;">VIP Wing Beta</h3>
-            <div id="vipRightWing" style="display: flex; flex-direction: column; gap: 12px;"></div>
-            
-            <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.05); margin: 15px 0;">
-            
-            <h3 style="margin: 0 0 10px 0; font-size: 16px;">Next In Queue</h3>
-            <ul id="waitingQueueContainer"></ul>
+        <!-- Submission Controls Terminal Box -->
+        <div class="glass-panel" id="uploadPanel">
+            <h2 id="txtSubmitTitle">📥 Submit Video Into Platform Pipeline</h2>
+            <p id="txtSubmitDesc" style="color: #888; font-size: 13px; margin-bottom: 10px;">Please upload a YouTube <strong>Video</strong> link. Tracking parameters will be automatically removed securely.</p>
+            <input type="text" id="youtubeLinkInput" class="upload-input" placeholder="Paste your YouTube Video Link here (e.g. https://youtube.com/watch?v=...)">
+            <button id="submitVideoBtn" class="action-btn">Commit Video Asset</button>
+        </div>
+
+        <!-- Waiting Queue Statistics Layout Panel -->
+        <div class="glass-panel">
+            <h2 id="txtWaitingTitle">⏳ Platform Waiting Queue List</h2>
+            <ul id="waitingQueueContainer" class="queue-list"></ul>
+        </div>
+
+        <!-- Rules and Guidelines Board Information Container -->
+        <div class="glass-panel" id="rulesAnchorPanel"></div>
+    </div>
+
+    <!-- Active Routine System Interruption Block Screen Layout -->
+    <div id="appearingPeriodOverlay" class="overlay" style="display: none;">
+        <div class="glass-panel" style="text-align: center; max-width: 600px; border: 1px solid #00ffff; box-shadow: 0 0 20px #00ffff;">
+            <h2 id="txtTransitionTitle" style="animation: pulse 1.5s infinite;">🔄 GLOBAL TRANSITION PERIOD ACTIVE</h2>
+            <p id="txtTransitionDesc" style="margin: 20px 0; color: #aaa; line-height: 1.6;">
+                The platform is currently running its global data synchronization routine. 
+                All nodes are tracking individual interaction matrices to update active placements. 
+                Please stand by; verification routines process momentarily.
+            </p>
         </div>
     </div>
 
-    <!-- System Regulations Static Anchor -->
-    <div class="glass-panel" id="rulesAnchorPanel"></div>
-
-    <!-- Mode Transition Modal Screen Element Layer -->
-    <div id="appearingPeriodOverlay" class="overlay" style="display: none; flex-direction: column; gap: 15px;">
-        <div class="glass-panel text-center" style="border-color: var(--cyan-glow); padding: 40px; text-align: center;">
-            <div style="font-size: 40px; animation: spin 2s linear infinite;">🔄</div>
-            <h2 style="color: var(--cyan-glow); margin-top: 15px;">Re-indexing Acceleration Matrix</h2>
-            <p style="color: #aaa; max-width: 400px;">FIFO array execution cycle active. Evaluating transition queues, checking link structural compliance, and routing replacement buffers...</p>
-        </div>
-    </div>
-
+    <!-- Global Framework Logical Automation Routine Engines Script -->
     <script>
-        // --- System Local Context Variables & Identity Profiles ---
-        let authToken = "mock_token_production_stream_xyz123";
-        let localUserSessionId = "usr_node_" + Math.floor(Math.random() * 8999 + 1000);
-        let activeUsername = "DeveloperNode_Alpha";
-        let activeChannelLink = "https://youtube.com/@dev_channel_node";
+        const authToken = localStorage.getItem("ns_user_token") || "";
 
-        // --- Active Application Dynamic Localization Memory Data Store Dictionary ---
-        let activeDictionary = {
-            commitBtn: "Submit Content Asset",
-            lockoutTitle: "System Integrity Lockout Active",
-            lockoutDesc: "Your verification slot has exited processing safely. To protect system fairness and maximize anti-bot patterns, your session is blocked from manual submission loops.",
-            regTitle: "System Matrix Regulations & Verification Compliance",
-            regulationsText: `
-                <li>All visual references must pass direct user matching rules.</li>
-                <li>System verifies continuous play through verification timing hooks.</li>
-                <li>Eviction routes occur natively upon reaching 3 system validation appeals.</li>
-                <li>Do not manipulate operational storage flags inside local DOM nodes.</li>
-            `,
-            vipReserved: "VIP Slot Open",
-            vipPosition: "Wing Position",
-            visit: "Verify & Launch",
-            locked: "Slot Locked",
-            views: "Impressions",
-            slotVacant: "No Active Engine Node",
-            waitingEmpty: "Waiting buffer depleted. Ready for asset seed injection.",
-            votes: "Eviction Petitions",
-            appealRegistered: "Appeal stream logged for",
-            appeal: "File Appeal",
-            provideUrlErr: "Validation Fault: Please input a clean URL node before dispatching.",
-            validationVideoErr: "Format Error: Unrecognized asset target format parameters.",
-            validationUrlErr: "Parse Error: The string payload fails deep URL interface checks."
+        // ==========================================================
+        //               MULTILINGUAL ENGINE DICTIONARY
+        // ==========================================================
+        const urlParamsParser = new URLSearchParams(window.location.search);
+        const targetLanguageSystem = urlParamsParser.get('lang') || localStorage.getItem("ns_selected_lang") || "en";
+        
+        localStorage.setItem("ns_selected_lang", targetLanguageSystem);
+
+        const languageDictionary = {
+            en: {
+                title: "NS PLATFORM: YOUTUBE ACCELERATION SYSTEM",
+                subtitle: "Sequential Conversion Routing Protocol Active",
+                views: "Traffic Views",
+                subs: "Subscribers",
+                likes: "Video Likes",
+                coms: "Comments",
+                vipTitle: "👑 VIP ACCELERATION SUITE",
+                vipReserved: "VIP SLOT RESERVED",
+                vipPosition: "Position",
+                mainBoard: "⚡ Main Acceleration Board (Live)",
+                slotVacant: "Slot Vacant",
+                visit: "Visit",
+                locked: "Locked",
+                submitTitle: "📥 Submit Video Into Platform Pipeline",
+                submitDesc: "Please upload a YouTube <strong>Video</strong> link. Tracking parameters will be automatically removed securely.",
+                placeholder: "Paste your YouTube Video Link here (e.g. https://youtube.com/watch?v=...)",
+                commitBtn: "Commit Video Asset",
+                waitingTitle: "⏳ Platform Waiting Queue List",
+                waitingEmpty: "Waiting pool empty. System parameters stable.",
+                votes: "Appearing Cycle Votes",
+                appeal: "Appeal",
+                complianceTitle: "🛡️ PLATFORM COMPLIANCE PROTOCOL",
+                understandBtn: "I Understand & Accept",
+                conditionLabel: "Condition",
+                ofLabel: "of",
+                transitionTitle: "🔄 GLOBAL TRANSITION PERIOD ACTIVE",
+                transitionDesc: "The platform is currently running its global data synchronization routine. All nodes are tracking individual interaction matrices to update active placements. Please stand by; verification routines process momentarily.",
+                lockoutTitle: "⏳ SECURITY INTERVENTION ACCELERATION SYSTEM LOCKOUT",
+                lockoutDesc: "Your session active allocation cycle has run out or an appearing phase reset has completed. To ensure platform stability and genuine processing metrics, your account is in cold cooling storage.",
+                regTitle: "📋 Platform Conversion Regulations Protocol",
+                validationVideoErr: "Validation Exception: You must upload a specific YouTube VIDEO link, not a channel or profile link.",
+                validationUrlErr: "Validation Exception: The provided text is not a valid URL structure.",
+                provideUrlErr: "Please provide a YouTube video link.",
+                dbSuccessBoard: "Success: You are placed onto the Main Acceleration Board!",
+                dbSuccessQueue: "Success: Video safely committed onto the Waiting List without tracking links.",
+                appealRegistered: "Appeal registered for user",
+                conditionsList: [
+                    "1. Please read and understand all policies and regulations of this website before using the platform.",
+                    "2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.",
+                    "3. Once you click Visit, a 30-second countdown will begin. You will be allowed to visit the next channel only after the countdown finishes, until you complete all visits.",
+                    "4. When your account becomes Live, please turn on notifications so you can monitor the actions taking place on your channel.",
+                    "5. While you are in the waiting list, if your account receives three appeals, it will be removed from the waiting list. If this happens three times, your account will be permanently deleted.",
+                    "6. Making an appeal will not return you back to the board, but it may affect another user who is currently in the waiting list."
+                ],
+                regulationsText: `
+                    <li>Channels must complete visits sequentially as tracked via active platform nodes.</li>
+                    <li>Skipping active targeted assets breaks validation streams and drops processing sync loops.</li>
+                    <li>When the platform triggers the <strong>Appearing Period</strong>, the data matrices rebuild entirely.</li>
+                    <li>Active elements are protected by anti-scrambling fallbacks to maintain pipeline speed.</li>
+                `
+            },
+            fr: {
+                title: "PLATEFORME NS : SYSTÈME D'ACCÉLÉRATION YOUTUBE",
+                subtitle: "Protocole de routage de conversion séquentielle actif",
+                views: "Vues de trafic",
+                subs: "Abonnés",
+                likes: "Mentions J'aime",
+                coms: "Commentaires",
+                vipTitle: "👑 SUITE D'ACCÉLÉRATION VIP",
+                vipReserved: "SLOT VIP RÉSERVÉ",
+                vipPosition: "Position",
+                mainBoard: "⚡ Tableau d'accélération principal (En direct)",
+                slotVacant: "Emplacement vacant",
+                visit: "Visiter",
+                locked: "Verrouillé",
+                submitTitle: "📥 Soumettre une vidéo dans le pipeline",
+                submitDesc: "Veuillez télécharger un lien de <strong>Vidéo</strong> YouTube. Les paramètres de suivi seront supprimés automatiquement.",
+                placeholder: "Collez votre lien de vidéo YouTube ici (ex: https://youtube.com/watch?v=...)",
+                commitBtn: "Engager l'élément vidéo",
+                waitingTitle: "⏳ Liste d'attente de la plateforme",
+                waitingEmpty: "File d'attente vide. Paramètres système stables.",
+                votes: "Votes du cycle d'apparition",
+                appeal: "Faire appel",
+                complianceTitle: "🛡️ PROTOCOLE DE CONFORMITÉ DE LA PLATEFORME",
+                understandBtn: "Je comprends et j'accepte",
+                conditionLabel: "Condition",
+                ofLabel: "sur",
+                transitionTitle: "🔄 PÉRIODE DE TRANSITION GLOBALE ACTIVE",
+                transitionDesc: "La plateforme exécute actuellement sa routine de synchronisation globale. Tous les nœuds suivent des matrices d'interaction individuelles pour mettre à jour les classements. Veuillez patienter.",
+                lockoutTitle: "⏳ VERROUILLAGE DE SÉCURITÉ DU SYSTÈME D'ACCÉLÉRATION",
+                lockoutDesc: "Votre cycle d'allocation active de session est expiré ou une réinitialisation de phase d'apparition s'est terminée. Votre compte est en stockage de refroidissement.",
+                regTitle: "📋 Protocole de réglementation des conversions de la plateforme",
+                validationVideoErr: "Exception de validation: vous devez télécharger un lien de VIDÉO YouTube spécifique, et non un lien de chaîne.",
+                validationUrlErr: "Exception de validation: le texte fourni n'est pas une URL valide.",
+                provideUrlErr: "Veuillez fournir un lien vidéo YouTube.",
+                dbSuccessBoard: "Succès: vous êtes placé sur le tableau d'accélération principal !",
+                dbSuccessQueue: "Succès: vidéo enregistrée dans la liste d'attente sans liens de suivi.",
+                appealRegistered: "Appel enregistré pour l'utilisateur",
+                conditionsList: [
+                    "1. Veuillez lire et comprendre toutes les politiques et réglementations de ce site Web avant d'utiliser la plateforme.",
+                    "2. Ce n'est pas un système automatisé qui fournit de faux abonnés, vues ou commentaires. Toutes les actions sont effectuées par de vrais utilisateurs, y compris vous. Par l'action 'Visiter', vous devez vous abonner, aimer et commenter.",
+                    "3. Une fois que vous cliquez sur Visiter, un compte à rebours de 30 secondes commence. Vous pourrez visiter la chaîne suivante uniquement après la fin du compte à rebours.",
+                    "4. Lorsque votre compte devient actif (Live), activez les notifications pour surveiller les actions sur votre chaîne.",
+                    "5. Si votre compte reçoit trois plaintes (appels) pendant qu'il est sur la liste d'attente, il sera supprimé. Si cela se produit trois fois, votre compte sera définitivement supprimé.",
+                    "6. Faire un appel ne vous ramènera pas sur le tableau, mais cela peut affecter un autre utilisateur actuellement sur la liste d'attente."
+                ],
+                regulationsText: `
+                    <li>Les chaînes doivent effectuer les visites de manière séquentielle comme indiqué par la plateforme.</li>
+                    <li>Sauter des éléments actifs interrompt les flux de validation et annule la synchronisation.</li>
+                    <li>Lorsque la plateforme déclenche la <strong>Période d'Apparition</strong>, les matrices de données sont reconstruites.</li>
+                    <li>Les éléments actifs sont protégés pour maintenir la vitesse du pipeline.</li>
+                `
+            },
+            rw: {
+                title: "NS PLATFORM: SISITEMU YO KWACELERERA YOUTUBE",
+                subtitle: "Porotokore yo guhindura ibintu ikora neza",
+                views: "Abarebye",
+                subs: "Abafatabuguzi",
+                likes: "Abakunze",
+                coms: "Ibitekerezo",
+                vipTitle: "👑 IMMYANYA Y'IKIRENGA (VIP)",
+                vipReserved: "UMWANYA WA VIP WASABWE",
+                vipPosition: "Icyiciro",
+                mainBoard: "⚡ Imbonerahamwe Nkuru (Live)",
+                slotVacant: "Umwanya uragurika",
+                visit: "Sura",
+                locked: "Funze",
+                submitTitle: "📥 Shyiraho Link ya Video yawe",
+                submitDesc: "Nyamuneka ushyireho link ya <strong>Video</strong> ya YouTube. Uturango twa tracking turahita dukurwaho mu buryo bwizewe.",
+                placeholder: "Uzuza link ya video ya YouTube hano (ex: https://youtube.com/watch?v=...)",
+                commitBtn: "Emeza Video yawe",
+                waitingTitle: "⏳ Urutonde rw'Abategereje",
+                waitingEmpty: "Nta muntu uri ku urutonde rw'abategereje.",
+                votes: "Amafo y'icyiciro cyo kugaragara",
+                appeal: "Kujurira",
+                complianceTitle: "🛡️ POROTOKORE YO KUBHIRIZA AMATEGEKO YA PLATFORM",
+                understandBtn: "Ndasobanukiwe & Ndabyemeye",
+                conditionLabel: "Itegeko rya",
+                ofLabel: "kuri",
+                transitionTitle: "🔄 IGIHE CYO GUHINDURA JENEWALI KIRAFISE",
+                transitionDesc: "Platform irimo gukora gahunda yo gusangira amadata ku isi yose. Nyamuneka utegereze gato routines zirimo kwemeza amadata.",
+                lockoutTitle: "⏳ SYSTEME IFUNZE BY'AGATEGAYO CYA SIKIRITE",
+                lockoutDesc: "Igihe cyawe cyo gukoresha cyarangiye cyangwa system yahindutse. Kugira ngo platform ikore neza, konti yawe iri mu minsi yo guhagarara gato.",
+                regTitle: "📋 Amategeko agenga guhindura kuri Platform",
+                validationVideoErr: "Ikosa ryo Kwemeza: Ugomba gushyiraho link ya VIDEO ya YouTube, ntabwo ari link ya channel.",
+                validationUrlErr: "Ikosa ryo Kwemeza: Ibyo wanditse ntabwo ari URL nziza.",
+                provideUrlErr: "Nyamuneka dushyirireho link ya video ya YouTube.",
+                dbSuccessBoard: "Byagenze neza: Washyizwe ku Mbonerahamwe Nkuru (Live)!",
+                dbSuccessQueue: "Byagenze neza: Video yawe yashyizwe mu bategereje idafite tracking parameters.",
+                appealRegistered: "Ubujurire bwanditswe ku mukoresha",
+                conditionsList: [
+                    "1. Nyamuneka banza usome kandi usobanukirwe amategeko n'amabwiriza yose y'uru rubuga mbere yo kurukoresha.",
+                    "2. Iyi ntabwo ari sisitemu ikoresha mu buryo bwikora abasubscribers cyangwa ibitekerezo by baringa. Byose bikorwa n'abantu bafite konti basanzwe, nawe urimo. Iyo ukanze 'Sura' ugomba gukora subscribe, like no gusiga igitekerezo.",
+                    "3. Iyo ukanze Sura, imasegonda 30 itangira kubara. Wemerewe gusura indi video ari uko iyo masegonda arangiye.",
+                    "4. Iyo konti yawe bivuze ko iri Live, fungura notifications kugira ngo umenye ibiri kubera kuri channel yawe.",
+                    "5. Mu gihe uri mu bategereje, konti yawe yakira ubujurire (appeals) butatu, urakurwa ku rutonde. Bikubayeho gatatu, konti yawe isibwa burundu.",
+                    "6. Gukora ubujurire ntibituma usubira Live ariko bishobora kugira uwo bihinduraho mu bategereje."
+                ],
+                regulationsText: `
+                    <li>Channel zigomba gusura zikurikirana nk'uko byanditswe kuri platform.</li>
+                    <li>Gusimbuka channel zikora bituma sisitemu ihagarara kuguha amadata.</li>
+                    <li>Iyo platform itangije **Appearing Period**, amadata yose asubiramo bushya.</li>
+                    <li>Abari Live bararindwa cyane kugira ngo pipeline ikomeze kugenda vuba.</li>
+                `
+            }
         };
 
-        // --- Core System States (Populated solely from Backend JSON responses) ---
+        const activeDictionary = languageDictionary[targetLanguageSystem] || languageDictionary.en;
+        let mandatoryConditionsList = activeDictionary.conditionsList;
+
+        function applyDynamicLocalization() {
+            document.getElementById("txtTitle").innerText = activeDictionary.title;
+            document.getElementById("txtSubtitle").innerText = activeDictionary.subtitle;
+            document.getElementById("lblViewsText").innerText = activeDictionary.views;
+            document.getElementById("lblSubsText").innerText = activeDictionary.subs;
+            document.getElementById("lblLikesText").innerText = activeDictionary.likes;
+            document.getElementById("lblCommentsText").innerText = activeDictionary.coms;
+            document.getElementById("txtVipTitle").innerText = activeDictionary.vipTitle;
+            document.getElementById("txtMainBoardTitle").innerText = activeDictionary.mainBoard;
+            document.getElementById("txtSubmitTitle").innerText = activeDictionary.submitTitle;
+            document.getElementById("txtSubmitDesc").innerHTML = activeDictionary.submitDesc;
+            document.getElementById("youtubeLinkInput").placeholder = activeDictionary.placeholder;
+            document.getElementById("submitVideoBtn").innerText = activeDictionary.commitBtn;
+            document.getElementById("txtWaitingTitle").innerText = activeDictionary.waitingTitle;
+            document.getElementById("txtComplianceTitle").innerText = activeDictionary.complianceTitle;
+            document.getElementById("termsAcceptButtonStep").innerText = activeDictionary.understandBtn;
+            document.getElementById("txtTransitionTitle").innerText = activeDictionary.transitionTitle;
+            document.getElementById("txtTransitionDesc").innerText = activeDictionary.transitionDesc;
+        }
+        // ==========================================================
+
+        const localUserSessionId = (function() {
+            let key = localStorage.getItem("ns_engine_token");
+            if (!key) {
+                key = "usr_token_" + Math.random().toString(36).substring(2, 15) + "_" + Date.now();
+                localStorage.setItem("ns_engine_token", key);
+            }
+            return key;
+        })();
+
+        const activeUsername = localStorage.getItem("ns_username") || "User_" + localUserSessionId.split("_")[2].substring(0, 5);
+        const activeChannelLink = localStorage.getItem("ns_channel_link") || ("https://youtube.com/@" + activeUsername);
+
         let activeBoard = [];
         let waitingList = [];
-        let vipBoard = [];
-        let systemPhase = "REGULAR_PERIOD";
-        let sequenceIndex = 0;
-        let currentBoardIsFull = false;
-        let executionTimerRunning = false;
+        let vipBoard = [
+            { isEmptySlot: true, slotPosition: "left_1" },
+            { isEmptySlot: true, slotPosition: "left_2" },
+            { isEmptySlot: true, slotPosition: "right_1" },
+            { isEmptySlot: true, slotPosition: "right_2" }
+        ];
 
-        // --- Fetch System State from Backend Brain ---
+        let systemPhase = "REGULAR_PERIOD"; 
+        let sequenceIndex = 0; 
+        let currentBoardIsFull = false;
+        let justBecameInactivePool = [];
+        let executionTimerRunning = false; 
+
+        let currentConditionIndexPointer = 0;
+        let termsAcceptedFlag = localStorage.getItem("ns_conditions_verified") === "true";
+
+        function instantiateComplianceGateway() {
+            if (termsAcceptedFlag) {
+                document.getElementById("termsVerificationOverlay").style.display = "none";
+                return;
+            }
+            
+            document.getElementById("termsVerificationOverlay").style.display = "flex";
+            renderCurrentConditionStep();
+
+            document.getElementById("termsAcceptButtonStep").addEventListener("click", () => {
+                currentConditionIndexPointer++;
+                if (currentConditionIndexPointer < mandatoryConditionsList.length) {
+                    renderCurrentConditionStep();
+                } else {
+                    termsAcceptedFlag = true;
+                    localStorage.setItem("ns_conditions_verified", "true");
+                    document.getElementById("termsVerificationOverlay").style.display = "none";
+                }
+            });
+        }
+
+        function renderCurrentConditionStep() {
+            document.getElementById("termsConditionPresenterText").innerText = mandatoryConditionsList[currentConditionIndexPointer];
+            document.getElementById("termsStepIndicatorLabel").innerText = `${activeDictionary.conditionLabel} ${currentConditionIndexPointer + 1} ${activeDictionary.ofLabel} ${mandatoryConditionsList.length}`;
+        }
+
+        function updateMetricsDisplayPanel() {
+            document.getElementById("metricViews").innerText = `${localStorage.getItem("ns_completed_hits") || "0"} view`;
+            document.getElementById("metricSubs").innerText = `${localStorage.getItem("ns_completed_hits") || "0"} sub`;
+            document.getElementById("metricLikes").innerText = `${localStorage.getItem("ns_completed_hits") || "0"} like`;
+            document.getElementById("metricComments").innerText = `${localStorage.getItem("ns_completed_hits") || "0"} com`;
+        }
+
+        // Sequential VIP Automated Skipping Engine Routine
+        function ensureValidSequenceTarget() {
+            let maxSequenceThreshold = 4 + activeBoard.length;
+            
+            // Look-ahead parser logic to automatically slide the index forward over vacant VIP positions
+            while (sequenceIndex < 4 && vipBoard[sequenceIndex] && vipBoard[sequenceIndex].isEmptySlot) {
+                sequenceIndex++;
+            }
+            
+            if (sequenceIndex >= maxSequenceThreshold) {
+                evaluateStateTransitions();
+            }
+        }
+
+        // Dedicated Submission Terminal Protection Layer Engine
+        function updateUploadPanelState() {
+            const uploadPanel = document.getElementById("uploadPanel");
+            const submitBtn = document.getElementById("submitVideoBtn");
+            const inputField = document.getElementById("youtubeLinkInput");
+
+            if (!uploadPanel || !submitBtn || !inputField) return;
+
+            const isCurrentlyOnBoard = activeBoard.some(slot => slot.userId === localUserSessionId);
+            const isCurrentlyInQueue = waitingList.some(slot => slot.userId === localUserSessionId);
+            
+            const registrationTimestamp = localStorage.getItem("ns_upload_time");
+            let coolingPeriodExpired = true;
+            let statusSuffix = "";
+
+            if (registrationTimestamp) {
+                const elapsedDelta = Date.now() - parseInt(registrationTimestamp);
+                const threeHoursMs = 3 * 60 * 60 * 1000;
+                if (elapsedDelta < threeHoursMs) {
+                    coolingPeriodExpired = false;
+                    const remainingMs = threeHoursMs - elapsedDelta;
+                    let hrs = Math.floor(remainingMs / 3600000);
+                    let mins = Math.floor((remainingMs % 3600000) / 60000);
+                    let secs = Math.floor((remainingMs % 60000) / 1000);
+                    statusSuffix = ` [Locked: ${hrs}h ${mins}m ${secs}s]`;
+                }
+            }
+
+            if (isCurrentlyOnBoard || isCurrentlyInQueue || !coolingPeriodExpired) {
+                uploadPanel.style.opacity = "0.5";
+                inputField.disabled = true;
+                submitBtn.disabled = true;
+                submitBtn.style.pointerEvents = "none";
+                
+                let explanation = "";
+                if (isCurrentlyOnBoard) explanation = " (Active on Board)";
+                else if (isCurrentlyInQueue) explanation = " (In Waiting Queue)";
+                else explanation = statusSuffix;
+
+                submitBtn.innerText = `${activeDictionary.commitBtn}${explanation}`;
+            } else {
+                uploadPanel.style.opacity = "1";
+                inputField.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.style.pointerEvents = "auto";
+                submitBtn.innerText = activeDictionary.commitBtn;
+            }
+        }
+
+        function runVerificationTimer(buttonElement, targetUrl, onCompleteRoutine) {
+            executionTimerRunning = true; 
+            buttonElement.style.pointerEvents = "none";
+            window.open(targetUrl, '_blank');
+
+            let secondsRemaining = 30;
+            buttonElement.innerText = `... (${secondsRemaining}s)`;
+
+            const timerCountdownLoop = setInterval(() => {
+                secondsRemaining--;
+                if (secondsRemaining > 0) {
+                    buttonElement.innerText = `... (${secondsRemaining}s)`;
+                } else {
+                    clearInterval(timerCountdownLoop);
+                    
+                    let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0") + 1;
+                    localStorage.setItem("ns_completed_hits", currentCompletedHits.toString());
+                    updateMetricsDisplayPanel();
+
+                    buttonElement.style.pointerEvents = "auto";
+                    executionTimerRunning = false; 
+                    onCompleteRoutine();
+                }
+            }, 1000);
+        }
+
         async function synchroniseWithLiveDatabase() {
             try {
                 const response = await fetch('/api/system-state', {
@@ -297,119 +607,161 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    
-                    // Assign global system states calculated cleanly by your backend
-                    activeBoard = data.activeBoard || [];
-                    waitingList = data.waitingList || [];
-                    vipBoard = data.vipBoard || [];
-                    systemPhase = data.systemPhase || "REGULAR_PERIOD";
-                    sequenceIndex = data.sequenceIndex ?? 0;
-                    currentBoardIsFull = data.currentBoardIsFull ?? false;
-
-                    // Handle full application state overlay transitions reactively
-                    if (systemPhase === "APPEARING_PERIOD") {
-                        document.getElementById("appearingPeriodOverlay").style.display = "flex";
-                    } else {
-                        document.getElementById("appearingPeriodOverlay").style.display = "none";
-                    }
-
-                    // Check if the backend flagged a manual user submission block execution pattern
-                    if (data.userLockouts && data.userLockouts[localUserSessionId]) {
-                        let remainingTime = data.userLockouts[localUserSessionId] - Date.now();
-                        if (remainingTime > 0) {
-                            renderLockoutInterfaceScreen(remainingTime);
-                            return true;
-                        }
-                    }
+                    activeBoard = data.activeBoard || activeBoard;
+                    waitingList = data.waitingList || waitingList;
+                    vipBoard = data.vipBoard || vipBoard;
+                    systemPhase = data.systemPhase || systemPhase;
+                    sequenceIndex = data.sequenceIndex ?? sequenceIndex;
+                    currentBoardIsFull = data.currentBoardIsFull ?? currentBoardIsFull;
+                    justBecameInactivePool = data.justBecameInactivePool || justBecameInactivePool;
                     return true;
                 }
             } catch (error) {
-                console.error("Critical: Frontend dropped connection to backend API gateway pipeline.", error);
+                console.warn("Backend API Offline or Unreachable. Operating in robust fallback storage mode.");
             }
             return false;
         }
 
-        // --- Update UI View Terminal States ---
-        function updateMetricsDisplayPanel() {
-            document.getElementById("systemPhaseBadge").innerText = systemPhase;
-            document.getElementById("completedHitsBadge").innerText = localStorage.getItem("ns_completed_hits") || "0";
-            document.getElementById("sequenceIndexBadge").innerText = sequenceIndex;
+        async function loadSystemData() {
+            const usingLiveServer = await synchroniseWithLiveDatabase();
+            
+            if (!usingLiveServer) {
+                const storedBoard = localStorage.getItem("ns_active_board");
+                if (storedBoard) {
+                    activeBoard = JSON.parse(storedBoard);
+                } else {
+                    activeBoard = [];
+                    for(let i = 0; i < 10; i++) {
+                        activeBoard.push({ isEmptySlot: true, clicks: 0 });
+                    }
+                }
+                waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
+                vipBoard = JSON.parse(localStorage.getItem("ns_vip_board")) || vipBoard;
+                systemPhase = localStorage.getItem("ns_system_phase") || "REGULAR_PERIOD";
+                sequenceIndex = parseInt(localStorage.getItem("ns_sequence_index") || "0");
+                currentBoardIsFull = (localStorage.getItem("ns_board_full") === "true");
+                justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
+            }
+
+            let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+            currentBoardIsFull = (filledCount === 10);
+            updateMetricsDisplayPanel();
+            ensureValidSequenceTarget();
         }
 
-        function updateUploadPanelState() {
-            const uploadPanel = document.getElementById("uploadPanel");
-            const inputField = document.getElementById("youtubeLinkInput");
-            const submitBtn = document.getElementById("submitVideoBtn");
+        // Real-Time Background Synchronization Loop without Re-loading page
+        function initializeLiveUpdateEngine() {
+            setInterval(async () => {
+                if (executionTimerRunning || systemPhase === "APPEARING_PERIOD") return; 
+                
+                const synced = await synchroniseWithLiveDatabase();
+                if (!synced) {
+                    const storedBoard = localStorage.getItem("ns_active_board");
+                    if (storedBoard) activeBoard = JSON.parse(storedBoard);
+                    waitingList = JSON.parse(localStorage.getItem("ns_waiting_list")) || [];
+                    vipBoard = JSON.parse(localStorage.getItem("ns_vip_board")) || vipBoard;
+                    systemPhase = localStorage.getItem("ns_system_phase") || "REGULAR_PERIOD";
+                    sequenceIndex = parseInt(localStorage.getItem("ns_sequence_index") || "0");
+                    currentBoardIsFull = (localStorage.getItem("ns_board_full") === "true");
+                    justBecameInactivePool = JSON.parse(localStorage.getItem("ns_inactive_pool")) || [];
+                }
+                
+                ensureValidSequenceTarget();
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateMetricsDisplayPanel();
+                updateUploadPanelState();
+                evaluateStateTransitions();
+            }, 3000); 
+        }
 
-            let isCurrentlyOnBoard = activeBoard.some(slot => slot.userId === localUserSessionId);
-            let isCurrentlyInQueue = waitingList.some(user => user.userId === localUserSessionId);
+        async function saveStateToStorage() {
+            localStorage.setItem("ns_active_board", JSON.stringify(activeBoard));
+            localStorage.setItem("ns_waiting_list", JSON.stringify(waitingList));
+            localStorage.setItem("ns_vip_board", JSON.stringify(vipBoard));
+            localStorage.setItem("ns_system_phase", systemPhase);
+            localStorage.setItem("ns_sequence_index", sequenceIndex.toString());
+            localStorage.setItem("ns_board_full", currentBoardIsFull.toString());
+            localStorage.setItem("ns_inactive_pool", JSON.stringify(justBecameInactivePool));
 
-            if (isCurrentlyOnBoard || isCurrentlyInQueue) {
-                uploadPanel.style.opacity = "0.6";
-                inputField.disabled = true;
-                submitBtn.disabled = true;
-                submitBtn.style.pointerEvents = "none";
-
-                let explanation = isCurrentlyOnBoard ? " (Active on Board)" : " (In Waiting Queue)";
-                submitBtn.innerText = `${activeDictionary.commitBtn}${explanation}`;
-            } else {
-                uploadPanel.style.opacity = "1";
-                inputField.disabled = false;
-                submitBtn.disabled = false;
-                submitBtn.style.pointerEvents = "auto";
-                submitBtn.innerText = activeDictionary.commitBtn;
+            try {
+                await fetch('/api/system-state', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        activeBoard, waitingList, vipBoard, systemPhase, sequenceIndex, currentBoardIsFull, justBecameInactivePool
+                    })
+                });
+            } catch(e) {
+                console.error("Failed to commit network mutation stream to remote database.");
             }
         }
 
-        // --- Verification Timer Execution (Fires Verification Token to Backend Upon Completion) ---
-        function runVerificationTimer(buttonElement, targetUrl, absoluteIndex, type) {
-            executionTimerRunning = true; 
-            buttonElement.style.pointerEvents = "none";
-            window.open(targetUrl, '_blank');
-
-            let secondsRemaining = 30;
-            buttonElement.innerText = `... (${secondsRemaining}s)`;
-
-            const timerCountdownLoop = setInterval(async () => {
-                secondsRemaining--;
-                if (secondsRemaining > 0) {
-                    buttonElement.innerText = `... (${secondsRemaining}s)`;
+        function checkLockoutState() {
+            const blockReleaseTimestamp = localStorage.getItem("ns_lockout_lift_time");
+            if (blockReleaseTimestamp) {
+                let delta = parseInt(blockReleaseTimestamp) - Date.now();
+                if (delta > 0) {
+                    renderLockoutInterfaceScreen(delta);
+                    return true;
                 } else {
-                    clearInterval(timerCountdownLoop);
-                    
-                    // Increment client side view metrics count logs smoothly
-                    let currentCompletedHits = parseInt(localStorage.getItem("ns_completed_hits") || "0") + 1;
-                    localStorage.setItem("ns_completed_hits", currentCompletedHits.toString());
+                    localStorage.removeItem("ns_lockout_lift_time");
+                }
+            }
+            return false;
+        }
 
-                    // Dispatch completed tracking parameters to backend storage pipeline
-                    try {
-                        const response = await fetch('/api/verify-hit', {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bearer ${authToken}`,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                userId: localUserSessionId,
-                                index: absoluteIndex,
-                                type: type
-                            })
-                        });
+        function forceLocalUserLockout() {
+            const lockoutDurationMs = 3 * 60 * 60 * 1000; 
+            const executionLiftTarget = Date.now() + lockoutDurationMs;
+            localStorage.setItem("ns_lockout_lift_time", executionLiftTarget.toString());
+            renderLockoutInterfaceScreen(lockoutDurationMs);
+        }
 
-                        if (response.ok) {
-                            console.log("Validation hook recognized safely by database backend architecture.");
-                        }
-                    } catch(e) {
-                        console.error("Failed to commit verification transaction signature directly to database storage context.");
-                    }
+        function renderLockoutInterfaceScreen(remainingMs) {
+            document.body.innerHTML = `
+                <div class="overlay">
+                    <div class="glass-panel lockout-box">
+                        <h2 style="color: #ff007f;">${activeDictionary.lockoutTitle}</h2>
+                        <p style="margin: 20px 0; color: #ccc; line-height: 1.6;">${activeDictionary.lockoutDesc}</p>
+                        <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">
+                            --:--:--
+                        </div>
+                    </div>
+                </div>
+            `;
 
-                    executionTimerRunning = false; 
-                    await refreshDashboardScene();
+            let absoluteTarget = Date.now() + remainingMs;
+            const liveClockRoutine = setInterval(() => {
+                let currentDelta = absoluteTarget - Date.now();
+                if (currentDelta <= 0) {
+                    clearInterval(liveClockRoutine);
+                    localStorage.removeItem("ns_lockout_lift_time");
+                    window.location.reload();
+                } else {
+                    let hrs = Math.floor(currentDelta / (3600000));
+                    let mins = Math.floor((currentDelta % 3600000) / 60000);
+                    let secs = Math.floor((currentDelta % 60000) / 1000);
+                    document.getElementById("countdownTimerBox").innerText = 
+                        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 }
             }, 1000);
         }
 
-        // --- Render UI Layout Formations ---
+        function buildRegulationsPanel() {
+            const container = document.getElementById("rulesAnchorPanel");
+            container.innerHTML = `
+                <h3 style="color: #ff007f;">${activeDictionary.regTitle}</h3>
+                <ol style="padding-left: 20px; line-height: 1.8; color: #ddd; margin-top: 10px;">
+                    ${activeDictionary.regulationsText}
+                </ol>
+            `;
+        }
+
         function renderVIPSpaces() {
             const leftWing = document.getElementById("vipLeftWing");
             const rightWing = document.getElementById("vipRightWing");
@@ -419,6 +771,7 @@
 
             vipBoard.forEach((slot, index) => {
                 let targetWing = (index < 2) ? leftWing : rightWing;
+                
                 let card = document.createElement("div");
                 card.className = "vip-card";
                 card.style.background = "rgba(255, 255, 255, 0.05)";
@@ -474,9 +827,16 @@
 
                     const actionBtn = card.querySelector(".vip-action-btn");
                     if (isCurrentTarget) {
-                        actionBtn.style.pointerEvents = "auto";
                         actionBtn.addEventListener("click", () => {
-                            runVerificationTimer(actionBtn, slot.youtubeLink, absoluteIndex, 'vip');
+                            runVerificationTimer(actionBtn, slot.youtubeLink, () => {
+                                vipBoard[absoluteIndex].clicks = displayClicks + 1;
+                                sequenceIndex++; 
+                                ensureValidSequenceTarget(); 
+                                saveStateToStorage();
+                                renderVIPSpaces();
+                                renderActiveBoard();
+                                evaluateStateTransitions();
+                            });
                         });
                     }
                 }
@@ -487,6 +847,7 @@
         function renderActiveBoard() {
             const boardContainer = document.getElementById("mainAccelerationBoard");
             boardContainer.innerHTML = "";
+
             let vipOffset = 4;
 
             activeBoard.forEach((slot, index) => {
@@ -539,9 +900,16 @@
 
                     const linkButton = elementNode.querySelector(".active-redirect-anchor");
                     if (isCurrentTarget) {
-                        linkButton.style.pointerEvents = "auto";
                         linkButton.addEventListener("click", () => {
-                            runVerificationTimer(linkButton, slot.youtubeLink, absoluteIndex, 'regular');
+                            runVerificationTimer(linkButton, slot.youtubeLink, () => {
+                                activeBoard[index].clicks = displayClicks + 1;
+                                sequenceIndex++;
+                                ensureValidSequenceTarget(); 
+                                saveStateToStorage();
+                                renderVIPSpaces();
+                                renderActiveBoard();
+                                evaluateStateTransitions();
+                            });
                         });
                     }
                 }
@@ -578,77 +946,114 @@
                                 </div>
                             </div>
                         </div>
-                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;" data-username="${user.username || user.channelTitle}">
-                            ${activeDictionary.appeal}
-                        </button>
+                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;" onclick="alert('${activeDictionary.appealRegistered} ${user.username || user.channelTitle}.')">${activeDictionary.appeal}</button>
                     </div>
                 `;
-
-                li.querySelector(".appeal-btn").addEventListener("click", function() {
-                    alert(`${activeDictionary.appealRegistered} ${this.getAttribute("data-username")}.`);
-                });
-
                 container.appendChild(li);
             });
         }
 
-        function buildRegulationsPanel() {
-            const container = document.getElementById("rulesAnchorPanel");
-            container.innerHTML = `
-                <h3 style="color: #ff007f;">${activeDictionary.regTitle}</h3>
-                <ol style="padding-left: 20px; line-height: 1.8; color: #ddd; margin-top: 10px;">
-                    ${activeDictionary.regulationsText}
-                </ol>
-            `;
+        function evaluateStateTransitions() {
+            if (!currentBoardIsFull) return false;
+
+            let maxSequenceThreshold = 4 + activeBoard.length;
+
+            if (sequenceIndex >= maxSequenceThreshold) {
+                systemPhase = "APPEARING_PERIOD";
+                saveStateToStorage();
+                executeAppearingPhaseRoutine();
+                return true;
+            }
+            return false;
         }
 
-        function renderLockoutInterfaceScreen(remainingMs) {
-            document.body.innerHTML = `
-                <div class="overlay">
-                    <div class="glass-panel lockout-box">
-                        <h2 style="color: #ff007f;">${activeDictionary.lockoutTitle}</h2>
-                        <p style="margin: 20px 0; color: #ccc; line-height: 1.6;">${activeDictionary.lockoutDesc}</p>
-                        <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">
-                            --:--:--
-                        </div>
-                    </div>
-                </div>
-            `;
+        // Chronological FIFO Waiting List & Advanced Transition Replacement Engine
+        function executeAppearingPhaseRoutine() {
+            document.getElementById("appearingPeriodOverlay").style.display = "flex";
+            
+            waitingList.forEach(user => {
+                user.appearsReceived = (user.appearsReceived || 0) + 1;
+            });
 
-            let absoluteTarget = Date.now() + remainingMs;
-            const liveClockRoutine = setInterval(() => {
-                let currentDelta = absoluteTarget - Date.now();
-                if (currentDelta <= 0) {
-                    clearInterval(liveClockRoutine);
-                    window.location.reload();
-                } else {
-                    let hrs = Math.floor(currentDelta / 3600000);
-                    let mins = Math.floor((currentDelta % 3600000) / 60000);
-                    let secs = Math.floor((currentDelta % 60000) / 1000);
-                    document.getElementById("countdownTimerBox").innerText = 
-                        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            let localUserWasActive = activeBoard.some(u => u.userId === localUserSessionId);
+
+            // Populate the inactive users pool with the outgoing active board users before flushing
+            let oldActiveUsers = activeBoard.filter(slot => !slot.isEmptySlot);
+            justBecameInactivePool = [...justBecameInactivePool, ...oldActiveUsers];
+
+            let nextActiveBoard = [];
+            let remainingWaitingList = [];
+
+            // Chronological parsing loop: Top entries (uploaded earliest) move up. If evicted by 3 appeals, skip to the next in queue.
+            for (let i = 0; i < waitingList.length; i++) {
+                let currentCandidate = waitingList[i];
+                if (currentCandidate.appearsReceived >= 3) {
+                    continue; // Evicted! Skipped to let the next user in the waiting list slide forward
                 }
-            }, 1000);
+                
+                if (nextActiveBoard.length < 10) {
+                    nextActiveBoard.push(currentCandidate);
+                } else {
+                    remainingWaitingList.push(currentCandidate);
+                }
+            }
+
+            // Fallback Engine: If queue runs dry, pull randomly from the recently inactive pool
+            while (nextActiveBoard.length < 10 && justBecameInactivePool.length > 0) {
+                const randomPickIndex = Math.floor(Math.random() * justBecameInactivePool.length);
+                const fallbackReplacement = justBecameInactivePool.splice(randomPickIndex, 1)[0];
+                
+                fallbackReplacement.appearsReceived = 0;
+                fallbackReplacement.clicks = 0;
+                nextActiveBoard.push(fallbackReplacement);
+            }
+
+            // Hard Fallback: If pools are fully depleted, inject system core seed nodes
+            while (nextActiveBoard.length < 10) {
+                nextActiveBoard.push({
+                    userId: "system_node_" + Math.floor(Math.random() * 10000),
+                    username: "SystemNode",
+                    channelTitle: "System Accelerated Feed",
+                    channelLink: "https://youtube.com/@system",
+                    clicks: 0,
+                    youtubeLink: "https://youtube.com"
+                });
+            }
+
+            // Reconstruct active board dataset
+            activeBoard = nextActiveBoard.map(element => {
+                return {
+                    userId: element.userId,
+                    username: element.username || element.channelTitle,
+                    channelTitle: element.channelTitle,
+                    channelLink: element.channelLink || "https://youtube.com",
+                    clicks: 0,
+                    youtubeLink: element.youtubeLink
+                };
+            });
+
+            waitingList = remainingWaitingList;
+            justBecameInactivePool = []; 
+            sequenceIndex = 0;
+            systemPhase = "REGULAR_PERIOD";
+
+            // Run look-ahead sweep immediately after reset to handle empty VIP blocks seamlessly
+            ensureValidSequenceTarget();
+
+            saveStateToStorage();
+            document.getElementById("appearingPeriodOverlay").style.display = "none";
+
+            if (localUserWasActive) {
+                forceLocalUserLockout();
+            } else {
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateMetricsDisplayPanel();
+                updateUploadPanelState();
+            }
         }
 
-        // --- Core Execution Synchronizer Loop ---
-        async function refreshDashboardScene() {
-            await synchroniseWithLiveDatabase();
-            renderVIPSpaces();
-            renderActiveBoard();
-            renderWaitingList();
-            updateMetricsDisplayPanel();
-            updateUploadPanelState();
-        }
-
-        function initializeLiveUpdateEngine() {
-            setInterval(async () => {
-                if (executionTimerRunning || systemPhase === "APPEARING_PERIOD") return; 
-                await refreshDashboardScene();
-            }, 3000); 
-        }
-
-        // --- Content Submission Routing Terminal ---
         document.getElementById("submitVideoBtn").addEventListener("click", async function() {
             const inputField = document.getElementById("youtubeLinkInput");
             const rawUrlValue = inputField.value.trim();
@@ -691,23 +1096,90 @@
 
                 if (response.ok) {
                     const statusResult = await response.json();
+                    localStorage.setItem("ns_upload_time", Date.now().toString());
                     alert(statusResult.message || "Video Asset committed safely!");
+                    await loadSystemData();
+                    renderVIPSpaces();
+                    renderActiveBoard();
+                    renderWaitingList();
+                    updateUploadPanelState();
                     inputField.value = "";
-                    await refreshDashboardScene();
-                } else {
-                    const errorResult = await response.json();
-                    alert(errorResult.message || "Submission rejected by system verification filters.");
+                    return;
                 }
             } catch(err) {
-                alert("Network Fault: Unable to verify asset payload structure with the cloud database matrix.");
+                console.warn("Backend pipeline offline, simulating local storage injection.");
+            }
+
+            let firstEmptyIndex = activeBoard.findIndex(slot => slot.isEmptySlot);
+
+            if (firstEmptyIndex !== -1 && !currentBoardIsFull) {
+                activeBoard[firstEmptyIndex] = {
+                    userId: localUserSessionId,
+                    username: activeUsername,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2], 
+                    channelLink: activeChannelLink,
+                    clicks: 0,
+                    youtubeLink: finalCleanedUrl 
+                };
+                
+                let filledCount = activeBoard.filter(slot => !slot.isEmptySlot).length;
+                currentBoardIsFull = (filledCount === 10);
+                
+                localStorage.setItem("ns_upload_time", Date.now().toString());
+                saveStateToStorage();
+                renderActiveBoard();
+                updateUploadPanelState();
+                
+                alert(activeDictionary.dbSuccessBoard);
+                
+                if (currentBoardIsFull) {
+                    evaluateStateTransitions();
+                } else {
+                    inputField.value = "";
+                }
+            } else {
+                const freshQueueObject = {
+                    userId: localUserSessionId,
+                    username: activeUsername,
+                    channelTitle: "User_" + localUserSessionId.split("_")[2], 
+                    channelLink: activeChannelLink,
+                    clicks: 0,
+                    youtubeLink: finalCleanedUrl, 
+                    appearsReceived: 0
+                };
+
+                // Array push naturally preserves FIFO rules by ordering earliest links at the front (index 0)
+                waitingList.push(freshQueueObject);
+                localStorage.setItem("ns_upload_time", Date.now().toString());
+                saveStateToStorage();
+
+                inputField.value = "";
+                
+                if (!evaluateStateTransitions()) {
+                    renderWaitingList();
+                    updateUploadPanelState();
+                    alert(activeDictionary.dbSuccessQueue);
+                    
+                    ensureValidSequenceTarget();
+                    renderVIPSpaces();
+                    renderActiveBoard();
+                }
             }
         });
 
-        // --- Document Initialization Activation Route ---
         window.addEventListener("DOMContentLoaded", async () => {
-            buildRegulationsPanel();
-            await refreshDashboardScene();
-            initializeLiveUpdateEngine(); 
+            applyDynamicLocalization(); 
+            instantiateComplianceGateway();
+            if (!checkLockoutState()) {
+                await loadSystemData();
+                buildRegulationsPanel();
+                renderVIPSpaces();
+                renderActiveBoard();
+                renderWaitingList();
+                updateUploadPanelState();
+                evaluateStateTransitions();
+                initializeLiveUpdateEngine(); 
+            }
         });
     </script>
 </body>
