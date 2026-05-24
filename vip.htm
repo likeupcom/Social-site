@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Platform - VIP Acceleration Suite Hub</title>
+    <style>
+        /* Modern Glassmorphic Dark-Mode Core Styling Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0a0a12;
+            color: #ffffff;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            margin-bottom: 20px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        /* Top Navigation/User status configuration */
+        .user-status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .user-meta-node {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .profile-icon {
+            font-size: 28px;
+            color: #00ffff;
+            filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.6));
+        }
+        .balance-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff007f;
+            text-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
+        }
+        /* Specific Section Styling spacing layouts */
+        .platform-section {
+            margin-bottom: 50px;
+        }
+        .platform-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 10px;
+        }
+        .platform-title {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .package-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 20px;
+        }
+        .package-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        .package-card:hover {
+            transform: translateY(-3px);
+            border-color: #00ffff;
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.1);
+        }
+        .package-volume {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .package-metrics-list {
+            font-size: 13px;
+            color: #aaa;
+            line-height: 1.6;
+        }
+        .package-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .package-cost {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff007f;
+        }
+        .asset-input-field {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .asset-input-field:focus {
+            border-color: #00ffff;
+        }
+        .action-btn {
+            background: linear-gradient(45deg, #00ffff, #ff007f);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 18px rgba(255, 0, 127, 0.5);
+        }
+        .deposit-btn {
+            background: transparent;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            box-shadow: none;
+        }
+        .deposit-btn:hover {
+            background: rgba(0, 255, 255, 0.1);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="glass-panel user-status-bar">
+            <div class="user-meta-node">
+                <span class="profile-icon">👤</span>
+                <div>
+                    <div id="lblUsername" style="font-weight: bold; color: #fff; font-size: 16px;">...</div>
+                    <div id="txtAccountType" style="font-size: 11px; color: #888; text-transform: uppercase; margin-top: 2px;">Premium Hub Member</div>
+                </div>
+            </div>
+            <div class="user-meta-node" style="gap: 20px;">
+                <div>
+                    <span id="lblBalanceText" style="font-size: 12px; color: #aaa; text-transform: uppercase; display: block; text-align: right; margin-bottom: 2px;">Wallet Balance</span>
+                    <span id="lblUserBalance" class="balance-value">0 FRW</span>
+                </div>
+                <button id="btnDepositRedirect" class="action-btn deposit-btn">Deposit</button>
+            </div>
+        </div>
+
+        <header style="margin-bottom: 40px; text-align: center;">
+            <h1 id="txtMainTitle">👑 VIP ACCELERATION SUITE SELECTION PANEL</h1>
+            <p id="txtMainSubtitle" style="color: #888; max-width: 700px; margin: 0 auto; font-size: 14px; line-height: 1.6;">
+                Purchase precise pipeline boosts. VIP placements route parameters smoothly into premium matrices. If execution pipelines are full, your target drops automatically into the priority VIP Waiting Queue with a standard <span style="color: #00ffff;">+100 asset safety retention margin</span>.
+            </p>
+        </header>
+
+        <div class="platform-section">
+            <div class="platform-header">
+                <span style="font-size: 26px;">🔴</span>
+                <span id="titleYoutube" class="platform-title" style="color: #ff4444;">YouTube Acceleration Packages</span>
+            </div>
+            <div class="package-grid">
+                <div class="package-card" style="border-top: 3px solid #ff4444;">
+                    <div>
+                        <div class="package-volume">200</div>
+                        <div class="package-metrics-list" data-lang-key="ytMetrics">Views, Subscribers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target YouTube Video link" data-platform="youtube" data-package="yt-200">
+                    <div class="package-price-row">
+                        <span class="package-cost">5,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="youtube" data-package="yt-200">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #ff4444;">
+                    <div>
+                        <div class="package-volume">500</div>
+                        <div class="package-metrics-list" data-lang-key="ytMetrics">Views, Subscribers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target YouTube Video link" data-platform="youtube" data-package="yt-500">
+                    <div class="package-price-row">
+                        <span class="package-cost">10,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="youtube" data-package="yt-500">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #ff4444;">
+                    <div>
+                        <div class="package-volume">1,000</div>
+                        <div class="package-metrics-list" data-lang-key="ytMetrics">Views, Subscribers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target YouTube Video link" data-platform="youtube" data-package="yt-1000">
+                    <div class="package-price-row">
+                        <span class="package-cost">15,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="youtube" data-package="yt-1000">Pay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="platform-section">
+            <div class="platform-header">
+                <span style="font-size: 26px;">📸</span>
+                <span id="titleInstagram" class="platform-title" style="color: #e1306c;">Instagram Acceleration Packages</span>
+            </div>
+            <div class="package-grid">
+                <div class="package-card" style="border-top: 3px solid #e1306c;">
+                    <div>
+                        <div class="package-volume">1,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target Instagram Post/Reel link" data-platform="instagram" data-package="ig-1000">
+                    <div class="package-price-row">
+                        <span class="package-cost">5,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="instagram" data-package="ig-1000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #e1306c;">
+                    <div>
+                        <div class="package-volume">2,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target Instagram Post/Reel link" data-platform="instagram" data-package="ig-2000">
+                    <div class="package-price-row">
+                        <span class="package-cost">7,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="instagram" data-package="ig-2000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #e1306c;">
+                    <div>
+                        <div class="package-volume">5,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target Instagram Post/Reel link" data-platform="instagram" data-package="ig-5000">
+                    <div class="package-price-row">
+                        <span class="package-cost">10,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="instagram" data-package="ig-5000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #e1306c;">
+                    <div>
+                        <div class="package-volume">10,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target Instagram Post/Reel link" data-platform="instagram" data-package="ig-10000">
+                    <div class="package-price-row">
+                        <span class="package-cost">20,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="instagram" data-package="ig-10000">Pay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="platform-section">
+            <div class="platform-header">
+                <span style="font-size: 26px;">🎵</span>
+                <span id="titleTiktok" class="platform-title" style="color: #00f2fe;">TikTok Acceleration Packages</span>
+            </div>
+            <div class="package-grid">
+                <div class="package-card" style="border-top: 3px solid #00f2fe;">
+                    <div>
+                        <div class="package-volume">1,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target TikTok Video link" data-platform="tiktok" data-package="tt-1000">
+                    <div class="package-price-row">
+                        <span class="package-cost">5,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="tiktok" data-package="tt-1000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #00f2fe;">
+                    <div>
+                        <div class="package-volume">2,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target TikTok Video link" data-platform="tiktok" data-package="tt-2000">
+                    <div class="package-price-row">
+                        <span class="package-cost">7,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="tiktok" data-package="tt-2000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #00f2fe;">
+                    <div>
+                        <div class="package-volume">5,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target TikTok Video link" data-platform="tiktok" data-package="tt-5000">
+                    <div class="package-price-row">
+                        <span class="package-cost">10,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="tiktok" data-package="tt-5000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #00f2fe;">
+                    <div>
+                        <div class="package-volume">10,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target TikTok Video link" data-platform="tiktok" data-package="tt-10000">
+                    <div class="package-price-row">
+                        <span class="package-cost">20,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="tiktok" data-package="tt-10000">Pay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="platform-section">
+            <div class="platform-header">
+                <span style="font-size: 26px;">👍</span>
+                <span id="titleFacebook" class="platform-title" style="color: #1877f2;">Facebook Acceleration Packages</span>
+            </div>
+            <div class="package-grid">
+                <div class="package-card" style="border-top: 3px solid #1877f2;">
+                    <div>
+                        <div class="package-volume">1,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target Facebook Video/Reel link" data-platform="facebook" data-package="fb-1000">
+                    <div class="package-price-row">
+                        <span class="package-cost">5,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="facebook" data-package="fb-1000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #1877f2;">
+                    <div>
+                        <div class="package-volume">2,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target Facebook Video/Reel link" data-platform="facebook" data-package="fb-2000">
+                    <div class="package-price-row">
+                        <span class="package-cost">7,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="facebook" data-package="fb-2000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #1877f2;">
+                    <div>
+                        <div class="package-volume">5,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target Facebook Video/Reel link" data-platform="facebook" data-package="fb-5000">
+                    <div class="package-price-row">
+                        <span class="package-cost">10,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="facebook" data-package="fb-5000">Pay</button>
+                    </div>
+                </div>
+                <div class="package-card" style="border-top: 3px solid #1877f2;">
+                    <div>
+                        <div class="package-volume">10,000</div>
+                        <div class="package-metrics-list" data-lang-key="generalMetrics">Views, Followers, Comments, Likes</div>
+                    </div>
+                    <input type="text" class="asset-input-field link-input-target" placeholder="Paste target Facebook Video/Reel link" data-platform="facebook" data-package="fb-10000">
+                    <div class="package-price-row">
+                        <span class="package-cost">20,000 FRW</span>
+                        <button class="action-btn purchase-trigger-btn" data-platform="facebook" data-package="fb-10000">Pay</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const authToken = localStorage.getItem("ns_user_token") || "";
+
+        // Determine user identity handling logic using consistent paradigm
+        const localUserSessionId = (function() {
+            let key = localStorage.getItem("ns_platform_user_token");
+            if (!key) {
+                key = "user_hub_tok_" + Math.random().toString(36).substring(2, 15) + "_" + Date.now();
+                localStorage.setItem("ns_platform_user_token", key);
+            }
+            return key;
+        })();
+
+        // ==========================================================
+        //                MULTILINGUAL ENGINE DICTIONARY
+        // ==========================================================
+        const urlParamsParser = new URLSearchParams(window.location.search);
+        const targetLanguageSystem = urlParamsParser.get('lang') || localStorage.getItem("ns_selected_lang") || "en";
+        localStorage.setItem("ns_selected_lang", targetLanguageSystem);
+
+        const languageDictionary = {
+            en: {
+                mainTitle: "👑 VIP ACCELERATION SUITE SELECTION PANEL",
+                mainSubtitle: "Purchase precise pipeline boosts. VIP placements route parameters smoothly into premium matrices. If execution pipelines are full, your target drops automatically into the priority VIP Waiting Queue with a standard +100 asset safety retention margin.",
+                accountType: "Premium Hub Member",
+                walletBalance: "Wallet Balance",
+                deposit: "Deposit",
+                ytTitle: "YouTube VIP Acceleration Packages",
+                igTitle: "Instagram VIP Acceleration Packages",
+                ttTitle: "TikTok VIP Acceleration Packages",
+                fbTitle: "Facebook VIP Acceleration Packages",
+                ytMetrics: "Views, Subscribers, Comments, Likes",
+                generalMetrics: "Views, Followers, Comments, Likes",
+                btnPay: "Pay",
+                missingLink: "Validation Error: Please insert a valid target asset link for this media position.",
+                processing: "Verifying allocation limits..."
+            },
+            fr: {
+                mainTitle: "👑 SYSTÈME DE SÉLECTION DES FORFAITS VIP",
+                mainSubtitle: "Achetez des boosts de pipeline précis. Les placements VIP acheminent les paramètres en douceur. Si les pipelines sont pleins, votre cible tombe automatiquement dans la file d'attente VIP avec une marge de sécurité standard de +100.",
+                accountType: "Membre Premium Hub",
+                walletBalance: "Solde du Portefeuille",
+                deposit: "Dépôt",
+                ytTitle: "Forfaits d'Accélération VIP YouTube",
+                igTitle: "Forfaits d'Accélération VIP Instagram",
+                ttTitle: "Forfaits d'Accélération VIP TikTok",
+                fbTitle: "Forfaits d'Accélération VIP Facebook",
+                ytMetrics: "Vues, Abonnés, Commentaires, Mentions J'aime",
+                generalMetrics: "Vues, Abonnés, Commentaires, Mentions J'aime",
+                btnPay: "Payer",
+                missingLink: "Erreur de validation: Veuillez insérer un lien média valide pour cet emplacement.",
+                processing: "Vérification des limites d'allocation..."
+            },
+            rw: {
+                mainTitle: "👑 IMMYANYA Y'IKIRENGA (VIP) GUHITAMO PACKAGES",
+                mainSubtitle: "Gura inyongeramusaruro ihamye. Imyanya ya VIP yinjiza amadata yawe neza muri premium matrices. Iyo imyanya ya VIP yuzuye, uhita ushyirwa ku rutonde rw'abategereje rwa VIP aho uhabwa inyongera ya +100 y'umutekano ku bintu wagezeho.",
+                accountType: "Umuryango wa Hub Premium",
+                walletBalance: "Amafaranga afite kuri Konti",
+                deposit: "Gushyiraho",
+                ytTitle: "Packages z'Ikirenga (VIP) ya YouTube",
+                igTitle: "Packages z'Ikirenga (VIP) ya Instagram",
+                ttTitle: "Packages z'Ikirenga (VIP) ya TikTok",
+                fbTitle: "Packages z'Ikirenga (VIP) ya Facebook",
+                ytMetrics: "Abarebye, Abakurikira, Ibitekerezo, Abakunze",
+                generalMetrics: "Abarebye, Abakurikira, Ibitekerezo, Abakunze",
+                btnPay: "YURA",
+                missingLink: "Ikosa ryo Kwemeza: Nyamuneka uzuza link ihamye ya video/post ushaka guha VIP hano.",
+                processing: "Gusuzuma ubushobozi bwa system..."
+            }
+        };
+
+        const activeDictionary = languageDictionary[targetLanguageSystem] || languageDictionary.en;
+
+        function applyDynamicLocalization() {
+            document.getElementById("txtMainTitle").innerText = activeDictionary.mainTitle;
+            document.getElementById("txtMainSubtitle").innerText = activeDictionary.mainSubtitle;
+            document.getElementById("txtAccountType").innerText = activeDictionary.accountType;
+            document.getElementById("lblBalanceText").innerText = activeDictionary.walletBalance;
+            document.getElementById("btnDepositRedirect").innerText = activeDictionary.deposit;
+            
+            document.getElementById("titleYoutube").innerText = activeDictionary.ytTitle;
+            document.getElementById("titleInstagram").innerText = activeDictionary.igTitle;
+            document.getElementById("titleTiktok").innerText = activeDictionary.ttTitle;
+            document.getElementById("titleFacebook").innerText = activeDictionary.fbTitle;
+
+            document.querySelectorAll('[data-lang-key="ytMetrics"]').forEach(el => el.innerText = activeDictionary.ytMetrics);
+            document.querySelectorAll('[data-lang-key="generalMetrics"]').forEach(el => el.innerText = activeDictionary.generalMetrics);
+            document.querySelectorAll('.purchase-trigger-btn').forEach(el => el.innerText = activeDictionary.btnPay);
+        }
+
+        // ==========================================================
+        //               LIVE ACCOUNT DATA SYNCHRONIZATION
+        // ==========================================================
+        async function fetchUserWalletMetrics() {
+            try {
+                const response = await fetch(`/api/vip/user-status?userId=${localUserSessionId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById("lblUsername").innerText = data.username || "Anonymous Node";
+                    document.getElementById("lblUserBalance").innerText = `${data.balance ?? 0} FRW`;
+                }
+            } catch (err) {
+                console.error("Critical Connection Issue: Backend balance module unreached.");
+            }
+        }
+
+        // ==========================================================
+        //                TRANSACTION HANDLING SUITE
+        // ==========================================================
+        async function executeVipPurchaseOrder(platform, packageId, targetLink) {
+            try {
+                const response = await fetch('/api/vip/purchase', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: localUserSessionId,
+                        platform: platform,
+                        packageId: packageId,
+                        targetLink: targetLink
+                    })
+                });
+
+                const data = await response.json();
+
+                // Direct routing instructions dictated solely by server side feedback logic
+                if (data.action === "REDIRECT" && data.url) {
+                    window.location.href = data.url;
+                } else if (response.ok) {
+                    // Successful structural processing pipeline allocation
+                    alert(data.message || "VIP Order Verified Successfully!");
+                    // Route user to the destination tracking panel configured by backend
+                    window.location.href = `${platform}-improvement.html?lang=${targetLanguageSystem}`;
+                } else {
+                    alert(data.error || "Transaction verification failed.");
+                }
+            } catch (err) {
+                console.error("Critical Exception processing data balance framework stream.", err);
+            }
+        }
+
+        // Setup triggers binding click signals safely to backend routes
+        document.addEventListener("DOMContentLoaded", () => {
+            applyDynamicLocalization();
+            fetchUserWalletMetrics();
+
+            // Setup Deposit routing handler
+            document.getElementById("btnDepositRedirect").addEventListener("click", () => {
+                window.location.href = `deposit.html?lang=${targetLanguageSystem}`;
+            });
+
+            // Bind transaction trigger elements
+            document.querySelectorAll(".purchase-trigger-btn").forEach(btn => {
+                btn.addEventListener("click", async function() {
+                    const selectedPlatform = this.getAttribute("data-platform");
+                    const selectedPackage = this.getAttribute("data-package");
+                    
+                    // Locate associated target media link input inside context container
+                    const targetInputNode = document.querySelector(`.link-input-target[data-platform="${selectedPlatform}"][data-package="${selectedPackage}"]`);
+                    const absoluteLinkValue = targetInputNode ? targetInputNode.value.trim() : "";
+
+                    if (!absoluteLinkValue) {
+                        alert(activeDictionary.missingLink);
+                        if (targetInputNode) targetInputNode.focus();
+                        return;
+                    }
+
+                    this.innerText = activeDictionary.processing;
+                    this.disabled = true;
+
+                    await executeVipPurchaseOrder(selectedPlatform, selectedPackage, absoluteLinkValue);
+
+                    this.innerText = activeDictionary.btnPay;
+                    this.disabled = false;
+                });
+            });
+        });
+    </script>
+</body>
+</html>
