@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Platform - Deposit Terminal Engine</title>
+    <style>
+        /* Modern Glassmorphic Dark-Mode Core Styling Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0a0a12;
+            color: #ffffff;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+        }
+        h1, h2, h3 {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        /* Live Status Badge Tracker */
+        .status-tracker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .status-badge {
+            font-size: 12px;
+            font-weight: bold;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        .status-none {
+            background: rgba(255, 255, 255, 0.05);
+            color: #aaa;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .status-pending {
+            background: rgba(255, 165, 0, 0.1);
+            color: #ffa500;
+            border: 1px solid #ffa500;
+            box-shadow: 0 0 10px rgba(255, 165, 0, 0.3);
+            animation: pulseState 2s infinite;
+        }
+        .status-approved {
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        /* Form Element Controls */
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .terminal-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        .terminal-input:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.25);
+        }
+        .action-btn {
+            width: 100%;
+            background: linear-gradient(45deg, #00ffff, #ff007f);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            margin-top: 10px;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.6);
+        }
+        .action-btn:disabled {
+            background: #222 !important;
+            color: #555 !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        /* Payment Instructions Presentation Board */
+        .instruction-panel {
+            background: rgba(255, 0, 127, 0.04);
+            border: 1px solid #ff007f;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.15);
+            display: none; /* Controlled explicitly by data streams */
+        }
+        .ussd-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .ussd-string {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+            letter-spacing: 1px;
+        }
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover {
+            background: #ff007f;
+            border-color: #ff007f;
+        }
+        .receiver-row {
+            font-size: 14px;
+            color: #ccc;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .receiver-name {
+            color: #ff007f;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        @keyframes pulseState {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="glass-panel">
+            <div class="status-tracker-header">
+                <div>
+                    <div id="lblStatusTitle" style="font-weight: bold; font-size: 15px;">Transaction Monitor</div>
+                    <div id="lblStatusSubtitle" style="font-size: 11px; color: #666; margin-top: 2px;">Realtime synchronization loop active</div>
+                </div>
+                <div id="depositStatusBadge" class="status-badge status-none">No Active Request</div>
+            </div>
+
+            <form id="depositTerminalForm" onsubmit="return false;">
+                <h2 id="txtPanelTitle">📥 DEPOSIT FUNDING TERMINAL</h2>
+                
+                <div class="form-group">
+                    <label id="lblFullName" for="inputFullName">Depositor Full Name (Characters Only)</label>
+                    <input type="text" id="inputFullName" class="terminal-input" required autocomplete="off" placeholder="Enter sender name">
+                </div>
+
+                <div class="form-group">
+                    <label id="lblTelephone" for="inputTelephone">Telephone Number (Exactly 10 Digits)</label>
+                    <input type="text" id="inputTelephone" class="terminal-input" maxlength="10" required autocomplete="off" placeholder="e.g. 078XXXXXXX">
+                </div>
+
+                <div class="form-group">
+                    <label id="lblAmount" for="inputAmount">Amount to Deposit (FRW)</label>
+                    <input type="text" id="inputAmount" class="terminal-input" required autocomplete="off" placeholder="Enter amount in numeric value">
+                </div>
+
+                <button type="submit" id="btnSubmitDeposit" class="action-btn">Initiate Secure Deposit</button>
+            </form>
+
+            <div id="paymentInstructionPanel" class="instruction-panel">
+                <h3 id="txtInstructionHeader" style="color: #ff007f; font-size: 16px; margin-bottom: 10px; text-align: left;">⚠️ ACTION REQUIRED</h3>
+                <p id="txtInstructionBody" style="font-size: 14px; line-height: 1.6; color: #ddd;">
+                    Please type this number in your phone to complete the process:
+                </p>
+                <div class="ussd-container">
+                    <span id="ussdCodeDisplay" class="ussd-string">*182*8*1*2072458#</span>
+                    <button type="button" id="btnCopyUssd" class="copy-btn">Copy Code</button>
+                </div>
+                <div class="receiver-row">
+                    <span id="lblReceiver">Receiver Name:</span> <span class="receiver-name">simeo</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        const authToken = localStorage.getItem("ns_user_token") || "";
+
+        // Consistent session mapping handling paradigm
+        const localUserSessionId = (function() {
+            let key = localStorage.getItem("ns_platform_user_token");
+            if (!key) {
+                key = "user_hub_tok_" + Math.random().toString(36).substring(2, 15) + "_" + Date.now();
+                localStorage.setItem("ns_platform_user_token", key);
+            }
+            return key;
+        })();
+
+        // ==========================================================
+        //                MULTILINGUAL ENGINE DICTIONARY
+        // ==========================================================
+        const urlParamsParser = new URLSearchParams(window.location.search);
+        const targetLanguageSystem = urlParamsParser.get('lang') || localStorage.getItem("ns_selected_lang") || "en";
+        localStorage.setItem("ns_selected_lang", targetLanguageSystem);
+
+        const languageDictionary = {
+            en: {
+                monitorTitle: "Transaction Monitor",
+                monitorSub: "Realtime synchronization loop active",
+                panelTitle: "📥 DEPOSIT FUNDING TERMINAL",
+                lblFullName: "Depositor Full Name (Characters Only)",
+                lblTelephone: "Telephone Number (Exactly 10 Digits)",
+                lblAmount: "Amount to Deposit (FRW)",
+                phName: "Enter sender name",
+                phPhone: "e.g. 078XXXXXXX",
+                phAmount: "Enter amount in numeric value",
+                btnSubmit: "Initiate Secure Deposit",
+                badgeNone: "No Active Request",
+                badgePending: "Pending Approval",
+                badgeApproved: "Approved / Credited",
+                instructionHeader: "⚠️ ACTION REQUIRED",
+                instructionBody: "Please type this number in your phone to complete the process:",
+                receiverText: "Receiver Name:",
+                btnCopy: "Copy Code",
+                copiedMsg: "USSD Code copied to clipboard!",
+                errName: "Validation Error: Full Name must contain text characters only.",
+                errPhone: "Validation Error: Telephone must consist of exactly 10 digits.",
+                errAmount: "Validation Error: Amount field must be a valid numeric entry.",
+                successSubmit: "Deposit request committed safely to server storage layers."
+            },
+            fr: {
+                monitorTitle: "Moniteur de Transaction",
+                monitorSub: "Boucle de synchronisation en temps réel active",
+                panelTitle: "📥 TERMINAL DE DÉPÔT DE FONDS",
+                lblFullName: "Nom Complet du Déposant (Lettres Uniquement)",
+                lblTelephone: "Numéro de Téléphone (Exactement 10 Chiffres)",
+                lblAmount: "Montant à Déposer (FRW)",
+                phName: "Entrez le nom de l'expéditeur",
+                phPhone: "ex: 078XXXXXXX",
+                phAmount: "Entrez le montant en valeur numérique",
+                btnSubmit: "Initier le dépôt sécurisé",
+                badgeNone: "Aucune Demande Active",
+                badgePending: "En Attente d'Approbation",
+                badgeApproved: "Approuvé / Crédité",
+                instructionHeader: "⚠️ ACTION REQUISE",
+                instructionBody: "Veuillez taper ce numéro sur votre téléphone pour terminer le processus:",
+                receiverText: "Nom du Destinataire:",
+                btnCopy: "Copier le Code",
+                copiedMsg: "Code USSD copié dans le presse-papiers!",
+                errName: "Erreur de Validation: Le nom complet doit contenir des lettres uniquement.",
+                errPhone: "Erreur de Validation: Le téléphone doit comporter exactement 10 chiffres.",
+                errAmount: "Erreur de Validation: Le champ montant doit être une valeur numérique valide.",
+                successSubmit: "Demande de dépôt enregistrée avec succès sur le serveur."
+            },
+            rw: {
+                monitorTitle: "Gukurikirana Transaksiyo",
+                monitorSub: "Gusangira amadata mu buryo bwa live birakora",
+                panelTitle: "📥 ABAYOBERAMU HO KUGURIZA ABANDI",
+                lblFullName: "Amazina y'Uwatanze Amafaranga (Inyuguti Gusa)",
+                lblTelephone: "Numero ya Telefone (Imibare 10 Gusa)",
+                lblAmount: "Amafaranga Ushyiraho (FRW)",
+                phName: "Uzuza amazina y'uwatanze",
+                phPhone: "Urugero: 078XXXXXXX",
+                phAmount: "Uzuza umubare w'amafaranga gusa",
+                btnSubmit: "Emeza Gushyiraho Amafaranga",
+                badgeNone: "Nta Nyandiko Ihari",
+                badgePending: "Irimo Gusuzumwa (Pending)",
+                badgeApproved: "Yemejwe / Byakorewe",
+                instructionHeader: "⚠️ IKIGOMBA GUKORWA",
+                instructionBody: "Nyamuneka kandika uyu mubare muri telefone yawe ngo urangize gahunda:",
+                receiverText: "Izina ry'Uwakira:",
+                btnCopy: "Kopera Kode",
+                copiedMsg: "Kode ya USSD yakopewe!",
+                errName: "Ikosa ryo Kwemeza: Amazina agomba kuba inyuguti gusa.",
+                errPhone: "Ikosa ryo Kwemeza: Numero ya telefone igomba kuba igizwe n'imibare 10 gusa.",
+                errAmount: "Ikosa ryo Kwemeza: Umubare w'amafaranga ugomba kuba imibare gusa.",
+                successSubmit: "Ibisabwa byo gushyiraho amafaranga byoherejwe kuri server cluster."
+            }
+        };
+
+        const activeDictionary = languageDictionary[targetLanguageSystem] || languageDictionary.en;
+
+        function applyDynamicLocalization() {
+            document.getElementById("lblStatusTitle").innerText = activeDictionary.monitorTitle;
+            document.getElementById("lblStatusSubtitle").innerText = activeDictionary.monitorSub;
+            document.getElementById("txtPanelTitle").innerText = activeDictionary.panelTitle;
+            document.getElementById("lblFullName").innerText = activeDictionary.lblFullName;
+            document.getElementById("lblTelephone").innerText = activeDictionary.lblTelephone;
+            document.getElementById("lblAmount").innerText = activeDictionary.lblAmount;
+            
+            document.getElementById("inputFullName").placeholder = activeDictionary.phName;
+            document.getElementById("inputTelephone").placeholder = activeDictionary.phPhone;
+            document.getElementById("inputAmount").placeholder = activeDictionary.phAmount;
+            document.getElementById("btnSubmitDeposit").innerText = activeDictionary.btnSubmit;
+            
+            document.getElementById("txtInstructionHeader").innerText = activeDictionary.instructionHeader;
+            document.getElementById("txtInstructionBody").innerText = activeDictionary.instructionBody;
+            document.getElementById("lblReceiver").innerText = activeDictionary.receiverText;
+            document.getElementById("btnCopyUssd").innerText = activeDictionary.btnCopy;
+        }
+
+        // ==========================================================
+        //         LIVE TRANSACTION STATUS ENGINE LOOP (POLLING)
+        // ==========================================================
+        async function checkLiveDatabaseDepositStatus() {
+            try {
+                const response = await fetch(`/api/deposit/status?userId=${localUserSessionId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatusDisplayBadge(data.status); // Server response controls frontend view
+                }
+            } catch (err) {
+                console.error("Failed to query runtime structural status from database.");
+            }
+        }
+
+        function updateStatusDisplayBadge(status) {
+            const badge = document.getElementById("depositStatusBadge");
+            const submitBtn = document.getElementById("btnSubmitDeposit");
+            
+            badge.className = "status-badge"; // Reset styles
+
+            if (status === "PENDING") {
+                badge.innerText = activeDictionary.badgePending;
+                badge.classList.add("status-pending");
+                document.getElementById("paymentInstructionPanel").style.display = "block";
+                submitBtn.disabled = true;
+            } else if (status === "APPROVED") {
+                badge.innerText = activeDictionary.badgeApproved;
+                badge.classList.add("status-approved");
+                document.getElementById("paymentInstructionPanel").style.display = "none";
+                submitBtn.disabled = false;
+                document.getElementById("depositTerminalForm").reset();
+            } else {
+                badge.innerText = activeDictionary.badgeNone;
+                badge.classList.add("status-none");
+                // Do not explicitly alter display here to allow UI workflow visibility
+            }
+        }
+
+        // ==========================================================
+        //               FORM ACCURACY VALIDATION ENGINE
+        // ==========================================================
+        function validateTerminalInputs(name, tel, amount) {
+            const namePattern = /^[A-Za-z\s]+$/;
+            const telPattern = /^\d{10}$/;
+            const amountPattern = /^\d+$/;
+
+            if (!namePattern.test(name)) {
+                alert(activeDictionary.errName);
+                return false;
+            }
+            if (!telPattern.test(tel)) {
+                alert(activeDictionary.errPhone);
+                return false;
+            }
+            if (!amountPattern.test(amount)) {
+                alert(activeDictionary.errAmount);
+                return false;
+            }
+            return true;
+        }
+
+        // ==========================================================
+        //                   SUBMISSION ENGINE BINDINGS
+        // ==========================================================
+        document.getElementById("depositTerminalForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const fullNameVal = document.getElementById("inputFullName").value.trim();
+            const telephoneVal = document.getElementById("inputTelephone").value.trim();
+            const amountVal = document.getElementById("inputAmount").value.trim();
+
+            if (!validateTerminalInputs(fullNameVal, telephoneVal, amountVal)) {
+                return;
+            }
+
+            // Pure transmission payload sent directly to remote MongoDB interface pipeline layers
+            try {
+                const response = await fetch('/api/deposit/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: localUserSessionId,
+                        fullName: fullNameVal,
+                        telephone: telephoneVal,
+                        amount: Number(amountVal)
+                    })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    // Update state presentation immediately based strictly on server instructions
+                    updateStatusDisplayBadge("PENDING");
+                    document.getElementById("paymentInstructionPanel").style.display = "block";
+                } else {
+                    alert(result.error || "Submission rejected by pipeline authorization routines.");
+                }
+            } catch (err) {
+                console.error("Critical communications interruption across pipeline endpoint stream.", err);
+            }
+        });
+
+        // ==========================================================
+        //                    CLIPBOARD OPERATIONS
+        // ==========================================================
+        document.getElementById("btnCopyUssd").addEventListener("click", function() {
+            const codeText = document.getElementById("ussdCodeDisplay").innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert(activeDictionary.copiedMsg);
+            }).catch(err => {
+                console.error("Clipboard operational loop fault.");
+            });
+        });
+
+        // Initialize configurations seamlessly
+        document.addEventListener("DOMContentLoaded", () => {
+            applyDynamicLocalization();
+            
+            // Kickstart status check polling lifecycle loops
+            checkLiveDatabaseDepositStatus();
+            setInterval(checkLiveDatabaseDepositStatus, 4000);
+        });
+    </script>
+</body>
+</html>
