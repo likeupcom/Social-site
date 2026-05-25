@@ -179,6 +179,7 @@ async function loadSavedChannel() {
                 isUploaded = true;
                 document.getElementById("btn1").disabled = false;
                 document.getElementById("ctrlBtn").className = "action-btn change-style";
+                document.getElementById("ctrlBtn").disabled = false;
                 updateButtonText();
             }
         }
@@ -248,6 +249,7 @@ async function handleLinkAction() {
             document.getElementById("chanLink").disabled = false;
             ctrlBtn.className = "action-btn upload-style";
             updateButtonText();
+            validateLiveInput();
         }
     }
 }
