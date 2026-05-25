@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS Platform - Grand Admin Control Core</title>
+    <style>
+        /* Modern Glassmorphic Dark-Mode Corporate Master Suite Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #06060c;
+            color: #ffffff;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Dashboard Layout Architecture */
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 18, 0.6);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+        .main-workspace {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 40px;
+            background: radial-gradient(circle at 50% 0%, #101026 0%, #06060c 70%);
+        }
+        
+        /* Typography & Branding Assets */
+        .brand-header {
+            font-size: 20px;
+            font-weight: 800;
+            color: #00ffff;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            margin-bottom: 35px;
+            padding-left: 10px;
+            letter-spacing: 1px;
+            border-left: 3px solid #ff007f;
+        }
+        h2 {
+            color: #00ffff;
+            font-size: 22px;
+            margin-bottom: 25px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+        
+        /* Navigation Components Matrix */
+        .nav-group-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #555565;
+            letter-spacing: 1.5px;
+            margin: 15px 0 8px 10px;
+            font-weight: bold;
+        }
+        .nav-btn {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #8c8c9e;
+            padding: 12px 15px;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.03);
+            color: #ffffff;
+        }
+        .nav-btn.active {
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.15) 0%, rgba(255, 0, 127, 0.05) 100%);
+            color: #00ffff;
+            border-left: 3px solid #00ffff;
+            font-weight: 600;
+        }
+
+        /* Glassmorphic Panel Elements */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.5);
+        }
+        
+        /* System Statistics Metrics Grid Layout */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 10px;
+        }
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(0, 255, 255, 0.2);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #6a6a7a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .stat-value.neon-cyan { color: #00ffff; text-shadow: 0 0 10px rgba(0,255,255,0.2); }
+        .stat-value.neon-pink { color: #ff007f; text-shadow: 0 0 10px rgba(255,0,127,0.2); }
+
+        /* Structural Tab Content Sections Toggle Layer */
+        .dashboard-section {
+            display: none;
+        }
+        .dashboard-section.active-section {
+            display: block;
+        }
+
+        /* Control Form Formats & Inputs */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: flex-end;
+        }
+        .form-group {
+            flex-grow: 1;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            color: #8c8c9e;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .terminal-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+        }
+        .terminal-input:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+        }
+
+        /* Master Utility Action Buttons */
+        .action-btn {
+            background: linear-gradient(45deg, #00ffff, #ff007f);
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        .btn-cyan { background: #00ffff; color: #000; font-weight: bold; }
+        .btn-cyan:hover { box-shadow: 0 0 12px rgba(0, 255, 255, 0.4); }
+        .btn-pink { background: #ff007f; color: #fff; }
+        .btn-pink:hover { box-shadow: 0 0 12px rgba(255, 0, 127, 0.4); }
+
+        /* Data Matrix Tables Custom Grid Frame */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background: rgba(255, 255, 255, 0.04);
+            color: #00ffff;
+            padding: 14px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: #d1d1d6;
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+            color: #ffffff;
+        }
+        
+        /* Badges Indicator Components */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-pending { background: rgba(255, 165, 0, 0.15); color: #ffa500; }
+        .badge-active { background: rgba(0, 255, 255, 0.15); color: #00ffff; }
+        .badge-alert { background: rgba(255, 0, 127, 0.15); color: #ff007f; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand-header">NS CORE CTRL v1.0</div>
+        
+        <span class="nav-group-title">Metrics Engine</span>
+        <button class="nav-btn active" onclick="navigateDashboard('secStats')">📊 System Statistics</button>
+        
+        <span class="nav-group-title">Social Modules</span>
+        <button class="nav-btn" onclick="navigateDashboard('secFacebook')">📘 Facebook Network</button>
+        <button class="nav-btn" onclick="navigateDashboard('secYouTube')">🟥 YouTube Network</button>
+        <button class="nav-btn" onclick="navigateDashboard('secTikTok')">🎵 TikTok Network</button>
+        <button class="nav-btn" onclick="navigateDashboard('secInstagram')">📸 Instagram Network</button>
+        
+        <span class="nav-group-title">Financial Gateway</span>
+        <button class="nav-btn" onclick="navigateDashboard('secDeposits')">💳 Deposit Management</button>
+        <button class="nav-btn" onclick="navigateDashboard('secWallets')">💰 Wallet Ecosystem</button>
+        
+        <span class="nav-group-title">Placement & Queues</span>
+        <button class="nav-btn" onclick="navigateDashboard('secVIPPlacements')">⭐ VIP Placements</button>
+        <button class="nav-btn" onclick="navigateDashboard('secRegularPlacements')">⚡ Regular Placements</button>
+        <button class="nav-btn" onclick="navigateDashboard('secWaitingLists')">⏳ Waiting Lists</button>
+        
+        <span class="nav-group-title">Network Moderation</span>
+        <button class="nav-btn" onclick="navigateDashboard('secReferrals')">👥 Referral & Bonuses</button>
+        <button class="nav-btn" onclick="navigateDashboard('secAppeals')">⚠️ Account Appeals</button>
+    </div>
+
+    <div class="main-workspace">
+
+        <div id="secStats" class="dashboard-section active-section">
+            <h2>📊 Real-time System Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">Total Platform Users</div><div id="statTotalUsers" class="stat-value neon-cyan">----</div></div>
+                <div class="stat-card"><div class="stat-label">Total Deposits Value</div><div id="statTotalDeposits" class="stat-value neon-pink">----</div></div>
+                <div class="stat-card"><div class="stat-label">Active VIP Nodes</div><div id="statActiveVIP" class="stat-value">----</div></div>
+                <div class="stat-card"><div class="stat-label">Queue Waiting Load</div><div id="statWaitingLoad" class="stat-value">----</div></div>
+                <div class="stat-card"><div class="stat-label">Pending Appeals</div><div id="statPendingAppeals" class="stat-value neon-pink">----</div></div>
+                <div class="stat-card"><div class="stat-label">Referral Commissions</div><div id="statReferralPayouts" class="stat-value">----</div></div>
+            </div>
+        </div>
+
+        <div id="secFacebook" class="dashboard-section">
+            <h2>📘 Facebook Improvement System Control</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Task ID</th><th>User Node</th><th>Target Link (Sanitized)</th><th>Actions Required</th><th>Status Cluster</th><th>Operations</th></tr>
+                        </thead>
+                        <tbody id="tblFacebookData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secYouTube" class="dashboard-section">
+            <h2>🟥 YouTube Improvement System Control</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Task ID</th><th>User Node</th><th>Clean Link (No Parameters)</th><th>Action Context</th><th>Status</th><th>Operations</th></tr>
+                        </thead>
+                        <tbody id="tblYouTubeData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secTikTok" class="dashboard-section">
+            <h2>🎵 TikTok Improvement System Control</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Task ID</th><th>User Node</th><th>Target Link</th><th>Metric Category</th><th>Status</th><th>Operations</th></tr>
+                        </thead>
+                        <tbody id="tblTikTokData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secInstagram" class="dashboard-section">
+            <h2>📸 Instagram Improvement System Control</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Task ID</th><th>User Node</th><th>Target Link</th><th>Request Type</th><th>Status</th><th>Operations</th></tr>
+                        </thead>
+                        <tbody id="tblInstagramData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secDeposits" class="dashboard-section">
+            <h2>💳 Deposit System Audit Control</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>TXN Hash Reference</th><th>Account Ref</th><th>Amount Sent</th><th>Gateway Details</th><th>Status</th><th>Operations Trigger</th></tr>
+                        </thead>
+                        <tbody id="tblDepositsData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secWallets" class="dashboard-section">
+            <h2>💰 User Wallet Balancing Ledger</h2>
+            <div class="glass-panel">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Target Account Token ID</label>
+                        <input type="text" id="walletTargetUser" class="terminal-input" placeholder="Paste specific user reference ID">
+                    </div>
+                    <div class="form-group">
+                        <label>Adjustment Value ($)</label>
+                        <input type="number" id="walletAdjustmentValue" class="terminal-input" placeholder="e.g. 50.00 or -20.00">
+                    </div>
+                    <button type="button" class="action-btn" onclick="triggerWalletAdjustment()">Update Balance Node</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>User Reference ID</th><th>Registered Profile</th><th>Current Account Balance</th><th>Total Commissions Generated</th></tr>
+                        </thead>
+                        <tbody id="tblWalletsData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secVIPPlacements" class="dashboard-section">
+            <h2>⭐ VIP Premium Strategic Placements</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Placement ID</th><th>Target Account ID</th><th>Premium Node Tier</th><th>Activation Timestamp</th><th>Expiration Execution</th><th>Operations</th></tr>
+                        </thead>
+                        <tbody id="tblVIPPlacementsData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secRegularPlacements" class="dashboard-section">
+            <h2>⚡ Standard Regular Traffic Placements</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Placement ID</th><th>Target Account ID</th><th>Link Objective</th><th>Views Allocated</th><th>Views Delivered</th><th>Operations</th></tr>
+                        </thead>
+                        <tbody id="tblRegularPlacementsData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secWaitingLists" class="dashboard-section">
+            <h2>⏳ Traffic Queue Waiting Lists</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Priority Order Index</th><th>Account Ref</th><th>System Pipeline Category</th><th>Entrance Date</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="tblWaitingListData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secReferrals" class="dashboard-section">
+            <h2>👥 Bonus & Referral Registered Partner Applications</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Account Node</th><th>Verified Real Names</th><th>Telephone Endpoint</th><th>Generated Code Tracking</th><th>Status</th><th>Action Triggers</th></tr>
+                        </thead>
+                        <tbody id="tblReferralsData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="secAppeals" class="dashboard-section">
+            <h2>⚠️ Structural User Account Infraction Appeals</h2>
+            <div class="glass-panel">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Appeal ID Reference</th><th>Account Target</th><th>Stated Justification Statement</th><th>Active Infraction Count</th><th>Emergency Control Matrix</th></tr>
+                        </thead>
+                        <tbody id="tblAppealsData"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Extract authorization security state context 
+        const authToken = localStorage.getItem("ns_user_token") || "";
+
+        // Verify active dashboard routing interface toggles
+        function navigateDashboard(targetSectionId) {
+            document.querySelectorAll('.dashboard-section').forEach(element => {
+                element.classList.remove('active-section');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(targetSectionId).classList.add('active-section');
+            
+            // Highlight button node link dynamically
+            const eventTriggerSource = window.event ? window.event.currentTarget : null;
+            if (eventTriggerSource && eventTriggerSource.classList) {
+                eventTriggerSource.classList.add('active');
+            }
+
+            // Route dynamic dataset retrieval arrays directly out to backend
+            refreshModuleDataStream(targetSectionId);
+        }
+
+        // Centralized API Integration Suite Mapping Context
+        async function hitBackendCoreNode(endpoint, transmissionMethod = 'GET', dataBody = null) {
+            if (!authToken) {
+                alert("Security Authorization Layer Failure: Admin Access Denied. Token Required.");
+                return null;
+            }
+
+            try {
+                const configurations = {
+                    method: transmissionMethod,
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                };
+                if (dataBody) {
+                    configurations.body = JSON.stringify(dataBody);
+                }
+
+                const reactionStream = await fetch(endpoint, configurations);
+                
+                if (reactionStream.status === 401 || reactionStream.status === 403) {
+                    alert("Admin Authentication Rejected by Backend Cluster.");
+                    return null;
+                }
+                
+                return await reactionStream.json();
+            } catch (err) {
+                console.error("Critical communications interruption on admin matrix routing backplanes: ", err);
+                return null;
+            }
+        }
+
+        // Structural pipeline router targeting data state metrics from specific views
+        function refreshModuleDataStream(sectionId) {
+            switch(sectionId) {
+                case 'secStats': loadSystemGlobalStats(); break;
+                case 'secFacebook': loadSocialPlatformSubmissions('facebook', 'tblFacebookData'); break;
+                case 'secYouTube': loadSocialPlatformSubmissions('youtube', 'tblYouTubeData'); break;
+                case 'secTikTok': loadSocialPlatformSubmissions('tiktok', 'tblTikTokData'); break;
+                case 'secInstagram': loadSocialPlatformSubmissions('instagram', 'tblInstagramData'); break;
+                case 'secDeposits': loadFinancialTransactionsLedger(); break;
+                case 'secWallets': loadWalletEcosystemGrid(); break;
+                case 'secVIPPlacements': loadPlacementDataEngine('vip', 'tblVIPPlacementsData'); break;
+                case 'secRegularPlacements': loadPlacementDataEngine('regular', 'tblRegularPlacementsData'); break;
+                case 'secWaitingLists': loadWaitingQueuesRegistry(); break;
+                case 'secReferrals': loadReferralPartnershipRegistry(); break;
+                case 'secAppeals': loadAccountAppealsAuditGrid(); break;
+            }
+        }
+
+        // Data Engine 1: Global Platform Statistics Hydration
+        async function loadSystemGlobalStats() {
+            const data = await hitBackendCoreNode('/api/admin/statistics');
+            if (data) {
+                document.getElementById("statTotalUsers").innerText = data.totalUsers ?? 0;
+                document.getElementById("statTotalDeposits").innerText = `$${data.totalDepositsValue ?? '0.00'}`;
+                document.getElementById("statActiveVIP").innerText = data.activeVIPNodes ?? 0;
+                document.getElementById("statWaitingLoad").innerText = data.queueWaitingLoad ?? 0;
+                document.getElementById("statPendingAppeals").innerText = data.pendingAppeals ?? 0;
+                document.getElementById("statReferralPayouts").innerText = `$${data.totalReferralPayouts ?? '0.00'}`;
+            }
+        }
+
+        // Data Engine 2: Social Matrix Framework Hydration (FB, YT, TT, IG)
+        async function loadSocialPlatformSubmissions(platformKey, tableBodyElementId) {
+            const data = await hitBackendCoreNode(`/api/admin/social/${platformKey}`);
+            const tbody = document.getElementById(tableBodyElementId);
+            tbody.innerHTML = "";
+
+            if (data && data.tasks) {
+                data.tasks.forEach(task => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${task._id}</td>
+                        <td>${task.userRef}</td>
+                        <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${task.targetLink}</td>
+                        <td>${task.actionType || 'Default Traffic'}</td>
+                        <td><span class="badge ${task.status === 'pending' ? 'badge-pending' : 'badge-active'}">${task.status}</span></td>
+                        <td>
+                            <button class="action-btn btn-sm btn-cyan" onclick="triggerTaskProcess('${platformKey}', '${task._id}', 'approve')">Approve</button>
+                            <button class="action-btn btn-sm btn-pink" onclick="triggerTaskProcess('${platformKey}', '${task._id}', 'reject')">Reject</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        async function triggerTaskProcess(platform, id, decision) {
+            const result = await hitBackendCoreNode(`/api/admin/social/${platform}/action`, 'POST', { taskId: id, actionDecision: decision });
+            if (result && result.success) { refreshModuleDataStream(`sec${platform.charAt(0).toUpperCase() + platform.slice(1)}`); }
+        }
+
+        // Data Engine 3: Gateway Financial Operations Ledger
+        async function loadFinancialTransactionsLedger() {
+            const data = await hitBackendCoreNode('/api/admin/deposits');
+            const tbody = document.getElementById("tblDepositsData");
+            tbody.innerHTML = "";
+
+            if (data && data.deposits) {
+                data.deposits.forEach(txn => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${txn.transactionHash}</td>
+                            <td>${txn.userRef}</td>
+                            <td class="neon-cyan">$${txn.amount}</td>
+                            <td>${txn.gateway}</td>
+                            <td><span class="badge ${txn.status === 'pending' ? 'badge-pending' : 'badge-active'}">${txn.status}</span></td>
+                            <td>
+                                <button class="action-btn btn-sm btn-cyan" onclick="processDeposit('${txn._id}', 'approve')">Confirm</button>
+                                <button class="action-btn btn-sm btn-pink" onclick="processDeposit('${txn._id}', 'reject')">Deny</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        async function processDeposit(id, decision) {
+            const res = await hitBackendCoreNode('/api/admin/deposits/verify', 'POST', { depositId: id, decision });
+            if (res && res.success) loadFinancialTransactionsLedger();
+        }
+
+        // Data Engine 4: Balancing Wallet Metrics Ledger Adjuster Node
+        async function loadWalletEcosystemGrid() {
+            const data = await hitBackendCoreNode('/api/admin/wallets');
+            const tbody = document.getElementById("tblWalletsData");
+            tbody.innerHTML = "";
+
+            if (data && data.wallets) {
+                data.wallets.forEach(wallet => {
+                    tbody.innerHTML += `<tr><td>${wallet.userId}</td><td>${wallet.username}</td><td class="neon-cyan">$${wallet.balance}</td><td>$${wallet.referralEarnings}</td></tr>`;
+                });
+            }
+        }
+
+        async function triggerWalletAdjustment() {
+            const userTarget = document.getElementById("walletTargetUser").value.trim();
+            const adjustment = parseFloat(document.getElementById("walletAdjustmentValue").value);
+            
+            if (!userTarget || isNaN(adjustment)) return;
+
+            const res = await hitBackendCoreNode('/api/admin/wallets/adjust', 'POST', { userId: userTarget, balanceDelta: adjustment });
+            if (res && res.success) {
+                alert("Wallet balance verified and mutated successfully via remote engine loop.");
+                loadWalletEcosystemGrid();
+            }
+        }
+
+        // Data Engine 5: Premium Network Placements Pipeline Routing
+        async function loadPlacementDataEngine(tierKey, tableId) {
+            const data = await hitBackendCoreNode(`/api/admin/placements/${tierKey}`);
+            const tbody = document.getElementById(tableId);
+            tbody.innerHTML = "";
+
+            if (data && data.placements) {
+                data.placements.forEach(p => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${p._id}</td>
+                            <td>${p.userId}</td>
+                            <td>${p.tierLevel || p.objectiveType}</td>
+                            <td>${p.activatedAt || 'N/A'}</td>
+                            <td>${p.expiresAt || p.metricProgress || 'N/A'}</td>
+                            <td><button class="action-btn btn-sm btn-pink" onclick="terminatePlacement('${tierKey}', '${p._id}')">Terminate</button></td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        async function terminatePlacement(tierKey, id) {
+            const res = await hitBackendCoreNode(`/api/admin/placements/${tierKey}/terminate`, 'POST', { placementId: id });
+            if (res && res.success) loadPlacementDataEngine(tierKey, `tbl${tierKey.toUpperCase()}PlacementsData`);
+        }
+
+        // Data Engine 6: Global Traffic Priority Waiting Lists Queues
+        async function loadWaitingQueuesRegistry() {
+            const data = await hitBackendCoreNode('/api/admin/waiting-lists');
+            const tbody = document.getElementById("tblWaitingListData");
+            tbody.innerHTML = "";
+
+            if (data && data.queue) {
+                data.queue.forEach((q, index) => {
+                    tbody.innerHTML += `<tr><td>${index + 1}</td><td>${q.userId}</td><td>${q.systemCategory}</td><td>${q.joinedAt}</td><td><span class="badge badge-pending">Queued</span></td></tr>`;
+                });
+            }
+        }
+
+        // Data Engine 7: Bonus Hub/Referral System Applications Mapping
+        async function loadReferralPartnershipRegistry() {
+            const data = await hitBackendCoreNode('/api/admin/referrals/partnerships');
+            const tbody = document.getElementById("tblReferralsData");
+            tbody.innerHTML = "";
+
+            if (data && data.partners) {
+                data.partners.forEach(partner => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${partner.userId}</td>
+                            <td>${partner.realNames}</td>
+                            <td>${partner.telephone}</td>
+                            <td class="neon-cyan">${partner.referralCode || 'NOT_GENERATED'}</td>
+                            <td><span class="badge ${partner.status === 'active' ? 'badge-active' : 'badge-pending'}">${partner.status}</span></td>
+                            <td>
+                                <button class="action-btn btn-sm btn-cyan" onclick="modifyReferralStatus('${partner._id}', 'approve')">Approve Partnership</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        async function modifyReferralStatus(id, action) {
+            const res = await hitBackendCoreNode('/api/admin/referrals/action', 'POST', { applicationId: id, actionDecision: action });
+            if (res && res.success) loadReferralPartnershipRegistry();
+        }
+
+        // Data Engine 8: Critical Moderation Platform Account Infraction Appeals Control Node
+        async function loadAccountAppealsAuditGrid() {
+            const data = await hitBackendCoreNode('/api/admin/appeals');
+            const tbody = document.getElementById("tblAppealsData");
+            tbody.innerHTML = "";
+
+            if (data && data.appeals) {
+                data.appeals.forEach(appeal => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${appeal._id}</td>
+                            <td>${appeal.userId}</td>
+                            <td style="max-width:300px; white-space:normal;">${appeal.justificationText}</td>
+                            <td class="neon-pink" style="font-weight:bold; font-family:monospace;">${appeal.infractionCount} / 3</td>
+                            <td>
+                                <button class="action-btn btn-sm btn-cyan" onclick="resolveAppeal('${appeal._id}', 'pardon')">Accept Appeal (Pardon)</button>
+                                <button class="action-btn btn-sm btn-pink" onclick="resolveAppeal('${appeal._id}', 'reject_ban')">Reject & Delete Profile (3 Strike Rule)</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        async function resolveAppeal(id, actionType) {
+            if (actionType === 'reject_ban' && !confirm("Warning: Confirming this action will execute account removal data deletion routines sequence. Proceed?")) {
+                return;
+            }
+            const res = await hitBackendCoreNode('/api/admin/appeals/resolve', 'POST', { appealId: id, action: actionType });
+            if (res && res.success) loadAccountAppealsAuditGrid();
+        }
+
+        // Structural initialization triggers on frame mounting
+        document.addEventListener("DOMContentLoaded", () => {
+            loadSystemGlobalStats();
+        });
+    </script>
+</body>
+</html>
