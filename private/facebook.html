@@ -280,15 +280,11 @@ footer{
   <h1 id="pageTitle">Facebook Promotion Center</h1>
 
   <div class="buttons">
-    <button class="tool-btn" onclick="goToFollowers()" id="btn1" disabled>
-      <i class="fa-solid fa-users"></i> <span id="btn1Text">Improve Your Followers</span>
-    </button>
-    <button class="tool-btn" onclick="goToViews()" id="btn2" disabled>
-      <i class="fa-solid fa-eye"></i> <span id="btn2Text">Get Comments & Views</span>
+    <button class="tool-btn" onclick="goToImproveAccount()" id="btn1" disabled>
+      <i class="fa-brands fa-facebook"></i> <span id="btn1Text">Improve Your Facebook Account</span>
     </button>
   </div>
 
-  <!-- LINK SUBMISSION BOX -->
   <div class="link-box">
     <h3 id="inputLabel">Enter Facebook Profile Link</h3>
     <span class="example-txt" id="exampleLabel">Example: https://facebook.com</span>
@@ -344,8 +340,7 @@ function applyLang(lang){
     en:{
       title:"Facebook Promotion Center",
       pageTitle:"Facebook Promotion Center",
-      btn1:"Improve Your Followers",
-      btn2:"Get Comments & Views",
+      btn1:"Improve Your Facebook Account",
       home:"Home",
       services:"Services",
       vip:"VIP",
@@ -365,8 +360,7 @@ function applyLang(lang){
     fr:{
       title:"Centre de Promotion Facebook",
       pageTitle:"Centre de Promotion Facebook",
-      btn1:"Améliorer vos abonnés",
-      btn2:"Obtenir des commentaires et des vues",
+      btn1:"Améliorer votre compte Facebook",
       home:"Accueil",
       services:"Services",
       vip:"VIP",
@@ -386,8 +380,7 @@ function applyLang(lang){
     rw:{
       title:"Facebook Promotion Center",
       pageTitle:"Facebook Promotion Center",
-      btn1:"Ongera Abagukurikirana",
-      btn2:"Shaka Comments na Views",
+      btn1:"Vugurura Konti yawe ya Facebook",
       home:"Ahabanza",
       services:"Serivisi",
       vip:"VIP",
@@ -411,7 +404,6 @@ function applyLang(lang){
   document.getElementById("title").innerText=currentDict.title;
   document.getElementById("pageTitle").innerText=currentDict.pageTitle;
   document.getElementById("btn1Text").innerText=currentDict.btn1;
-  document.getElementById("btn2Text").innerText=currentDict.btn2;
   document.getElementById("inputLabel").innerText=currentDict.boxTitle;
   document.getElementById("exampleLabel").innerText=currentDict.exText;
   document.getElementById("hintLabel").innerText=currentDict.hintText;
@@ -458,12 +450,10 @@ function checkDatabaseProfile() {
         const inputEl = document.getElementById("chanLink");
         const ctrlBtn = document.getElementById("ctrlBtn");
         const btn1 = document.getElementById("btn1");
-        const btn2 = document.getElementById("btn2");
 
         inputEl.value = databaseUserChannel;
         inputEl.disabled = true;
         btn1.disabled = false;
-        btn2.disabled = false;
         
         ctrlBtn.innerText = currentDict.btnCh || "Change";
         ctrlBtn.className = "action-btn change-style";
@@ -479,7 +469,6 @@ function handleLinkAction() {
   const ctrlBtn = document.getElementById("ctrlBtn");
   const notify = document.getElementById("notify");
   const btn1 = document.getElementById("btn1");
-  const btn2 = document.getElementById("btn2");
 
   if (!isUploaded) {
     const linkValue = inputEl.value.trim();
@@ -495,7 +484,6 @@ function handleLinkAction() {
         notify.className = "notify-msg error-text";
         notify.innerText = currentDict.errExist || "Link already exists!";
         btn1.disabled = true;
-        btn2.disabled = true;
         isUploaded = false;
         return;
       }
@@ -505,7 +493,6 @@ function handleLinkAction() {
         notify.innerText = currentDict.successSave;
         inputEl.disabled = true;
         btn1.disabled = false;
-        btn2.disabled = false;
         
         ctrlBtn.innerText = currentDict.btnCh;
         ctrlBtn.className = "action-btn change-style";
@@ -515,16 +502,17 @@ function handleLinkAction() {
     .catch(err => console.error("Error saving to MongoDB:", err));
 
   } else {
-    inputEl.disabled = false;
-    inputEl.value = "";
-    btn1.disabled = true;
-    btn2.disabled = true;
-    notify.innerText = "";
-    
-    ctrlBtn.innerText = currentDict.btnUp;
-    ctrlBtn.className = "action-btn upload-style";
-    ctrlBtn.disabled = true;
-    isUploaded = false;
+    if (confirm("Are you sure you want to change this link?")) {
+      inputEl.disabled = false;
+      inputEl.value = "";
+      btn1.disabled = true;
+      notify.innerText = "";
+      
+      ctrlBtn.innerText = currentDict.btnUp;
+      ctrlBtn.className = "action-btn upload-style";
+      ctrlBtn.disabled = true;
+      isUploaded = false;
+    }
   }
 }
 
@@ -534,12 +522,8 @@ function buildTargetURL(pageName) {
   return pageName + (params.length > 0 ? "?" + params.join("&") : "");
 }
 
-function goToFollowers() {
-  window.location.href = buildTargetURL("improve-followers.html");
-}
-
-function goToViews() {
-  window.location.href = buildTargetURL("comments-views.html");
+function goToImproveAccount() {
+  window.location.href = buildTargetURL("facebook-improvement.html");
 }
 
 window.onload = function() {
