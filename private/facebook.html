@@ -114,6 +114,45 @@ h1{
   display: block;
 }
 
+/* Conditions Checklist Styling */
+.conditions-container {
+  text-align: left;
+  margin-bottom: 20px;
+  background: #0b1220;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #1f2937;
+}
+
+.condition-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.condition-item:last-child {
+  margin-bottom: 0;
+}
+
+.condition-item input[type="checkbox"] {
+  margin-top: 3px;
+  accent-color: #38bdf8;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.condition-item input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .input-group {
   display: flex;
   gap: 10px;
@@ -289,6 +328,21 @@ footer{
     <h3 id="inputLabel">Enter Facebook Profile Link</h3>
     <span class="example-txt" id="exampleLabel">Example: https://facebook.com</span>
     
+    <div class="conditions-container">
+      <label class="condition-item">
+        <input type="checkbox" id="cond1" onchange="validateLiveInput()">
+        <span>1. Please make sure that whenever you visit another user’s channel, you provide a Like, Comment and you follow as required. Failure to complete these actions may cause your account to be removed from the waiting list.</span>
+      </label>
+      <label class="condition-item">
+        <input type="checkbox" id="cond2" onchange="validateLiveInput()">
+        <span>2. Please ensure that the account link you upload is the same account you will use to interact with other user's account. Using a different account may negatively affect you during the appeal process.</span>
+      </label>
+      <label class="condition-item">
+        <input type="checkbox" id="cond3" onchange="validateLiveInput()">
+        <span>3. Making an appeal will not return your account to the active board. However, it will be used to take action against users who are not interacting fairly with other channels.</span>
+      </label>
+    </div>
+    
     <div class="input-group">
       <input type="text" id="chanLink" class="link-input" oninput="validateLiveInput()" placeholder="https://facebook.com">
       <button id="ctrlBtn" class="action-btn upload-style" onclick="handleLinkAction()" disabled>Upload</button>
@@ -429,11 +483,18 @@ function applyLang(lang){
 }
 
 function validateLiveInput() {
-  if (isUploaded) return;
+  if (isUploaded) {
+    document.getElementById("ctrlBtn").disabled = false;
+    return;
+  }
   const val = document.getElementById("chanLink").value.trim();
   const ctrlBtn = document.getElementById("ctrlBtn");
+  const cond1 = document.getElementById("cond1").checked;
+  const cond2 = document.getElementById("cond2").checked;
+  const cond3 = document.getElementById("cond3").checked;
   
-  if (FACEBOOK_HANDLE_REGEX.test(val)) {
+  // Requirements filter configuration requiring strict check values
+  if (FACEBOOK_HANDLE_REGEX.test(val) && cond1 && cond2 && cond3) {
     ctrlBtn.disabled = false;
   } else {
     ctrlBtn.disabled = true;
@@ -454,6 +515,14 @@ function checkDatabaseProfile() {
         inputEl.value = databaseUserChannel;
         inputEl.disabled = true;
         btn1.disabled = false;
+        
+        // Assert conditions verified status from current state database fetch
+        document.getElementById("cond1").checked = true;
+        document.getElementById("cond2").checked = true;
+        document.getElementById("cond3").checked = true;
+        document.getElementById("cond1").disabled = true;
+        document.getElementById("cond2").disabled = true;
+        document.getElementById("cond3").disabled = true;
         
         ctrlBtn.innerText = currentDict.btnCh || "Change";
         ctrlBtn.className = "action-btn change-style";
@@ -494,6 +563,11 @@ function handleLinkAction() {
         inputEl.disabled = true;
         btn1.disabled = false;
         
+        // Lock conditions container post verification matching specifications
+        document.getElementById("cond1").disabled = true;
+        document.getElementById("cond2").disabled = true;
+        document.getElementById("cond3").disabled = true;
+        
         ctrlBtn.innerText = currentDict.btnCh;
         ctrlBtn.className = "action-btn change-style";
         isUploaded = true;
@@ -508,10 +582,19 @@ function handleLinkAction() {
       btn1.disabled = true;
       notify.innerText = "";
       
+      // Clear condition inputs and return toggle abilities back to client interaction state
+      document.getElementById("cond1").checked = false;
+      document.getElementById("cond2").checked = false;
+      document.getElementById("cond3").checked = false;
+      document.getElementById("cond1").disabled = false;
+      document.getElementById("cond2").disabled = false;
+      document.getElementById("cond3").disabled = false;
+      
       ctrlBtn.innerText = currentDict.btnUp;
       ctrlBtn.className = "action-btn upload-style";
       ctrlBtn.disabled = true;
       isUploaded = false;
+      validateLiveInput();
     }
   }
 }
