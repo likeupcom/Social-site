@@ -304,6 +304,12 @@ function auth(req, res, next) {
   }
 }
 
+/* ---------- LINKING THE EXTERNAL PAGE.JS ROUTER ROUTE EXTENSION ---------- */
+// Placed here so specific page.js endpoints process before wildcards drop through
+const otherPagesRouter = require("./page.js");
+app.use("/", otherPagesRouter);
+/* ------------------------------------------------------------------------- */
+
 /* ---------------- DYNAMIC WORKSPACE FILE ROUTER ---------------- */
 app.get("/:page.html", auth, (req, res) => {
   const allowedPages = ["youtube", "tiktok", "instagram", "facebook"];
