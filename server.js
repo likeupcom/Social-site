@@ -16,7 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "ns-platform-super-secret-key";
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
-    "default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob:; style-src * 'unsafe-inline';"
+    "default-src 'self' *.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.com; connect-src 'self' *.com; img-src 'self' data: blob: *.com; style-src 'self' 'unsafe-inline' *.com;"
   );
   next();
 });
