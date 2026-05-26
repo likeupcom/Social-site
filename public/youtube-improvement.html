@@ -3,171 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NS Platform - YouTube Booster</title>
+    <title>NS Platform - YouTube Acceleration</title>
     <style>
-        /* Base Reset & Core Theme */
+        /* Modern Glassmorphism & Neon Accent Reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background: #0a0a12;
-            color: #ffffff;
+            background: #0a0a0f;
+            color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(255, 0, 127, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 255, 255, 0.05) 0px, transparent 50%);
         }
 
-        /* Glassmorphic Utilities */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        /* Layout Framework */
-        .app-container {
-            max-width: 1400px;
+        .container {
+            max-width: 1300px;
             margin: 0 auto;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
         }
 
-        /* Global Header Dashboard */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 0, 127, 0.2);
-            padding-bottom: 15px;
+        /* Glassmorphism Master Panel Template */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
 
-        .brand h1 {
-            font-size: 24px;
-            font-weight: 800;
-            background: linear-gradient(45deg, #00ffff, #ff007f);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: 1px;
-        }
-
-        .lang-switch-panel button {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .lang-switch-panel button:hover {
-            background: rgba(0, 255, 255, 0.2);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
-        }
-
-        /* Global Aggregations Matrix Row */
-        .metrics-summary-grid {
+        /* Top 4x1 Statistics Dashboard Bar */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
+            gap: 20px;
+            margin-bottom: 24px;
         }
 
-        .metric-card {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+        .stat-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
         }
 
-        .metric-card .icon-space {
-            font-size: 28px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.02);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 255, 255, 0.2);
         }
 
-        .metric-card h4 {
+        .stat-card h4 {
             font-size: 12px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .metric-card p {
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            margin-top: 2px;
-        }
-
-        /* VIP Tier System Sub-Grid */
-        .vip-booster-section {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .vip-title-bar {
-            font-size: 14px;
-            font-weight: 700;
-            color: #ff007f;
             text-transform: uppercase;
             letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        /* Split-Wing Structure Layout (VIP Left & Right Wings) */
+        .wings-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .wings-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .wing-title {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .vip-wings-wrapper {
+        /* 2x2 Absolute Grid Specification for Main Boards */
+        .grid-2x2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        @media (max-width: 768px) {
-            .vip-wings-wrapper {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .wing-column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Acceleration Core Matrix (Strict 2x2 Grid) */
-        .board-headline {
-            font-size: 14px;
-            font-weight: 700;
-            color: #00ffff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .acceleration-matrix-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: auto auto;
             gap: 20px;
         }
 
-        @media (max-width: 768px) {
-            .acceleration-matrix-grid {
+        @media (max-width: 650px) {
+            .grid-2x2 {
                 grid-template-columns: 1fr;
             }
         }
@@ -175,384 +120,242 @@
         .board-card {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 20px;
+            min-height: 125px;
             position: relative;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.2s ease-in-out;
         }
 
         .board-card.active-target {
-            border-color: #00ffff;
-            background: rgba(0, 255, 255, 0.02);
+            border: 1px solid #00ffff;
             box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+            background: rgba(0, 255, 255, 0.01);
         }
 
-        .metric-badge-row {
+        /* Layout Pipeline Core Control Center Wrapper */
+        .control-layout {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .badge-node {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            color: #ccc;
-        }
-
-        .badge-icon {
-            font-size: 14px;
-        }
-
-        /* Action Controls Layout Split */
-        .workspace-split-layout {
-            display: grid;
-            grid-template-columns: 1.2fr 0.8fr;
+            grid-template-columns: 1.81fr 1.19fr;
             gap: 24px;
         }
 
-        @media (max-width: 992px) {
-            .workspace-split-layout {
+        @media (max-width: 950px) {
+            .control-layout {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* Upload Matrix System Elements */
-        .input-pipeline-group {
+        /* Forms, Buttons and Interactive States */
+        .input-group {
             display: flex;
             gap: 12px;
-            margin-top: 15px;
+            margin-top: 12px;
         }
 
-        .input-pipeline-group input {
+        .neon-input {
             flex: 1;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 12px 16px;
+            padding: 14px 16px;
+            border-radius: 6px;
             color: #fff;
             font-size: 14px;
             outline: none;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.2s;
         }
 
-        .input-pipeline-group input:focus {
+        .neon-input:focus {
             border-color: #ff007f;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.1);
         }
 
-        /* Generic System Interactive Actions */
         .action-btn {
-            background: linear-gradient(45deg, #ff007f, #7f00ff);
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.1s, opacity 0.2s;
         }
 
-        .action-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 0, 127, 0.4);
+        .action-btn:active {
+            transform: scale(0.98);
         }
 
-        .action-btn:disabled {
-            background: #222;
-            color: #555;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* Queue Structure Framework */
-        .queue-scroller-box {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        /* Queue Scrolling Configurations */
+        .queue-scroll-box {
             max-height: 380px;
             overflow-y: auto;
-            margin-top: 15px;
-            padding-right: 5px;
+            list-style: none;
+            padding-right: 4px;
         }
 
-        .queue-scroller-box::-webkit-scrollbar {
-            width: 6px;
+        .queue-scroll-box::-webkit-scrollbar {
+            width: 5px;
         }
 
-        .queue-scroller-box::-webkit-scrollbar-thumb {
+        .queue-scroll-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .queue-scroll-box::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
+            border-radius: 10px;
         }
 
-        .queue-item {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Verification Phase Screen Overlay */
-        .overlay {
+        .appearing-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(5, 5, 10, 0.95);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 8, 0.98);
+            z-index: 10000;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-        }
-
-        .lockout-box {
-            max-width: 500px;
-            width: 90%;
             text-align: center;
-            border-color: rgba(255, 0, 127, 0.3);
-            box-shadow: 0 0 30px rgba(255, 0, 127, 0.2);
         }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <!-- Dynamic Appearing Phase Screen Lock overlay -->
+    <div id="appearingPeriodOverlay" class="appearing-overlay" style="display: none;">
+        <h1 style="color: #00ffff; font-size: 2.5rem; margin-bottom: 15px; letter-spacing: 2px; filter: drop-shadow(0 0 10px rgba(0,255,255,0.4));">APPEARING PERIOD ACTIVE</h1>
+        <p style="color: #888; max-width: 500px; line-height: 1.6; padding: 0 20px;">The platform is currently cycling structural resources. Real-time board calculations are temporarily locked until this window closes.</p>
+    </div>
+
+    <div class="container">
         
-        <header class="glass-panel">
-            <div class="brand">
-                <h1>NS PLATFORM Booster</h1>
+        <!-- Global Telemetry Overview Grid Panel -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4 id="lblTotalViews">Total Distributed Views</h4>
+                <div class="value" id="metricTotalViews">0</div>
             </div>
-            <div class="lang-switch-panel">
-                <button id="toggleLangBtn" onclick="toggleSystemLocalizationLanguage()">EN</button>
+            <div class="stat-card">
+                <h4 id="lblTotalSubs">Total Subscriptions</h4>
+                <div class="value" id="metricTotalSubs">0</div>
             </div>
-        </header>
+            <div class="stat-card">
+                <h4 id="lblTotalLikes">Likes Generated</h4>
+                <div class="value" id="metricTotalLikes">0</div>
+            </div>
+            <div class="stat-card">
+                <h4 id="lblTotalComments">Comments Delivered</h4>
+                <div class="value" id="metricTotalComments">0</div>
+            </div>
+        </div>
 
-        <section class="metrics-summary-grid glass-panel">
-            <div class="metric-card">
-                <div class="icon-space" style="border-color: #00ffff;">👁️</div>
-                <div>
-                    <h4 id="lblTotalViews">Total Views Gathered</h4>
-                    <p id="metricTotalViews">0</p>
-                </div>
+        <!-- Premium VIP Double Wing Layout Matrix -->
+        <div class="wings-wrapper">
+            <div class="glass-panel">
+                <div class="wing-title" style="color: #ff007f;"><span style="text-shadow: 0 0 8px #ff007f;">⚡</span> <span id="lblLeftWing">VIP Left Wing Acceleration</span></div>
+                <div id="vipLeftWing"></div>
             </div>
-            <div class="metric-card">
-                <div class="icon-space" style="border-color: #ff007f;">🔔</div>
-                <div>
-                    <h4 id="lblTotalSubs">Subscribers Driven</h4>
-                    <p id="metricTotalSubs">0</p>
-                </div>
+            <div class="glass-panel">
+                <div class="wing-title" style="color: #ff007f;"><span style="text-shadow: 0 0 8px #ff007f;">⚡</span> <span id="lblRightWing">VIP Right Wing Acceleration</span></div>
+                <div id="vipRightWing"></div>
             </div>
-            <div class="metric-card">
-                <div class="icon-space" style="border-color: #00ffff;">❤️</div>
-                <div>
-                    <h4 id="lblTotalLikes">Total Likes Validated</h4>
-                    <p id="metricTotalLikes">0</p>
-                </div>
-            </div>
-            <div class="metric-card">
-                <div class="icon-space" style="border-color: #ff007f;">💬</div>
-                <div>
-                    <h4 id="lblTotalComments">Feedback Dispatched</h4>
-                    <p id="metricTotalComments">0</p>
-                </div>
-            </div>
-        </section>
+        </div>
 
-        <section class="vip-booster-section">
-            <div class="vip-title-bar">
-                <span>👑</span> <span id="lblVipTitle">VIP Members Acceleration Streams</span>
+        <!-- Central Target Core Sequence Board (2x2 Structure) -->
+        <div class="glass-panel">
+            <div style="font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; color: #00ffff; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+                <span>🎯</span> <span id="lblMainBoardTitle">Main Pipeline Acceleration Deck</span>
             </div>
-            <div class="vip-wings-wrapper">
-                <div class="wing-column" id="vipLeftWing"></div>
-                <div class="wing-column" id="vipRightWing"></div>
-            </div>
-        </section>
+            <div class="grid-2x2" id="mainAccelerationBoard"></div>
+        </div>
 
-        <main>
-            <div class="board-headline">
-                <span>⚡</span> <span id="lblBoardTitle">Active System Acceleration Hub</span>
-            </div>
-            <div class="acceleration-matrix-grid" id="mainAccelerationBoard"></div>
-        </main>
-
-        <div class="workspace-split-layout">
+        <!-- Bottom Execution Panel Grid Matrix split -->
+        <div class="control-layout">
             
-            <div class="glass-panel" style="display: flex; flex-direction: column; gap: 20px;">
-                <div>
-                    <h3 id="lblQueueTitle" style="color: #00ffff; font-size: 16px; font-weight: 700; text-transform: uppercase;">Awaiting Insertion Matrix</h3>
-                    <ul class="queue-scroller-box" id="waitingQueueContainer"></ul>
+            <!-- Left Execution Controls Framework -->
+            <div>
+                <!-- Work verification Interactive Block -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; color: #fff;" id="lblGatewayTitle">Task Verification Hub</h3>
+                    <div id="verificationInteractiveArea" style="min-height: 50px; display: flex; align-items: center; justify-content: center;"></div>
                 </div>
-                
-                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.05);">
-                
-                <div id="complianceGatewayInterfaceBlock">
-                    <h3 id="lblVerificationTitle" style="color: #ff007f; font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Compliance Tracker</h3>
-                    <p id="lblVerificationDesc" style="font-size: 13px; color: #aaa; line-height: 1.5; margin-bottom: 12px;"></p>
-                    <div id="verificationInteractiveArea"></div>
-                </div>
-            </div>
 
-            <div class="glass-panel" style="display: flex; flex-direction: column; gap: 24px;">
-                <div>
-                    <h3 id="lblUploadTitle" style="color: #fff; font-size: 16px; font-weight: 700; text-transform: uppercase;">Inject Asset Link</h3>
-                    <div class="input-pipeline-group">
-                        <input type="text" id="youtubeLinkInput" placeholder="https://www.youtube.com/watch?v=...">
-                        <button class="action-btn" id="submitVideoBtn">SUBMIT</button>
+                <!-- Asset URL Submission Management Interface block -->
+                <div class="glass-panel">
+                    <h3 style="font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #fff;" id="lblUploadTitle">Deploy Video Promotion Asset</h3>
+                    <p style="font-size: 12px; color: #888; margin-top: 4px;" id="lblUploadDesc">Insert your active tracking payload link below. The backend server verifies entry compliance criteria.</p>
+                    <div class="input-group">
+                        <input type="text" class="neon-input" id="youtubeLinkInput" placeholder="https://www.youtube.com/watch?v=...">
+                        <button class="action-btn" id="submitVideoBtn" style="background: #ff007f; color: #fff; padding: 0 24px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 0 15px rgba(255,0,127,0.3);">SUBMIT</button>
                     </div>
-                    <div id="uploadStatusTextPanel" style="margin-top: 10px; font-size: 12px; color: #ff007f; font-weight: bold;"></div>
+                    <div id="uploadStatusTextPanel" style="color: #ff007f; font-size: 12px; margin-top: 8px; font-weight: 500;"></div>
                 </div>
 
-                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.05);">
+                <!-- Structural Guideline Regulations Anchor Box -->
+                <div class="glass-panel" id="rulesAnchorPanel"></div>
+            </div>
 
-                <div id="rulesAnchorPanel" style="font-size: 13px;"></div>
+            <!-- Right Queue Waiting List Pipeline View -->
+            <div class="glass-panel" style="display: flex; flex-direction: column;">
+                <h3 style="font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                    <span id="lblQueueTitle">Waiting Queue Pipeline</span>
+                    <span style="font-size: 11px; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 20px; color: #888; font-weight: normal;" id="queueCounterBox">Pool</span>
+                </h3>
+                <ul class="queue-scroll-box" id="waitingQueueContainer"></ul>
             </div>
 
         </div>
-
     </div>
 
-    <div class="overlay" id="appearingPeriodOverlay" style="display: none;">
-        <div class="glass-panel lockout-box">
-            <h2 id="lblAppearingTitle" style="color: #00ffff;">APPEARING PERIOD ACTIVE</h2>
-            <p id="lblAppearingDesc" style="margin: 20px 0; color: #ccc; line-height: 1.6;">The matrix calculation pipelines are realigning arrays inside the cluster architecture. Interaction functions are temporarily offline.</p>
-        </div>
-    </div>
-
+    <!-- Client-Side Global Storage State Context Definition Mapping Layer -->
     <script>
-        // Global Local Storage Runtime Variables Initialization
+        // Session and authorization contextual pointers
+        const authToken = localStorage.getItem("platformAuthToken") || "DEMO_TOKEN_STREAM";
+        const localUserSessionId = localStorage.getItem("platformUserId") || "USER_NODE_LOCAL_99";
+
+        // Pure Data Representation Arrays
         let activeBoard = [];
         let waitingList = [];
         let vipBoard = [];
-        let systemPhase = "REGULAR_PERIOD";
-        let sequenceIndex = 0;
+        let systemPhase = "REGULAR_PERIOD"; 
+        let sequenceIndex = 0; 
+
         let globalMetrics = { totalViews: 0, totalSubs: 0, totalLikes: 0, totalComments: 0 };
         let userUploadRestriction = { allowed: true, remainingTimeText: "" };
         let userLockoutStatus = { isLockedOut: false, remainingLockoutMs: 0 };
-        
-        let localUserSessionId = "USER_SYSTEM_ID_STUB"; 
-        let authToken = "SESSION_BEARER_STUB"; 
-        let currentLocalizationLanguageCode = "EN";
+
         let executionTimerRunning = false;
 
-        // Multilingual Translation Matrix Dictionary Data Layout
-        const localizationMatrixDictionary = {
-            EN: {
-                totalViews: "Total Views Gathered",
-                totalSubs: "Subscribers Driven",
-                totalLikes: "Total Likes Validated",
-                totalComments: "Feedback Dispatched",
-                vipTitle: "VIP Members Acceleration Streams",
-                boardTitle: "Active System Acceleration Hub",
-                queueTitle: "Awaiting Insertion Matrix",
-                uploadTitle: "Inject Asset Link",
-                submitBtn: "SUBMIT",
-                vipReserved: "Slot Vacant",
-                vipPosition: "Tier Position",
-                visit: "EXPLORE ASSET",
-                locked: "LOCKED AT SEQUENCE",
-                slotVacant: "No Allocated Channel Asset Here",
-                views: "Views",
-                votes: "Appeals Registered",
-                appeal: "REGISTER APPEAL",
-                appealRegistered: "Appeal targeted successfully for",
-                provideUrlErr: "Please drop a verified URL string asset inside the configuration line.",
-                regTitle: "Matrix Compliance Framework Rules",
-                regulationsText: `
-                    <li>You must sequentially complete interactions mapped precisely by the matrix index pointers.</li>
-                    <li>Skipping active node index processing will cause direct account safety suspension measures.</li>
-                    <li>The system is purely reactive. The server brain calculates synchronization metrics.</li>
-                    <li>VIP Slots enjoy continuous priority acceleration processing loops concurrently.</li>
-                `,
-                verificationTitle: "Compliance Verification Core Gateway",
-                verificationDesc: "To maintain entry validation flags inside the routing engine tables, execute your active session targeting cycle safely.",
-                startVerification: "ENGAGE ASSIGNED TARGET NODE",
-                countdownMessage: "Review Asset Data for absolute compliance verification validation rules within: ",
-                confirmTask: "VERIFY SYSTEM INTERACTION SUCCESS",
-                appearingTitle: "APPEARING PHASE COMMENCING",
-                appearingDesc: "The matrix calculation pipelines are realigning arrays inside the cluster architecture. Interaction functions are temporarily offline.",
-                lockoutTitle: "SECURITY ISOLATION ACTIVE",
-                lockoutDesc: "Your platform routing configuration vector was temporarily locked due to validation variance signals.",
-                waitingEmpty: "No channels currently stacked inside the waiting cluster pipelines."
-            },
-            KN: {
-                totalViews: "Inshuro Zose Hamwe Abantu Barebye",
-                totalSubs: "Abafatanyabikorwa Bongeyeho",
-                totalLikes: "Gukunda Kwasuzumwe Kose",
-                totalComments: "Ibitekerezo Byatanzwe",
-                vipTitle: "Ibyerekezo By'Abanyacyubahiro (VIP)",
-                boardTitle: "Imbonerahamwe Nshingwabikorwa Ya Platform",
-                queueTitle: "Urutonde Rw'Abategereje Gushyirwaho",
-                uploadTitle: "Injiza Umuyoboro Wawe Hano",
-                submitBtn: "OHEREZA",
-                vipReserved: "Umwanya Uracyari Mwiza",
-                vipPosition: "Icyiciro Cy'Umwanya",
-                visit: "SURA UMUYOBORO",
-                locked: "IKESHEJWE KURI SEQUENCE",
-                slotVacant: "Nta Muyoboro Uri Kuri Uyu Mwanya",
-                views: "Kureba",
-                votes: "Gusaba Inkunga",
-                appeal: "SABA INKUNGA",
-                appealRegistered: "Gusaba inkunga kwakirwe neza kuri",
-                provideUrlErr: "Ugomba gushyiramo umuyoboro wemewe hano.",
-                regTitle: "Amategeko Agenga Imikorere Y'Ikoranabuhanga",
-                regulationsText: `
-                    <li>Ugomba gukurikiza neza urukurikirane rw'imiyoboro uko ruteganyijwe.</li>
-                    <li>Gusimbuka umuyoboro uriho ubu bishobora guhagarika konti yawe mu buryo bw'umutekano.</li>
-                    <li>Iri koranabuhanga riyoborwa n'ubwonko bwa server; hano nta mibare ihabarirwa.</li>
-                    <li>Imyanya y'abanyacyubahiro (VIP) ihora ihabwa amahirwe yo kwihuta imbere y'indi.</li>
-                `,
-                verificationTitle: "Ihuriro Ryo Kwemeza Ubudahemuka",
-                verificationDesc: "Kugira ngo ukomeze kugira uburenganzira bwo gukoresha sisitemu, kora igikorwa cyo gusura umuyoboro uriho ubu.",
-                startVerification: "TANGIRA GUSURA UMUYOBORO",
-                countdownMessage: "Guma ku muyoboro kandi usuzume amategeko yose mu gihe kingana na: ",
-                confirmTask: "EMEZA KO WAKOZE IGIKORWA NEZA",
-                appearingTitle: "IGIHE CYO GUHINDURA MATRIX KURI LIVE",
-                appearingDesc: "Uburyo bwo kubara no guhuza amadosiye buri gukorwa na server runaka. Ibikorwa byose bihagaritswe by'agateganyo.",
-                lockoutTitle: "UMUTEKANO WAKAZIWE KURI KONTI YAWE",
-                lockoutDesc: "Konti yawe yafunzwe by'agateganyo kubera kutanyura mu nzego z'isuzuma neza.",
-                waitingEmpty: "Nta miyoboro iri ku rutonde rwo gutegereza muri uyu mwanya."
-            }
+        // Static Internationalization Mapping System for UI Injection
+        const activeDictionary = {
+            startVerification: "TANGIRA LIYENZAKORWA / START VERIFICATION",
+            confirmTask: "EMEZA UMURIMO / CONFIRM SYSTEM TASK",
+            countdownMessage: "LINDA GUKOMENYA / RETENTION TIMEOUT:",
+            lockoutTitle: "AMATEGEKO YANZE / ACCESS SUSPENDED",
+            lockoutDesc: "Your verification access has been restricted due to multiple processing pipeline integrity failures detected by the database brain.",
+            regTitle: "AMATEGEKO NGENDERWAKO / OPERATIONAL RULES",
+            regulationsText: `
+                <li>You must completely review the channel video presented by the active targeting indicator before clicking complete.</li>
+                <li>Falsifying validation logs triggers absolute backend server lockout security actions immediately.</li>
+                <li>VIP allocations receive isolated tracking streams across left and right acceleration decks.</li>
+            `,
+            vipReserved: "VIP Slot Vacant",
+            vipPosition: "Deck Wing Space",
+            visit: "REBA / VISIT",
+            locked: "FUNZE / LOCKED",
+            slotVacant: "Empty Board Allocation Space",
+            waitingEmpty: "No channels currently holding inside queue pipelines.",
+            votes: "Appeals",
+            appeal: "Emeza / Appeal",
+            appealRegistered: "Appeal registered for",
+            provideUrlErr: "Please supply an authentic URL target payload."
         };
 
-        let activeDictionary = localizationMatrixDictionary[currentLocalizationLanguageCode];
-
-        function toggleSystemLocalizationLanguage() {
-            currentLocalizationLanguageCode = (currentLocalizationLanguageCode === "EN") ? "KN" : "EN";
-            document.getElementById("toggleLangBtn").innerText = currentLocalizationLanguageCode;
-            applyDynamicLocalization();
-            buildRegulationsPanel();
-            processPipelineCycle();
-        }
-
+        // Inject localization labels into the shell layout elements
         function applyDynamicLocalization() {
-            activeDictionary = localizationMatrixDictionary[currentLocalizationLanguageCode];
-            
-            document.getElementById("lblTotalViews").innerText = activeDictionary.totalViews;
-            document.getElementById("lblTotalSubs").innerText = activeDictionary.totalSubs;
-            document.getElementById("lblTotalLikes").innerText = activeDictionary.totalLikes;
-            document.getElementById("lblTotalComments").innerText = activeDictionary.totalComments;
-            document.getElementById("lblVipTitle").innerText = activeDictionary.vipTitle;
-            document.getElementById("lblBoardTitle").innerText = activeDictionary.boardTitle;
-            document.getElementById("lblQueueTitle").innerText = activeDictionary.queueTitle;
-            document.getElementById("lblUploadTitle").innerText = activeDictionary.uploadTitle;
-            document.getElementById("submitVideoBtn").innerText = activeDictionary.submitBtn;
-            document.getElementById("lblVerificationTitle").innerText = activeDictionary.verificationTitle;
-            document.getElementById("lblVerificationDesc").innerText = activeDictionary.verificationDesc;
-            document.getElementById("lblAppearingTitle").innerText = activeDictionary.appearingTitle;
-            document.getElementById("lblAppearingDesc").innerText = activeDictionary.appearingDesc;
+            document.getElementById("lblTotalViews").innerText = activeDictionary.regTitle ? "Total Distributed Views" : "";
+            document.getElementById("lblMainBoardTitle").innerText = "Main Pipeline Acceleration Deck";
+            document.getElementById("lblLeftWing").innerText = "VIP Left Wing Acceleration";
+            document.getElementById("lblRightWing").innerText = "VIP Right Wing Acceleration";
+            document.getElementById("lblGatewayTitle").innerText = "Task Verification Hub";
+            document.getElementById("lblUploadTitle").innerText = "Deploy Video Promotion Asset";
+            document.getElementById("lblQueueTitle").innerText = "Waiting Queue Pipeline";
         }
 
+        // Update metric counters on the display dashboard
         function updateMetricsDisplayPanel() {
             document.getElementById("metricTotalViews").innerText = globalMetrics.totalViews;
             document.getElementById("metricTotalSubs").innerText = globalMetrics.totalSubs;
@@ -560,26 +363,30 @@
             document.getElementById("metricTotalComments").innerText = globalMetrics.totalComments;
         }
 
+        // Toggle state of the input submission box according to rules dispatched from backend brain
         function updateUploadPanelState() {
             const inputElement = document.getElementById("youtubeLinkInput");
             const btnElement = document.getElementById("submitVideoBtn");
             const textPanel = document.getElementById("uploadStatusTextPanel");
 
-            if (userUploadRestriction.allowed) {
+            if (userUploadRestriction && userUploadRestriction.allowed) {
                 inputElement.removeAttribute("disabled");
                 btnElement.removeAttribute("disabled");
                 textPanel.innerText = "";
             } else {
                 inputElement.setAttribute("disabled", "true");
                 btnElement.setAttribute("disabled", "true");
-                textPanel.innerText = userUploadRestriction.remainingTimeText;
+                textPanel.innerText = userUploadRestriction ? userUploadRestriction.remainingTimeText : "";
             }
         }
 
+        // Setup the centralized verification action gateway box
         function instantiateComplianceGateway() {
             const container = document.getElementById("verificationInteractiveArea");
+            if (!container) return;
+
             container.innerHTML = `
-                <button class="action-btn" id="triggerGateFlowBtn" style="width: 100%; border-radius: 6px; background: linear-gradient(45deg, #ff007f, #00ffff);">
+                <button class="action-btn" id="triggerGateFlowBtn" style="width: 100%; border-radius: 6px; background: linear-gradient(45deg, #ff007f, #00ffff); font-weight: bold; color: #fff; border: none; cursor: pointer; padding: 12px;">
                     ${activeDictionary.startVerification}
                 </button>
             `;
@@ -589,6 +396,7 @@
                 let activeType = null;
                 let trackingIndex = 0;
 
+                // Absolute pointer alignment strictly calculated by sequenceIndex from DB
                 if (sequenceIndex < 4) {
                     const slot = vipBoard[sequenceIndex];
                     if (slot && !slot.isEmptySlot) {
@@ -612,13 +420,14 @@
                 window.open(activeTargetUrl, '_blank');
 
                 let totalSecondsCountdown = 10;
-                container.innerHTML = `<div style="font-size: 14px; color: #00ffff; font-weight: bold;" id="gateTickerBox"></div>`;
+                container.innerHTML = `<div style="font-size: 14px; color: #00ffff; font-weight: bold; text-align: center; padding: 10px;" id="gateTickerBox"></div>`;
                 
                 const tickerRoutine = setInterval(() => {
+                    const tickerBox = document.getElementById("gateTickerBox");
                     if (totalSecondsCountdown <= 0) {
                         clearInterval(tickerRoutine);
                         container.innerHTML = `
-                            <button class="action-btn" id="commitVerificationFinalBtn" style="width: 100%; background: #00ffff; color: #000;">
+                            <button class="action-btn" id="commitVerificationFinalBtn" style="width: 100%; background: #00ffff; color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; padding: 12px; box-shadow: 0 0 15px rgba(0,255,255,0.6);">
                                 ${activeDictionary.confirmTask}
                             </button>
                         `;
@@ -628,13 +437,16 @@
                             await sendInteractionTrackRecord(activeType, trackingIndex);
                         });
                     } else {
-                        document.getElementById("gateTickerBox").innerText = `${activeDictionary.countdownMessage} ${totalSecondsCountdown}s`;
+                        if (tickerBox) {
+                            tickerBox.innerText = `${activeDictionary.countdownMessage} ${totalSecondsCountdown}s`;
+                        }
                         totalSecondsCountdown--;
                     }
                 }, 1000);
             });
         }
 
+        // Auxiliary context countdown execution timer
         function runVerificationTimer(buttonElement, linkUrl, successCallbackAsync) {
             executionTimerRunning = true;
             window.open(linkUrl, '_blank');
@@ -654,6 +466,7 @@
             }, 1000);
         }
 
+        // Pull pristine global data representations directly from the live database
         async function synchroniseWithLiveDatabase() {
             try {
                 const response = await fetch('/api/state', {
@@ -673,30 +486,38 @@
                     return true;
                 }
             } catch (error) {
-                console.error("Backend state down or unavailable.");
+                console.error("Backend server state down or unavailable mapping streaming layers.");
             }
             return false;
         }
 
+        // Pipeline layout flow engine cycle
+        let lockoutTimerRegistered = false; 
         async function processPipelineCycle() {
             if (executionTimerRunning) return;
 
             const synced = await synchroniseWithLiveDatabase();
             if (!synced) return;
 
-            // Render absolute phase configurations governed entirely by backend brain
+            // Strict evaluation governed entirely by backend data payload parameters
             if (userLockoutStatus.isLockedOut) {
-                renderLockoutInterfaceScreen(userLockoutStatus.remainingLockoutMs);
+                if (!lockoutTimerRegistered) {
+                    renderLockoutInterfaceScreen(userLockoutStatus.remainingLockoutMs);
+                }
                 return;
             }
 
-            if (systemPhase === "APPEARING_PERIOD") {
-                document.getElementById("appearingPeriodOverlay").style.display = "flex";
-                return;
-            } else {
-                document.getElementById("appearingPeriodOverlay").style.display = "none";
+            const appearingOverlay = document.getElementById("appearingPeriodOverlay");
+            if (appearingOverlay) {
+                if (systemPhase === "APPEARING_PERIOD") {
+                    appearingOverlay.style.display = "flex";
+                    return;
+                } else {
+                    appearingOverlay.style.display = "none";
+                }
             }
 
+            // Normal structural interface tree rendering routines
             renderVIPSpaces();
             renderActiveBoard();
             renderWaitingList();
@@ -704,13 +525,15 @@
             updateUploadPanelState();
         }
 
+        // Draw lockout blocking wall if strict safety restrictions trigger on backend
         function renderLockoutInterfaceScreen(remainingMs) {
+            lockoutTimerRegistered = true;
             document.body.innerHTML = `
-                <div class="overlay">
-                    <div class="glass-panel lockout-box">
-                        <h2 style="color: #ff007f;">${activeDictionary.lockoutTitle}</h2>
-                        <p style="margin: 20px 0; color: #ccc; line-height: 1.6;">${activeDictionary.lockoutDesc}</p>
-                        <div id="countdownTimerBox" style="font-size: 28px; font-weight: bold; color: #00ffff; margin-top: 20px;">
+                <div class="overlay" style="position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(10,10,14,0.95); display: flex; justify-content: center; align-items: center; z-index: 99999;">
+                    <div class="glass-panel lockout-box" style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid #ff007f; padding: 40px; border-radius: 12px; text-align: center; max-width: 450px; box-shadow: 0 0 30px rgba(255, 0, 127, 0.25);">
+                        <h2 style="color: #ff007f; margin-bottom: 15px; font-weight: 800; letter-spacing: 1px;">${activeDictionary.lockoutTitle}</h2>
+                        <p style="margin: 20px 0; color: #ccc; line-height: 1.6; font-size: 14px;">${activeDictionary.lockoutDesc}</p>
+                        <div id="countdownTimerBox" style="font-size: 32px; font-weight: bold; color: #00ffff; margin-top: 20px; text-shadow: 0 0 10px rgba(0, 255, 255, 0.5); letter-spacing: 2px;">
                             --:--:--
                         </div>
                     </div>
@@ -723,87 +546,105 @@
                     clearInterval(liveClockRoutine);
                     window.location.reload();
                 } else {
-                    let hrs = Math.floor(currentDelta / (3600000));
+                    let hrs = Math.floor(currentDelta / 3600000);
                     let mins = Math.floor((currentDelta % 3600000) / 60000);
                     let secs = Math.floor((currentDelta % 60000) / 1000);
-                    document.getElementById("countdownTimerBox").innerText = 
-                        `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    const timerBox = document.getElementById("countdownTimerBox");
+                    if (timerBox) {
+                        timerBox.innerText = 
+                            `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    }
                 }
             }, 1000);
         }
 
+        // Build structural data regulations panel list
         function buildRegulationsPanel() {
             const container = document.getElementById("rulesAnchorPanel");
+            if (!container) return;
             container.innerHTML = `
-                <h3 style="color: #ff007f;">${activeDictionary.regTitle}</h3>
-                <ol style="padding-left: 20px; line-height: 1.8; color: #ddd; margin-top: 10px;">
+                <h3 style="color: #ff007f; font-weight: bold; margin-bottom: 12px;">${activeDictionary.regTitle}</h3>
+                <ol style="padding-left: 20px; line-height: 1.8; color: #ddd; margin-top: 10px; font-size: 13.5px;">
                     ${activeDictionary.regulationsText}
                 </ol>
             `;
         }
 
+        // Build premium VIP slot representations across wings
         function renderVIPSpaces() {
             const leftWing = document.getElementById("vipLeftWing");
             const rightWing = document.getElementById("vipRightWing");
             
+            if (!leftWing || !rightWing) return;
+            
             leftWing.innerHTML = "";
             rightWing.innerHTML = "";
+            
             vipBoard.forEach((slot, index) => {
                 let targetWing = (index < 2) ? leftWing : rightWing;
                 let card = document.createElement("div");
                 card.className = "vip-card";
-                card.style.background = "rgba(255, 255, 255, 0.05)";
-                card.style.backdropFilter = "blur(10px)";
-                card.style.border = "1px solid #ff007f";
+                card.style.background = "rgba(255, 255, 255, 0.02)";
+                card.style.backdropFilter = "blur(12px)";
+                card.style.border = "1px solid rgba(255, 0, 127, 0.35)";
                 card.style.borderRadius = "8px";
-                card.style.padding = "15px";
+                card.style.padding = "16px";
                 card.style.display = "flex";
                 card.style.justifyContent = "space-between";
                 card.style.alignItems = "center";
-                card.style.boxShadow = "0 0 10px rgba(255, 0, 127, 0.2)";
+                card.style.marginBottom = "12px";
+                card.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.2)";
 
                 if (slot.isEmptySlot) {
                     card.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px; color: #888;">
+                        <div style="display: flex; align-items: center; gap: 12px; color: #666;">
                             <span style="font-size: 24px;">👤</span>
                             <div>
-                                <div style="font-weight: bold; color: #ff007f;">${activeDictionary.vipReserved}</div>
-                                <div style="font-size: 12px;">${activeDictionary.vipPosition}: ${slot.slotPosition.toUpperCase()}</div>
+                                <div style="font-weight: bold; color: rgba(255, 0, 127, 0.6);">${activeDictionary.vipReserved}</div>
+                                <div style="font-size: 11px; opacity: 0.7;">${activeDictionary.vipPosition}: ${slot.slotPosition ? slot.slotPosition.toUpperCase() : index}</div>
                             </div>
                         </div>
-                        <button disabled style="background: #333; color: #666; border: none; padding: 8px 16px; border-radius: 4px; cursor: not-allowed;">${activeDictionary.visit}</button>
+                        <button disabled style="background: #1a1a24; color: #444; border: 1px solid #2d2d3d; padding: 6px 14px; border-radius: 4px; cursor: not-allowed; font-size: 12px;">${activeDictionary.visit}</button>
                     `;
                 } else {
                     let isCurrentTarget = (sequenceIndex === index);
                     let displayClicks = slot.clicks || 0;
+                    card.style.border = isCurrentTarget ? "1px solid #ff007f" : "1px solid rgba(255, 0, 127, 0.35)";
+                    if (isCurrentTarget) {
+                        card.style.boxShadow = "0 0 15px rgba(255, 0, 127, 0.3)";
+                        card.style.background = "rgba(255, 0, 127, 0.04)";
+                    }
+
                     card.innerHTML = `
-                        <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
-                            <span style="font-size: 24px; color: #00ffff; filter: drop-shadow(0 0 5px #00ffff);">👑</span>
-                            <div style="width: 100%;">
-                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${slot.username || slot.channelTitle}</div>
+                        <div style="display: flex; align-items: center; gap: 12px; width: 68%;">
+                            <span style="font-size: 24px; color: #00ffff; filter: drop-shadow(0 0 5px rgba(0,255,255,0.6));">👑</span>
+                            <div style="width: 100%; overflow: hidden;">
+                                <div style="font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14.5px;">${slot.username || slot.channelTitle}</div>
                                 <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px;">
-                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} ${activeDictionary.views.toLowerCase()}</span>
-                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} sub</span>
-                                    <span style="font-size: 10px; background: rgba(0,255,255,0.1); color: #00ffff; padding: 2px 4px; border-radius: 3px;">${displayClicks} like</span>
-                                    <span style="font-size: 10px; background: rgba(255,0,127,0.1); color: #ff007f; padding: 2px 4px; border-radius: 3px;">${displayClicks} com</span>
+                                    <span style="font-size: 9px; background: rgba(0,255,255,0.08); color: #00ffff; padding: 2px 5px; border-radius: 3px; border: 1px solid rgba(0,255,255,0.15);">${displayClicks} ${activeDictionary.views.toLowerCase()}</span>
+                                    <span style="font-size: 9px; background: rgba(255,0,127,0.08); color: #ff007f; padding: 2px 5px; border-radius: 3px; border: 1px solid rgba(255,0,127,0.15);">sub</span>
+                                    <span style="font-size: 9px; background: rgba(0,255,255,0.08); color: #00ffff; padding: 2px 5px; border-radius: 3px; border: 1px solid rgba(0,255,255,0.15);">like</span>
+                                    <span style="font-size: 9px; background: rgba(255,0,127,0.08); color: #ff007f; padding: 2px 5px; border-radius: 3px; border: 1px solid rgba(255,0,127,0.15);">com</span>
                                 </div>
                             </div>
                         </div>
                         <button class="action-btn vip-action-btn" style="
-                            background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : '#222'};
+                            background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : '#161622'};
                             color: #fff;
-                            border: ${isCurrentTarget ? 'none' : '1px solid #ff007f'};
-                            padding: 8px 16px;
+                            font-weight: bold;
+                            font-size: 12px;
+                            border: ${isCurrentTarget ? 'none' : '1px solid rgba(255,0,127,0.4)'};
+                            padding: 8px 14px;
                             border-radius: 4px;
-                            box-shadow: ${isCurrentTarget ? '0 0 10px rgba(255,0,127,0.5)' : 'none'};
                             cursor: ${isCurrentTarget ? 'pointer' : 'default'};
-                            opacity: ${isCurrentTarget ? '1' : '0.4'};
+                            opacity: ${isCurrentTarget ? '1' : '0.35'};
+                            box-shadow: ${isCurrentTarget ? '0 0 10px rgba(255,0,127,0.4)' : 'none'};
                         ">${isCurrentTarget ? activeDictionary.visit : activeDictionary.locked}</button>
                     `;
-                    const actionBtn = card.querySelector(".vip-action-btn");
+                    
                     if (isCurrentTarget) {
-                        actionBtn.addEventListener("click", () => {
-                            runVerificationTimer(actionBtn, slot.youtubeLink, async () => {
+                        card.querySelector(".vip-action-btn").addEventListener("click", function() {
+                            runVerificationTimer(this, slot.youtubeLink, async () => {
                                 await sendInteractionTrackRecord('vip', index);
                             });
                         });
@@ -813,58 +654,64 @@
             });
         }
 
+        // Draw structural main layout cards for acceleration system board
         function renderActiveBoard() {
             const boardContainer = document.getElementById("mainAccelerationBoard");
+            if (!boardContainer) return;
             boardContainer.innerHTML = "";
             let vipOffset = 4;
+            
             activeBoard.forEach((slot, index) => {
                 const elementNode = document.createElement("div");
                 elementNode.className = "board-card";
+                
                 if (slot.isEmptySlot) {
                     elementNode.innerHTML = `
-                        <div style="color: #555; text-align: center; padding: 20px 0; display: flex; flex-direction: column; justify-content: center; height: 100%;">
-                            <div style="font-size: 24px;">📭</div>
-                            <div style="font-size: 12px; margin-top: 5px;">${activeDictionary.slotVacant}</div>
+                        <div style="color: #444; text-align: center; padding: 25px 0; display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                            <div style="font-size: 26px; margin-bottom: 4px;">📭</div>
+                            <div style="font-size: 11px; font-weight: 500; color: #666; letter-spacing: 0.5px;">${activeDictionary.slotVacant}</div>
                         </div>
                     `;
                 } else {
                     let absoluteIndex = vipOffset + index;
                     let isCurrentTarget = (sequenceIndex === absoluteIndex);
                     let displayClicks = slot.clicks || 0;
+                    
                     if (isCurrentTarget) {
                         elementNode.className += " active-target";
                     }
+                    
                     elementNode.innerHTML = `
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <div style="display: flex; align-items: center; gap: 10px; width: 65%;">
-                                    <span style="font-size: 28px; color: #00ffff; text-shadow: 0 0 5px rgba(0,255,255,0.4);">👤</span>
-                                    <div style="font-weight: bold; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
+                                    <span style="font-size: 26px; color: #00ffff; text-shadow: 0 0 6px rgba(0,255,255,0.3);">👤</span>
+                                    <div style="font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff;">
                                         ${slot.username || slot.channelTitle}
                                     </div>
                                 </div>
                                 <button class="active-redirect-anchor action-btn" style="
-                                    background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : 'rgba(255,255,255,0.05)'};
-                                    color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px; font-weight: bold;
-                                    border: ${isCurrentTarget ? 'none' : '1px solid rgba(255,255,255,0.1)'};
+                                    background: ${isCurrentTarget ? 'linear-gradient(45deg, #00ffff, #ff007f)' : 'rgba(255,255,255,0.02)'};
+                                    color: #fff; padding: 7px 14px; border-radius: 4px; font-size: 12px; font-weight: bold;
+                                    border: ${isCurrentTarget ? 'none' : '1px solid rgba(255,255,255,0.08)'};
                                     cursor: ${isCurrentTarget ? 'pointer' : 'default'};
-                                    opacity: ${isCurrentTarget ? '1' : '0.4'};
-                                    box-shadow: ${isCurrentTarget ? '0 0 10px rgba(0, 255, 255, 0.4)' : 'none'}
+                                    opacity: ${isCurrentTarget ? '1' : '0.35'};
+                                    box-shadow: ${isCurrentTarget ? '0 0 12px rgba(0, 255, 255, 0.4)' : 'none'}
                                 ">${isCurrentTarget ? activeDictionary.visit : activeDictionary.locked}</button>
                             </div>
                         </div>
                         
-                        <div class="metric-badge-row">
-                            <div class="badge-node"><span class="badge-icon">👁️</span><span>${displayClicks} ${activeDictionary.views.toLowerCase()}</span></div>
-                            <div class="badge-node"><span class="badge-icon">❤️</span><span>${displayClicks} like</span></div>
-                            <div class="badge-node"><span class="badge-icon">🔔</span><span>${displayClicks} sub</span></div>
-                            <div class="badge-node"><span class="badge-icon">💬</span><span>${displayClicks} com</span></div>
+                        <div class="metric-badge-row" style="display: flex; gap: 4px; flex-wrap: wrap;">
+                            <div class="badge-node" style="font-size: 10px; background: rgba(255,255,255,0.03); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); color: #ccc;"><span class="badge-icon" style="margin-right: 3px;">👁️</span><span>${displayClicks}</span></div>
+                            <div class="badge-node" style="font-size: 10px; background: rgba(255,255,255,0.03); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); color: #ccc;"><span class="badge-icon" style="margin-right: 3px;">❤️</span><span>like</span></div>
+                            <div class="badge-node" style="font-size: 10px; background: rgba(255,255,255,0.03); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); color: #ccc;"><span class="badge-icon" style="margin-right: 3px;">🔔</span><span>sub</span></div>
+                            <div class="badge-node" style="font-size: 10px; background: rgba(255,255,255,0.03); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); color: #ccc;"><span class="badge-icon" style="margin-right: 3px;">💬</span><span>com</span></div>
                         </div>
                     `;
-                    const linkButton = elementNode.querySelector(".active-redirect-anchor");
+                    
                     if (isCurrentTarget) {
-                        linkButton.addEventListener("click", () => {
-                            runVerificationTimer(linkButton, slot.youtubeLink, async () => {
+                        elementNode.querySelector(".active-redirect-anchor").addEventListener("click", function() {
+                            runVerificationTimer(this, slot.youtubeLink, async () => {
                                 await sendInteractionTrackRecord('regular', index);
                             });
                         });
@@ -874,34 +721,47 @@
             });
         }
 
+        // Draw and align standard pipeline queue items waiting entry
         function renderWaitingList() {
             const container = document.getElementById("waitingQueueContainer");
+            if (!container) return;
             container.innerHTML = "";
+            
+            // Sync current size metrics dynamically to header counter pill
+            document.getElementById("queueCounterBox").innerText = `${waitingList.length} Channels`;
+
             if (waitingList.length === 0) {
-                container.innerHTML = `<li style="color: #666; padding: 15px; text-align: center;">${activeDictionary.waitingEmpty}</li>`;
+                container.innerHTML = `<li style="color: #555; padding: 20px; text-align: center; font-size: 13.5px; border-radius: 6px; border: 1px dashed rgba(255,255,255,0.05); background: rgba(0,0,0,0.1);">${activeDictionary.waitingEmpty}</li>`;
                 return;
             }
+            
             waitingList.forEach((user, index) => {
                 const li = document.createElement("li");
                 li.className = "queue-item";
+                li.style.background = "rgba(255, 255, 255, 0.01)";
+                li.style.border = "1px solid rgba(255,255,255,0.04)";
+                li.style.padding = "14px";
+                li.style.borderRadius = "6px";
+                li.style.marginBottom = "8px";
+                li.style.display = "flex";
                 
                 li.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <div style="display: flex; align-items: center; gap: 15px; width: 75%;">
-                            <span style="font-size: 32px; color: #888;">👤</span>
-                            <div style="width: 100%;">
-                                <div style="color: #fff; font-weight: bold; font-size: 15px; margin-bottom: 3px;">
+                            <span style="font-size: 28px; color: #555;">👤</span>
+                            <div style="width: 100%; overflow: hidden;">
+                                <div style="color: #fff; font-weight: bold; font-size: 14px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     ${index + 1}. ${user.username || user.channelTitle}
                                 </div>
-                                <div style="color: #00ffff; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8;">
-                                    🔗 ${user.channelLink || 'Channel Link Pre-Uploaded'}
+                                <div style="color: #00ffff; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.75; font-family: monospace;">
+                                    🔗 ${user.channelLink || 'Channel Asset Mapping Dynamic'}
                                 </div>
-                                <div style="color: #ff007f; font-size: 11px; margin-top: 4px; font-weight: bold;">
+                                <div style="color: #ff007f; font-size: 11px; margin-top: 4px; font-weight: bold; letter-spacing: 0.5px;">
                                     ${activeDictionary.votes}: ${user.appearsReceived || 0}/3
                                 </div>
                             </div>
                         </div>
-                        <button class="action-btn appeal-btn" style="padding: 8px 16px; font-size: 13px; border-radius: 4px;" data-user-id="${user.userId}">
+                        <button class="action-btn appeal-btn" style="padding: 6px 12px; font-size: 11.5px; border-radius: 4px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;" data-user-id="${user.userId}">
                             ${activeDictionary.appeal}
                         </button>
                     </div>
@@ -922,7 +782,7 @@
                         alert(data.message || `${activeDictionary.appealRegistered} ${user.username || user.channelTitle}.`);
                         await processPipelineCycle();
                     } catch (e) {
-                        console.error("Error committing backend action stream.");
+                        console.error("Error committing backend execution transaction flow streams.");
                     }
                 });
 
@@ -930,6 +790,7 @@
             });
         }
 
+        // Commit verified metric interaction logs to backend database cluster
         async function sendInteractionTrackRecord(boardType, index) {
             try {
                 const response = await fetch('/api/action/visit-complete', {
@@ -948,12 +809,15 @@
                     await processPipelineCycle();
                 }
             } catch (err) {
-                console.error("Failed to commit conversion metrics to server cluster.", err);
+                console.error("Failed to safely synchronize telemetry validation payload metrics to server cluster.", err);
             }
         }
 
+        // Handle URL asset submissions securely matching backend filter protocols
         document.getElementById("submitVideoBtn").addEventListener("click", async function() {
             const inputField = document.getElementById("youtubeLinkInput");
+            if (!inputField) return;
+            
             const rawUrlValue = inputField.value.trim();
             if (!rawUrlValue) {
                 alert(activeDictionary.provideUrlErr);
@@ -975,23 +839,25 @@
                 
                 const statusResult = await response.json();
                 if (response.ok) {
-                    alert(statusResult.message || "Video Asset committed safely!");
+                    alert(statusResult.message || "Asset pipeline committed safely!");
                     inputField.value = "";
                     await processPipelineCycle();
                 } else {
-                    alert(statusResult.error || "Submission rejected by system verification standard layers.");
+                    alert(statusResult.error || "Submission rejected by pipeline verification middleware layers.");
                 }
             } catch(err) {
-                console.error("Connection stream failed processing link pipeline entry rules.");
+                console.error("Network connection interface broken during link tracking delivery stream layout execution rules.");
             }
         });
 
+        // Initialize user workspace context configurations cleanly on structural content ready
         window.addEventListener("DOMContentLoaded", async () => {
             applyDynamicLocalization(); 
             instantiateComplianceGateway();
             buildRegulationsPanel();
             
             await processPipelineCycle();
+            // Polling interval strictly requests state updates without carrying native structural computations locally
             setInterval(processPipelineCycle, 3000); 
         });
     </script>
