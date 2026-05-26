@@ -139,7 +139,7 @@ router.get("/api/state/sync-youtube", auth, async (req, res) => {
               state.activeBoard[i] = {
                 isEmptySlot: false,
                 username: randomUsers[0].username,
-                channelLink: randomUsers[0].channelLink || "https://youtube.com",
+                channelLink: randomUsers[0].youtubeChannel || "https://youtube.com", // Linked to schema structure
                 youtubeLink: "https://youtube.com",
                 clicks: 0
               };
@@ -268,12 +268,14 @@ router.post("/api/submit-link", auth, async (req, res) => {
     const User = mongoose.model("User");
     const existingUserDoc = await User.findOne({ username: req.user });
 
-    if (!existingUserDoc || !existingUserDoc.channelLink) {
+    // ✅ FIXED BUG HERE: Changed existingUserDoc.channelLink to existingUserDoc.youtubeChannel to match your Mongoose Schema
+    if (!existingUserDoc || !existingUserDoc.youtubeChannel) {
       return res.status(400).json({ error: "No profile channel link registered in database. Please upload it via youtube.html first." });
     }
 
     const cleanInputChannel = cleanYoutubeUrl(channelLink);
-    const cleanDbChannel = cleanYoutubeUrl(existingUserDoc.channelLink);
+    // ✅ FIXED BUG HERE: Changed existingUserDoc.channelLink to existingUserDoc.youtubeChannel to match your Mongoose Schema
+    const cleanDbChannel = cleanYoutubeUrl(existingUserDoc.youtubeChannel);
 
     // Cross-verify matching criteria requirements
     if (cleanInputChannel !== cleanDbChannel) {
