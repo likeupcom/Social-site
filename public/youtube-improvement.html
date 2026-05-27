@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>YouTube Improvement Dashboard</title>
 
-<!-- FontAwesome Icons Clean CDN Link -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
@@ -73,7 +72,7 @@ h1{
   align-items: center;
 }
 
-/* VIP GRID SYSTEM (4 parts: 2 left, 2 right) */
+/* VIP GRID SYSTEM */
 .vip-section {
   margin-bottom: 35px;
 }
@@ -100,7 +99,7 @@ h1{
   align-items: center;
   justify-content: space-between;
   transition: 0.3s;
-  min-height: 80px;
+  min-height: 95px;
 }
 
 .vip-card {
@@ -159,13 +158,27 @@ h1{
   text-overflow: ellipsis;
 }
 
-.click-counter {
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 2px;
+/* METRICS LAYOUT IN THE CARD */
+.metrics-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #94a3b8;
 }
 
-/* REGULAR GRID SYSTEM (10 spaces) */
+.metric-item {
+  background: #0b1220;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* REGULAR GRID SYSTEM */
 .regular-section {
   margin-bottom: 40px;
 }
@@ -265,7 +278,7 @@ h1{
 .upload-form-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   text-align: left;
 }
 
@@ -277,11 +290,11 @@ h1{
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .link-input {
-  flex: 1;
+  width: 100%;
   background: #0b1220;
   border: 1px solid #38bdf8;
   border-radius: 6px;
@@ -406,7 +419,7 @@ h1{
 .success-text { color: #22c55e; }
 .info-text { color: #38bdf8; }
 
-/* USER PRE-UPLOADED PROFILE IDENTITY BADGE */
+/* USER IDENTITY BADGE */
 .user-identity-card {
   background: linear-gradient(135deg, #1e1b4b 0%, #111827 100%);
   border: 1px solid #38bdf8;
@@ -476,12 +489,8 @@ footer{
 <div class="container">
   <h1 id="pageMainTitle">YouTube Improvement Dashboard</h1>
 
-  <!-- USER PRE-UPLOADED CHANNEL MANAGEMENT LAYER (APPEARING PERIOD MECHANICS) -->
-  <div id="preUploadedProfileArea">
-    <!-- Managed via JavaScript state engine tracking active/inactive toggle variables -->
-  </div>
+  <div id="preUploadedProfileArea"></div>
 
-  <!-- VIP PARTNER SECTIONS (4 SPACES) -->
   <div class="vip-section">
     <div class="section-title">
       <span id="vipSectionTitle">VIP Premium Channels (4 slots)</span>
@@ -489,7 +498,6 @@ footer{
     <div class="vip-grid" id="realVipGrid"></div>
   </div>
 
-  <!-- REGULAR SPACES SECTION (10 SPACES) -->
   <div class="regular-section">
     <div class="section-title">
       <span id="regularSectionTitle">Standard Exchange Slots (10 slots)</span>
@@ -497,13 +505,11 @@ footer{
     <div class="regular-grid" id="realRegularGrid"></div>
   </div>
 
-  <!-- LOWER DYNAMIC INTERACTION ZONE -->
   <div class="gateway-box" id="bottomControlZone">
     <button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">📜 Read & Accept Conditions</button>
   </div>
 </div>
 
-<!-- REGULATIONS OVERLAY MODAL -->
 <div class="regulations-overlay" id="rulesModal">
   <div class="regulations-card">
     <h2>Platform Regulations</h2>
@@ -550,7 +556,6 @@ footer{
   </div>
 </footer>
 
-<!-- NAVIGATION PANEL -->
 <div class="bottom-nav">
   <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt">Home</span></a>
   <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt">Services</span></a>
@@ -560,44 +565,62 @@ footer{
 </div>
 
 <script>
-// Mocking the user's pre-registered channel profile state (simulating data before they entered this page)
-let currentUserAccount = {
-  username: "My Personal Channel",
-  channelUrl: "https://youtube.com/c/MyPreUploadedChannel",
-  isAllowedToAppear: true // Becomes true when user is marked inactive at a certain time
-};
-
-// Main Board Dynamic Collections Array Structure
-let vipChannels = [
-  { id: "vip0", username: "Premium Creator Alpha", youtubeChannel: "https://youtube.com/c/AlphaCreator" },
-  { id: "vip1", username: "Elite Tech Reviews", youtubeChannel: "https://youtube.com/c/TechElite" },
-  { id: "vip2", username: "Vlog Matrix VIP", youtubeChannel: "https://youtube.com/c/VlogMatrix" },
-  { id: "vip3", username: "Gaming Master Pro", youtubeChannel: "https://youtube.com/c/GameMaster" }
-];
-
-let regularChannels = [
-  { id: "reg0", username: "Standard User 1", youtubeChannel: "https://youtube.com/c/UserOne", clicks: 0 },
-  { id: "reg1", username: "Standard User 2", youtubeChannel: "https://youtube.com/c/UserTwo", clicks: 4 },
-  { id: "reg2", username: "Standard User 3", youtubeChannel: "https://youtube.com/c/UserThree", clicks: 9 }, // Will drop on 10 clicks
-  { id: "reg3", username: "Standard User 4", youtubeChannel: "https://youtube.com/c/UserFour", clicks: 2 },
-  { id: "reg4", username: "Standard User 5", youtubeChannel: "https://youtube.com/c/UserFive", clicks: 0 },
-  { id: "reg5", username: "Standard User 6", youtubeChannel: "https://youtube.com/c/UserSix", clicks: 7 },
-  { id: "reg6", username: "Standard User 7", youtubeChannel: "https://youtube.com/c/UserSeven", clicks: 1 },
-  { id: "reg7", username: "Standard User 8", youtubeChannel: "https://youtube.com/c/UserEight", clicks: 5 },
-  { id: "reg8", username: "Standard User 9", youtubeChannel: "https://youtube.com/c/UserNine", clicks: 3 },
-  { id: "reg9", username: "Standard User 10", youtubeChannel: "https://youtube.com/c/UserTen", clicks: 0 }
-];
-
-// Backend Queue waiting structure for automated replacements
-let waitingListQueue = [];
-
-// Flow Variables
-let conditionsAccepted = false;
-let sequenceIndex = 0; // Tracks what item index must be visited next sequentially
-let globalTimerActive = false;
+// Structural data mappings for future backend framework injection
+let currentUserAccount = null;
+let vipChannels = [];
+let regularChannels = [];
 let combinedBoardOrder = [];
+let sequenceIndex = 0; 
+let globalTimerActive = false;
+let conditionsAccepted = false;
 
-// Render User Pre-uploaded Profile Header Badge
+// Dynamic parsing utility to cleanse link payloads securely
+function cleanTrackingParameters(urlStr) {
+  try {
+    const url = new URL(urlStr);
+    // Erase search string query parameters (?si=, ?feature=, etc.)
+    url.search = "";
+    return url.toString();
+  } catch (e) {
+    // Basic fallback parsing if URL implementation differs
+    return urlStr.split('?')[0];
+  }
+}
+
+async function fetchDashboardState() {
+  try {
+    // This is prepared to make requests directly to your future Node backend route handlers
+    // const response = await fetch('/api/youtube/state');
+    // const data = await response.json();
+    
+    // Simulating user pre-uploaded data architecture
+    currentUserAccount = {
+      username: "AlphaUser99", // Stored signup handle
+      channelUrl: "https://youtube.com/@AlphaUser99", // Preregistered address
+      isAllowedToAppear: true
+    };
+
+    // Cold start simulation architecture (returns empty placeholder frames if no active users are populated)
+    vipChannels = [
+      { id: "v0", empty: true },
+      { id: "v1", empty: true },
+      { id: "v2", empty: true },
+      { id: "v3", empty: true }
+    ];
+
+    regularChannels = [];
+    for(let i = 0; i < 10; i++) {
+      regularChannels.push({ id: `r${i}`, empty: true });
+    }
+
+    computeBoardSequencing();
+    renderUserIdentityBadge();
+    renderGrids();
+  } catch (err) {
+    console.error("Database tracking error syncing view states:", err);
+  }
+}
+
 function renderUserIdentityBadge() {
   const container = document.getElementById("preUploadedProfileArea");
   if(!currentUserAccount) return;
@@ -607,7 +630,7 @@ function renderUserIdentityBadge() {
       <div class="card-info">
         <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
-          <span class="username-txt">${currentUserAccount.username} <small style="color:#eab308;">(Your Pre-uploaded Channel)</small></span>
+          <span class="username-txt">${currentUserAccount.username} <small style="color:#eab308;">(Signed Identity)</small></span>
           <span class="raw-link-txt">${currentUserAccount.channelUrl.replace("https://", "")}</span>
         </div>
       </div>
@@ -618,7 +641,6 @@ function renderUserIdentityBadge() {
   `;
 }
 
-// Combine all grid slots into a strict array for sequential execution tracking
 function computeBoardSequencing() {
   combinedBoardOrder = [];
   vipChannels.forEach(item => combinedBoardOrder.push({ ...item, type: 'vip' }));
@@ -637,8 +659,7 @@ function renderGrids() {
   });
 
   regularChannels.forEach((item, index) => {
-    // Index adjusted to continue offset from VIP layout sequence count
-    vipOffsetIndex = index + vipChannels.length;
+    const vipOffsetIndex = index + vipChannels.length;
     regularGrid.innerHTML += generateCardHTML(item, vipOffsetIndex, false);
   });
 
@@ -646,19 +667,43 @@ function renderGrids() {
 }
 
 function generateCardHTML(item, sequencePosition, isVip) {
-  const clickDisplay = !isVip ? `<span class="click-counter"><i class="fa-solid fa-mouse-pointer"></i> Clicks: ${item.clicks}/10</span>` : '';
+  if (item.empty) {
+    // Cold start placeholder representation logic: Person avatar, generic title, completely disabled interaction
+    return `
+      <div class="channel-card ${isVip ? 'vip-card' : ''}">
+        <div class="card-info">
+          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="user-details">
+            <span class="username-txt" style="color:#64748b; font-style:italic;">Available Slot</span>
+            <span class="raw-link-txt" style="color:#334155;">Waiting for user interaction...</span>
+          </div>
+        </div>
+        <div>
+          <button class="action-btn visit-style seq-btn" disabled>
+            <span>Visit</span>
+          </button>
+        </div>
+      </div>`;
+  }
+
+  // Active User Card Render Structure
   return `
     <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
       <div class="card-info">
-        <div class="user-avatar"><i class="fa-brands fa-youtube"></i></div>
+        <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
           <span class="username-txt">${item.username}</span>
           <span class="raw-link-txt">${item.youtubeChannel.replace("https://", "")}</span>
-          ${clickDisplay}
+          <div class="metrics-display">
+            <span class="metric-item"><i class="fa-solid fa-eye"></i> Views: ${item.views || 0}</span>
+            <span class="metric-item"><i class="fa-solid fa-bell"></i> Subs: ${item.subs || 0}</span>
+            <span class="metric-item"><i class="fa-solid fa-thumbs-up"></i> Likes: ${item.likes || 0}</span>
+            <span class="metric-item"><i class="fa-solid fa-comment"></i> Comments: ${item.comments || 0}</span>
+          </div>
         </div>
       </div>
       <div id="btn-container-${sequencePosition}">
-        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" onclick="handleSequentialVisit('${item.youtubeChannel}', ${sequencePosition}, '${item.id}', ${!isVip})">
+        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" onclick="handleSequentialVisit('${item.youtubeVideo || item.youtubeChannel}', ${sequencePosition}, '${item.id}')">
           <span>Visit</span>
         </button>
       </div>
@@ -668,9 +713,6 @@ function generateCardHTML(item, sequencePosition, isVip) {
 function syncButtonStates() {
   document.querySelectorAll('.seq-btn').forEach(btn => {
     const currentBtnSeq = parseInt(btn.getAttribute('data-seq'));
-    
-    // Condition 1: Lock if regulations haven't been accepted
-    // Condition 2: Enforce sequential processing order
     if (!conditionsAccepted || currentBtnSeq !== sequenceIndex || globalTimerActive) {
       btn.disabled = true;
     } else {
@@ -679,30 +721,18 @@ function syncButtonStates() {
   });
 }
 
-function handleSequentialVisit(url, sequencePosition, elementId, isRegular) {
+function handleSequentialVisit(url, sequencePosition, elementId) {
   if (globalTimerActive || sequencePosition !== sequenceIndex) return;
 
   window.open(url, '_blank');
   globalTimerActive = true;
   disableAllControls();
 
-  // If visiting a regular space channel, increment target item click counter
-  if (isRegular) {
-    const matchedItem = regularChannels.find(c => c.id === elementId);
-    if (matchedItem) {
-      matchedItem.clicks++;
-      
-      // Automatic removal engine check if clicks reach 10 threshold limit
-      if (matchedItem.clicks >= 10) {
-        setTimeout(() => {
-          processAutomatedSlotPurge(elementId);
-        }, 1000);
-      }
-    }
-  }
+  // Web Socket or API counter integration link targets here
+  // fetch(`/api/youtube/increment-click/${elementId}`, { method: 'POST' });
 
   const container = document.getElementById(`btn-container-${sequencePosition}`);
-  let secondsLeft = 30; // 30-Second requirement override counter rule
+  let secondsLeft = 30;
   container.innerHTML = `<span class="timer-chip">30s</span>`;
 
   const countdown = setInterval(() => {
@@ -715,9 +745,8 @@ function handleSequentialVisit(url, sequencePosition, elementId, isRegular) {
       globalTimerActive = false;
       container.innerHTML = `<span class="success-text" style="font-size:13px;"><i class="fa-solid fa-circle-check"></i> Verified</span>`;
       
-      sequenceIndex++; // Increment to next mandatory slot
+      sequenceIndex++;
       
-      // Evaluation rule check: Did user complete ALL boards?
       if (sequenceIndex >= combinedBoardOrder.length) {
         unlockVideoUploadZone();
       } else {
@@ -727,46 +756,10 @@ function handleSequentialVisit(url, sequencePosition, elementId, isRegular) {
   }, 1000);
 }
 
-// Automatic substitution mechanic for Mongo state logic matching
-function processAutomatedSlotPurge(elementId) {
-  const indexPos = regularChannels.findIndex(c => c.id === elementId);
-  if (indexPos === -1) return;
-
-  if (waitingListQueue.length > 0) {
-    // Dequeue next video link data payload automatically to standard row spot
-    const incomingVideoPayload = waitingListQueue.shift();
-    regularChannels[indexPos] = {
-      id: elementId,
-      username: incomingVideoPayload.user,
-      youtubeChannel: incomingVideoPayload.videoUrl,
-      clicks: 0
-    };
-  } else {
-    // If empty fallback placeholder items cleanly
-    regularChannels[indexPos].clicks = 0;
-    regularChannels[indexPos].username = "Available Slot";
-    regularChannels[indexPos].youtubeChannel = "https://youtube.com";
-  }
-  
-  computeBoardSequencing();
-  renderGrids();
-}
-
 function triggerAppearanceOnBoard() {
   if (!currentUserAccount.isAllowedToAppear) return;
-  
-  // Find an available low-activity index layout row or reset slot to inject profile identity live
-  regularChannels[0] = {
-    id: "reg0",
-    username: currentUserAccount.username + " (Live)",
-    youtubeChannel: currentUserAccount.channelUrl,
-    clicks: 0
-  };
-  
-  currentUserAccount.isAllowedToAppear = false;
-  renderUserIdentityBadge();
-  computeBoardSequencing();
-  renderGrids();
+  // Endpoint connection logic mapping placeholder
+  console.log("Notifying system matrix of presentation shift initialization.");
 }
 
 function disableAllControls() {
@@ -796,9 +789,8 @@ function submitAcceptedConditions() {
   conditionsAccepted = true;
   document.getElementById("rulesModal").style.display = "none";
   
-  // Change bottom control context text to inform users of active lock state rules
   const bottomZone = document.getElementById("bottomControlZone");
-  bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Please complete visiting all VIP and Regular board slots sequentially to unlock your Video Upload Form.</p>`;
+  bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Please complete visiting all VIP and Regular board slots sequentially to unlock your Promotion Form.</p>`;
   
   syncButtonStates();
 }
@@ -807,53 +799,71 @@ function unlockVideoUploadZone() {
   const bottomZone = document.getElementById("bottomControlZone");
   bottomZone.innerHTML = `
     <div class="upload-form-container">
-      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> All Visited! Submit Video to MongoDB Queue</h3>
+      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> Promotion Zone Unlocked!</h3>
       <div class="input-group">
-        <input type="url" class="link-input" id="ytVideoInput" placeholder="Paste your target YouTube Video URL here..." required />
-        <button class="submit-link-btn" onclick="processDatabaseVideoCommit()">Upload & Save Video</button>
+        <label style="font-size:13px; color:#94a3b8;">Target YouTube Video Link:</label>
+        <input type="url" class="link-input" id="ytVideoInput" placeholder="https://www.youtube.com/watch?v=..." required />
+        
+        <label style="font-size:13px; color:#94a3b8; margin-top:4px;">Your YouTube Channel Link (Must match pre-registered profile address):</label>
+        <input type="url" class="link-input" id="ytChannelInput" placeholder="https://www.youtube.com/..." required />
+        
+        <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">Submit Promotional Document</button>
       </div>
       <div id="uploadFeedback" class="notify-msg"></div>
     </div>
   `;
 }
 
-// Handles form validation and structures payloads for future MongoDB database schema syncing 
-function processDatabaseVideoCommit() {
+async function processDatabaseVideoCommit() {
   const videoInput = document.getElementById("ytVideoInput");
+  const channelInput = document.getElementById("ytChannelInput");
   const feedback = document.getElementById("uploadFeedback");
-  const videoUrl = videoInput.value.trim();
 
-  if (!videoUrl.includes("youtube.com") && !videoUrl.includes("youtu.be")) {
+  let rawVideoUrl = videoInput.value.trim();
+  let rawChannelUrl = channelInput.value.trim();
+
+  // Basic validation rules checking address layout strings
+  if (!rawVideoUrl.includes("youtube.com") && !rawVideoUrl.includes("youtu.be")) {
     feedback.className = "notify-msg error-text";
     feedback.innerText = "Validation Error: Please submit a valid YouTube video address string.";
     return;
   }
 
+  if (!rawChannelUrl.includes("youtube.com") && !rawChannelUrl.includes("youtu.be")) {
+    feedback.className = "notify-msg error-text";
+    feedback.innerText = "Validation Error: Please submit a valid YouTube channel address string.";
+    return;
+  }
+
+  // Automatic verification requirement parameters cleaning execution step
+  const sanitizedVideoUrl = cleanTrackingParameters(rawVideoUrl);
+  const sanitizedChannelUrl = cleanTrackingParameters(rawChannelUrl);
+  const preregisteredSanitizedChannel = cleanTrackingParameters(currentUserAccount.channelUrl);
+
+  // Absolute enforcement check comparing incoming payload with identity metrics
+  if (sanitizedChannelUrl !== preregisteredSanitizedChannel) {
+    feedback.className = "notify-msg error-text";
+    feedback.innerText = "Critical Security Error: Channel link does not match your pre-registered signup profile link.";
+    return;
+  }
+
   feedback.className = "notify-msg info-text";
-  feedback.innerText = "Establishing MongoDB collection persistence handshake...";
+  feedback.innerText = "Processing link tracking parameters extraction & saving to database collections...";
 
-  // Simulating an asynchronous database fetch commit cycle payload response
+  // Simulated Asynchronous payload dispatch cycle targeting backend logic controllers
   setTimeout(() => {
-    // Pushes dynamically into waiting list structured object reference context
-    waitingListQueue.push({
-      user: "Verified Creator Pool Link",
-      videoUrl: videoUrl
-    });
-
     feedback.className = "notify-msg success-text";
-    feedback.innerText = "Video document successfully saved to MongoDB waiting list collection references!";
+    feedback.innerText = "Links successfully sanitized and documented into MongoDB queue pipelines!";
     videoInput.value = "";
+    channelInput.value = "";
     
-    // Refresh application status counters tracking board variations
-    computeBoardSequencing();
-    renderGrids();
-  }, 1500);
+    // Refresh display structures directly from server models
+    fetchDashboardState();
+  }, 1800);
 }
 
 window.onload = function() {
-  renderUserIdentityBadge();
-  computeBoardSequencing();
-  renderGrids();
+  fetchDashboardState();
 };
 </script>
 </body>
