@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>YouTube Improvement Dashboard</title>
 
-<!-- FontAwesome Icons Clean CDN Link -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
@@ -58,6 +57,34 @@ h1{
   margin-bottom:25px;
   color:#38bdf8;
   text-align: center;
+}
+
+/* APPEALING PERIOD GLOBAL BROADCAST PANEL */
+.appealing-alert-banner {
+  background: linear-gradient(135deg, #7f1d1d 0%, #111827 100%);
+  border: 2px dashed #ef4444;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: pulseGlow 2s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); }
+  100% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+}
+
+.alert-timer-box {
+  background: #ef4444;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 18px;
+  font-family: monospace;
 }
 
 /* SECTION TITLES */
@@ -508,12 +535,20 @@ footer{
 </header>
 
 <div class="container">
+  <div id="appealingPeriodBanner" style="display: none;">
+    <div class="appealing-alert-banner">
+      <div>
+        <h3 style="color:#ef4444; font-size:18px; margin-bottom:4px;"><i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active</h3>
+        <p style="color:#cbd5e1; font-size:13px;">Standard board sequences are locked. Active board operators are executing validation audits on queue nodes.</p>
+      </div>
+      <div class="alert-timer-box" id="appealingCountdown">02:00</div>
+    </div>
+  </div>
+
   <h1 id="pageMainTitle">YouTube Improvement Dashboard</h1>
 
-  <!-- USER PRE-UPLOADED CHANNEL MANAGEMENT LAYER -->
   <div id="preUploadedProfileArea"></div>
 
-  <!-- VIP PARTNER SECTIONS -->
   <div class="vip-section">
     <div class="section-title">
       <span id="vipSectionTitle">VIP Premium Channels (4 slots)</span>
@@ -521,7 +556,6 @@ footer{
     <div class="vip-grid" id="realVipGrid"></div>
   </div>
 
-  <!-- REGULAR SPACES SECTION -->
   <div class="regular-section">
     <div class="section-title">
       <span id="regularSectionTitle">Standard Exchange Slots (10 slots)</span>
@@ -529,7 +563,6 @@ footer{
     <div class="regular-grid" id="realRegularGrid"></div>
   </div>
 
-  <!-- WAITING LIST SECTION -->
   <div class="waiting-section">
     <div class="section-title">
       <span>Queue Line Waiting List</span>
@@ -537,13 +570,11 @@ footer{
     <div class="waiting-list-container" id="realWaitingContainer"></div>
   </div>
 
-  <!-- LOWER DYNAMIC INTERACTION ZONE -->
   <div class="gateway-box" id="bottomControlZone">
     <button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">📜 Read & Accept Conditions</button>
   </div>
 </div>
 
-<!-- REGULATIONS OVERLAY MODAL -->
 <div class="regulations-overlay" id="rulesModal">
   <div class="regulations-card">
     <h2>Platform Regulations</h2>
@@ -590,7 +621,6 @@ footer{
   </div>
 </footer>
 
-<!-- NAVIGATION PANEL -->
 <div class="bottom-nav">
   <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt">Home</span></a>
   <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt">Services</span></a>
@@ -600,7 +630,7 @@ footer{
 </div>
 
 <script>
-// Backend state variables layout maps
+// State architecture driving database rules models
 let currentUserAccount = null;
 let vipChannels = [];
 let regularChannels = [];
@@ -609,6 +639,10 @@ let combinedBoardOrder = [];
 let sequenceIndex = 0; 
 let globalTimerActive = false;
 let conditionsAccepted = false;
+
+// Appealing evaluation state variables
+let isAppealingPeriodActive = false;
+let userIsActiveOnBoard = false; // Evaluated by backend match constraints
 
 function cleanTrackingParameters(urlStr) {
   try {
@@ -622,17 +656,18 @@ function cleanTrackingParameters(urlStr) {
 
 async function fetchDashboardState() {
   try {
-    // Linked to node database routes asynchronously
+    // Linked directly to server database schemas
     // const res = await fetch('/api/youtube/state');
     // const data = await res.json();
     
+    // Simulating user execution logs
     currentUserAccount = {
+      id: "u_curr",
       username: "AlphaUser99",
       channelUrl: "https://youtube.com/@AlphaUser99",
       isAllowedToAppear: false 
     };
 
-    // Cold start simulation mode showing some active spots mixed with placeholders
     vipChannels = [
       { id: "v0", empty: true },
       { id: "v1", empty: true },
@@ -640,52 +675,103 @@ async function fetchDashboardState() {
       { id: "v3", empty: true }
     ];
 
-    // Simulating full slots scenario to branch normal users downstream safely
+    // Simulating full active board counters to test evaluation algorithms
     regularChannels = [
-      { id: "r0", username: "CreatorGuy", youtubeChannel: "https://youtube.com/@CreatorGuy", youtubeVideo: "https://youtube.com/watch?v=vid0", views: 12, subs: 10, likes: 8, comments: 4 },
-      { id: "r1", username: "TechVlog", youtubeChannel: "https://youtube.com/@TechVlog", youtubeVideo: "https://youtube.com/watch?v=vid1", views: 15, subs: 11, likes: 9, comments: 7 },
-      { id: "r2", username: "GamingZone", youtubeChannel: "https://youtube.com/@GamingZone", youtubeVideo: "https://youtube.com/watch?v=vid2", views: 9, subs: 6, likes: 5, comments: 2 },
-      { id: "r3", username: "CookingArt", youtubeChannel: "https://youtube.com/@CookingArt", youtubeVideo: "https://youtube.com/watch?v=vid3", views: 22, subs: 18, likes: 14, comments: 9 },
-      { id: "r4", username: "FitLife", youtubeChannel: "https://youtube.com/@FitLife", youtubeVideo: "https://youtube.com/watch?v=vid4", views: 14, subs: 10, likes: 10, comments: 5 },
-      { id: "r5", username: "TravelPhile", youtubeChannel: "https://youtube.com/@TravelPhile", youtubeVideo: "https://youtube.com/watch?v=vid5", views: 30, subs: 25, likes: 21, comments: 12 },
-      { id: "r6", username: "MusicBeats", youtubeChannel: "https://youtube.com/@MusicBeats", youtubeVideo: "https://youtube.com/watch?v=vid6", views: 45, subs: 40, likes: 38, comments: 20 },
-      { id: "r7", username: "EduTrends", youtubeChannel: "https://youtube.com/@EduTrends", youtubeVideo: "https://youtube.com/watch?v=vid7", views: 8, subs: 7, likes: 4, comments: 1 },
-      { id: "r8", username: "ComedyHub", youtubeChannel: "https://youtube.com/@ComedyHub", youtubeVideo: "https://youtube.com/watch?v=vid8", views: 50, subs: 48, likes: 45, comments: 31 },
-      { id: "r9", username: "DIYCrafts", youtubeChannel: "https://youtube.com/@DIYCrafts", youtubeVideo: "https://youtube.com/watch?v=vid9", views: 17, subs: 12, likes: 11, comments: 6 }
+      { id: "r0", username: "CreatorGuy", youtubeChannel: "https://youtube.com/@CreatorGuy", youtubeVideo: "https://youtube.com/watch?v=vid0", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r1", username: "TechVlog", youtubeChannel: "https://youtube.com/@TechVlog", youtubeVideo: "https://youtube.com/watch?v=vid1", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r2", username: "GamingZone", youtubeChannel: "https://youtube.com/@GamingZone", youtubeVideo: "https://youtube.com/watch?v=vid2", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r3", username: "CookingArt", youtubeChannel: "https://youtube.com/@CookingArt", youtubeVideo: "https://youtube.com/watch?v=vid3", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r4", username: "FitLife", youtubeChannel: "https://youtube.com/@FitLife", youtubeVideo: "https://youtube.com/watch?v=vid4", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r5", username: "TravelPhile", youtubeChannel: "https://youtube.com/@TravelPhile", youtubeVideo: "https://youtube.com/watch?v=vid5", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r6", username: "MusicBeats", youtubeChannel: "https://youtube.com/@MusicBeats", youtubeVideo: "https://youtube.com/watch?v=vid6", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r7", username: "EduTrends", youtubeChannel: "https://youtube.com/@EduTrends", youtubeVideo: "https://youtube.com/watch?v=vid7", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r8", username: "ComedyHub", youtubeChannel: "https://youtube.com/@ComedyHub", youtubeVideo: "https://youtube.com/watch?v=vid8", views: 10, subs: 10, likes: 10, comments: 10 },
+      { id: "r9", username: "DIYCrafts", youtubeChannel: "https://youtube.com/@DIYCrafts", youtubeVideo: "https://youtube.com/watch?v=vid9", views: 10, subs: 10, likes: 10, comments: 10 }
     ];
 
-    // Initial waiting queue layout data model
     waitingListUsers = [
-      { id: "w1", youtubeChannel: "https://youtube.com/@WaitingCreator1" },
-      { id: "w2", youtubeChannel: "https://youtube.com/@WaitingCreator2" }
+      { id: "w1", youtubeChannel: "https://youtube.com/@QueueVlog", appealCount: 0 },
+      { id: "w2", youtubeChannel: "https://youtube.com/@BetaTech", appealCount: 1 },
+      { id: "w3", youtubeChannel: "https://youtube.com/@NovaSound", appealCount: 2 }
     ];
+
+    // Check if ALL active channels on regular spaces hit exactly 10 views
+    const allTenVisitedTenTimes = regularChannels.length === 10 && regularChannels.every(item => item.views >= 10);
+    
+    if (allTenVisitedTenTimes) {
+      triggerAppealingPeriodMatrix();
+    }
 
     computeBoardSequencing();
     renderUserIdentityBadge();
     renderGrids();
     renderWaitingList();
   } catch (err) {
-    console.error("Database link connection error handling state view:", err);
+    console.error("Database tracking loop link synchronization breakdown:", err);
   }
+}
+
+function triggerAppealingPeriodMatrix() {
+  isAppealingPeriodActive = true;
+  document.getElementById("appealingPeriodBanner").style.display = "block";
+  
+  // Security validation checks if current logged identity is one of the 10 active slots on the board
+  userIsActiveOnBoard = regularChannels.some(slot => slot.id === currentUserAccount.id || currentUserAccount.username === "AlphaUser99"); // Mock bypass evaluation flag for validation execution inside ui
+  
+  // Lock down lower upload access panels during transaction window
+  const bottomZone = document.getElementById("bottomControlZone");
+  bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Upload Form Frozen: System is currently executing an Appealing Period cycle.</p>`;
+
+  startAppealingTimer(120); // 2 minutes countdown
+}
+
+function startAppealingTimer(durationSeconds) {
+  let timeLeft = durationSeconds;
+  const display = document.getElementById("appealingCountdown");
+
+  const countdownInterval = setInterval(() => {
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+    display.innerText = `${minutes}:${seconds}`;
+    timeLeft--;
+
+    if (timeLeft < 0) {
+      clearInterval(countdownInterval);
+      executeBoardRevolutionSwap();
+    }
+  }, 1000);
+}
+
+function executeBoardRevolutionSwap() {
+  // Dispatched straight to server clusters to trigger database updates
+  // fetch('/api/youtube/execute-rotation-swap', {method: 'POST'})
+  
+  isAppealingPeriodActive = false;
+  document.getElementById("appealingPeriodBanner").style.display = "none";
+  alert("Appealing period expired! Waiting list candidates have swapped places onto the main display grid.");
+  
+  // Reset fields and fetch structural view frames directly from database models
+  fetchDashboardState();
 }
 
 function renderUserIdentityBadge() {
   const container = document.getElementById("preUploadedProfileArea");
   if(!currentUserAccount) return;
 
-  // If regular grid is full, check logic configuration to switch workflow status
-  const standardGridIsFull = regularChannels.filter(c => !c.empty).length >= 10;
-
   container.innerHTML = `
     <div class="user-identity-card">
       <div class="card-info">
         <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
-          <span class="username-txt">${currentUserAccount.username} <small style="color:#38bdf8;">(Status: Active Session)</small></span>
+          <span class="username-txt">${currentUserAccount.username} <small style="color:#38bdf8;">(Security Node Active)</small></span>
           <span class="raw-link-txt">${currentUserAccount.channelUrl.replace("https://", "")}</span>
         </div>
       </div>
-      <button class="action-btn appear-style" id="appearTriggerBtn" ${currentUserAccount.isAllowedToAppear ? '' : 'disabled'} onclick="triggerAppearanceOnBoard()">
+      <button class="action-btn appear-style" id="appearTriggerBtn" disabled>
         <i class="fa-solid fa-eye"></i> <span>Appear</span>
       </button>
     </div>
@@ -694,7 +780,8 @@ function renderUserIdentityBadge() {
 
 function computeBoardSequencing() {
   combinedBoardOrder = [];
-  // Build clean sequence mapping out empty blocks automatically so skipped blocks cause zero performance drops
+  if (isAppealingPeriodActive) return; // Freeze processing loop tracks
+
   vipChannels.forEach(item => {
     if(!item.empty) combinedBoardOrder.push({ ...item, type: 'vip' });
   });
@@ -714,11 +801,9 @@ function renderGrids() {
     vipGrid.innerHTML += generateCardHTML(item, index, true);
   });
 
-  // Regular channels positioning indices calculated accurately after vip sequence layouts
   let activeVipCount = vipChannels.filter(v => !v.empty).length;
 
   regularChannels.forEach((item, index) => {
-    // Safe sequential positioning index counter fallback assignment logic
     let calculatedPosition = item.empty ? -1 : (activeVipCount + regularChannels.filter((c, i) => i < index && !c.empty).length);
     regularGrid.innerHTML += generateCardHTML(item, calculatedPosition, false);
   });
@@ -745,7 +830,6 @@ function generateCardHTML(item, sequencePosition, isVip) {
       </div>`;
   }
 
-  // Action targets specific uploaded video tracking addresses
   return `
     <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
       <div class="card-info">
@@ -778,18 +862,21 @@ function renderWaitingList() {
     return;
   }
 
-  // Render specifications rule: Person avatar indicator, Raw Channel link only, active context Appeal trigger execution block
   waitingListUsers.forEach(user => {
+    // Determine appeal button permission context based on current status metrics
+    const isAllowedToClickAppeal = isAppealingPeriodActive && userIsActiveOnBoard;
+
     container.innerHTML += `
-      <div class="channel-card" style="border-color: #3b82f6;">
+      <div class="channel-card" style="border-color: #3b82f6;" id="waiting-node-${user.id}">
         <div class="card-info">
           <div class="user-avatar" style="color:#3b82f6; background:rgba(59,130,246,0.1);"><i class="fa-solid fa-user"></i></div>
           <div class="user-details">
             <span class="raw-link-txt" style="font-size:14px; color:#f1f5f9; font-family:monospace;">${user.youtubeChannel}</span>
+            <span style="font-size:11px; color:#ef4444; margin-top:2px; font-weight:bold;"><i class="fa-solid fa-gavel"></i> Appeals Registered: ${user.appealCount || 0} / 3</span>
           </div>
         </div>
         <div>
-          <button class="action-btn appeal-style" onclick="handleDatabaseAppealTrigger('${user.id}')">
+          <button class="action-btn appeal-style" ${isAllowedToClickAppeal ? '' : 'disabled'} onclick="handleDatabaseAppealTrigger('${user.id}')">
             <i class="fa-solid fa-gavel"></i> Appeal
           </button>
         </div>
@@ -799,7 +886,11 @@ function renderWaitingList() {
 }
 
 function syncButtonStates() {
-  // Checks if there are any active slots on the entire layout board
+  if (isAppealingPeriodActive) {
+    document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
+    return;
+  }
+
   if (combinedBoardOrder.length === 0 && conditionsAccepted) {
     unlockVideoUploadZone();
     return;
@@ -816,9 +907,8 @@ function syncButtonStates() {
 }
 
 function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
-  if (globalTimerActive || sequencePosition !== sequenceIndex) return;
+  if (globalTimerActive || sequencePosition !== sequenceIndex || isAppealingPeriodActive) return;
 
-  // Launches target video link straight inside external browse window
   window.open(videoUrl, '_blank');
   globalTimerActive = true;
   disableAllControls();
@@ -848,13 +938,30 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
   }, 1000);
 }
 
-function handleDatabaseAppealTrigger(queueUserId) {
-  alert(`Appeal validation logging fired targets backend element: ${queueUserId}`);
-  // Hooked to endpoint handler pipeline: fetch(`/api/youtube/appeal/${queueUserId}`, {method: 'POST'})
-}
+async function handleDatabaseAppealTrigger(queueUserId) {
+  if (!isAppealingPeriodActive || !userIsActiveOnBoard) return;
 
-function triggerAppearanceOnBoard() {
-  console.log("Push tracking request dispatch signaling data clusters.");
+  try {
+    // Interacts with your future backend endpoint route
+    // const res = await fetch(`/api/youtube/appeal/${queueUserId}`, { method: 'POST' });
+    // const status = await res.json();
+
+    // Frontend simulation of 3-Strike drop + replacement logic constraints
+    const targetUser = waitingListUsers.find(u => u.id === queueUserId);
+    if(targetUser) {
+      targetUser.appealCount++;
+      
+      if(targetUser.appealCount >= 3) {
+        alert("System Notice: Target channel has accumulated 3 appeals. Drop execution triggered. Account placed into a 3-hour lockdown matrix!");
+        // Remove dropped entry immediately
+        waitingListUsers = waitingListUsers.filter(u => u.id !== queueUserId);
+      }
+      
+      renderWaitingList();
+    }
+  } catch (e) {
+    console.error("Failed handling database appeal execution parameters:", e);
+  }
 }
 
 function disableAllControls() {
@@ -886,17 +993,20 @@ function submitAcceptedConditions() {
   
   const bottomZone = document.getElementById("bottomControlZone");
   
-  if (combinedBoardOrder.length === 0) {
-    bottomZone.innerHTML = `<p class="success-text"><i class="fa-solid fa-circle-check"></i> Board is ready for immediate insertion.</p>`;
+  if (isAppealingPeriodActive) {
+    bottomZone.innerHTML = `<p class="error-text"><i class="fa-solid fa-lock"></i> System is currently executing an Appealing Period cycle.</p>`;
+  } else if (combinedBoardOrder.length === 0) {
+    bottomZone.innerHTML = `<p class="success-text"><i class="fa-solid fa-circle-check"></i> Board open for immediate entry placement.</p>`;
     unlockVideoUploadZone();
   } else {
-    bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Please complete visiting all VIP and Regular board slots sequentially to unlock your Promotion Form.</p>`;
+    bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Complete visiting all board slots sequentially to unlock the promotion dashboard forms.</p>`;
   }
   
   syncButtonStates();
 }
 
 function unlockVideoUploadZone() {
+  if(isAppealingPeriodActive) return;
   const bottomZone = document.getElementById("bottomControlZone");
   bottomZone.innerHTML = `
     <div class="upload-form-container">
@@ -905,7 +1015,7 @@ function unlockVideoUploadZone() {
         <label style="font-size:13px; color:#94a3b8;">Target YouTube Video Link:</label>
         <input type="url" class="link-input" id="ytVideoInput" placeholder="https://www.youtube.com/watch?v=..." required />
         
-        <label style="font-size:13px; color:#94a3b8; margin-top:4px;">Your YouTube Channel Link (Must match pre-registered profile address):</label>
+        <label style="font-size:13px; color:#94a3b8; margin-top:4px;">Your YouTube Channel Link:</label>
         <input type="url" class="link-input" id="ytChannelInput" placeholder="https://www.youtube.com/..." required />
         
         <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">Submit Promotional Document</button>
@@ -923,15 +1033,10 @@ async function processDatabaseVideoCommit() {
   let rawVideoUrl = videoInput.value.trim();
   let rawChannelUrl = channelInput.value.trim();
 
-  if (!rawVideoUrl.includes("youtube.com") && !rawVideoUrl.includes("youtu.be")) {
+  if (!rawVideoUrl.includes("youtube.com") && !rawVideoUrl.includes("youtu.be") ||
+      !rawChannelUrl.includes("youtube.com") && !rawChannelUrl.includes("youtu.be")) {
     feedback.className = "notify-msg error-text";
-    feedback.innerText = "Validation Error: Please submit a valid YouTube video address string.";
-    return;
-  }
-
-  if (!rawChannelUrl.includes("youtube.com") && !rawChannelUrl.includes("youtu.be")) {
-    feedback.className = "notify-msg error-text";
-    feedback.innerText = "Validation Error: Please submit a valid YouTube channel address string.";
+    feedback.innerText = "Validation Error: Please submit valid YouTube address parameters.";
     return;
   }
 
@@ -941,20 +1046,18 @@ async function processDatabaseVideoCommit() {
 
   if (sanitizedChannelUrl !== preregisteredSanitizedChannel) {
     feedback.className = "notify-msg error-text";
-    feedback.innerText = "Critical Security Error: Channel link does not match your pre-registered signup profile link.";
+    feedback.innerText = "Security Error: Channel link does not match pre-registered profile metadata.";
     return;
   }
 
   feedback.className = "notify-msg info-text";
-  feedback.innerText = "Processing link tracking parameters extraction & routing to waiting queue handlers...";
+  feedback.innerText = "Processing tracking parameter removal & queueing into database nodes...";
 
   setTimeout(() => {
     feedback.className = "notify-msg success-text";
-    feedback.innerText = "Links successfully documented! You are routed down directly inside the queue line waiting list.";
+    feedback.innerText = "Links successfully documented inside the queue waiting list lines!";
     videoInput.value = "";
     channelInput.value = "";
-    
-    // Refresh structural views directly from mock tracking state parameters
     fetchDashboardState();
   }, 1800);
 }
