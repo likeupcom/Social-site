@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>YouTube Improvement Dashboard</title>
 
+<!-- FontAwesome Icons Clean CDN Link -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
@@ -195,6 +196,17 @@ h1{
   }
 }
 
+/* WAITING LIST SECTION */
+.waiting-section {
+  margin-bottom: 40px;
+}
+
+.waiting-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 /* INTERACTION BUTTONS */
 .action-btn {
   padding: 10px 22px;
@@ -226,6 +238,15 @@ h1{
 
 .appear-style:hover:not(:disabled) {
   background: #ca8a04;
+}
+
+.appeal-style {
+  background: #ef4444;
+  color: #fff;
+}
+
+.appeal-style:hover:not(:disabled) {
+  background: #dc2626;
 }
 
 .action-btn:disabled {
@@ -489,8 +510,10 @@ footer{
 <div class="container">
   <h1 id="pageMainTitle">YouTube Improvement Dashboard</h1>
 
+  <!-- USER PRE-UPLOADED CHANNEL MANAGEMENT LAYER -->
   <div id="preUploadedProfileArea"></div>
 
+  <!-- VIP PARTNER SECTIONS -->
   <div class="vip-section">
     <div class="section-title">
       <span id="vipSectionTitle">VIP Premium Channels (4 slots)</span>
@@ -498,6 +521,7 @@ footer{
     <div class="vip-grid" id="realVipGrid"></div>
   </div>
 
+  <!-- REGULAR SPACES SECTION -->
   <div class="regular-section">
     <div class="section-title">
       <span id="regularSectionTitle">Standard Exchange Slots (10 slots)</span>
@@ -505,11 +529,21 @@ footer{
     <div class="regular-grid" id="realRegularGrid"></div>
   </div>
 
+  <!-- WAITING LIST SECTION -->
+  <div class="waiting-section">
+    <div class="section-title">
+      <span>Queue Line Waiting List</span>
+    </div>
+    <div class="waiting-list-container" id="realWaitingContainer"></div>
+  </div>
+
+  <!-- LOWER DYNAMIC INTERACTION ZONE -->
   <div class="gateway-box" id="bottomControlZone">
     <button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">📜 Read & Accept Conditions</button>
   </div>
 </div>
 
+<!-- REGULATIONS OVERLAY MODAL -->
 <div class="regulations-overlay" id="rulesModal">
   <div class="regulations-card">
     <h2>Platform Regulations</h2>
@@ -556,6 +590,7 @@ footer{
   </div>
 </footer>
 
+<!-- NAVIGATION PANEL -->
 <div class="bottom-nav">
   <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt">Home</span></a>
   <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt">Services</span></a>
@@ -565,42 +600,39 @@ footer{
 </div>
 
 <script>
-// Structural data mappings for future backend framework injection
+// Backend state variables layout maps
 let currentUserAccount = null;
 let vipChannels = [];
 let regularChannels = [];
+let waitingListUsers = [];
 let combinedBoardOrder = [];
 let sequenceIndex = 0; 
 let globalTimerActive = false;
 let conditionsAccepted = false;
 
-// Dynamic parsing utility to cleanse link payloads securely
 function cleanTrackingParameters(urlStr) {
   try {
     const url = new URL(urlStr);
-    // Erase search string query parameters (?si=, ?feature=, etc.)
     url.search = "";
     return url.toString();
   } catch (e) {
-    // Basic fallback parsing if URL implementation differs
     return urlStr.split('?')[0];
   }
 }
 
 async function fetchDashboardState() {
   try {
-    // This is prepared to make requests directly to your future Node backend route handlers
-    // const response = await fetch('/api/youtube/state');
-    // const data = await response.json();
+    // Linked to node database routes asynchronously
+    // const res = await fetch('/api/youtube/state');
+    // const data = await res.json();
     
-    // Simulating user pre-uploaded data architecture
     currentUserAccount = {
-      username: "AlphaUser99", // Stored signup handle
-      channelUrl: "https://youtube.com/@AlphaUser99", // Preregistered address
-      isAllowedToAppear: true
+      username: "AlphaUser99",
+      channelUrl: "https://youtube.com/@AlphaUser99",
+      isAllowedToAppear: false 
     };
 
-    // Cold start simulation architecture (returns empty placeholder frames if no active users are populated)
+    // Cold start simulation mode showing some active spots mixed with placeholders
     vipChannels = [
       { id: "v0", empty: true },
       { id: "v1", empty: true },
@@ -608,16 +640,32 @@ async function fetchDashboardState() {
       { id: "v3", empty: true }
     ];
 
-    regularChannels = [];
-    for(let i = 0; i < 10; i++) {
-      regularChannels.push({ id: `r${i}`, empty: true });
-    }
+    // Simulating full slots scenario to branch normal users downstream safely
+    regularChannels = [
+      { id: "r0", username: "CreatorGuy", youtubeChannel: "https://youtube.com/@CreatorGuy", youtubeVideo: "https://youtube.com/watch?v=vid0", views: 12, subs: 10, likes: 8, comments: 4 },
+      { id: "r1", username: "TechVlog", youtubeChannel: "https://youtube.com/@TechVlog", youtubeVideo: "https://youtube.com/watch?v=vid1", views: 15, subs: 11, likes: 9, comments: 7 },
+      { id: "r2", username: "GamingZone", youtubeChannel: "https://youtube.com/@GamingZone", youtubeVideo: "https://youtube.com/watch?v=vid2", views: 9, subs: 6, likes: 5, comments: 2 },
+      { id: "r3", username: "CookingArt", youtubeChannel: "https://youtube.com/@CookingArt", youtubeVideo: "https://youtube.com/watch?v=vid3", views: 22, subs: 18, likes: 14, comments: 9 },
+      { id: "r4", username: "FitLife", youtubeChannel: "https://youtube.com/@FitLife", youtubeVideo: "https://youtube.com/watch?v=vid4", views: 14, subs: 10, likes: 10, comments: 5 },
+      { id: "r5", username: "TravelPhile", youtubeChannel: "https://youtube.com/@TravelPhile", youtubeVideo: "https://youtube.com/watch?v=vid5", views: 30, subs: 25, likes: 21, comments: 12 },
+      { id: "r6", username: "MusicBeats", youtubeChannel: "https://youtube.com/@MusicBeats", youtubeVideo: "https://youtube.com/watch?v=vid6", views: 45, subs: 40, likes: 38, comments: 20 },
+      { id: "r7", username: "EduTrends", youtubeChannel: "https://youtube.com/@EduTrends", youtubeVideo: "https://youtube.com/watch?v=vid7", views: 8, subs: 7, likes: 4, comments: 1 },
+      { id: "r8", username: "ComedyHub", youtubeChannel: "https://youtube.com/@ComedyHub", youtubeVideo: "https://youtube.com/watch?v=vid8", views: 50, subs: 48, likes: 45, comments: 31 },
+      { id: "r9", username: "DIYCrafts", youtubeChannel: "https://youtube.com/@DIYCrafts", youtubeVideo: "https://youtube.com/watch?v=vid9", views: 17, subs: 12, likes: 11, comments: 6 }
+    ];
+
+    // Initial waiting queue layout data model
+    waitingListUsers = [
+      { id: "w1", youtubeChannel: "https://youtube.com/@WaitingCreator1" },
+      { id: "w2", youtubeChannel: "https://youtube.com/@WaitingCreator2" }
+    ];
 
     computeBoardSequencing();
     renderUserIdentityBadge();
     renderGrids();
+    renderWaitingList();
   } catch (err) {
-    console.error("Database tracking error syncing view states:", err);
+    console.error("Database link connection error handling state view:", err);
   }
 }
 
@@ -625,12 +673,15 @@ function renderUserIdentityBadge() {
   const container = document.getElementById("preUploadedProfileArea");
   if(!currentUserAccount) return;
 
+  // If regular grid is full, check logic configuration to switch workflow status
+  const standardGridIsFull = regularChannels.filter(c => !c.empty).length >= 10;
+
   container.innerHTML = `
     <div class="user-identity-card">
       <div class="card-info">
         <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
-          <span class="username-txt">${currentUserAccount.username} <small style="color:#eab308;">(Signed Identity)</small></span>
+          <span class="username-txt">${currentUserAccount.username} <small style="color:#38bdf8;">(Status: Active Session)</small></span>
           <span class="raw-link-txt">${currentUserAccount.channelUrl.replace("https://", "")}</span>
         </div>
       </div>
@@ -643,8 +694,13 @@ function renderUserIdentityBadge() {
 
 function computeBoardSequencing() {
   combinedBoardOrder = [];
-  vipChannels.forEach(item => combinedBoardOrder.push({ ...item, type: 'vip' }));
-  regularChannels.forEach(item => combinedBoardOrder.push({ ...item, type: 'regular' }));
+  // Build clean sequence mapping out empty blocks automatically so skipped blocks cause zero performance drops
+  vipChannels.forEach(item => {
+    if(!item.empty) combinedBoardOrder.push({ ...item, type: 'vip' });
+  });
+  regularChannels.forEach(item => {
+    if(!item.empty) combinedBoardOrder.push({ ...item, type: 'regular' });
+  });
 }
 
 function renderGrids() {
@@ -658,9 +714,13 @@ function renderGrids() {
     vipGrid.innerHTML += generateCardHTML(item, index, true);
   });
 
+  // Regular channels positioning indices calculated accurately after vip sequence layouts
+  let activeVipCount = vipChannels.filter(v => !v.empty).length;
+
   regularChannels.forEach((item, index) => {
-    const vipOffsetIndex = index + vipChannels.length;
-    regularGrid.innerHTML += generateCardHTML(item, vipOffsetIndex, false);
+    // Safe sequential positioning index counter fallback assignment logic
+    let calculatedPosition = item.empty ? -1 : (activeVipCount + regularChannels.filter((c, i) => i < index && !c.empty).length);
+    regularGrid.innerHTML += generateCardHTML(item, calculatedPosition, false);
   });
 
   syncButtonStates();
@@ -668,7 +728,6 @@ function renderGrids() {
 
 function generateCardHTML(item, sequencePosition, isVip) {
   if (item.empty) {
-    // Cold start placeholder representation logic: Person avatar, generic title, completely disabled interaction
     return `
       <div class="channel-card ${isVip ? 'vip-card' : ''}">
         <div class="card-info">
@@ -686,7 +745,7 @@ function generateCardHTML(item, sequencePosition, isVip) {
       </div>`;
   }
 
-  // Active User Card Render Structure
+  // Action targets specific uploaded video tracking addresses
   return `
     <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
       <div class="card-info">
@@ -703,17 +762,52 @@ function generateCardHTML(item, sequencePosition, isVip) {
         </div>
       </div>
       <div id="btn-container-${sequencePosition}">
-        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" onclick="handleSequentialVisit('${item.youtubeVideo || item.youtubeChannel}', ${sequencePosition}, '${item.id}')">
+        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item.id}')">
           <span>Visit</span>
         </button>
       </div>
     </div>`;
 }
 
+function renderWaitingList() {
+  const container = document.getElementById("realWaitingContainer");
+  container.innerHTML = "";
+
+  if(waitingListUsers.length === 0) {
+    container.innerHTML = `<p style="color:#4b5563; font-style:italic; font-size:14px; text-align:center; padding:15px;">No channels currently holding inside the waiting list queue matrix.</p>`;
+    return;
+  }
+
+  // Render specifications rule: Person avatar indicator, Raw Channel link only, active context Appeal trigger execution block
+  waitingListUsers.forEach(user => {
+    container.innerHTML += `
+      <div class="channel-card" style="border-color: #3b82f6;">
+        <div class="card-info">
+          <div class="user-avatar" style="color:#3b82f6; background:rgba(59,130,246,0.1);"><i class="fa-solid fa-user"></i></div>
+          <div class="user-details">
+            <span class="raw-link-txt" style="font-size:14px; color:#f1f5f9; font-family:monospace;">${user.youtubeChannel}</span>
+          </div>
+        </div>
+        <div>
+          <button class="action-btn appeal-style" onclick="handleDatabaseAppealTrigger('${user.id}')">
+            <i class="fa-solid fa-gavel"></i> Appeal
+          </button>
+        </div>
+      </div>
+    `;
+  });
+}
+
 function syncButtonStates() {
+  // Checks if there are any active slots on the entire layout board
+  if (combinedBoardOrder.length === 0 && conditionsAccepted) {
+    unlockVideoUploadZone();
+    return;
+  }
+
   document.querySelectorAll('.seq-btn').forEach(btn => {
     const currentBtnSeq = parseInt(btn.getAttribute('data-seq'));
-    if (!conditionsAccepted || currentBtnSeq !== sequenceIndex || globalTimerActive) {
+    if (!conditionsAccepted || currentBtnSeq !== sequenceIndex || globalTimerActive || currentBtnSeq === -1) {
       btn.disabled = true;
     } else {
       btn.disabled = false;
@@ -721,15 +815,13 @@ function syncButtonStates() {
   });
 }
 
-function handleSequentialVisit(url, sequencePosition, elementId) {
+function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
   if (globalTimerActive || sequencePosition !== sequenceIndex) return;
 
-  window.open(url, '_blank');
+  // Launches target video link straight inside external browse window
+  window.open(videoUrl, '_blank');
   globalTimerActive = true;
   disableAllControls();
-
-  // Web Socket or API counter integration link targets here
-  // fetch(`/api/youtube/increment-click/${elementId}`, { method: 'POST' });
 
   const container = document.getElementById(`btn-container-${sequencePosition}`);
   let secondsLeft = 30;
@@ -756,10 +848,13 @@ function handleSequentialVisit(url, sequencePosition, elementId) {
   }, 1000);
 }
 
+function handleDatabaseAppealTrigger(queueUserId) {
+  alert(`Appeal validation logging fired targets backend element: ${queueUserId}`);
+  // Hooked to endpoint handler pipeline: fetch(`/api/youtube/appeal/${queueUserId}`, {method: 'POST'})
+}
+
 function triggerAppearanceOnBoard() {
-  if (!currentUserAccount.isAllowedToAppear) return;
-  // Endpoint connection logic mapping placeholder
-  console.log("Notifying system matrix of presentation shift initialization.");
+  console.log("Push tracking request dispatch signaling data clusters.");
 }
 
 function disableAllControls() {
@@ -790,7 +885,13 @@ function submitAcceptedConditions() {
   document.getElementById("rulesModal").style.display = "none";
   
   const bottomZone = document.getElementById("bottomControlZone");
-  bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Please complete visiting all VIP and Regular board slots sequentially to unlock your Promotion Form.</p>`;
+  
+  if (combinedBoardOrder.length === 0) {
+    bottomZone.innerHTML = `<p class="success-text"><i class="fa-solid fa-circle-check"></i> Board is ready for immediate insertion.</p>`;
+    unlockVideoUploadZone();
+  } else {
+    bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Please complete visiting all VIP and Regular board slots sequentially to unlock your Promotion Form.</p>`;
+  }
   
   syncButtonStates();
 }
@@ -822,7 +923,6 @@ async function processDatabaseVideoCommit() {
   let rawVideoUrl = videoInput.value.trim();
   let rawChannelUrl = channelInput.value.trim();
 
-  // Basic validation rules checking address layout strings
   if (!rawVideoUrl.includes("youtube.com") && !rawVideoUrl.includes("youtu.be")) {
     feedback.className = "notify-msg error-text";
     feedback.innerText = "Validation Error: Please submit a valid YouTube video address string.";
@@ -835,12 +935,10 @@ async function processDatabaseVideoCommit() {
     return;
   }
 
-  // Automatic verification requirement parameters cleaning execution step
   const sanitizedVideoUrl = cleanTrackingParameters(rawVideoUrl);
   const sanitizedChannelUrl = cleanTrackingParameters(rawChannelUrl);
   const preregisteredSanitizedChannel = cleanTrackingParameters(currentUserAccount.channelUrl);
 
-  // Absolute enforcement check comparing incoming payload with identity metrics
   if (sanitizedChannelUrl !== preregisteredSanitizedChannel) {
     feedback.className = "notify-msg error-text";
     feedback.innerText = "Critical Security Error: Channel link does not match your pre-registered signup profile link.";
@@ -848,16 +946,15 @@ async function processDatabaseVideoCommit() {
   }
 
   feedback.className = "notify-msg info-text";
-  feedback.innerText = "Processing link tracking parameters extraction & saving to database collections...";
+  feedback.innerText = "Processing link tracking parameters extraction & routing to waiting queue handlers...";
 
-  // Simulated Asynchronous payload dispatch cycle targeting backend logic controllers
   setTimeout(() => {
     feedback.className = "notify-msg success-text";
-    feedback.innerText = "Links successfully sanitized and documented into MongoDB queue pipelines!";
+    feedback.innerText = "Links successfully documented! You are routed down directly inside the queue line waiting list.";
     videoInput.value = "";
     channelInput.value = "";
     
-    // Refresh display structures directly from server models
+    // Refresh structural views directly from mock tracking state parameters
     fetchDashboardState();
   }, 1800);
 }
