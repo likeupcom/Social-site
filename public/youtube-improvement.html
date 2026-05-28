@@ -540,14 +540,14 @@ footer{
   <div id="appealingPeriodBanner" style="display: none;">
     <div class="appealing-alert-banner">
       <div>
-        <h3 style="color:#ef4444; font-size:18px; margin-bottom:4px;"><i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active</h3>
-        <p style="color:#cbd5e1; font-size:13px;">Standard board sequences are locked. Active board operators are executing validation audits on queue nodes.</p>
+        <h3 id="appealingActiveTitle" style="color:#ef4444; font-size:18px; margin-bottom:4px;"><i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active</h3>
+        <p id="appealingActiveDesc" style="color:#cbd5e1; font-size:13px;">Standard board sequences are locked. Active board operators are executing validation audits on queue nodes.</p>
       </div>
       <div class="alert-timer-box" id="appealingCountdown">02:00</div>
     </div>
   </div>
 
-  <h1 id="pageMainTitle">YouTube Improvement Dashboard</h1>
+  <h1 id="mainDashboardTitle">YouTube Improvement Dashboard</h1>
 
   <!-- USER PRE-UPLOADED CHANNEL MANAGEMENT LAYER -->
   <div id="preUploadedProfileArea"></div>
@@ -571,7 +571,7 @@ footer{
   <!-- WAITING LIST SECTION -->
   <div class="waiting-section">
     <div class="section-title">
-      <span>Queue Line Waiting List</span>
+      <span id="waitingListSectionTitle">Queue Line Waiting List</span>
     </div>
     <div class="waiting-list-container" id="realWaitingContainer"></div>
   </div>
@@ -585,37 +585,37 @@ footer{
 <!-- REGULATIONS OVERLAY MODAL -->
 <div class="regulations-overlay" id="rulesModal">
   <div class="regulations-card">
-    <h2>Platform Regulations</h2>
-    <p>Please check all items sequentially to declare that you agree to follow the platform mechanics.</p>
+    <h2 id="modalTitle">Platform Regulations</h2>
+    <p id="modalSub">Please check all items sequentially to declare that you agree to follow the platform mechanics.</p>
     
     <div class="rules-list">
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check1" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check1">1. Please read and understand all policies and regulations of this website before using the platform.</label>
+        <label class="rule-text" id="rule1Text" for="check1">1. Please read and understand all policies and regulations of this website before using the platform.</label>
       </div>
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check2" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check2">2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.</label>
+        <label class="rule-text" id="rule2Text" for="check2">2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.</label>
       </div>
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check3" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check3">3. Once you click Visit, a 30-second countdown will begin. You will be allowed to visit the next channel only after the countdown finishes, until you complete all visits.</label>
+        <label class="rule-text" id="rule3Text" for="check3">3. Once you click Visit, a 30-second countdown will begin. You will be allowed to visit the next channel only after the countdown finishes, until you complete all visits.</label>
       </div>
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check4" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check4">4. When your account becomes Live, please turn on notifications so you can monitor the actions taking place on your channel.</label>
+        <label class="rule-text" id="rule4Text" for="check4">4. When your account becomes Live, please turn on notifications so you can monitor the actions taking place on your channel.</label>
       </div>
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check5" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check5">5. When you are removed from Live status, make sure that you have received at least 10 subscribers, views, likes, and comments. Please do not appear again unless you have fewer than 10 subscribers, views, likes, and comments.</label>
+        <label class="rule-text" id="rule5Text" for="check5">5. When you are removed from Live status, make sure that you have received at least 10 subscribers, views, likes, and comments. Please do not appear again unless you have fewer than 10 subscribers, views, likes, and comments.</label>
       </div>
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check6" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check6">6. If you receive fewer than 10 subscribers, views, likes, or comments, you are allowed to reappear after 3 minutes among the channels listed in the waiting list.</label>
+        <label class="rule-text" id="rule6Text" for="check6">6. If you receive fewer than 10 subscribers, views, likes, or comments, you are allowed to reappear after 3 minutes among the channels listed in the waiting list.</label>
       </div>
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check7" onchange="validateCheckboxes()">
-        <label class="rule-text" for="check7">7. While you are in the waiting list, if your account receives three appeals, it will be removed from the waiting list. If this happens three times, your account will be permanently deleted.</label>
+        <label class="rule-text" id="rule7Text" for="check7">7. While you are in the waiting list, if your account receives three appeals, it will be removed from the waiting list. If this happens three times, your account will be permanently deleted.</label>
       </div>
     </div>
 
@@ -631,14 +631,216 @@ footer{
 
 <!-- NAVIGATION PANEL -->
 <div class="bottom-nav">
-  <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt">Home</span></a>
-  <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt">Services</span></a>
-  <a class="nav-item" href="vip.html" id="navVipLink"><span>💎</span><span class="nav-txt">VIP</span></a>
-  <a class="nav-item" href="bonus.html" id="navBonusLink"><span>🎁</span><span class="nav-txt">Bonus</span></a>
-  <a class="nav-item" href="regulations.html" id="navRulesLink"><span>📜</span><span class="nav-txt">Regulations</span></a>
+  <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt" id="lblNavHome">Home</span></a>
+  <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt" id="lblNavServices">Services</span></a>
+  <a class="nav-item" href="vip.html" id="navVipLink"><span>💎</span><span class="nav-txt" id="lblNavVip">VIP</span></a>
+  <a class="nav-item" href="bonus.html" id="navBonusLink"><span>🎁</span><span class="nav-txt" id="lblNavBonus">Bonus</span></a>
+  <a class="nav-item" href="regulations.html" id="navRulesLink"><span>📜</span><span class="nav-txt" id="lblNavRules">Regulations</span></a>
 </div>
 
 <script>
+// Translation Localization Dictionary Framework Object
+const localizationDictionary = {
+  en: {
+    headerLogo: "YouTube Promotion Center",
+    mainDashboardTitle: "YouTube Improvement Dashboard",
+    appealingActiveTitle: "<i class=\"fa-solid fa-triangle-exclamation\"></i> Appealing Period Active",
+    appealingActiveDesc: "Standard board sequences are locked. Active board operators are executing validation audits on queue nodes.",
+    vipSectionTitle: "VIP Premium Channels (4 slots)",
+    regularSectionTitle: "Standard Exchange Slots (10 slots)",
+    waitingListSectionTitle: "Queue Line Waiting List",
+    actionGateBtn: "📜 Read & Accept Conditions",
+    modalTitle: "Platform Regulations",
+    modalSub: "Please check all items sequentially to declare that you agree to follow the platform mechanics.",
+    rule1: "1. Please read and understand all policies and regulations of this website before using the platform.",
+    rule2: "2. This is not an automated system that provides fake subscribers, views, or comments. All subscriptions, views, likes, and comments are performed by real users, including you. Therefore, when you click “Visit” on someone’s channel, you must subscribe, like, and leave a comment on their video.",
+    rule3: "3. Once you click Visit, a 30-second countdown will begin. You will be allowed to visit the next channel only after the countdown finishes, until you complete all visits.",
+    rule4: "4. When your account becomes Live, please turn on notifications so you can monitor the actions taking place on your channel.",
+    rule5: "5. When you are removed from Live status, make sure that you have received at least 10 subscribers, views, likes, and comments. Please do not appear again unless you have fewer than 10 subscribers, views, likes, and comments.",
+    rule6: "6. If you receive fewer than 10 subscribers, views, likes, or comments, you are allowed to reappear after 3 minutes among the channels listed in the waiting list.",
+    rule7: "7. While you are in the waiting list, if your account receives three appeals, it will be removed from the waiting list. If this happens three times, your account will be permanently deleted.",
+    acceptBtn: "I Accept All Conditions",
+    lblNavHome: "Home",
+    lblNavServices: "Services",
+    lblNavVip: "VIP",
+    lblNavBonus: "Bonus",
+    lblNavRules: "Regulations",
+    footerText: "© 2026 YouTube Promotion Center. All rights reserved.<br>Grow your presence, boost engagement, and reach more people.",
+    txtAvailableSlot: "Available Slot",
+    txtWaitingInteraction: "Waiting for user interaction...",
+    txtVisited: "Visited",
+    txtVisitBtn: "Visit",
+    txtAppearBtn: "Appear",
+    txtAppealBtn: "Appeal",
+    txtSecurityNode: "(Security Node Active)",
+    txtNoUsersQueue: "No channels currently holding inside the waiting list queue matrix.",
+    txtAppealsRegistered: "Appeals Registered",
+    alertAppealingExpiredOut: "Appealing period expired! Your slot has rotated out. You enter a 3-hour normal rotation cooldown before uploading again.",
+    alertAppealingExpiredRetained: "Appealing period expired! You were randomly selected to retain a spot on the main display board due to vacancy openings.",
+    alertAppealingExpiredSwap: "Appealing period expired! Waiting list candidates have swapped places onto the main display grid.",
+    txtUploadBlockedAppeals: "Upload Blocked: Account suspended due to 3 appeals. Re-allowed in {min} mins.",
+    txtUploadBlockedCooldown: "Upload Blocked: Post-active display rotation cooldown active. Re-allowed in {min} mins.",
+    txtSingleUploadSecurity: "Single Upload Security Active: Your channel link document is already tracked on the board grids or waiting line.",
+    txtUploadFormFrozen: "Upload Form Frozen: System is currently executing an Appealing Period cycle.",
+    txtCompleteVisitsToUnlock: "Complete visiting all board slots sequentially to unlock the promotion dashboard forms.",
+    txtPromoZoneUnlocked: "Promotion Zone Unlocked!",
+    lblTargetVideo: "Target YouTube Video Link:",
+    lblYourChannel: "Your YouTube Channel Link:",
+    btnSubmitDocument: "Submit Promotional Document",
+    validationErrorLink: "Validation Error: Please submit valid YouTube address parameters.",
+    securityErrorProfile: "Security Error: Channel link does not match pre-registered profile metadata.",
+    txtProcessingParams: "Processing tracking parameter removal & documenting node data...",
+    txtWelcomeColdStart: "Welcome! As part of the first 10 users, you have been routed directly onto the active display board!",
+    txtSuccessQueueAdded: "Links successfully documented inside the queue waiting list lines!",
+    alertAccumulatedAppeals: "System Notice: Target channel has accumulated 3 appeals. Drop execution triggered. Account placed into a 4-hour lockdown matrix!"
+  },
+  fr: {
+    headerLogo: "Centre de Promotion YouTube",
+    mainDashboardTitle: "Tableau de Bord d'Amélioration YouTube",
+    appealingActiveTitle: "<i class=\"fa-solid fa-triangle-exclamation\"></i> Période de Recours Active",
+    appealingActiveDesc: "Les séquences standard du tableau sont verrouillées. Les opérateurs actifs exécutent des audits de validation sur les nœuds de file d'attente.",
+    vipSectionTitle: "Chaînes Premium VIP (4 emplacements)",
+    regularSectionTitle: "Emplacements d'Échange Standard (10 emplacements)",
+    waitingListSectionTitle: "Liste d'Attente de la File",
+    actionGateBtn: "📜 Lire & Accepter les Conditions",
+    modalTitle: "Règlements de la Plateforme",
+    modalSub: "Veuillez cocher tous les éléments séquentiellement pour déclarer que vous acceptez de suivre la mécanique de la plateforme.",
+    rule1: "1. Veuillez lire et comprendre toutes les politiques et réglementations de ce site Web avant d'utiliser la plateforme.",
+    rule2: "2. Ce n'est pas un système automatisé qui fournit de faux abonnés, vues ou commentaires. Toutes les inscriptions, vues, j'aime et commentaires sont effectués par de vrais utilisateurs, y compris vous. Par conséquent, lorsque vous cliquez sur « Visiter » sur la chaîne de quelqu'un, vous devez vous abonner, aimer et laisser un commentaire sur sa vidéo.",
+    rule3: "3. Une fois que vous aurez cliqué sur Visiter, un compte à rebours de 30 secondes commencera. Vous ne serez autorisé à visiter la chaîne suivante qu'après la fin du compte à rebours, jusqu'à ce que vous ayez terminé toutes les visites.",
+    rule4: "4. Lorsque votre compte devient Actif (Live), veuillez activer les notifications afin de pouvoir surveiller les actions qui se déroulent sur votre chaîne.",
+    rule5: "5. Lorsque vous êtes retiré du statut Live, assurez-vous d'avoir reçu au moins 10 abonnés, vues, j'aime et commentaires. Veuillez ne plus réapparaître à moins d'avoir moins de 10 abonnés, vues, j'aime et commentaires.",
+    rule6: "6. Si vous recevez moins de 10 abonnés, vues, j'aime ou commentaires, vous êtes autorisé à réapparaître après 3 minutes parmi les chaînes listées dans la liste d'attente.",
+    rule7: "7. Pendant que vous êtes dans la liste d'attente, si votre compte reçoit trois recours, il sera retiré de la liste d'attente. Si cela se produit trois fois, votre compte sera définitivement supprimé.",
+    acceptBtn: "J'Accepte Toutes les Conditions",
+    lblNavHome: "Accueil",
+    lblNavServices: "Services",
+    lblNavVip: "VIP",
+    lblNavBonus: "Bonus",
+    lblNavRules: "Règlements",
+    footerText: "© 2026 Centre de Promotion YouTube. Tous droits réservés.<br>Développez votre présence, boostez l'engagement et touchez plus de monde.",
+    txtAvailableSlot: "Emplacement Disponible",
+    txtWaitingInteraction: "En attente d'interaction de l'utilisateur...",
+    txtVisited: "Visité",
+    txtVisitBtn: "Visiter",
+    txtAppearBtn: "Apparaître",
+    txtAppealBtn: "Recours",
+    txtSecurityNode: "(Nœud de Sécurité Actif)",
+    txtNoUsersQueue: "Aucune chaîne ne se trouve actuellement dans la matrice de la liste d'attente.",
+    txtAppealsRegistered: "Recours Enregistrés",
+    alertAppealingExpiredOut: "La période de recours a expiré ! Votre emplacement a été permuté. Vous entrez dans un délai de récupération normal de 3 heures avant de pouvoir télécharger à nouveau.",
+    alertAppealingExpiredRetained: "La période de recours a expiré ! Vous avez été sélectionné au hasard pour conserver une place sur le tableau d'affichage principal en raison de postes vacants.",
+    alertAppealingExpiredSwap: "La période de recours a expiré ! Les candidats de la liste d'attente ont permuté leurs places sur la grille d'affichage principale.",
+    txtUploadBlockedAppeals: "Téléchargement Bloqué: Compte suspendu en raison de 3 recours. Ré-autorisé dans {min} min.",
+    txtUploadBlockedCooldown: "Téléchargement Bloqué: Délai de récupération après rotation active en cours. Ré-autorisé dans {min} min.",
+    txtSingleUploadSecurity: "Sécurité de Téléchargement Unique Active: Le lien de votre chaîne est déjà suivi sur les grilles du tableau ou la ligne d'attente.",
+    txtUploadFormFrozen: "Formulaire de Téléchargement Gelé: Le système exécute actuellement un cycle de Période de Recours.",
+    txtCompleteVisitsToUnlock: "Terminez la visite séquentielle de tous les emplacements du tableau pour déverrouiller les formulaires du panneau de promotion.",
+    txtPromoZoneUnlocked: "Zone de Promotion Déverrouillée !",
+    lblTargetVideo: "Lien de la Vidéo YouTube Cible:",
+    lblYourChannel: "Lien de votre Chaîne YouTube:",
+    btnSubmitDocument: "Soumettre le Document Promotionnel",
+    validationErrorLink: "Erreur de Validation: Veuillez soumettre des paramètres d'adresse YouTube valides.",
+    securityErrorProfile: "Erreur de Sécurité: Le lien de la chaîne ne correspond pas aux métadonnées du profil pré-enregistré.",
+    txtProcessingParams: "Traitement de la suppression des paramètres de suivi & documentation des données du nœud...",
+    txtWelcomeColdStart: "Bienvenue ! En tant que membre des 10 premiers utilisateurs, vous avez été dirigé directement sur le tableau d'affichage actif !",
+    txtSuccessQueueAdded: "Liens documentés avec succès dans les lignes de la liste d'attente !",
+    alertAccumulatedAppeals: "Avis du Système: La chaîne cible a accumulé 3 recours. Déclenchement de l'exclusion. Compte placé dans une matrice de verrouillage de 4 heures !"
+  },
+  rw: {
+    headerLogo: "Ikigo cyo Kwamamaza kuri YouTube",
+    mainDashboardTitle: "Ikibaho cyo Guteza Imbere YouTube",
+    appealingActiveTitle: "<i class=\"fa-solid fa-triangle-exclamation\"></i> Igihe cy'Ubujurire Kiractive",
+    appealingActiveDesc: "Gukurikirana ku kibaho bisanzwe birafunze. Abakozi bafite uburenganzira barimo baragenzura imyanya iri ku murongo.",
+    vipSectionTitle: "Imyanya y'Abanyacyubahiro VIP (Imyanya 4)",
+    regularSectionTitle: "Imyanya Inyuranye Isanzwe (Imyanya 10)",
+    waitingListSectionTitle: "Urutonde rw'Abategereje ku Murongo",
+    actionGateBtn: "📜 Soma kandi Wemeranye n'Amategeko",
+    modalTitle: "Amategeko n'Amabwiriza",
+    modalSub: "Nyamuneka kanda kuri buri kintu ugenda ukurikiranya kugira ngo ugaragaze ko wemeye gukurikiza imikorere y'urubuga.",
+    rule1: "1. Nyamuneka soma kandi usobanukirwe na politiki n'amategeko agenga uru rubuga mbere yo rwandukorera.",
+    rule2: "2. Ubu ntabwo ari uburyo bwikora butanga abafatabuguzi (subscribers), bareba (views), cyangwa ibitekerezo (comments) by'ibihimbano. Ifatabuguzi ryose, kureba, gukunda (likes), n'ibitekerezo bikorwa n'abakoresha b'ukuri, barimo nawe. Shingiro ryo, iyo ukanze “Sura” (Visit) ku muyoboro w'undi muntu, ugomba gukora subscribe, like, n'igitekerezo kuri video ye.",
+    rule3: "3. Iyo ukanze Sura, iminota n'amasegonda 30 bizatangira kubara basubira inyuma. Uzemererwa gusura umuyoboro ukurikira gusa nyuma y'uko ayo masegonda arangiye, kugeza urangije gusura imyanya yose.",
+    rule4: "4. Iyo konti yawe ibaye Live, nyamuneka aka notification (imyanzuro) ngo ubashe gukurikirana ibikorwa birimo kubera ku muyoboro wawe.",
+    rule5: "5. Iyo ukuwe ku mwanya wa Live, kora uko ushoboye ube wamaze kubona nibura abafatabuguzi 10, abarebye 10, likes 10, n'ibitekerezo 10. Nyamuneka ntuzagaragare (appear) hano ukundi uretse iyo ufite abafatabuguzi, abarebye, likes, cyangwa ibitekerezo biri munsi ya 10.",
+    rule6: "6. Iyo ubonye abafatabuguzi, abarebye, likes, cyangwa ibitekerezo biri munsi ya 10, wemererwa kongera kugaragara nyuma y'iminota 3 mu miyoboro iri ku rutonde rw'abategereje.",
+    rule7: "7. Igihe uri ku rutonde rw'abategereje, iyo konti yawe yakiriye ubujurire (appeals) bitatu, ikurwa ku rutonde rw'abategereje. Ibi iyo bibaye inshuro eshatu, konti yawe isibwa burundu.",
+    acceptBtn: "Nemeye Amabwiriza Yose",
+    lblNavHome: "Ahabanza",
+    lblNavServices: "Serivisi",
+    lblNavVip: "VIP",
+    lblNavBonus: "Agahimbazamusyi",
+    lblNavRules: "Amategeko",
+    footerText: "© 2026 Ikigo cyo Kwamamaza kuri YouTube. Uburenganzira bwose burasuguye.<br>Kura ibikorwa byawe, wongere ubwiganze, kandi ugere kubantu benshi.",
+    txtAvailableSlot: "Umwanya Uhari",
+    txtWaitingInteraction: "Utegereje igikorwa cy'umukoresha...",
+    txtVisited: "Yasuwe",
+    txtVisitBtn: "Sura",
+    txtAppearBtn: "Garagara",
+    txtAppealBtn: "Jurira",
+    txtSecurityNode: "(Umutekano urarinzwe)",
+    txtNoUsersQueue: " Nta miyoboro ihari ihagaze ku rutonde rw'abategereje ubu.",
+    txtAppealsRegistered: "Ubujurire Bumaze Kwandikwa",
+    alertAppealingExpiredOut: "Igihe cy'ubujurire cyarangiye! Umwanya wawe wahinduwe. Winjiye mu gihe cy'akaruhuko cy'amasaha 3 mbere yo kongera gushoraho.",
+    alertAppealingExpiredRetained: "Igihe cy'ubujurire cyarangiye! Watoranyijwe mu buryo bw'amahirwe ngo ugume ku kibaho gishorwaho kubera imyanya yari ishonje.",
+    alertAppealingExpiredSwap: "Igihe cy'ubujurire cyarangiye! Abari bategereje ku murongo bimuriwe ku kibaho gishorwaho gikuru.",
+    txtUploadBlockedAppeals: "Gushoraho birahagaritswe: Konti yarahagaritswe kubera ubujurire 3. Bikundwa nanone nyuma y'iminota {min}.",
+    txtUploadBlockedCooldown: "Gushoraho birahagaritswe: Muri mu karuhuko nyuma yo kuva ku kibaho cy'iyamamakaza. Bikundwa nanone nyuma y'iminota {min}.",
+    txtSingleUploadSecurity: "Umutekano wo Gushoraho Rimwe uractive: Umuyoboro wawe uracyari ku kibaho cyangwa ku murongo utegereje.",
+    txtUploadFormFrozen: "Urupapuro rwo Gushoraho rurafunze: Urubuga ruri mu gihe cy'ubujurire (Appealing Period).",
+    txtCompleteVisitsToUnlock: "Banza usure imyanya yose iri ku kibaho ugenda uyikurikiranya nka bwo urupapuro rwo gushoraho rufunguke.",
+    txtPromoZoneUnlocked: "Ahari Iyamamakaza Hafunguwe!",
+    lblTargetVideo: "Iyanzo rya Video ya YouTube:",
+    lblYourChannel: "Iyanzo y'Umuyoboro wawe wa YouTube:",
+    btnSubmitDocument: "Ohereza Dosiye y'Iyamamakaza",
+    validationErrorLink: "Ikosa ryo Kugenzura: Nyamuneka tanga iyanzo z'ukuri za YouTube.",
+    securityErrorProfile: "Ikosa ry'Umutekano: Iyanzo y'umuyoboro ntabwo ihuye n'umuyoboro wawe wiyandikishije.",
+    txtProcessingParams: "Turimo gukuraho ibiranga ikurikirana ndetse no kwandika amakuru...",
+    txtWelcomeColdStart: "Ikaze! Nk'umwe mu bakoresha 10 ba mbere, wahise ushyirwa mu buryo bw'ako kanya ku kibaho gikuru kiyandikishirizwaho!",
+    txtSuccessQueueAdded: "Iyanzo zose zanditswe neza ku rutonde rw'abategereje!",
+    alertAccumulatedAppeals: "Icyangombwa cy'Urubuga: Umuyoboro ujuriwe wageze ku bujurire 3. Ukuweho ako kanya. Konti ishyizwe mu gufungwa by'agateganyo by'amasaha 4!"
+  }
+};
+
+// Retrieve globally active language identifier set inside index.html navigation flows
+let activeLang = localStorage.getItem("selectedLanguage") || "en";
+if (!["en", "fr", "rw"].includes(activeLang)) {
+  activeLang = "en";
+}
+
+function applyPageLocalization() {
+  const t = localizationDictionary[activeLang];
+  
+  document.getElementById("headerLogo").innerText = t.headerLogo;
+  document.getElementById("mainDashboardTitle").innerText = t.mainDashboardTitle;
+  document.getElementById("appealingActiveTitle").innerHTML = t.appealingActiveTitle;
+  document.getElementById("appealingActiveDesc").innerText = t.appealingActiveDesc;
+  document.getElementById("vipSectionTitle").innerText = t.vipSectionTitle;
+  document.getElementById("regularSectionTitle").innerText = t.regularSectionTitle;
+  document.getElementById("waitingListSectionTitle").innerText = t.waitingListSectionTitle;
+  
+  const actionGateBtn = document.getElementById("actionGateBtn");
+  if (actionGateBtn) actionGateBtn.innerText = t.actionGateBtn;
+  
+  document.getElementById("modalTitle").innerText = t.modalTitle;
+  document.getElementById("modalSub").innerText = t.modalSub;
+  document.getElementById("rule1Text").innerText = t.rule1;
+  document.getElementById("rule2Text").innerText = t.rule2;
+  document.getElementById("rule3Text").innerText = t.rule3;
+  document.getElementById("rule4Text").innerText = t.rule4;
+  document.getElementById("rule5Text").innerText = t.rule5;
+  document.getElementById("rule6Text").innerText = t.rule6;
+  document.getElementById("rule7Text").innerText = t.rule7;
+  document.getElementById("acceptBtn").innerText = t.acceptBtn;
+  
+  document.getElementById("lblNavHome").innerText = t.lblNavHome;
+  document.getElementById("lblNavServices").innerText = t.lblNavServices;
+  document.getElementById("lblNavVip").innerText = t.lblNavVip;
+  document.getElementById("lblNavBonus").innerText = t.lblNavBonus;
+  document.getElementById("lblNavRules").innerText = t.lblNavRules;
+  document.getElementById("footerText").innerHTML = t.footerText;
+}
+
 // State architecture driving database rules models
 let currentUserAccount = null;
 let vipChannels = [];
@@ -660,6 +862,7 @@ let userIsActiveOnBoard = false;
 let usersAppealedByMe = []; 
 
 async function fetchDashboardState() {
+  const t = localizationDictionary[activeLang];
   try {
     if (!currentUserAccount) {
       currentUserAccount = {
@@ -745,6 +948,7 @@ function startAppealingTimer(durationSeconds) {
 }
 
 function executeBoardRevolutionSwap() {
+  const t = localizationDictionary[activeLang];
   isAppealingPeriodActive = false;
   document.getElementById("appealingPeriodBanner").style.display = "none";
   
@@ -789,12 +993,12 @@ function executeBoardRevolutionSwap() {
     if (!stillActiveNow) {
       const threeHoursInMs = 3 * 60 * 60 * 1000;
       localStorage.setItem("normalActiveExpiry", (Date.now() + threeHoursInMs).toString());
-      alert("Appealing period expired! Your slot has rotated out. You enter a 3-hour normal rotation cooldown before uploading again.");
+      alert(t.alertAppealingExpiredOut);
     } else {
-      alert("Appealing period expired! You were randomly selected to retain a spot on the main display board due to vacancy openings.");
+      alert(t.alertAppealingExpiredRetained);
     }
   } else {
-    alert("Appealing period expired! Waiting list candidates have swapped places onto the main display grid.");
+    alert(t.alertAppealingExpiredSwap);
   }
   
   usersAppealedByMe = []; 
@@ -803,6 +1007,7 @@ function executeBoardRevolutionSwap() {
 }
 
 function renderUserIdentityBadge() {
+  const t = localizationDictionary[activeLang];
   const container = document.getElementById("preUploadedProfileArea");
   if(!currentUserAccount) return;
 
@@ -811,12 +1016,12 @@ function renderUserIdentityBadge() {
       <div class="card-info">
         <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
-          <span class="username-txt">${currentUserAccount.username} <small style="color:#38bdf8;">(Security Node Active)</small></span>
+          <span class="username-txt">${currentUserAccount.username} <small style="color:#38bdf8;">${t.txtSecurityNode}</small></span>
           <span class="raw-link-txt">${currentUserAccount.channelUrl.replace("https://", "")}</span>
         </div>
       </div>
       <button class="action-btn appear-style" id="appearTriggerBtn" disabled>
-        <i class="fa-solid fa-eye"></i> <span>Appear</span>
+        <i class="fa-solid fa-eye"></i> <span>${t.txtAppearBtn}</span>
       </button>
     </div>
   `;
@@ -860,19 +1065,20 @@ function renderGrids() {
 }
 
 function generateCardHTML(item, sequencePosition, isVip) {
+  const t = localizationDictionary[activeLang];
   if (item.empty) {
     return `
       <div class="channel-card ${isVip ? 'vip-card' : ''}">
         <div class="card-info">
           <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
           <div class="user-details">
-            <span class="username-txt" style="color:#64748b; font-style:italic;">Available Slot</span>
-            <span class="raw-link-txt" style="color:#334155;">Waiting for user interaction...</span>
+            <span class="username-txt" style="color:#64748b; font-style:italic;">${t.txtAvailableSlot}</span>
+            <span class="raw-link-txt" style="color:#334155;">${t.txtWaitingInteraction}</span>
           </div>
         </div>
         <div>
           <button class="action-btn visit-style seq-btn" disabled>
-            <span>Visit</span>
+            <span>${t.txtVisitBtn}</span>
           </button>
         </div>
       </div>`;
@@ -898,7 +1104,7 @@ function generateCardHTML(item, sequencePosition, isVip) {
         </div>
         <div>
           <span class="success-text" style="font-size:13px; font-weight:bold; padding: 10px 12px; display:flex; align-items:center; gap:4px;">
-            <i class="fa-solid fa-circle-check"></i> Visited
+            <i class="fa-solid fa-circle-check"></i> ${t.txtVisited}
           </span>
         </div>
       </div>`;
@@ -921,18 +1127,19 @@ function generateCardHTML(item, sequencePosition, isVip) {
       </div>
       <div id="btn-container-${sequencePosition}">
         <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" data-id="${item.id}" onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item.id}')">
-          <span>Visit</span>
+          <span>${t.txtVisitBtn}</span>
         </button>
       </div>
     </div>`;
 }
 
 function renderWaitingList() {
+  const t = localizationDictionary[activeLang];
   const container = document.getElementById("realWaitingContainer");
   container.innerHTML = "";
 
   if(waitingListUsers.length === 0) {
-    container.innerHTML = `<p style="color:#4b5563; font-style:italic; font-size:14px; text-align:center; padding:15px;">No channels currently holding inside the waiting list queue matrix.</p>`;
+    container.innerHTML = `<p style="color:#4b5563; font-style:italic; font-size:14px; text-align:center; padding:15px;">${t.txtNoUsersQueue}</p>`;
     return;
   }
 
@@ -954,12 +1161,12 @@ function renderWaitingList() {
             <span class="raw-link-txt" style="font-size:14px; color:#f1f5f9; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
               <i class="fa-solid fa-link" style="font-size:11px; color:#38bdf8; margin-right:4px;"></i>${user.youtubeChannel}
             </span>
-            <span style="font-size:11px; color:#ef4444; margin-top:4px; font-weight:bold;"><i class="fa-solid fa-gavel"></i> Appeals Registered: ${user.appealCount || 0} / 3</span>
+            <span style="font-size:11px; color:#ef4444; margin-top:4px; font-weight:bold;"><i class="fa-solid fa-gavel"></i> ${t.txtAppealsRegistered}: ${user.appealCount || 0} / 3</span>
           </div>
         </div>
         <div>
           <button class="action-btn appeal-style" ${isAllowedToClickAppeal ? '' : 'disabled'} onclick="handleDatabaseAppealTrigger('${user.id}')">
-            <i class="fa-solid fa-gavel"></i> Appeal
+            <i class="fa-solid fa-gavel"></i> ${t.txtAppealBtn}
           </button>
         </div>
       </div>
@@ -1034,7 +1241,8 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
         localStorage.setItem("visitedChannelIds", JSON.stringify(visitedChannelIds));
       }
 
-      container.innerHTML = `<span class="success-text" style="font-size:13px; font-weight:bold;"><i class="fa-solid fa-circle-check"></i> Visited</span>`;
+      const t = localizationDictionary[activeLang];
+      container.innerHTML = `<span class="success-text" style="font-size:13px; font-weight:bold;"><i class="fa-solid fa-circle-check"></i> ${t.txtVisited}</span>`;
       
       sequenceIndex++;
       advanceSequencePastVisitedSlots();
@@ -1049,6 +1257,7 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
 }
 
 async function handleDatabaseAppealTrigger(queueUserId) {
+  const t = localizationDictionary[activeLang];
   if (!isAppealingPeriodActive || !userIsActiveOnBoard) return;
   if (usersAppealedByMe.includes(queueUserId) || usersAppealedByMe.length >= 3) return;
 
@@ -1059,7 +1268,7 @@ async function handleDatabaseAppealTrigger(queueUserId) {
       usersAppealedByMe.push(queueUserId);
       
       if(targetUser.appealCount >= 3) {
-        alert("System Notice: Target channel has accumulated 3 appeals. Drop execution triggered. Account placed into a 4-hour lockdown matrix!");
+        alert(t.alertAccumulatedAppeals);
         if (queueUserId === currentUserAccount.id) {
           const fourHoursInMs = 4 * 60 * 60 * 1000;
           localStorage.setItem("appealLockdownExpiry", (Date.now() + fourHoursInMs).toString());
@@ -1106,18 +1315,19 @@ function submitAcceptedConditions() {
 function evaluateControlZonePresentation() {
   const bottomZone = document.getElementById("bottomControlZone");
   const now = Date.now();
+  const t = localizationDictionary[activeLang];
 
   if (localStorage.getItem("appealLockdownExpiry") && now < parseInt(localStorage.getItem("appealLockdownExpiry"))) {
     const remainingMs = parseInt(localStorage.getItem("appealLockdownExpiry")) - now;
     const remainingMins = Math.ceil(remainingMs / (1000 * 60));
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-gavel"></i> Upload Blocked: Account suspended due to 3 appeals. Re-allowed in ${remainingMins} mins.</p>`;
+    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-gavel"></i> ${t.txtUploadBlockedAppeals.replace("{min}", remainingMins)}</p>`;
     return;
   }
 
   if (localStorage.getItem("normalActiveExpiry") && now < parseInt(localStorage.getItem("normalActiveExpiry"))) {
     const remainingMs = parseInt(localStorage.getItem("normalActiveExpiry")) - now;
     const remainingMins = Math.ceil(remainingMs / (1000 * 60));
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-clock"></i> Upload Blocked: Post-active display rotation cooldown active. Re-allowed in ${remainingMins} mins.</p>`;
+    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-clock"></i> ${t.txtUploadBlockedCooldown.replace("{min}", remainingMins)}</p>`;
     return;
   }
 
@@ -1125,12 +1335,12 @@ function evaluateControlZonePresentation() {
   const userIsAlreadyInQueue = waitingListUsers.some(user => user.id === currentUserAccount.id);
   
   if (userIsAlreadyOnBoard || userIsAlreadyInQueue) {
-    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-circle-info"></i> Single Upload Security Active: Your channel link document is already tracked on the board grids or waiting line.</p>`;
+    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-circle-info"></i> ${t.txtSingleUploadSecurity}</p>`;
     return;
   }
 
   if (isAppealingPeriodActive) {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Upload Form Frozen: System is currently executing an Appealing Period cycle.</p>`;
+    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtUploadFormFrozen}</p>`;
     return;
   }
 
@@ -1140,7 +1350,7 @@ function evaluateControlZonePresentation() {
   if (activeRegularCount < 10) {
     unlockVideoUploadZone();
   } else if (sequenceIndex < combinedBoardOrder.length) {
-    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Complete visiting all board slots sequentially to unlock the promotion dashboard forms.</p>`;
+    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtCompleteVisitsToUnlock}</p>`;
   } else {
     unlockVideoUploadZone();
   }
@@ -1149,17 +1359,18 @@ function evaluateControlZonePresentation() {
 function unlockVideoUploadZone() {
   if(isAppealingPeriodActive) return;
   const bottomZone = document.getElementById("bottomControlZone");
+  const t = localizationDictionary[activeLang];
   bottomZone.innerHTML = `
     <div class="upload-form-container">
-      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> Promotion Zone Unlocked!</h3>
+      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> ${t.txtPromoZoneUnlocked}</h3>
       <div class="input-group">
-        <label style="font-size:13px; color:#94a3b8;">Target YouTube Video Link:</label>
+        <label style="font-size:13px; color:#94a3b8;">${t.lblTargetVideo}</label>
         <input type="url" class="link-input" id="ytVideoInput" placeholder="https://www.youtube.com/watch?v=..." required />
         
-        <label style="font-size:13px; color:#94a3b8; margin-top:4px;">Your YouTube Channel Link:</label>
+        <label style="font-size:13px; color:#94a3b8; margin-top:4px;">${t.lblYourChannel}</label>
         <input type="url" class="link-input" id="ytChannelInput" placeholder="https://www.youtube.com/..." required />
         
-        <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">Submit Promotional Document</button>
+        <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">${t.btnSubmitDocument}</button>
       </div>
       <div id="uploadFeedback" class="notify-msg"></div>
     </div>
@@ -1180,6 +1391,7 @@ async function processDatabaseVideoCommit() {
   const videoInput = document.getElementById("ytVideoInput");
   const channelInput = document.getElementById("ytChannelInput");
   const feedback = document.getElementById("uploadFeedback");
+  const t = localizationDictionary[activeLang];
 
   let rawVideoUrl = videoInput.value.trim();
   let rawChannelUrl = channelInput.value.trim();
@@ -1187,7 +1399,7 @@ async function processDatabaseVideoCommit() {
   if (!rawVideoUrl.includes("youtube.com") && !rawVideoUrl.includes("youtu.be") ||
       !rawChannelUrl.includes("youtube.com") && !rawChannelUrl.includes("youtu.be")) {
     feedback.className = "notify-msg error-text";
-    feedback.innerText = "Validation Error: Please submit valid YouTube address parameters.";
+    feedback.innerText = t.validationErrorLink;
     return;
   }
 
@@ -1197,12 +1409,12 @@ async function processDatabaseVideoCommit() {
 
   if (sanitizedChannelUrl !== preregisteredSanitizedChannel) {
     feedback.className = "notify-msg error-text";
-    feedback.innerText = "Security Error: Channel link does not match pre-registered profile metadata.";
+    feedback.innerText = t.securityErrorProfile;
     return;
   }
 
   feedback.className = "notify-msg info-text";
-  feedback.innerText = "Processing tracking parameter removal & documenting node data...";
+  feedback.innerText = t.txtProcessingParams;
 
   setTimeout(() => {
     const activeRegularCount = regularChannels.filter(item => !item.empty).length;
@@ -1219,7 +1431,7 @@ async function processDatabaseVideoCommit() {
         };
       }
       feedback.className = "notify-msg success-text";
-      feedback.innerText = "Welcome! As part of the first 10 users, you have been routed directly onto the active display board!";
+      feedback.innerText = t.txtWelcomeColdStart;
     } else {
       // Rule: Normal operations route validated channels into the waiting list
       waitingListUsers.push({
@@ -1230,7 +1442,7 @@ async function processDatabaseVideoCommit() {
         appealCount: 0
       });
       feedback.className = "notify-msg success-text";
-      feedback.innerText = "Links successfully documented inside the queue waiting list lines!";
+      feedback.innerText = t.txtSuccessQueueAdded;
     }
 
     videoInput.value = "";
@@ -1243,6 +1455,7 @@ async function processDatabaseVideoCommit() {
 }
 
 window.onload = function() {
+  applyPageLocalization();
   fetchDashboardState();
 
   setInterval(() => {
