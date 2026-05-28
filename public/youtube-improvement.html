@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>YouTube Improvement Dashboard</title>
 
-<!-- FontAwesome Icons Clean CDN Link -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
@@ -294,6 +293,50 @@ h1{
   font-weight: bold;
 }
 
+/* BOTTOM FIXED NAVIGATION */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#111827;
+  display:flex;
+  justify-content:space-around;
+  padding:12px 0;
+  border-top:1px solid #1f2937;
+  z-index:1500;
+}
+
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-decoration:none;
+  color:#cbd5e1;
+  font-weight:bold;
+  font-size:12px;
+  transition: 0.2s;
+}
+
+.nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
+.nav-item:hover{color:#38bdf8;}
+.nav-item.active{color:#38bdf8;}
+
+footer{
+  background:#111827;
+  padding:35px 20px;
+  text-align:center;
+  margin-top: 20px;
+}
+
+.footer-text{
+  max-width:900px;
+  margin:auto;
+  line-height:1.6;
+  color:#cbd5e1;
+  font-size: 14px;
+}
+
 /* BOTTOM GATEWAY INTERACTION ZONE */
 .gateway-box {
   background: #111827;
@@ -479,50 +522,6 @@ h1{
   justify-content: space-between;
   margin-bottom: 25px;
 }
-
-/* BOTTOM FIXED NAVIGATION */
-.bottom-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:#111827;
-  display:flex;
-  justify-content:space-around;
-  padding:12px 0;
-  border-top:1px solid #1f2937;
-  z-index:1500;
-}
-
-.nav-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-decoration:none;
-  color:#cbd5e1;
-  font-weight:bold;
-  font-size:12px;
-  transition: 0.2s;
-}
-
-.nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
-.nav-item:hover{color:#38bdf8;}
-.nav-item.active{color:#38bdf8;}
-
-footer{
-  background:#111827;
-  padding:35px 20px;
-  text-align:center;
-  margin-top: 20px;
-}
-
-.footer-text{
-  max-width:900px;
-  margin:auto;
-  line-height:1.6;
-  color:#cbd5e1;
-  font-size: 14px;
-}
 </style>
 </head>
 
@@ -536,23 +535,20 @@ footer{
 </header>
 
 <div class="container">
-  <!-- DYNAMIC MONITORING TRACKING STATE BANNER -->
   <div id="appealingPeriodBanner" style="display: none;">
     <div class="appealing-alert-banner">
       <div>
         <h3 id="appealingActiveTitle" style="color:#ef4444; font-size:18px; margin-bottom:4px;"><i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active</h3>
         <p id="appealingActiveDesc" style="color:#cbd5e1; font-size:13px;">Standard board sequences are locked. Active board operators are executing validation audits on queue nodes.</p>
       </div>
-      <div class="alert-timer-box" id="appealingCountdown">02:00</div>
+      <div class="alert-timer-box" id="appealingCountdown">00:00</div>
     </div>
   </div>
 
   <h1 id="mainDashboardTitle">YouTube Improvement Dashboard</h1>
 
-  <!-- USER PRE-UPLOADED CHANNEL MANAGEMENT LAYER -->
   <div id="preUploadedProfileArea"></div>
 
-  <!-- VIP PARTNER SECTIONS -->
   <div class="vip-section">
     <div class="section-title">
       <span id="vipSectionTitle">VIP Premium Channels (4 slots)</span>
@@ -560,7 +556,6 @@ footer{
     <div class="vip-grid" id="realVipGrid"></div>
   </div>
 
-  <!-- REGULAR SPACES SECTION -->
   <div class="regular-section">
     <div class="section-title">
       <span id="regularSectionTitle">Standard Exchange Slots (10 slots)</span>
@@ -568,7 +563,6 @@ footer{
     <div class="regular-grid" id="realRegularGrid"></div>
   </div>
 
-  <!-- WAITING LIST SECTION -->
   <div class="waiting-section">
     <div class="section-title">
       <span id="waitingListSectionTitle">Queue Line Waiting List</span>
@@ -576,18 +570,16 @@ footer{
     <div class="waiting-list-container" id="realWaitingContainer"></div>
   </div>
 
-  <!-- LOWER DYNAMIC INTERACTION ZONE -->
   <div class="gateway-box" id="bottomControlZone">
     <button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">📜 Read & Accept Conditions</button>
   </div>
 </div>
 
-<!-- REGULATIONS OVERLAY MODAL -->
 <div class="regulations-overlay" id="rulesModal">
   <div class="regulations-card">
     <h2 id="modalTitle">Platform Regulations</h2>
     <p id="modalSub">Please check all items sequentially to declare that you agree to follow the platform mechanics.</p>
-    
+     
     <div class="rules-list">
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check1" onchange="validateCheckboxes()">
@@ -611,7 +603,7 @@ footer{
       </div>
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check6" onchange="validateCheckboxes()">
-        <label class="rule-text" id="rule6Text" for="check6">6. If you receive fewer than 10 subscribers, views, likes, or comments, you are allowed to reappear after 3 minutes among the channels listed in the waiting list.</label>
+        <label class="rule-text" id="rule6Text" for="check6">6. If you receive fewer than 10 subscribers, views, likes or comments, you are allowed to reappear after 3 minutes among the channels listed in the waiting list.</label>
       </div>
       <div class="rule-item">
         <input type="checkbox" class="rule-checkbox" id="check7" onchange="validateCheckboxes()">
@@ -629,7 +621,6 @@ footer{
   </div>
 </footer>
 
-<!-- NAVIGATION PANEL -->
 <div class="bottom-nav">
   <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt" id="lblNavHome">Home</span></a>
   <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt" id="lblNavServices">Services</span></a>
@@ -675,9 +666,6 @@ const localizationDictionary = {
     txtSecurityNode: "(Security Node Active)",
     txtNoUsersQueue: "No channels currently holding inside the waiting list queue matrix.",
     txtAppealsRegistered: "Appeals Registered",
-    alertAppealingExpiredOut: "Appealing period expired! Your slot has rotated out. You enter a 3-hour normal rotation cooldown before uploading again.",
-    alertAppealingExpiredRetained: "Appealing period expired! You were randomly selected to retain a spot on the main display board due to vacancy openings.",
-    alertAppealingExpiredSwap: "Appealing period expired! Waiting list candidates have swapped places onto the main display grid.",
     txtUploadBlockedAppeals: "Upload Blocked: Account suspended due to 3 appeals. Re-allowed in {min} mins.",
     txtUploadBlockedCooldown: "Upload Blocked: Post-active display rotation cooldown active. Re-allowed in {min} mins.",
     txtSingleUploadSecurity: "Single Upload Security Active: Your channel link document is already tracked on the board grids or waiting line.",
@@ -689,10 +677,7 @@ const localizationDictionary = {
     btnSubmitDocument: "Submit Promotional Document",
     validationErrorLink: "Validation Error: Please submit valid YouTube address parameters.",
     securityErrorProfile: "Security Error: Channel link does not match pre-registered profile metadata.",
-    txtProcessingParams: "Processing tracking parameter removal & documenting node data...",
-    txtWelcomeColdStart: "Welcome! As part of the first 10 users, you have been routed directly onto the active display board!",
-    txtSuccessQueueAdded: "Links successfully documented inside the queue waiting list lines!",
-    alertAccumulatedAppeals: "System Notice: Target channel has accumulated 3 appeals. Drop execution triggered. Account placed into a 4-hour lockdown matrix!"
+    txtProcessingParams: "Processing tracking parameter removal & documenting node data..."
   },
   fr: {
     headerLogo: "Centre de Promotion YouTube",
@@ -728,9 +713,6 @@ const localizationDictionary = {
     txtSecurityNode: "(Nœud de Sécurité Actif)",
     txtNoUsersQueue: "Aucune chaîne ne se trouve actuellement dans la matrice de la liste d'attente.",
     txtAppealsRegistered: "Recours Enregistrés",
-    alertAppealingExpiredOut: "La période de recours a expiré ! Votre emplacement a été permuté. Vous entrez dans un délai de récupération normal de 3 heures avant de pouvoir télécharger à nouveau.",
-    alertAppealingExpiredRetained: "La période de recours a expiré ! Vous avez été sélectionné au hasard pour conserver une place sur le tableau d'affichage principal en raison de postes vacants.",
-    alertAppealingExpiredSwap: "La période de recours a expiré ! Les candidats de la liste d'attente ont permuté leurs places sur la grille d'affichage principale.",
     txtUploadBlockedAppeals: "Téléchargement Bloqué: Compte suspendu en raison de 3 recours. Ré-autorisé dans {min} min.",
     txtUploadBlockedCooldown: "Téléchargement Bloqué: Délai de récupération après rotation active en cours. Ré-autorisé dans {min} min.",
     txtSingleUploadSecurity: "Sécurité de Téléchargement Unique Active: Le lien de votre chaîne est déjà suivi sur les grilles du tableau ou la ligne d'attente.",
@@ -742,10 +724,7 @@ const localizationDictionary = {
     btnSubmitDocument: "Soumettre le Document Promotionnel",
     validationErrorLink: "Erreur de Validation: Veuillez soumettre des paramètres d'adresse YouTube valides.",
     securityErrorProfile: "Erreur de Sécurité: Le lien de la chaîne ne correspond pas aux métadonnées du profil pré-enregistré.",
-    txtProcessingParams: "Traitement de la suppression des paramètres de suivi & documentation des données du nœud...",
-    txtWelcomeColdStart: "Bienvenue ! En tant que membre des 10 premiers utilisateurs, vous avez été dirigé directement sur le tableau d'affichage actif !",
-    txtSuccessQueueAdded: "Liens documentés avec succès dans les lignes de la liste d'attente !",
-    alertAccumulatedAppeals: "Avis du Système: La chaîne cible a accumulé 3 recours. Déclenchement de l'exclusion. Compte placé dans une matrice de verrouillage de 4 heures !"
+    txtProcessingParams: "Traitement de la suppression des paramètres de suivi & documentation des données du nœud..."
   },
   rw: {
     headerLogo: "Ikigo cyo Kwamamaza kuri YouTube",
@@ -781,9 +760,6 @@ const localizationDictionary = {
     txtSecurityNode: "(Umutekano urarinzwe)",
     txtNoUsersQueue: " Nta miyoboro ihari ihagaze ku rutonde rw'abategereje ubu.",
     txtAppealsRegistered: "Ubujurire Bumaze Kwandikwa",
-    alertAppealingExpiredOut: "Igihe cy'ubujurire cyarangiye! Umwanya wawe wahinduwe. Winjiye mu gihe cy'akaruhuko cy'amasaha 3 mbere yo kongera gushoraho.",
-    alertAppealingExpiredRetained: "Igihe cy'ubujurire cyarangiye! Watoranyijwe mu buryo bw'amahirwe ngo ugume ku kibaho gishorwaho kubera imyanya yari ishonje.",
-    alertAppealingExpiredSwap: "Igihe cy'ubujurire cyarangiye! Abari bategereje ku murongo bimuriwe ku kibaho gishorwaho gikuru.",
     txtUploadBlockedAppeals: "Gushoraho birahagaritswe: Konti yarahagaritswe kubera ubujurire 3. Bikundwa nanone nyuma y'iminota {min}.",
     txtUploadBlockedCooldown: "Gushoraho birahagaritswe: Muri mu karuhuko nyuma yo kuva ku kibaho cy'iyamamakaza. Bikundwa nanone nyuma y'iminota {min}.",
     txtSingleUploadSecurity: "Umutekano wo Gushoraho Rimwe uractive: Umuyoboro wawe uracyari ku kibaho cyangwa ku murongo utegereje.",
@@ -795,14 +771,10 @@ const localizationDictionary = {
     btnSubmitDocument: "Ohereza Dosiye y'Iyamamakaza",
     validationErrorLink: "Ikosa ryo Kugenzura: Nyamuneka tanga iyanzo z'ukuri za YouTube.",
     securityErrorProfile: "Ikosa ry'Umutekano: Iyanzo y'umuyoboro ntabwo ihuye n'umuyoboro wawe wiyandikishije.",
-    txtProcessingParams: "Turimo gukuraho ibiranga ikurikirana ndetse no kwandika amakuru...",
-    txtWelcomeColdStart: "Ikaze! Nk'umwe mu bakoresha 10 ba mbere, wahise ushyirwa mu buryo bw'ako kanya ku kibaho gikuru kiyandikishirizwaho!",
-    txtSuccessQueueAdded: "Iyanzo zose zanditswe neza ku rutonde rw'abategereje!",
-    alertAccumulatedAppeals: "Icyangombwa cy'Urubuga: Umuyoboro ujuriwe wageze ku bujurire 3. Ukuweho ako kanya. Konti ishyizwe mu gufungwa by'agateganyo by'amasaha 4!"
+    txtProcessingParams: "Turimo gukuraho ibiranga ikurikirana ndetse no kwandika amakuru..."
   }
 };
 
-// Retrieve globally active language identifier set inside index.html navigation flows
 let activeLang = localStorage.getItem("selectedLanguage") || "en";
 if (!["en", "fr", "rw"].includes(activeLang)) {
   activeLang = "en";
@@ -841,183 +813,63 @@ function applyPageLocalization() {
   document.getElementById("footerText").innerHTML = t.footerText;
 }
 
-// State architecture driving database rules models
-let currentUserAccount = null;
-let vipChannels = [];
-let regularChannels = [];
-let waitingListUsers = [];
-let combinedBoardOrder = [];
-let sequenceIndex = 0; 
-let globalTimerActive = false;
-let conditionsAccepted = false;
+// PRODUCTION CONFIGURATION: Target base route path of your secure Node.js instance
+const BACKEND_API_BASE = "/api/youtube-dashboard";
 
-// One-Visit Security Rule State Tracking Model
-let visitedChannelIds = JSON.parse(localStorage.getItem("visitedChannelIds")) || [];
-
-// Appealing evaluation state variables
-let isAppealingPeriodActive = false;
-let userIsActiveOnBoard = false; 
-
-// Track active user appeals to enforce constraint models locally
-let usersAppealedByMe = []; 
-
+/**
+ * 1. Synchronized Dynamic Display Engine
+ * Fetches computed architectural state from backend and renders UI.
+ */
 async function fetchDashboardState() {
-  const t = localizationDictionary[activeLang];
   try {
-    if (!currentUserAccount) {
-      currentUserAccount = {
-        id: "u_curr",
-        username: "AlphaUser99",
-        channelUrl: "https://youtube.com/@AlphaUser99"
-      };
-    }
-
-    const now = Date.now();
-    if (localStorage.getItem("appealLockdownExpiry")) {
-      const expiry = parseInt(localStorage.getItem("appealLockdownExpiry"));
-      if (now < expiry) currentUserAccount.isLockedOutByAppeals = true;
-      else localStorage.removeItem("appealLockdownExpiry");
-    }
-    if (localStorage.getItem("normalActiveExpiry")) {
-      const expiry = parseInt(localStorage.getItem("normalActiveExpiry"));
-      if (now < expiry) currentUserAccount.isInNormalCooldown = true;
-      else localStorage.removeItem("normalActiveExpiry");
-    }
-
-    // Checking if VIP space holds accounts or remains unallocated/empty
-    vipChannels = [
-      { id: "v0", empty: true },
-      { id: "v1", empty: true },
-      { id: "v2", empty: true },
-      { id: "v3", empty: true }
-    ];
-
-    if (regularChannels.length === 0) {
-      for(let i = 0; i < 10; i++) {
-        regularChannels.push({ id: `slot_${i}`, empty: true });
-      }
-    }
-
-    const activeRegularCount = regularChannels.filter(item => !item.empty).length;
-    const isBoardFullyPopulated = (activeRegularCount === 10);
-
-    if (isBoardFullyPopulated) {
-      const allTenVisitedTenTimes = regularChannels.every(item => item.views >= 10);
-      if (allTenVisitedTenTimes && !isAppealingPeriodActive) {
-        triggerAppealingPeriodMatrix();
-      }
-    }
-
-    computeBoardSequencing();
-    renderUserIdentityBadge();
-    renderGrids();
-    renderWaitingList();
+    // Note: Backend handles absolute security authentication validation directly via HTTPS JWT cookies.
+    const response = await fetch(`${BACKEND_API_BASE}/state`);
+    if (!response.ok) throw new Error("Dashboard synchronizer network connection failure.");
     
-    if (conditionsAccepted) {
-      evaluateControlZonePresentation();
-    }
+    const state = await response.json();
+    
+    // Dynamic Application UI Upgrades triggered directly from backend response state parameters
+    renderBanner(state.appealingPeriod);
+    renderUserIdentityBadge(state.userAccount);
+    renderGrids(state.vipChannels, state.regularChannels, state.visitedChannelIds, state.buttonSystemState);
+    renderWaitingList(state.waitingListUsers, state.appealingPeriod, state.userIsActiveOnBoard);
+    renderControlZonePresentation(state.controlZoneState);
+    
   } catch (err) {
-    console.error("Database tracking loop link synchronization breakdown:", err);
+    console.error("Database sync loop link failure:", err);
   }
 }
 
-function triggerAppealingPeriodMatrix() {
-  isAppealingPeriodActive = true;
-  document.getElementById("appealingPeriodBanner").style.display = "block";
-  userIsActiveOnBoard = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id); 
-  startAppealingTimer(120); 
-}
-
-function startAppealingTimer(durationSeconds) {
-  let timeLeft = durationSeconds;
+/**
+ * UI DISPLAY RENDER PIPELINES
+ */
+function renderBanner(appealingPeriod) {
+  const banner = document.getElementById("appealingPeriodBanner");
   const display = document.getElementById("appealingCountdown");
-
-  const countdownInterval = setInterval(() => {
-    let minutes = Math.floor(timeLeft / 60);
-    let seconds = timeLeft % 60;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-    display.innerText = `${minutes}:${seconds}`;
-    timeLeft--;
-
-    if (timeLeft < 0) {
-      clearInterval(countdownInterval);
-      executeBoardRevolutionSwap();
-    }
-  }, 1000);
-}
-
-function executeBoardRevolutionSwap() {
-  const t = localizationDictionary[activeLang];
-  isAppealingPeriodActive = false;
-  document.getElementById("appealingPeriodBanner").style.display = "none";
   
-  let oldActivePool = regularChannels.filter(slot => !slot.empty);
-  let incomingRegulars = [];
-  let qualifiedQueue = waitingListUsers.filter(user => user.appealCount < 3);
-
-  while (incomingRegulars.length < 10 && qualifiedQueue.length > 0) {
-    let node = qualifiedQueue.shift();
-    incomingRegulars.push({
-      id: node.id,
-      username: node.username || "QueuedCreator",
-      youtubeChannel: node.youtubeChannel,
-      youtubeVideo: node.youtubeVideo || node.youtubeChannel,
-      views: 0, subs: 0, likes: 0, comments: 0
-    });
-  }
-
-  waitingListUsers = qualifiedQueue;
-
-  if (incomingRegulars.length < 10 && oldActivePool.length > 0) {
-    while (incomingRegulars.length < 10 && oldActivePool.length > 0) {
-      let randomIndex = Math.floor(Math.random() * oldActivePool.length);
-      let selectedUser = oldActivePool.splice(randomIndex, 1)[0];
-      
-      selectedUser.views = 0;
-      selectedUser.subs = 0;
-      selectedUser.likes = 0;
-      selectedUser.comments = 0;
-      
-      incomingRegulars.push(selectedUser);
-    }
-  }
-
-  regularChannels = incomingRegulars;
-  while (regularChannels.length < 10) {
-    regularChannels.push({ id: `slot_${regularChannels.length}`, empty: true });
-  }
-
-  if (userIsActiveOnBoard) {
-    const stillActiveNow = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id);
-    if (!stillActiveNow) {
-      const threeHoursInMs = 3 * 60 * 60 * 1000;
-      localStorage.setItem("normalActiveExpiry", (Date.now() + threeHoursInMs).toString());
-      alert(t.alertAppealingExpiredOut);
-    } else {
-      alert(t.alertAppealingExpiredRetained);
-    }
+  if (appealingPeriod && appealingPeriod.isActive) {
+    banner.style.display = "block";
+    display.innerText = appealingPeriod.countdownText || "00:00";
   } else {
-    alert(t.alertAppealingExpiredSwap);
+    banner.style.display = "none";
   }
-  
-  usersAppealedByMe = []; 
-  sequenceIndex = 0; 
-  fetchDashboardState();
 }
 
-function renderUserIdentityBadge() {
+function renderUserIdentityBadge(userAccount) {
   const t = localizationDictionary[activeLang];
   const container = document.getElementById("preUploadedProfileArea");
-  if(!currentUserAccount) return;
+  if (!userAccount) {
+    container.innerHTML = "";
+    return;
+  }
 
   container.innerHTML = `
     <div class="user-identity-card">
       <div class="card-info">
         <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
-          <span class="username-txt">${currentUserAccount.username} <small style="color:#38bdf8;">${t.txtSecurityNode}</small></span>
-          <span class="raw-link-txt">${currentUserAccount.channelUrl.replace("https://", "")}</span>
+          <span class="username-txt">${userAccount.username} <small style="color:#38bdf8;">${t.txtSecurityNode}</small></span>
+          <span class="raw-link-txt">${userAccount.channelUrl.replace("https://", "")}</span>
         </div>
       </div>
       <button class="action-btn appear-style" id="appearTriggerBtn" disabled>
@@ -1027,22 +879,7 @@ function renderUserIdentityBadge() {
   `;
 }
 
-function computeBoardSequencing() {
-  combinedBoardOrder = [];
-  const activeRegularCount = regularChannels.filter(item => !item.empty).length;
-  if (isAppealingPeriodActive || activeRegularCount < 10) return; 
-
-  // Rule: If VIP slots are filled, push them to sequence stack first. If empty, skip them automatically.
-  vipChannels.forEach(item => {
-    if(!item.empty) combinedBoardOrder.push({ ...item, type: 'vip' });
-  });
-  
-  regularChannels.forEach(item => {
-    if(!item.empty) combinedBoardOrder.push({ ...item, type: 'regular' });
-  });
-}
-
-function renderGrids() {
+function renderGrids(vipChannels, regularChannels, visitedChannelIds, buttonSystemState) {
   const vipGrid = document.getElementById("realVipGrid");
   const regularGrid = document.getElementById("realRegularGrid");
   
@@ -1050,21 +887,15 @@ function renderGrids() {
   regularGrid.innerHTML = "";
 
   vipChannels.forEach((item, index) => {
-    vipGrid.innerHTML += generateCardHTML(item, index, true);
+    vipGrid.innerHTML += generateCardHTML(item, item.sequencePosition, true, visitedChannelIds, buttonSystemState);
   });
-
-  let activeVipCount = vipChannels.filter(v => !v.empty).length;
 
   regularChannels.forEach((item, index) => {
-    let calculatedPosition = item.empty ? -1 : (activeVipCount + regularChannels.filter((c, i) => i < index && !c.empty).length);
-    regularGrid.innerHTML += generateCardHTML(item, calculatedPosition, false);
+    regularGrid.innerHTML += generateCardHTML(item, item.sequencePosition, false, visitedChannelIds, buttonSystemState);
   });
-
-  advanceSequencePastVisitedSlots();
-  syncButtonStates();
 }
 
-function generateCardHTML(item, sequencePosition, isVip) {
+function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, buttonSystemState) {
   const t = localizationDictionary[activeLang];
   if (item.empty) {
     return `
@@ -1110,6 +941,9 @@ function generateCardHTML(item, sequencePosition, isVip) {
       </div>`;
   }
 
+  // Active or Locked Button state dynamically mapped directly from backend array rules calculation
+  const isBtnDisabled = buttonSystemState.disabled || sequencePosition !== buttonSystemState.activeSequenceIndex;
+
   return `
     <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
       <div class="card-info">
@@ -1126,33 +960,27 @@ function generateCardHTML(item, sequencePosition, isVip) {
         </div>
       </div>
       <div id="btn-container-${sequencePosition}">
-        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" data-id="${item.id}" onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item.id}')">
+        <button class="action-btn visit-style seq-btn" ${isBtnDisabled ? 'disabled' : ''} onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item.id}')">
           <span>${t.txtVisitBtn}</span>
         </button>
       </div>
     </div>`;
 }
 
-function renderWaitingList() {
+function renderWaitingList(waitingListUsers, appealingPeriod, userIsActiveOnBoard) {
   const t = localizationDictionary[activeLang];
   const container = document.getElementById("realWaitingContainer");
   container.innerHTML = "";
 
-  if(waitingListUsers.length === 0) {
+  if(!waitingListUsers || waitingListUsers.length === 0) {
     container.innerHTML = `<p style="color:#4b5563; font-style:italic; font-size:14px; text-align:center; padding:15px;">${t.txtNoUsersQueue}</p>`;
     return;
   }
 
   waitingListUsers.forEach(user => {
-    const hasAlreadyAppealedThisUser = usersAppealedByMe.includes(user.id);
-    const totalDistinctAppealsCount = usersAppealedByMe.length;
-    
-    const isAllowedToClickAppeal = isAppealingPeriodActive && 
-                                   userIsActiveOnBoard && 
-                                   !hasAlreadyAppealedThisUser && 
-                                   totalDistinctAppealsCount < 3;
+    // Let the backend explicitly decide permission states based on business models logic
+    const isAllowedToClickAppeal = appealingPeriod.isActive && userIsActiveOnBoard && user.canBeAppealedByMe;
 
-    // Rule: Display channel item with person icon, raw channel link, and structural appeal button
     container.innerHTML += `
       <div class="channel-card" style="border-color: #3b82f6;" id="waiting-node-${user.id}">
         <div class="card-info">
@@ -1174,122 +1002,63 @@ function renderWaitingList() {
   });
 }
 
-function advanceSequencePastVisitedSlots() {
-  while (sequenceIndex < combinedBoardOrder.length && visitedChannelIds.includes(combinedBoardOrder[sequenceIndex].id)) {
-    sequenceIndex++;
-  }
-}
-
-function syncButtonStates() {
-  const activeRegularCount = regularChannels.filter(item => !item.empty).length;
-  
-  // Rule: If board is not full (less than 10 regular users), interaction controls are locked
-  if (activeRegularCount < 10 || isAppealingPeriodActive) {
-    document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
-    return;
-  }
-
-  // Rule: Users already on the board or resting inside the waiting list are strictly locked out from visiting
-  const userIsOnBoard = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id);
-  const userIsInQueue = waitingListUsers.some(user => user.id === currentUserAccount.id);
-  
-  if (userIsOnBoard || userIsInQueue) {
-    document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
-    return;
-  }
-
-  document.querySelectorAll('.seq-btn').forEach(btn => {
-    const currentBtnSeq = parseInt(btn.getAttribute('data-seq'));
-    const targetChannelId = btn.getAttribute('data-id');
-
-    if (!conditionsAccepted || currentBtnSeq !== sequenceIndex || globalTimerActive || currentBtnSeq === -1 || visitedChannelIds.includes(targetChannelId)) {
-      btn.disabled = true;
-    } else {
-      btn.disabled = false;
-    }
-  });
-}
-
-function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
-  const activeRegularCount = regularChannels.filter(item => !item.empty).length;
-  if (globalTimerActive || sequencePosition !== sequenceIndex || isAppealingPeriodActive || activeRegularCount < 10 || visitedChannelIds.includes(elementId)) return;
-
-  // Security Verification check: Stop active board operators or queued candidates from clicking
-  const userIsOnBoard = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id);
-  const userIsInQueue = waitingListUsers.some(user => user.id === currentUserAccount.id);
-  if (userIsOnBoard || userIsInQueue) return;
-
-  window.open(videoUrl, '_blank');
-  globalTimerActive = true;
-  disableAllControls();
-
-  const container = document.getElementById(`btn-container-${sequencePosition}`);
-  let secondsLeft = 30;
-  container.innerHTML = `<span class="timer-chip">30s</span>`;
-
-  const countdown = setInterval(() => {
-    secondsLeft--;
-    const chip = container.querySelector('.timer-chip');
-    if (chip) chip.innerText = `${secondsLeft}s`;
-
-    if (secondsLeft <= 0) {
-      clearInterval(countdown);
-      globalTimerActive = false;
-
-      if (!visitedChannelIds.includes(elementId)) {
-        visitedChannelIds.push(elementId);
-        localStorage.setItem("visitedChannelIds", JSON.stringify(visitedChannelIds));
-      }
-
-      const t = localizationDictionary[activeLang];
-      container.innerHTML = `<span class="success-text" style="font-size:13px; font-weight:bold;"><i class="fa-solid fa-circle-check"></i> ${t.txtVisited}</span>`;
-      
-      sequenceIndex++;
-      advanceSequencePastVisitedSlots();
-      
-      if (sequenceIndex >= combinedBoardOrder.length) {
-        evaluateControlZonePresentation();
-      } else {
-        enableControlsAndSync();
-      }
-    }
-  }, 1000);
-}
-
-async function handleDatabaseAppealTrigger(queueUserId) {
+function renderControlZonePresentation(controlZone) {
+  const bottomZone = document.getElementById("bottomControlZone");
   const t = localizationDictionary[activeLang];
-  if (!isAppealingPeriodActive || !userIsActiveOnBoard) return;
-  if (usersAppealedByMe.includes(queueUserId) || usersAppealedByMe.length >= 3) return;
 
-  try {
-    const targetUser = waitingListUsers.find(u => u.id === queueUserId);
-    if(targetUser) {
-      targetUser.appealCount++;
-      usersAppealedByMe.push(queueUserId);
-      
-      if(targetUser.appealCount >= 3) {
-        alert(t.alertAccumulatedAppeals);
-        if (queueUserId === currentUserAccount.id) {
-          const fourHoursInMs = 4 * 60 * 60 * 1000;
-          localStorage.setItem("appealLockdownExpiry", (Date.now() + fourHoursInMs).toString());
-        }
-        waitingListUsers = waitingListUsers.filter(u => u.id !== queueUserId);
-      }
-      renderWaitingList();
-    }
-  } catch (e) {
-    console.error("Failed handling database appeal execution parameters:", e);
+  if (controlZone.status === "INITIAL_GATEWAY") {
+    bottomZone.innerHTML = `<button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">${t.actionGateBtn}</button>`;
+    return;
+  }
+
+  if (controlZone.status === "LOCKDOWN_APPEALS") {
+    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-gavel"></i> ${t.txtUploadBlockedAppeals.replace("{min}", controlZone.remainingMinutes)}</p>`;
+    return;
+  }
+
+  if (controlZone.status === "LOCKDOWN_COOLDOWN") {
+    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-clock"></i> ${t.txtUploadBlockedCooldown.replace("{min}", controlZone.remainingMinutes)}</p>`;
+    return;
+  }
+
+  if (controlZone.status === "TRACKING_SECURITY") {
+    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-circle-info"></i> ${t.txtSingleUploadSecurity}</p>`;
+    return;
+  }
+
+  if (controlZone.status === "FROZEN_APPEALING") {
+    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtUploadFormFrozen}</p>`;
+    return;
+  }
+
+  if (controlZone.status === "VISITS_INCOMPLETE") {
+    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtCompleteVisitsToUnlock}</p>`;
+    return;
+  }
+
+  if (controlZone.status === "UNLOCKED") {
+    bottomZone.innerHTML = `
+      <div class="upload-form-container">
+        <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> ${t.txtPromoZoneUnlocked}</h3>
+        <div class="input-group">
+          <label style="font-size:13px; color:#94a3b8;">${t.lblTargetVideo}</label>
+          <input type="url" class="link-input" id="ytVideoInput" placeholder="https://www.youtube.com/watch?v=..." required />
+          
+          <label style="font-size:13px; color:#94a3b8; margin-top:4px;">${t.lblYourChannel}</label>
+          <input type="url" class="link-input" id="ytChannelInput" placeholder="https://www.youtube.com/..." required />
+          
+          <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">${t.btnSubmitDocument}</button>
+        </div>
+        <div id="uploadFeedback" class="notify-msg"></div>
+      </div>
+    `;
+    return;
   }
 }
 
-function disableAllControls() {
-  document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
-}
-
-function enableControlsAndSync() {
-  syncButtonStates();
-}
-
+/**
+ * 2. Collect User Input & Send Requests to Backend Trigger Pipelines
+ */
 function openRegulationsModal() {
   document.getElementById("rulesModal").style.display = "block";
 }
@@ -1305,85 +1074,81 @@ function validateCheckboxes() {
   document.getElementById("acceptBtn").disabled = !allChecked;
 }
 
-function submitAcceptedConditions() {
-  conditionsAccepted = true;
-  document.getElementById("rulesModal").style.display = "none";
-  evaluateControlZonePresentation();
-  syncButtonStates();
-}
-
-function evaluateControlZonePresentation() {
-  const bottomZone = document.getElementById("bottomControlZone");
-  const now = Date.now();
-  const t = localizationDictionary[activeLang];
-
-  if (localStorage.getItem("appealLockdownExpiry") && now < parseInt(localStorage.getItem("appealLockdownExpiry"))) {
-    const remainingMs = parseInt(localStorage.getItem("appealLockdownExpiry")) - now;
-    const remainingMins = Math.ceil(remainingMs / (1000 * 60));
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-gavel"></i> ${t.txtUploadBlockedAppeals.replace("{min}", remainingMins)}</p>`;
-    return;
-  }
-
-  if (localStorage.getItem("normalActiveExpiry") && now < parseInt(localStorage.getItem("normalActiveExpiry"))) {
-    const remainingMs = parseInt(localStorage.getItem("normalActiveExpiry")) - now;
-    const remainingMins = Math.ceil(remainingMs / (1000 * 60));
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-clock"></i> ${t.txtUploadBlockedCooldown.replace("{min}", remainingMins)}</p>`;
-    return;
-  }
-
-  const userIsAlreadyOnBoard = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id);
-  const userIsAlreadyInQueue = waitingListUsers.some(user => user.id === currentUserAccount.id);
-  
-  if (userIsAlreadyOnBoard || userIsAlreadyInQueue) {
-    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-circle-info"></i> ${t.txtSingleUploadSecurity}</p>`;
-    return;
-  }
-
-  if (isAppealingPeriodActive) {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtUploadFormFrozen}</p>`;
-    return;
-  }
-
-  const activeRegularCount = regularChannels.filter(item => !item.empty).length;
-  
-  // Rule: Cold start mode -> allow instant uploads without sequencing visits
-  if (activeRegularCount < 10) {
-    unlockVideoUploadZone();
-  } else if (sequenceIndex < combinedBoardOrder.length) {
-    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtCompleteVisitsToUnlock}</p>`;
-  } else {
-    unlockVideoUploadZone();
-  }
-}
-
-function unlockVideoUploadZone() {
-  if(isAppealingPeriodActive) return;
-  const bottomZone = document.getElementById("bottomControlZone");
-  const t = localizationDictionary[activeLang];
-  bottomZone.innerHTML = `
-    <div class="upload-form-container">
-      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> ${t.txtPromoZoneUnlocked}</h3>
-      <div class="input-group">
-        <label style="font-size:13px; color:#94a3b8;">${t.lblTargetVideo}</label>
-        <input type="url" class="link-input" id="ytVideoInput" placeholder="https://www.youtube.com/watch?v=..." required />
-        
-        <label style="font-size:13px; color:#94a3b8; margin-top:4px;">${t.lblYourChannel}</label>
-        <input type="url" class="link-input" id="ytChannelInput" placeholder="https://www.youtube.com/..." required />
-        
-        <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">${t.btnSubmitDocument}</button>
-      </div>
-      <div id="uploadFeedback" class="notify-msg"></div>
-    </div>
-  `;
-}
-
-function cleanTrackingParameters(urlStr) {
+async function submitAcceptedConditions() {
   try {
-    const url = new URL(urlStr);
-    url.search = "";
-    return url.toString();
-  } catch (e) {
-    return urlStr.split('?')[0];
+    const response = await fetch(`${BACKEND_API_BASE}/accept-conditions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
+    if (response.ok) {
+      document.getElementById("rulesModal").style.display = "none";
+      fetchDashboardState();
+    }
+  } catch (err) {
+    console.error("Failed to commit condition declarations:", err);
+  }
+}
+
+function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
+  window.open(videoUrl, '_blank');
+
+  // Trigger countdown visually on the DOM card container node immediately
+  const container = document.getElementById(`btn-container-${sequencePosition}`);
+  let secondsLeft = 30;
+  container.innerHTML = `<span class="timer-chip">30s</span>`;
+  
+  // Disable all other operational view controls to enforce client runtime sync stability
+  document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
+
+  const countdown = setInterval(async () => {
+    secondsLeft--;
+    const chip = container.querySelector('.timer-chip');
+    if (chip) chip.innerText = `${secondsLeft}s`;
+
+    if (secondsLeft <= 0) {
+      clearInterval(countdown);
+      
+      // Notify Backend that visit timer completed successfully
+      try {
+        const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ elementId, sequencePosition })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          // Backend notifies client if special global state actions occurred (alerts)
+          if (result.systemAlertMessage) {
+            alert(localizationDictionary[activeLang][result.systemAlertMessage]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed tracking visit verification loop:", err);
+      } finally {
+        fetchDashboardState();
+      }
+    }
+  }, 1000);
+}
+
+async function handleDatabaseAppealTrigger(queueUserId) {
+  try {
+    const response = await fetch(`${BACKEND_API_BASE}/appeal-user`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ queueUserId })
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      if (result.systemAlertMessage) {
+        alert(localizationDictionary[activeLang][result.systemAlertMessage]);
+      }
+      fetchDashboardState();
+    }
+  } catch (err) {
+    console.error("Failed handling systemic database appeal parameters execution:", err);
   }
 }
 
@@ -1396,70 +1161,54 @@ async function processDatabaseVideoCommit() {
   let rawVideoUrl = videoInput.value.trim();
   let rawChannelUrl = channelInput.value.trim();
 
-  if (!rawVideoUrl.includes("youtube.com") && !rawVideoUrl.includes("youtu.be") ||
-      !rawChannelUrl.includes("youtube.com") && !rawChannelUrl.includes("youtu.be")) {
-    feedback.className = "notify-msg error-text";
-    feedback.innerText = t.validationErrorLink;
-    return;
-  }
-
-  const sanitizedVideoUrl = cleanTrackingParameters(rawVideoUrl);
-  const sanitizedChannelUrl = cleanTrackingParameters(rawChannelUrl);
-  const preregisteredSanitizedChannel = cleanTrackingParameters(currentUserAccount.channelUrl);
-
-  if (sanitizedChannelUrl !== preregisteredSanitizedChannel) {
-    feedback.className = "notify-msg error-text";
-    feedback.innerText = t.securityErrorProfile;
-    return;
-  }
+  // Basic basic validation block before transmission
+  if (!rawVideoUrl || !rawChannelUrl) return;
 
   feedback.className = "notify-msg info-text";
   feedback.innerText = t.txtProcessingParams;
 
-  setTimeout(() => {
-    const activeRegularCount = regularChannels.filter(item => !item.empty).length;
+  try {
+    const response = await fetch(`${BACKEND_API_BASE}/submit-promotion`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rawVideoUrl, rawChannelUrl })
+    });
 
-    if (activeRegularCount < 10) {
-      let firstEmptyIndex = regularChannels.findIndex(slot => slot.empty);
-      if (firstEmptyIndex !== -1) {
-        regularChannels[firstEmptyIndex] = {
-          id: currentUserAccount.id,
-          username: currentUserAccount.username,
-          youtubeChannel: sanitizedChannelUrl,
-          youtubeVideo: sanitizedVideoUrl,
-          views: 0, subs: 0, likes: 0, comments: 0
-        };
-      }
-      feedback.className = "notify-msg success-text";
-      feedback.innerText = t.txtWelcomeColdStart;
-    } else {
-      // Rule: Normal operations route validated channels into the waiting list
-      waitingListUsers.push({
-        id: currentUserAccount.id,
-        username: currentUserAccount.username,
-        youtubeChannel: sanitizedChannelUrl,
-        youtubeVideo: sanitizedVideoUrl,
-        appealCount: 0
-      });
-      feedback.className = "notify-msg success-text";
-      feedback.innerText = t.txtSuccessQueueAdded;
+    const result = await response.json();
+
+    if (!response.ok) {
+      feedback.className = "notify-msg error-text";
+      feedback.innerText = t[result.errorKey] || result.message;
+      return;
     }
 
+    feedback.className = "notify-msg success-text";
+    feedback.innerText = t[result.successKey];
+    
     videoInput.value = "";
     channelInput.value = "";
     
-    // Reset structural tracking variables for the local simulation environment
-    sequenceIndex = 0;
-    fetchDashboardState();
-  }, 1800);
+    setTimeout(() => fetchDashboardState(), 1000);
+
+  } catch (err) {
+    console.error("Submission breakdown pipeline fault:", err);
+    feedback.className = "notify-msg error-text";
+    feedback.innerText = "System connection failure.";
+  }
 }
 
+/**
+ * 3. Window Initializers & Background Polling Loop Engine
+ */
 window.onload = function() {
   applyPageLocalization();
   fetchDashboardState();
 
+  // Long polling heartbeat loop matching previous architecture timing intervals safely
   setInterval(() => {
-    if (!globalTimerActive && !isAppealingPeriodActive) {
+    // If a current local layout visit countdown is running on screen, avoid polling disruptions
+    const localizedTimerRunning = document.querySelector('.timer-chip');
+    if (!localizedTimerRunning) {
       fetchDashboardState();
     }
   }, 5000);
