@@ -649,6 +649,9 @@ let sequenceIndex = 0;
 let globalTimerActive = false;
 let conditionsAccepted = false;
 
+// One-Visit Security Rule State Tracking Model
+let visitedChannelIds = JSON.parse(localStorage.getItem("visitedChannelIds")) || [];
+
 // Appealing evaluation state variables
 let isAppealingPeriodActive = false;
 let userIsActiveOnBoard = false; 
@@ -658,7 +661,6 @@ let usersAppealedByMe = [];
 
 async function fetchDashboardState() {
   try {
-    // Current user context loading logic
     if (!currentUserAccount) {
       currentUserAccount = {
         id: "u_curr",
@@ -667,7 +669,6 @@ async function fetchDashboardState() {
       };
     }
 
-    // Checking client profile security parameters
     const now = Date.now();
     if (localStorage.getItem("appealLockdownExpiry")) {
       const expiry = parseInt(localStorage.getItem("appealLockdownExpiry"));
@@ -680,6 +681,7 @@ async function fetchDashboardState() {
       else localStorage.removeItem("normalActiveExpiry");
     }
 
+    // Checking if VIP space holds accounts or remains unallocated/empty
     vipChannels = [
       { id: "v0", empty: true },
       { id: "v1", empty: true },
@@ -687,19 +689,15 @@ async function fetchDashboardState() {
       { id: "v3", empty: true }
     ];
 
-    // Seed empty board framework initialization (Simulating cold-start state if empty)
     if (regularChannels.length === 0) {
-      // Initialize with 10 slots. At absolute startup, they are empty models.
       for(let i = 0; i < 10; i++) {
         regularChannels.push({ id: `slot_${i}`, empty: true });
       }
     }
 
-    // Check if board layout is fully populated (cold start flag check)
     const activeRegularCount = regularChannels.filter(item => !item.empty).length;
     const isBoardFullyPopulated = (activeRegularCount === 10);
 
-    // Rule: System works as normal and checks for cycle transition only when fully packed
     if (isBoardFullyPopulated) {
       const allTenVisitedTenTimes = regularChannels.every(item => item.views >= 10);
       if (allTenVisitedTenTimes && !isAppealingPeriodActive) {
@@ -723,9 +721,7 @@ async function fetchDashboardState() {
 function triggerAppealingPeriodMatrix() {
   isAppealingPeriodActive = true;
   document.getElementById("appealingPeriodBanner").style.display = "block";
-  
   userIsActiveOnBoard = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id); 
-  
   startAppealingTimer(120); 
 }
 
@@ -736,10 +732,8 @@ function startAppealingTimer(durationSeconds) {
   const countdownInterval = setInterval(() => {
     let minutes = Math.floor(timeLeft / 60);
     let seconds = timeLeft % 60;
-
     minutes = minutes < 10 ? "0" + minutes : minutes;
     seconds = seconds < 10 ? "0" + seconds : seconds;
-
     display.innerText = `${minutes}:${seconds}`;
     timeLeft--;
 
@@ -754,16 +748,10 @@ function executeBoardRevolutionSwap() {
   isAppealingPeriodActive = false;
   document.getElementById("appealingPeriodBanner").style.display = "none";
   
-  // Track old candidates to pull random elements from if queue line runs short
   let oldActivePool = regularChannels.filter(slot => !slot.empty);
-  
-  // Reset active board slots completely
   let incomingRegulars = [];
-
-  // Filter queue line to strip out anyone who hit 3 appeals before executing pop loops
   let qualifiedQueue = waitingListUsers.filter(user => user.appealCount < 3);
 
-  // Pull up to 10 qualified users sequentially from the queue list
   while (incomingRegulars.length < 10 && qualifiedQueue.length > 0) {
     let node = qualifiedQueue.shift();
     incomingRegulars.push({
@@ -775,16 +763,13 @@ function executeBoardRevolutionSwap() {
     });
   }
 
-  // Update real waiting list tracking to reflect the pops
   waitingListUsers = qualifiedQueue;
 
-  // Rule: If waiting list ran dry before filling 10 active slots, fill vacancies randomly from old active pool
   if (incomingRegulars.length < 10 && oldActivePool.length > 0) {
     while (incomingRegulars.length < 10 && oldActivePool.length > 0) {
       let randomIndex = Math.floor(Math.random() * oldActivePool.length);
       let selectedUser = oldActivePool.splice(randomIndex, 1)[0];
       
-      // Reset metrics tracking counters for their fresh display lifecycle rotation
       selectedUser.views = 0;
       selectedUser.subs = 0;
       selectedUser.likes = 0;
@@ -794,13 +779,11 @@ function executeBoardRevolutionSwap() {
     }
   }
 
-  // Ensure board structure array retains exactly 10 element models
   regularChannels = incomingRegulars;
   while (regularChannels.length < 10) {
     regularChannels.push({ id: `slot_${regularChannels.length}`, empty: true });
   }
 
-  // Rule: Users removed from active board who didn't get pulled back via random fallback enter 3-hour cooldown
   if (userIsActiveOnBoard) {
     const stillActiveNow = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id);
     if (!stillActiveNow) {
@@ -844,9 +827,11 @@ function computeBoardSequencing() {
   const activeRegularCount = regularChannels.filter(item => !item.empty).length;
   if (isAppealingPeriodActive || activeRegularCount < 10) return; 
 
+  // Rule: If VIP slots are filled, push them to sequence stack first. If empty, skip them automatically.
   vipChannels.forEach(item => {
     if(!item.empty) combinedBoardOrder.push({ ...item, type: 'vip' });
   });
+  
   regularChannels.forEach(item => {
     if(!item.empty) combinedBoardOrder.push({ ...item, type: 'regular' });
   });
@@ -870,6 +855,7 @@ function renderGrids() {
     regularGrid.innerHTML += generateCardHTML(item, calculatedPosition, false);
   });
 
+  advanceSequencePastVisitedSlots();
   syncButtonStates();
 }
 
@@ -892,6 +878,32 @@ function generateCardHTML(item, sequencePosition, isVip) {
       </div>`;
   }
 
+  const alreadyVisited = visitedChannelIds.includes(item.id);
+
+  if (alreadyVisited) {
+    return `
+      <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
+        <div class="card-info">
+          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="user-details">
+            <span class="username-txt">${item.username}</span>
+            <span class="raw-link-txt">${item.youtubeChannel.replace("https://", "")}</span>
+            <div class="metrics-display">
+              <span class="metric-item"><i class="fa-solid fa-eye"></i> Views: ${item.views || 0}</span>
+              <span class="metric-item"><i class="fa-solid fa-bell"></i> Subs: ${item.subs || 0}</span>
+              <span class="metric-item"><i class="fa-solid fa-thumbs-up"></i> Likes: ${item.likes || 0}</span>
+              <span class="metric-item"><i class="fa-solid fa-comment"></i> Comments: ${item.comments || 0}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <span class="success-text" style="font-size:13px; font-weight:bold; padding: 10px 12px; display:flex; align-items:center; gap:4px;">
+            <i class="fa-solid fa-circle-check"></i> Visited
+          </span>
+        </div>
+      </div>`;
+  }
+
   return `
     <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
       <div class="card-info">
@@ -908,7 +920,7 @@ function generateCardHTML(item, sequencePosition, isVip) {
         </div>
       </div>
       <div id="btn-container-${sequencePosition}">
-        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item.id}')">
+        <button class="action-btn visit-style seq-btn" data-seq="${sequencePosition}" data-id="${item.id}" onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item.id}')">
           <span>Visit</span>
         </button>
       </div>
@@ -933,13 +945,16 @@ function renderWaitingList() {
                                    !hasAlreadyAppealedThisUser && 
                                    totalDistinctAppealsCount < 3;
 
+    // Rule: Display channel item with person icon, raw channel link, and structural appeal button
     container.innerHTML += `
       <div class="channel-card" style="border-color: #3b82f6;" id="waiting-node-${user.id}">
         <div class="card-info">
           <div class="user-avatar" style="color:#3b82f6; background:rgba(59,130,246,0.1);"><i class="fa-solid fa-user"></i></div>
           <div class="user-details">
-            <span class="raw-link-txt" style="font-size:14px; color:#f1f5f9; font-family:monospace;">${user.youtubeChannel}</span>
-            <span style="font-size:11px; color:#ef4444; margin-top:2px; font-weight:bold;"><i class="fa-solid fa-gavel"></i> Appeals Registered: ${user.appealCount || 0} / 3</span>
+            <span class="raw-link-txt" style="font-size:14px; color:#f1f5f9; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+              <i class="fa-solid fa-link" style="font-size:11px; color:#38bdf8; margin-right:4px;"></i>${user.youtubeChannel}
+            </span>
+            <span style="font-size:11px; color:#ef4444; margin-top:4px; font-weight:bold;"><i class="fa-solid fa-gavel"></i> Appeals Registered: ${user.appealCount || 0} / 3</span>
           </div>
         </div>
         <div>
@@ -952,23 +967,35 @@ function renderWaitingList() {
   });
 }
 
+function advanceSequencePastVisitedSlots() {
+  while (sequenceIndex < combinedBoardOrder.length && visitedChannelIds.includes(combinedBoardOrder[sequenceIndex].id)) {
+    sequenceIndex++;
+  }
+}
+
 function syncButtonStates() {
   const activeRegularCount = regularChannels.filter(item => !item.empty).length;
   
-  // Rule: Cold start tracking. If board is under 10 slots filled, visit sequencing is bypassed.
-  if (activeRegularCount < 10) {
+  // Rule: If board is not full (less than 10 regular users), interaction controls are locked
+  if (activeRegularCount < 10 || isAppealingPeriodActive) {
     document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
     return;
   }
 
-  if (isAppealingPeriodActive) {
+  // Rule: Users already on the board or resting inside the waiting list are strictly locked out from visiting
+  const userIsOnBoard = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id);
+  const userIsInQueue = waitingListUsers.some(user => user.id === currentUserAccount.id);
+  
+  if (userIsOnBoard || userIsInQueue) {
     document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
     return;
   }
 
   document.querySelectorAll('.seq-btn').forEach(btn => {
     const currentBtnSeq = parseInt(btn.getAttribute('data-seq'));
-    if (!conditionsAccepted || currentBtnSeq !== sequenceIndex || globalTimerActive || currentBtnSeq === -1) {
+    const targetChannelId = btn.getAttribute('data-id');
+
+    if (!conditionsAccepted || currentBtnSeq !== sequenceIndex || globalTimerActive || currentBtnSeq === -1 || visitedChannelIds.includes(targetChannelId)) {
       btn.disabled = true;
     } else {
       btn.disabled = false;
@@ -978,7 +1005,12 @@ function syncButtonStates() {
 
 function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
   const activeRegularCount = regularChannels.filter(item => !item.empty).length;
-  if (globalTimerActive || sequencePosition !== sequenceIndex || isAppealingPeriodActive || activeRegularCount < 10) return;
+  if (globalTimerActive || sequencePosition !== sequenceIndex || isAppealingPeriodActive || activeRegularCount < 10 || visitedChannelIds.includes(elementId)) return;
+
+  // Security Verification check: Stop active board operators or queued candidates from clicking
+  const userIsOnBoard = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id);
+  const userIsInQueue = waitingListUsers.some(user => user.id === currentUserAccount.id);
+  if (userIsOnBoard || userIsInQueue) return;
 
   window.open(videoUrl, '_blank');
   globalTimerActive = true;
@@ -996,12 +1028,19 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
     if (secondsLeft <= 0) {
       clearInterval(countdown);
       globalTimerActive = false;
-      container.innerHTML = `<span class="success-text" style="font-size:13px;"><i class="fa-solid fa-circle-check"></i> Verified</span>`;
+
+      if (!visitedChannelIds.includes(elementId)) {
+        visitedChannelIds.push(elementId);
+        localStorage.setItem("visitedChannelIds", JSON.stringify(visitedChannelIds));
+      }
+
+      container.innerHTML = `<span class="success-text" style="font-size:13px; font-weight:bold;"><i class="fa-solid fa-circle-check"></i> Visited</span>`;
       
       sequenceIndex++;
+      advanceSequencePastVisitedSlots();
       
       if (sequenceIndex >= combinedBoardOrder.length) {
-        unlockVideoUploadZone();
+        evaluateControlZonePresentation();
       } else {
         enableControlsAndSync();
       }
@@ -1019,18 +1058,14 @@ async function handleDatabaseAppealTrigger(queueUserId) {
       targetUser.appealCount++;
       usersAppealedByMe.push(queueUserId);
       
-      // Rule: Hit 3 appeals => dropped instantly, 4-hour cooldown assigned
       if(targetUser.appealCount >= 3) {
         alert("System Notice: Target channel has accumulated 3 appeals. Drop execution triggered. Account placed into a 4-hour lockdown matrix!");
-        
         if (queueUserId === currentUserAccount.id) {
           const fourHoursInMs = 4 * 60 * 60 * 1000;
           localStorage.setItem("appealLockdownExpiry", (Date.now() + fourHoursInMs).toString());
         }
-        
         waitingListUsers = waitingListUsers.filter(u => u.id !== queueUserId);
       }
-      
       renderWaitingList();
     }
   } catch (e) {
@@ -1086,8 +1121,7 @@ function evaluateControlZonePresentation() {
     return;
   }
 
-  // Single Upload Validation Block
-  const userIsAlreadyOnBoard = regularChannels.some(slot => !slot.empty && slot.username === currentUserAccount.username);
+  const userIsAlreadyOnBoard = regularChannels.some(slot => !slot.empty && slot.id === currentUserAccount.id);
   const userIsAlreadyInQueue = waitingListUsers.some(user => user.id === currentUserAccount.id);
   
   if (userIsAlreadyOnBoard || userIsAlreadyInQueue) {
@@ -1100,8 +1134,9 @@ function evaluateControlZonePresentation() {
     return;
   }
 
-  // Rule: Cold Start Upload Window Logic
   const activeRegularCount = regularChannels.filter(item => !item.empty).length;
+  
+  // Rule: Cold start mode -> allow instant uploads without sequencing visits
   if (activeRegularCount < 10) {
     unlockVideoUploadZone();
   } else if (sequenceIndex < combinedBoardOrder.length) {
@@ -1172,7 +1207,6 @@ async function processDatabaseVideoCommit() {
   setTimeout(() => {
     const activeRegularCount = regularChannels.filter(item => !item.empty).length;
 
-    // Rule: First ten users go directly into the regular board slots instead of the waiting list
     if (activeRegularCount < 10) {
       let firstEmptyIndex = regularChannels.findIndex(slot => slot.empty);
       if (firstEmptyIndex !== -1) {
@@ -1187,7 +1221,7 @@ async function processDatabaseVideoCommit() {
       feedback.className = "notify-msg success-text";
       feedback.innerText = "Welcome! As part of the first 10 users, you have been routed directly onto the active display board!";
     } else {
-      // System working normally -> push onto the line queue list configuration
+      // Rule: Normal operations route validated channels into the waiting list
       waitingListUsers.push({
         id: currentUserAccount.id,
         username: currentUserAccount.username,
@@ -1202,6 +1236,8 @@ async function processDatabaseVideoCommit() {
     videoInput.value = "";
     channelInput.value = "";
     
+    // Reset structural tracking variables for the local simulation environment
+    sequenceIndex = 0;
     fetchDashboardState();
   }, 1800);
 }
@@ -1209,7 +1245,6 @@ async function processDatabaseVideoCommit() {
 window.onload = function() {
   fetchDashboardState();
 
-  // AUTOMATED REFRESH MATRIX LAYER: Runs every 5 seconds to surface updates automatically
   setInterval(() => {
     if (!globalTimerActive && !isAppealingPeriodActive) {
       fetchDashboardState();
