@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>YouTube Improvement Dashboard</title>
 
+<!-- FontAwesome Icons Clean CDN Link -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
 <style>
@@ -535,6 +536,7 @@ footer{
 </header>
 
 <div class="container">
+  <!-- DYNAMIC MONITORING TRACKING STATE BANNER -->
   <div id="appealingPeriodBanner" style="display: none;">
     <div class="appealing-alert-banner">
       <div>
@@ -547,8 +549,10 @@ footer{
 
   <h1 id="pageMainTitle">YouTube Improvement Dashboard</h1>
 
+  <!-- USER PRE-UPLOADED CHANNEL MANAGEMENT LAYER -->
   <div id="preUploadedProfileArea"></div>
 
+  <!-- VIP PARTNER SECTIONS -->
   <div class="vip-section">
     <div class="section-title">
       <span id="vipSectionTitle">VIP Premium Channels (4 slots)</span>
@@ -556,6 +560,7 @@ footer{
     <div class="vip-grid" id="realVipGrid"></div>
   </div>
 
+  <!-- REGULAR SPACES SECTION -->
   <div class="regular-section">
     <div class="section-title">
       <span id="regularSectionTitle">Standard Exchange Slots (10 slots)</span>
@@ -563,6 +568,7 @@ footer{
     <div class="regular-grid" id="realRegularGrid"></div>
   </div>
 
+  <!-- WAITING LIST SECTION -->
   <div class="waiting-section">
     <div class="section-title">
       <span>Queue Line Waiting List</span>
@@ -570,11 +576,13 @@ footer{
     <div class="waiting-list-container" id="realWaitingContainer"></div>
   </div>
 
+  <!-- LOWER DYNAMIC INTERACTION ZONE -->
   <div class="gateway-box" id="bottomControlZone">
     <button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">📜 Read & Accept Conditions</button>
   </div>
 </div>
 
+<!-- REGULATIONS OVERLAY MODAL -->
 <div class="regulations-overlay" id="rulesModal">
   <div class="regulations-card">
     <h2>Platform Regulations</h2>
@@ -621,6 +629,7 @@ footer{
   </div>
 </footer>
 
+<!-- NAVIGATION PANEL -->
 <div class="bottom-nav">
   <a class="nav-item" href="index.html" id="navHomeLink"><span>🏠</span><span class="nav-txt">Home</span></a>
   <a class="nav-item" href="services.html" id="navServicesLink"><span>🛠</span><span class="nav-txt">Services</span></a>
@@ -643,6 +652,7 @@ let conditionsAccepted = false;
 // Appealing evaluation state variables
 let isAppealingPeriodActive = false;
 let userIsActiveOnBoard = false; // Evaluated by backend match constraints
+let isBoardFullyPopulated = false; // Tracks if all 10 regular slots are active
 
 function cleanTrackingParameters(urlStr) {
   try {
@@ -660,7 +670,6 @@ async function fetchDashboardState() {
     // const res = await fetch('/api/youtube/state');
     // const data = await res.json();
     
-    // Simulating user execution logs
     currentUserAccount = {
       id: "u_curr",
       username: "AlphaUser99",
@@ -675,7 +684,7 @@ async function fetchDashboardState() {
       { id: "v3", empty: true }
     ];
 
-    // Simulating full active board counters to test evaluation algorithms
+    // Simulation configuration: Change item properties to "empty: true" to test bootstrap filing phases
     regularChannels = [
       { id: "r0", username: "CreatorGuy", youtubeChannel: "https://youtube.com/@CreatorGuy", youtubeVideo: "https://youtube.com/watch?v=vid0", views: 10, subs: 10, likes: 10, comments: 10 },
       { id: "r1", username: "TechVlog", youtubeChannel: "https://youtube.com/@TechVlog", youtubeVideo: "https://youtube.com/watch?v=vid1", views: 10, subs: 10, likes: 10, comments: 10 },
@@ -695,8 +704,11 @@ async function fetchDashboardState() {
       { id: "w3", youtubeChannel: "https://youtube.com/@NovaSound", appealCount: 2 }
     ];
 
-    // Check if ALL active channels on regular spaces hit exactly 10 views
-    const allTenVisitedTenTimes = regularChannels.length === 10 && regularChannels.every(item => item.views >= 10);
+    // Evaluate structural state parameter thresholds
+    const activeRegularCount = regularChannels.filter(item => !item.empty).length;
+    isBoardFullyPopulated = (activeRegularCount === 10);
+
+    const allTenVisitedTenTimes = isBoardFullyPopulated && regularChannels.every(item => item.views >= 10);
     
     if (allTenVisitedTenTimes) {
       triggerAppealingPeriodMatrix();
@@ -706,6 +718,11 @@ async function fetchDashboardState() {
     renderUserIdentityBadge();
     renderGrids();
     renderWaitingList();
+    
+    // Updates lower action controls immediately based on structural properties
+    if (conditionsAccepted) {
+      evaluateControlZonePresentation();
+    }
   } catch (err) {
     console.error("Database tracking loop link synchronization breakdown:", err);
   }
@@ -715,13 +732,9 @@ function triggerAppealingPeriodMatrix() {
   isAppealingPeriodActive = true;
   document.getElementById("appealingPeriodBanner").style.display = "block";
   
-  // Security validation checks if current logged identity is one of the 10 active slots on the board
-  userIsActiveOnBoard = regularChannels.some(slot => slot.id === currentUserAccount.id || currentUserAccount.username === "AlphaUser99"); // Mock bypass evaluation flag for validation execution inside ui
+  // Security validation checks if current identity matches an item in the 10 active regular slots
+  userIsActiveOnBoard = regularChannels.some(slot => slot.id === currentUserAccount.id || currentUserAccount.username === "AlphaUser99"); 
   
-  // Lock down lower upload access panels during transaction window
-  const bottomZone = document.getElementById("bottomControlZone");
-  bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Upload Form Frozen: System is currently executing an Appealing Period cycle.</p>`;
-
   startAppealingTimer(120); // 2 minutes countdown
 }
 
@@ -754,7 +767,6 @@ function executeBoardRevolutionSwap() {
   document.getElementById("appealingPeriodBanner").style.display = "none";
   alert("Appealing period expired! Waiting list candidates have swapped places onto the main display grid.");
   
-  // Reset fields and fetch structural view frames directly from database models
   fetchDashboardState();
 }
 
@@ -780,7 +792,7 @@ function renderUserIdentityBadge() {
 
 function computeBoardSequencing() {
   combinedBoardOrder = [];
-  if (isAppealingPeriodActive) return; // Freeze processing loop tracks
+  if (isAppealingPeriodActive || !isBoardFullyPopulated) return; // Freeze validation sequencing loops
 
   vipChannels.forEach(item => {
     if(!item.empty) combinedBoardOrder.push({ ...item, type: 'vip' });
@@ -886,6 +898,12 @@ function renderWaitingList() {
 }
 
 function syncButtonStates() {
+  // If the 10 spaces on the regular board are not completely full yet, visit loops remain locked
+  if (!isBoardFullyPopulated) {
+    document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
+    return;
+  }
+
   if (isAppealingPeriodActive) {
     document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
     return;
@@ -907,7 +925,7 @@ function syncButtonStates() {
 }
 
 function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
-  if (globalTimerActive || sequencePosition !== sequenceIndex || isAppealingPeriodActive) return;
+  if (globalTimerActive || sequencePosition !== sequenceIndex || isAppealingPeriodActive || !isBoardFullyPopulated) return;
 
   window.open(videoUrl, '_blank');
   globalTimerActive = true;
@@ -946,14 +964,13 @@ async function handleDatabaseAppealTrigger(queueUserId) {
     // const res = await fetch(`/api/youtube/appeal/${queueUserId}`, { method: 'POST' });
     // const status = await res.json();
 
-    // Frontend simulation of 3-Strike drop + replacement logic constraints
     const targetUser = waitingListUsers.find(u => u.id === queueUserId);
     if(targetUser) {
       targetUser.appealCount++;
       
       if(targetUser.appealCount >= 3) {
-        alert("System Notice: Target channel has accumulated 3 appeals. Drop execution triggered. Account placed into a 3-hour lockdown matrix!");
-        // Remove dropped entry immediately
+        alert("System Notice: Target channel has accumulated 3 appeals. Drop execution triggered. Account placed into a 4-hour lockdown matrix!");
+        // Filter out the dropped entry instantly from the queue data array
         waitingListUsers = waitingListUsers.filter(u => u.id !== queueUserId);
       }
       
@@ -990,19 +1007,23 @@ function validateCheckboxes() {
 function submitAcceptedConditions() {
   conditionsAccepted = true;
   document.getElementById("rulesModal").style.display = "none";
-  
+  evaluateControlZonePresentation();
+  syncButtonStates();
+}
+
+function evaluateControlZonePresentation() {
   const bottomZone = document.getElementById("bottomControlZone");
   
   if (isAppealingPeriodActive) {
-    bottomZone.innerHTML = `<p class="error-text"><i class="fa-solid fa-lock"></i> System is currently executing an Appealing Period cycle.</p>`;
+    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Upload Form Frozen: System is currently executing an Appealing Period cycle.</p>`;
+  } else if (!isBoardFullyPopulated) {
+    // If spaces are not full yet, first 10 users bypass checking validation rules directly to upload forms
+    unlockVideoUploadZone();
   } else if (combinedBoardOrder.length === 0) {
-    bottomZone.innerHTML = `<p class="success-text"><i class="fa-solid fa-circle-check"></i> Board open for immediate entry placement.</p>`;
     unlockVideoUploadZone();
   } else {
-    bottomZone.innerHTML = `<p class="info-text"><i class="fa-solid fa-lock"></i> Complete visiting all board slots sequentially to unlock the promotion dashboard forms.</p>`;
+    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Complete visiting all board slots sequentially to unlock the promotion dashboard forms.</p>`;
   }
-  
-  syncButtonStates();
 }
 
 function unlockVideoUploadZone() {
