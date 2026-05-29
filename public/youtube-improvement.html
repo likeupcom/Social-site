@@ -815,6 +815,7 @@ function applyPageLocalization() {
 
 // PRODUCTION CONFIGURATION: Target base route path of your secure Node.js instance
 const BACKEND_API_BASE = "/api/youtube-dashboard";
+  let userCurrentlyTyping = false;
 
 /**
  * 1. Synchronized Dynamic Display Engine
@@ -1037,22 +1038,45 @@ function renderControlZonePresentation(controlZone) {
   }
 
   if (controlZone.status === "UNLOCKED") {
-    bottomZone.innerHTML = `
-      <div class="upload-form-container">
-        <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> ${t.txtPromoZoneUnlocked}</h3>
-        <div class="input-group">
-          <label style="font-size:13px; color:#94a3b8;">${t.lblTargetVideo}</label>
-          <input type="url" class="link-input" id="ytVideoInput" placeholder="https://www.youtube.com/watch?v=..." required />
-          
-          <label style="font-size:13px; color:#94a3b8; margin-top:4px;">${t.lblYourChannel}</label>
-          <input type="url" class="link-input" id="ytChannelInput" placeholder="https://www.youtube.com/..." required />
-          
-          <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">${t.btnSubmitDocument}</button>
-        </div>
-        <div id="uploadFeedback" class="notify-msg"></div>
+  bottomZone.innerHTML = `
+    <div class="upload-form-container">
+      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> ${t.txtPromoZoneUnlocked}</h3>
+      <div class="input-group">
+
+        <label style="font-size:13px; color:#94a3b8;">${t.lblTargetVideo}</label>
+
+        <input
+          type="url"
+          class="link-input"
+          id="ytVideoInput"
+          placeholder="https://www.youtube.com/watch?v=..."
+          required
+          onfocus="userCurrentlyTyping = true"
+          onblur="userCurrentlyTyping = false"
+        />
+
+        <label style="font-size:13px; color:#94a3b8; margin-top:4px;">${t.lblYourChannel}</label>
+
+        <input
+          type="url"
+          class="link-input"
+          id="ytChannelInput"
+          placeholder="https://www.youtube.com/..."
+          required
+          onfocus="userCurrentlyTyping = true"
+          onblur="userCurrentlyTyping = false"
+        />
+
+        <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">${t.btnSubmitDocument}</button>
+
       </div>
-    `;
-    return;
+
+      <div id="uploadFeedback" class="notify-msg"></div>
+    </div>
+  `;
+  
+  return;
+}
   }
 }
 
@@ -1206,12 +1230,12 @@ window.onload = function() {
 
   // Long polling heartbeat loop matching previous architecture timing intervals safely
   setInterval(() => {
-    // If a current local layout visit countdown is running on screen, avoid polling disruptions
-    const localizedTimerRunning = document.querySelector('.timer-chip');
-    if (!localizedTimerRunning) {
-      fetchDashboardState();
-    }
-  }, 5000);
+  const localizedTimerRunning = document.querySelector('.timer-chip');
+
+  if (!localizedTimerRunning && !userCurrentlyTyping) {
+    fetchDashboardState();
+  }
+}, 5000);
 };
 </script>
 </body>
