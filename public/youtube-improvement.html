@@ -1207,11 +1207,17 @@ window.onload = function() {
   // Long polling heartbeat loop matching previous architecture timing intervals safely
   setInterval(() => {
     // If a current local layout visit countdown is running on screen, avoid polling disruptions
-    const localizedTimerRunning = document.querySelector('.timer-chip');
-    if (!localizedTimerRunning) {
-      fetchDashboardState();
-    }
-  }, 5000);
+    setInterval(() => {
+  const localizedTimerRunning = document.querySelector('.timer-chip');
+
+  const active = document.activeElement;
+  const isTyping =
+    active && (active.tagName === "INPUT" || active.tagName === "TEXTAREA");
+
+  if (!localizedTimerRunning && !isTyping) {
+    fetchDashboardState();
+  }
+}, 5000);
 };
 </script>
 </body>
