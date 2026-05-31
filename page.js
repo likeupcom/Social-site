@@ -200,11 +200,16 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         let targetedSlotsToClick = activeSlots.map(s => s._id.toString());
         const finishedAllVisits = targetedSlotsToClick.every(id => userProfile.visitedChannels.includes(id));
 
-        if (realActiveCount > 0 && !finishedAllVisits) {
-          controlZoneState.status = "VISITS_INCOMPLETE";
-        } else {
-          controlZoneState.status = "UNLOCKED";
-        }
+        // Bootstrap mode until 10 standard slots are filled
+if (realActiveCount < 10) {
+  controlZoneState.status = "UNLOCKED";
+}
+else if (!finishedAllVisits) {
+  controlZoneState.status = "VISITS_INCOMPLETE";
+}
+else {
+  controlZoneState.status = "UNLOCKED";
+}
       }
     }
 
