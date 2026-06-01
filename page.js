@@ -90,15 +90,94 @@ function sanitizeYoutubeUrl(url) {
 
 /**
  * Fetches or initializes the unified operational core application configurations.
- */
+ */ 
 async function getOrCreateSystemState() {
   let state = await YTBoardState.findOne();
   if (!state) {
-    state = new YTBoardState({ appealingPeriodActive: false, activeSequenceIndex: 0 });
+    state = new YTBoardState({
+      appealingPeriodActive: false,
+      activeSequenceIndex: 0
+    });
     await state.save();
   }
   return state;
 }
+async function processAppealingPeriodEnd() {
+
+  const activeSlots = await YTActiveSlot.find()
+    .sort({ sequencePosition: 1 });
+
+  let waitingUsers = await YTWaitingQueue.find()
+    .sort({ timestamp: 1 });
+
+  const rejectedUsers = waitingUsers.filter(
+    u => u.appealCount >= 3
+  );
+
+  for (const rejected of rejectedUsers) {
+
+    await YTUserProfile.findOneAndUpdate(
+      { userId: rejected.userId },
+      {
+        appealBanUntil:
+          new Date(Date.now() + (4 * 60 * 60 * 1000)),
+        acceptedConditions: false,
+        visitedChannels: []
+      },
+      { upsert: true }
+    );
+
+    await YTWaitingQueue.deleteOne({
+      _id: rejected._id
+    });
+  }
+
+  waitingUsers = await YTWaitingQueue.find()
+    .sort({ timestamp: 1 });
+
+  for (const slot of activeSlots) {
+
+    await YTUserProfile.findOneAndUpdate(
+      { userId: slot.userId },
+      {
+        cooldownUntil:
+          new Date(Date.now() + (3 * 60 * 60 * 1000)),
+        acceptedConditions: false,
+        visitedChannels: []
+      },
+      { upsert: true }
+    );
+  }
+
+  await YTActiveSlot.deleteMany({});
+
+  const promotedUsers = waitingUsers.slice(0, 10);
+
+  let position = 4;
+
+  for (const user of promotedUsers) {
+
+    await YTActiveSlot.create({
+      userId: user.userId,
+      username: user.username,
+      youtubeChannel: user.youtubeChannel,
+      youtubeVideo: user.youtubeVideo,
+      sequencePosition: position,
+      isVip: false
+    });
+
+    await YTWaitingQueue.deleteOne({
+      _id: user._id
+    });
+
+    position++;
+  }
+}
+
+
+/* ---------------- ROUTER ROUTE CHANNELS API ---------------- */
+
+router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
 
 
 /* ---------------- ROUTER ROUTE CHANNELS API ---------------- */
@@ -129,11 +208,15 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = sysState.appealingPeriodEnd - new Date();
       if (remainingMs <= 0) {
-        // Automatically switch off appealing status reactively on loop expiration
-        sysState.appealingPeriodActive = false;
-        sysState.appealingPeriodEnd = null;
-        await sysState.save();
-      } else {
+
+  await processAppealingPeriodEnd();
+
+  sysState.appealingPeriodActive = false;
+  sysState.appealingPeriodEnd = null;
+
+  await sysState.save();
+}
+      else {
         const mins = Math.floor(remainingMs / 60000);
         const secs = Math.floor((remainingMs % 60000) / 1000);
         appealingPeriod.isActive = true;
@@ -432,7 +515,8 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
       await YTUserProfile.findOneAndUpdate(
         { userId: offendingUserId },
         { 
-          appealBanUntil: new Date(Date.now() + 15 * 60000), // Account lockout 15 Mins
+          appealBanUntil:
+          new Date(Date.now() + 4 * 60 * 60 * 1000),
           visitedChannels: [] 
         }
       );
