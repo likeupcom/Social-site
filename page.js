@@ -133,22 +133,40 @@ async function processAppealingPeriodEnd() {
 
   waitingUsers = await YTWaitingQueue.find()
     .sort({ timestamp: 1 });
+   const promotedUsers = waitingUsers.slice(0, 10);
 
-  for (const slot of activeSlots) {
-    await YTUserProfile.findOneAndUpdate(
-      { userId: slot.userId },
-      {
-        cooldownUntil:
-          new Date(Date.now() + (3 * 60 * 60 * 1000)),
-        acceptedConditions: false,
-        visitedChannels: []
-      },
-      { upsert: true }
-    );
+const promotedIds = promotedUsers.map(
+  u => u.userId
+);
+
+const survivors = [];
+const replacedUsers = [];
+
+for (const slot of activeSlots) {
+
+  if (promotedIds.includes(slot.userId)) {
+    survivors.push(slot);
+  } else {
+    replacedUsers.push(slot);
   }
+}
+  for (const slot of replacedUsers) {
 
-  await YTActiveSlot.deleteMany({});
+  await YTUserProfile.findOneAndUpdate(
+    { userId: slot.userId },
+    {
+      cooldownUntil:
+        new Date(Date.now() + (3 * 60 * 60 * 1000)),
+      acceptedConditions: false,
+      visitedChannels: []
+    },
+    { upsert: true }
+  );
 
+  await YTActiveSlot.deleteOne({
+    _id: slot._id
+  });
+}
   const promotedUsers = waitingUsers.slice(0, 10);
 
   let position = 4;
@@ -494,24 +512,6 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
     queueRecord.appealCount += 1;
     queueRecord.appealedBy.push(currentOperatorId);
     await queueRecord.save();
-
-    // Rules Evaluation: Handle 3-Appeal Deletion Conditions
-    if (queueRecord.appealCount >= 3) {
-      const offendingUserId = queueRecord.userId;
-      
-      // Expel target object entirely out of the queue matrix database
-      await YTWaitingQueue.findByIdAndDelete(queueUserId);
-
-      // Issue temporary penalty timeline lockdown records to user profile node parameters
-      await YTUserProfile.findOneAndUpdate(
-        { userId: offendingUserId },
-        { 
-          appealBanUntil:
-          new Date(Date.now() + 4 * 60 * 60 * 1000),
-          visitedChannels: [] 
-        }
-      );
-    }
 
     res.json({ success: true });
 
