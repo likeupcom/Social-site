@@ -102,8 +102,8 @@ async function getOrCreateSystemState() {
   }
   return state;
 }
-async function processAppealingPeriodEnd() {
 
+async function processAppealingPeriodEnd() {
   const activeSlots = await YTActiveSlot.find()
     .sort({ sequencePosition: 1 });
 
@@ -115,7 +115,6 @@ async function processAppealingPeriodEnd() {
   );
 
   for (const rejected of rejectedUsers) {
-
     await YTUserProfile.findOneAndUpdate(
       { userId: rejected.userId },
       {
@@ -136,7 +135,6 @@ async function processAppealingPeriodEnd() {
     .sort({ timestamp: 1 });
 
   for (const slot of activeSlots) {
-
     await YTUserProfile.findOneAndUpdate(
       { userId: slot.userId },
       {
@@ -156,7 +154,6 @@ async function processAppealingPeriodEnd() {
   let position = 4;
 
   for (const user of promotedUsers) {
-
     await YTActiveSlot.create({
       userId: user.userId,
       username: user.username,
@@ -173,11 +170,6 @@ async function processAppealingPeriodEnd() {
     position++;
   }
 }
-
-
-/* ---------------- ROUTER ROUTE CHANNELS API ---------------- */
-
-router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
 
 
 /* ---------------- ROUTER ROUTE CHANNELS API ---------------- */
@@ -208,14 +200,13 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = sysState.appealingPeriodEnd - new Date();
       if (remainingMs <= 0) {
+        await processAppealingPeriodEnd();
 
-  await processAppealingPeriodEnd();
+        sysState.appealingPeriodActive = false;
+        sysState.appealingPeriodEnd = null;
 
-  sysState.appealingPeriodActive = false;
-  sysState.appealingPeriodEnd = null;
-
-  await sysState.save();
-}
+        await sysState.save();
+      }
       else {
         const mins = Math.floor(remainingMs / 60000);
         const secs = Math.floor((remainingMs % 60000) / 1000);
@@ -284,15 +275,15 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         const finishedAllVisits = targetedSlotsToClick.every(id => userProfile.visitedChannels.includes(id));
 
         // Bootstrap mode until 10 standard slots are filled
-if (realActiveCount < 10) {
-  controlZoneState.status = "UNLOCKED";
-}
-else if (!finishedAllVisits) {
-  controlZoneState.status = "VISITS_INCOMPLETE";
-}
-else {
-  controlZoneState.status = "UNLOCKED";
-}
+        if (realActiveCount < 10) {
+          controlZoneState.status = "UNLOCKED";
+        }
+        else if (!finishedAllVisits) {
+          controlZoneState.status = "VISITS_INCOMPLETE";
+        }
+        else {
+          controlZoneState.status = "UNLOCKED";
+        }
       }
     }
 
