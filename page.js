@@ -89,7 +89,7 @@ function sanitizeYoutubeUrl(url) {
 }
 
 /**
- * Fetches or initializes the unified operational core application configurations.
+ * Autonomously fetches or initializes the unified operational core application configurations.
  */ 
 async function getOrCreateSystemState() {
   let state = await YTBoardState.findOne();
@@ -134,71 +134,71 @@ async function processAppealingPeriodEnd() {
   waitingUsers = await YTWaitingQueue.find()
     .sort({ timestamp: 1 });
     
- // First 10 waiting users get priority
-const promotedUsers = waitingUsers.slice(0, 10);
+  // First 10 waiting users get priority
+  const promotedUsers = waitingUsers.slice(0, 10);
 
-// Regular active slots only (4-13)
-const regularActiveSlots = activeSlots.filter(
-  s => s.sequencePosition >= 4
-);
-
-// How many waiting users are available
-const waitingCount = promotedUsers.length;
-
-// Number of active users that must be replaced
-const replacementCount = waitingCount;
-
-// Shuffle active users randomly
-const shuffled = [...regularActiveSlots].sort(
-  () => Math.random() - 0.5
-);
-
-// Select users that will be removed
-const replacedUsers = shuffled.slice(
-  0,
-  replacementCount
-);
-
-// Apply cooldown only to replaced users
-for (const slot of replacedUsers) {
-  await YTUserProfile.findOneAndUpdate(
-    { userId: slot.userId },
-    {
-      cooldownUntil:
-        new Date(Date.now() + (3 * 60 * 60 * 1000)),
-      acceptedConditions: false,
-      visitedChannels: []
-    },
-    { upsert: true }
+  // Regular active slots only (4-13)
+  const regularActiveSlots = activeSlots.filter(
+    s => s.sequencePosition >= 4
   );
 
-  await YTActiveSlot.deleteOne({
-    _id: slot._id
-  });
-}
+  // How many waiting users are available
+  const waitingCount = promotedUsers.length;
 
-// Collect available positions
-const freePositions = replacedUsers.map(
-  s => s.sequencePosition
-).sort((a, b) => a - b);
+  // Number of active users that must be replaced
+  const replacementCount = waitingCount;
 
-// Insert promoted users into freed positions
-for (let i = 0; i < promotedUsers.length; i++) {
-  const user = promotedUsers[i];
+  // Shuffle active users randomly
+  const shuffled = [...regularActiveSlots].sort(
+    () => Math.random() - 0.5
+  );
 
-  await YTActiveSlot.create({
-    userId: user.userId,
-    username: user.username,
-    youtubeChannel: user.youtubeChannel,
-    youtubeVideo: user.youtubeVideo,
-    sequencePosition: freePositions[i],
-    isVip: false
-  });
+  // Select users that will be removed
+  const replacedUsers = shuffled.slice(
+    0,
+    replacementCount
+  );
 
-  await YTWaitingQueue.deleteOne({
-    _id: user._id
-  });
-} 
+  // Apply cooldown only to replaced users
+  for (const slot of replacedUsers) {
+    await YTUserProfile.findOneAndUpdate(
+      { userId: slot.userId },
+      {
+        cooldownUntil:
+          new Date(Date.now() + (3 * 60 * 60 * 1000)),
+        acceptedConditions: false,
+        visitedChannels: []
+      },
+      { upsert: true }
+    );
+
+    await YTActiveSlot.deleteOne({
+      _id: slot._id
+    });
+  }
+
+  // Collect available positions
+  const freePositions = replacedUsers.map(
+    s => s.sequencePosition
+  ).sort((a, b) => a - b);
+
+  // Insert promoted users into freed positions
+  for (let i = 0; i < promotedUsers.length; i++) {
+    const user = promotedUsers[i];
+
+    await YTActiveSlot.create({
+      userId: user.userId,
+      username: user.username,
+      youtubeChannel: user.youtubeChannel,
+      youtubeVideo: user.youtubeVideo,
+      sequencePosition: freePositions[i],
+      isVip: false
+    });
+
+    await YTWaitingQueue.deleteOne({
+      _id: user._id
+    });
+  } 
 }
 
 
@@ -424,15 +424,14 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
     const sysState = await getOrCreateSystemState();
 
-// Block all visits unless the appealing period is active
-if (!sysState.appealingPeriodActive) {
-  return res.status(403).json({
-    error: "Visits are not allowed right now."
-  });
-}
+    // Block all visits unless the appealing period is active
+    if (!sysState.appealingPeriodActive) {
+      return res.status(403).json({
+        error: "Visits are not allowed right now."
+      });
+    }
 
     // Secure operational phase check
-    const sysState = await getOrCreateSystemState();
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = sysState.appealingPeriodEnd - new Date();
       const totalSecs = Math.floor(remainingMs / 1000);
@@ -617,24 +616,24 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
     const dbUser = await User.findOne({ username: req.user });
     const currentOperatorId = dbUser._id.toString();
     const isActiveUser = await YTActiveSlot.findOne({
-  userId: currentOperatorId
-});
+      userId: currentOperatorId
+    });
 
-if (!isActiveUser) {
-  return res.status(403).json({
-    error: "Only active users can submit appeals."
-  });
-}
+    if (!isActiveUser) {
+      return res.status(403).json({
+        error: "Only active users can submit appeals."
+      });
+    }
 
-const myAppealsCount = await YTWaitingQueue.countDocuments({
-  appealedBy: currentOperatorId
-});
+    const myAppealsCount = await YTWaitingQueue.countDocuments({
+      appealedBy: currentOperatorId
+    });
 
-if (myAppealsCount >= 3) {
-  return res.status(400).json({
-    error: "You have already used all 3 appeals."
-  });
-}
+    if (myAppealsCount >= 3) {
+      return res.status(400).json({
+        error: "You have already used all 3 appeals."
+      });
+    }
 
     // Securely check if we are in Phase 1 (Appealing Window)
     const sysState = await getOrCreateSystemState();
