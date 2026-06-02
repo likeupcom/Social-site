@@ -133,41 +133,40 @@ async function processAppealingPeriodEnd() {
 
   waitingUsers = await YTWaitingQueue.find()
     .sort({ timestamp: 1 });
-   const promotedUsers = waitingUsers.slice(0, 10);
+    
+  const promotedUsers = waitingUsers.slice(0, 10);
 
-const promotedIds = promotedUsers.map(
-  u => u.userId
-);
-
-const survivors = [];
-const replacedUsers = [];
-
-for (const slot of activeSlots) {
-
-  if (promotedIds.includes(slot.userId)) {
-    survivors.push(slot);
-  } else {
-    replacedUsers.push(slot);
-  }
-}
-  for (const slot of replacedUsers) {
-
-  await YTUserProfile.findOneAndUpdate(
-    { userId: slot.userId },
-    {
-      cooldownUntil:
-        new Date(Date.now() + (3 * 60 * 60 * 1000)),
-      acceptedConditions: false,
-      visitedChannels: []
-    },
-    { upsert: true }
+  const promotedIds = promotedUsers.map(
+    u => u.userId
   );
 
-  await YTActiveSlot.deleteOne({
-    _id: slot._id
-  });
-}
-  const promotedUsers = waitingUsers.slice(0, 10);
+  const survivors = [];
+  const replacedUsers = [];
+
+  for (const slot of activeSlots) {
+    if (promotedIds.includes(slot.userId)) {
+      survivors.push(slot);
+    } else {
+      replacedUsers.push(slot);
+    }
+  }
+  
+  for (const slot of replacedUsers) {
+    await YTUserProfile.findOneAndUpdate(
+      { userId: slot.userId },
+      {
+        cooldownUntil:
+          new Date(Date.now() + (3 * 60 * 60 * 1000)),
+        acceptedConditions: false,
+        visitedChannels: []
+      },
+      { upsert: true }
+    );
+
+    await YTActiveSlot.deleteOne({
+      _id: slot._id
+    });
+  }
 
   let position = 4;
 
