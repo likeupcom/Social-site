@@ -226,7 +226,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     const sysState = await getOrCreateSystemState();
     
     // Process system clock variables for Appealing Period
-    let appealingPeriod = { isActive: false, countdownText: "00:00" };
+    let appealingPeriod = { isActive: false, countdownText: "00:00", phase: 0 };
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = sysState.appealingPeriodEnd - new Date();
       if (remainingMs <= 0) {
@@ -238,29 +238,64 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         await sysState.save();
       }
       else {
-        const mins = Math.floor(remainingMs / 60000);
-        const secs = Math.floor((remainingMs % 60000) / 1000);
         appealingPeriod.isActive = true;
+        const totalSecs = Math.floor(remainingMs / 1000);
+        const mins = Math.floor(totalSecs / 60);
+        const secs = totalSecs % 60;
         appealingPeriod.countdownText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        
+        // Phase 1 (Appealing window): First 2 mins (Remaining time: 180s down to 60s)
+        // Phase 2 (Targeted Visit window): Last 1 min (Remaining time: under 60s)
+        if (totalSecs > 60) {
+          appealingPeriod.phase = 1; 
+        } else {
+          appealingPeriod.phase = 2;
+        }
       }
     }
 
     // Process board layouts (First 10 users rules apply dynamically)
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
     
+    // Check if the current logged-in user (waiting list user) was appealed by any active slot user
+    // We fetch all waiting queue slots where this user might be listed to see who appealed them
+    const myQueueRecord = await YTWaitingQueue.findOne({ userId });
+
     let vipChannels = [];
     let regularChannels = [];
 
     // Initialize 4 VIP slots structures explicitly
     for (let i = 0; i < 4; i++) {
       const match = activeSlots.find(s => s.sequencePosition === i);
-      vipChannels.push(match ? match : { empty: true, sequencePosition: i });
+      if (match) {
+        // In Phase 2, if this active user appealed against me, allow me to visit them
+        const wasAppealedByThisActiveUser = myQueueRecord && myQueueRecord.appealedBy.includes(match.userId);
+        const hasVisited = userProfile.visitedChannels.includes(match._id.toString());
+        
+        vipChannels.push({
+          ...match.toObject(),
+          canVisitTargeted: appealingPeriod.phase === 2 && wasAppealedByThisActiveUser && !hasVisited
+        });
+      } else {
+        vipChannels.push({ empty: true, sequencePosition: i });
+      }
     }
 
     // Initialize 10 Standard slots structures explicitly
     for (let i = 4; i < 14; i++) {
       const match = activeSlots.find(s => s.sequencePosition === i);
-      regularChannels.push(match ? match : { empty: true, sequencePosition: i });
+      if (match) {
+        // In Phase 2, if this active user appealed against me, allow me to visit them
+        const wasAppealedByThisActiveUser = myQueueRecord && myQueueRecord.appealedBy.includes(match.userId);
+        const hasVisited = userProfile.visitedChannels.includes(match._id.toString());
+        
+        regularChannels.push({
+          ...match.toObject(),
+          canVisitTargeted: appealingPeriod.phase === 2 && wasAppealedByThisActiveUser && !hasVisited
+        });
+      } else {
+        regularChannels.push({ empty: true, sequencePosition: i });
+      }
     }
 
     // Count non-empty boards items to see if client needs to complete requirements
@@ -279,7 +314,8 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
       id: q._id.toString(),
       youtubeChannel: q.youtubeChannel,
       appealCount: q.appealCount,
-      canBeAppealedByMe: !q.appealedBy.includes(userId) && q.userId !== userId
+      appealedBy: q.appealedBy, // Show who appealed them during the phase windows
+      canBeAppealedByMe: appealingPeriod.phase === 1 && !q.appealedBy.includes(userId) && q.userId !== userId
     }));
 
     // Calculate status of lower promotional interaction forms zones
@@ -294,10 +330,10 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
       controlZoneState.status = "LOCKDOWN_COOLDOWN";
       controlZoneState.remainingMinutes = Math.ceil((userProfile.cooldownUntil - new Date()) / 60000);
     } else {
-      const alreadyInSystem = userIsActiveOnBoard || await YTWaitingQueue.findOne({ userId });
-      if (alreadyInSystem) {
+      const alreadyInSystem = userIsActiveOnBoard || !!myQueueRecord;
+      if (alreadyInSystem && appealingPeriod.phase !== 2) {
         controlZoneState.status = "TRACKING_SECURITY";
-      } else if (appealingPeriod.isActive) {
+      } else if (appealingPeriod.isActive && appealingPeriod.phase === 1) {
         controlZoneState.status = "FROZEN_APPEALING";
       } else {
         // User must click all occupied operational board items to clear verification sequences
@@ -364,27 +400,46 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     const User = mongoose.model("User");
     const dbUser = await User.findOne({ username: req.user });
     const userId = dbUser._id.toString();
-     const userProfile = await YTUserProfile.findOne({ userId });
+    const userProfile = await YTUserProfile.findOne({ userId });
 
-if (
-  userProfile?.appealBanUntil &&
-  userProfile.appealBanUntil > new Date()
-) {
-  return res.status(403).json({
-    error: "Appeal lockdown active"
-  });
-}
+    if (
+      userProfile?.appealBanUntil &&
+      userProfile.appealBanUntil > new Date()
+    ) {
+      return res.status(403).json({
+        error: "Appeal lockdown active"
+      });
+    }
 
-if (
-  userProfile?.cooldownUntil &&
-  userProfile.cooldownUntil > new Date()
-) {
-  return res.status(403).json({
-    error: "Cooldown active"
-  });
-}
+    if (
+      userProfile?.cooldownUntil &&
+      userProfile.cooldownUntil > new Date()
+    ) {
+      return res.status(403).json({
+        error: "Cooldown active"
+      });
+    }
+
     const slot = await YTActiveSlot.findById(elementId);
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
+
+    // Secure operational phase check
+    const sysState = await getOrCreateSystemState();
+    if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
+      const remainingMs = sysState.appealingPeriodEnd - new Date();
+      const totalSecs = Math.floor(remainingMs / 1000);
+
+      if (totalSecs > 60) {
+        // Locked during Phase 1 completely
+        return res.status(403).json({ error: "Visits are completely frozen during the appealing phase." });
+      } else {
+        // Phase 2: Verify if this active slot user actually appealed against the current logged-in user
+        const myQueueRecord = await YTWaitingQueue.findOne({ userId });
+        if (!myQueueRecord || !myQueueRecord.appealedBy.includes(slot.userId)) {
+          return res.status(403).json({ error: "Unauthorized visit: This active user did not appeal against you." });
+        }
+      }
+    }
 
     // 1. Credit incremental rewards to target visual metadata node securely on backend
     slot.views += 1;
@@ -399,8 +454,12 @@ if (
       { $addToSet: { visitedChannels: elementId } }
     );
 
+    // If it's a Phase 2 verification visit, we bypass index modifications and just exit successfully
+    if (sysState.appealingPeriodActive) {
+      return res.json({ success: true });
+    }
+
     // 3. Increment board indexing values or launch Appealing Period rules engine dynamically
-    const sysState = await getOrCreateSystemState();
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
     
     // Find next non-empty positional coordinate in layout list
@@ -426,7 +485,7 @@ if (
     // If current user just clicked the last active item on the sequence rotation, trigger validation audits phase
     if (!foundNextSlot || nextIndex <= sequencePosition) {
       sysState.appealingPeriodActive = true;
-      sysState.appealingPeriodEnd = new Date(Date.now() + 3 * 60000); // 3 Minutes validation freeze active
+      sysState.appealingPeriodEnd = new Date(Date.now() + 3 * 60000); // 3 total minutes setup (2 min Phase 1 + 1 min Phase 2)
       sysState.activeSequenceIndex = activeSlots.length > 0 ? activeSlots[0].sequencePosition : 0;
       responsePayload.systemAlertMessage = "txtUploadFormFrozen";
     }
@@ -451,23 +510,23 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     const userId = dbUser._id.toString();
     const userProfile = await YTUserProfile.findOne({ userId });
 
-if (
-  userProfile?.appealBanUntil &&
-  userProfile.appealBanUntil > new Date()
-) {
-  return res.status(403).json({
-    error: "Appeal lockdown active"
-  });
-}
+    if (
+      userProfile?.appealBanUntil &&
+      userProfile.appealBanUntil > new Date()
+    ) {
+      return res.status(403).json({
+        error: "Appeal lockdown active"
+      });
+    }
 
-if (
-  userProfile?.cooldownUntil &&
-  userProfile.cooldownUntil > new Date()
-) {
-  return res.status(403).json({
-    error: "Cooldown active"
-  });
-}
+    if (
+      userProfile?.cooldownUntil &&
+      userProfile.cooldownUntil > new Date()
+    ) {
+      return res.status(403).json({
+        error: "Cooldown active"
+      });
+    }
 
     // Perform URL filtering sanitization arrays right away inside backend
     const cleanVideoUrl = sanitizeYoutubeUrl(rawVideoUrl);
@@ -549,6 +608,17 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
     const User = mongoose.model("User");
     const dbUser = await User.findOne({ username: req.user });
     const currentOperatorId = dbUser._id.toString();
+
+    // Securely check if we are in Phase 1 (Appealing Window)
+    const sysState = await getOrCreateSystemState();
+    if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
+      const remainingMs = sysState.appealingPeriodEnd - new Date();
+      if (Math.floor(remainingMs / 1000) <= 60) {
+        return res.status(400).json({ error: "Appealing phase window has closed. Verification window active." });
+      }
+    } else {
+      return res.status(400).json({ error: "Appealing process is not active." });
+    }
 
     const queueRecord = await YTWaitingQueue.findById(queueUserId);
     if (!queueRecord) return res.status(404).json({ error: "Queue element targeted not found." });
