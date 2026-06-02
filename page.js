@@ -422,6 +422,14 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
 
     const slot = await YTActiveSlot.findById(elementId);
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
+    const sysState = await getOrCreateSystemState();
+
+// Block all visits unless the appealing period is active
+if (!sysState.appealingPeriodActive) {
+  return res.status(403).json({
+    error: "Visits are not allowed right now."
+  });
+}
 
     // Secure operational phase check
     const sysState = await getOrCreateSystemState();
@@ -608,6 +616,25 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
     const User = mongoose.model("User");
     const dbUser = await User.findOne({ username: req.user });
     const currentOperatorId = dbUser._id.toString();
+    const isActiveUser = await YTActiveSlot.findOne({
+  userId: currentOperatorId
+});
+
+if (!isActiveUser) {
+  return res.status(403).json({
+    error: "Only active users can submit appeals."
+  });
+}
+
+const myAppealsCount = await YTWaitingQueue.countDocuments({
+  appealedBy: currentOperatorId
+});
+
+if (myAppealsCount >= 3) {
+  return res.status(400).json({
+    error: "You have already used all 3 appeals."
+  });
+}
 
     // Securely check if we are in Phase 1 (Appealing Window)
     const sysState = await getOrCreateSystemState();
