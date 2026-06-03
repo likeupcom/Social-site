@@ -448,18 +448,29 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
       }
     }
 
-    // 1. Credit incremental rewards to target visual metadata node securely on backend
-    slot.views += 1;
-    slot.subs += 1;
-    slot.likes += 1;
-    slot.comments += 1;
-    await slot.save();
+    // During Phase 2 we only record the verification visit.
+// No views, likes, subs, or comments are added.
 
-    // 2. Document completed action to user tracking list array profiles
-    await YTUserProfile.findOneAndUpdate(
-      { userId },
-      { $addToSet: { visitedChannels: elementId } }
-    );
+const isPhase2Visit =
+  sysState.appealingPeriodActive &&
+  sysState.appealingPeriodEnd &&
+  Math.floor(
+    (sysState.appealingPeriodEnd - new Date()) / 1000
+  ) <= 60;
+
+if (!isPhase2Visit) {
+  slot.views += 1;
+  slot.subs += 1;
+  slot.likes += 1;
+  slot.comments += 1;
+  await slot.save();
+}
+
+// Record visit regardless of phase
+await YTUserProfile.findOneAndUpdate(
+  { userId },
+  { $addToSet: { visitedChannels: elementId } }
+);
 
     // If it's a Phase 2 verification visit, we bypass index modifications and just exit successfully
     if (sysState.appealingPeriodActive) {
