@@ -847,10 +847,29 @@ async function fetchDashboardState() {
 function renderBanner(appealingPeriod) {
   const banner = document.getElementById("appealingPeriodBanner");
   const display = document.getElementById("appealingCountdown");
-  
+  const title = document.getElementById("appealingActiveTitle");
+  const desc = document.getElementById("appealingActiveDesc");
+
   if (appealingPeriod && appealingPeriod.isActive) {
     banner.style.display = "block";
     display.innerText = appealingPeriod.countdownText || "00:00";
+
+    if (appealingPeriod.phase === 1) {
+      title.innerHTML =
+        '<i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active';
+
+      desc.innerText =
+        "Active users may submit appeals. Standard visits are locked.";
+    }
+
+    if (appealingPeriod.phase === 2) {
+      title.innerHTML =
+        '<i class="fa-solid fa-shield-check"></i> Verification Period Active';
+
+      desc.innerText =
+        "Appeals are closed. Appealed waiting-list users may now verify the channels that appealed them.";
+    }
+
   } else {
     banner.style.display = "none";
   }
@@ -917,6 +936,7 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
   }
 
   const alreadyVisited = visitedChannelIds.includes(item.id);
+  const targetedVisitAllowed = item.canVisitTargeted === true;
 
   if (alreadyVisited) {
     return `
@@ -943,7 +963,10 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
   }
 
   // Active or Locked Button state dynamically mapped directly from backend array rules calculation
-  const isBtnDisabled = buttonSystemState.disabled || sequencePosition !== buttonSystemState.activeSequenceIndex;
+  const isBtnDisabled = targetedVisitAllowed
+  ? false
+  : (buttonSystemState.disabled ||
+     sequencePosition !== buttonSystemState.activeSequenceIndex);
 
   return `
     <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
@@ -962,7 +985,9 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
       </div>
       <div id="btn-container-${sequencePosition}">
         <button class="action-btn visit-style seq-btn" ${isBtnDisabled ? 'disabled' : ''} onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item.id}')">
-          <span>${t.txtVisitBtn}</span>
+          <span>
+  ${targetedVisitAllowed ? 'Verify Visit' : t.txtVisitBtn}
+</span>
         </button>
       </div>
     </div>`;
