@@ -1161,7 +1161,7 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
         const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id: elementId, sequenceposition })
+          body: JSON.stringify({ id: elementId })
         });
         
         if (response.ok) {
