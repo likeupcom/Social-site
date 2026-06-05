@@ -935,12 +935,12 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
       </div>`;
   }
 
-  const alreadyVisited = visitedChannelIds.includes(item.id);
+  const alreadyVisited = visitedChannelIds.includes(item._id);
   const targetedVisitAllowed = item.canVisitTargeted === true;
 
   if (alreadyVisited) {
     return `
-      <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
+      <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item._id}">
         <div class="card-info">
           <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
           <div class="user-details">
@@ -969,7 +969,7 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
      sequencePosition !== buttonSystemState.activeSequenceIndex);
 
   return `
-    <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item.id}">
+    <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item._id}">
       <div class="card-info">
         <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
@@ -984,7 +984,7 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
         </div>
       </div>
       <div id="btn-container-${sequencePosition}">
-        <button class="action-btn visit-style seq-btn" ${isBtnDisabled ? 'disabled' : ''} onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item.id}')">
+        <button class="action-btn visit-style seq-btn" ${isBtnDisabled ? 'disabled' : ''} onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item._id}')">
           <span>
   ${targetedVisitAllowed ? 'Verify Visit' : t.txtVisitBtn}
 </span>
