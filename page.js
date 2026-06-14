@@ -425,11 +425,11 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     const sysState = await getOrCreateSystemState();
 
     // Block all visits unless the appealing period is active
-   // if (!sysState.appealingPeriodActive) {
-     // return res.status(403).json({
-      //  error: "Visits are not allowed right now."
-    //  });
-   // }
+    if (!sysState.appealingPeriodActive) {
+      return res.status(403).json({
+        error: "Visits are not allowed right now."
+      });
+    }
 
     // Secure operational phase check
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
