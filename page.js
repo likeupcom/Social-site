@@ -104,6 +104,9 @@ async function getOrCreateSystemState() {
 }
 
 async function processAppealingPeriodEnd() {
+  console.log("=== processAppealingPeriodEnd STARTED ===");
+
+  try {
   const activeSlots = await YTActiveSlot.find()
     .sort({ sequencePosition: 1 });
 
@@ -196,9 +199,16 @@ async function processAppealingPeriodEnd() {
     });
 
     await YTWaitingQueue.deleteOne({
-      _id: user._id
-    });
-  } 
+  _id: user._id
+});
+}
+
+console.log("=== processAppealingPeriodEnd FINISHED ===");
+
+} catch (err) {
+  console.error("processAppealingPeriodEnd ERROR:", err);
+  throw err;
+}
 }
 
 
@@ -366,10 +376,13 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "State compilation failure" });
-  }
-});
+  console.error("STATE ROUTE ERROR:", err);
+
+  res.status(500).json({
+    error: "State compilation failure",
+    details: err.message
+  });
+}
 
 /**
  * POST /api/youtube-dashboard/accept-conditions
@@ -508,12 +521,25 @@ await YTUserProfile.findOneAndUpdate(
     let responsePayload = { success: true, systemAlertMessage: null };
 
     // If current user just clicked the last active item on the sequence rotation, trigger validation audits phase
-    if (!foundNextSlot || nextIndex <= sequencePosition) {
-      sysState.appealingPeriodActive = true;
-      sysState.appealingPeriodEnd = new Date(Date.now() + 3 * 60000); // 3 total minutes setup (2 min Phase 1 + 1 min Phase 2)
-      sysState.activeSequenceIndex = activeSlots.length > 0 ? activeSlots[0].sequencePosition : 0;
-      responsePayload.systemAlertMessage = "txtUploadFormFrozen";
-    }
+    // Start appealing period ONLY when every active user has reached 10 interactions
+const allUsersReachedTen = activeSlots.length >= 10 &&
+  activeSlots.every(slot =>
+    slot.views >= 10 &&
+    slot.subs >= 10 &&
+    slot.likes >= 10 &&
+    slot.comments >= 10
+  );
+
+if (allUsersReachedTen) {
+  sysState.appealingPeriodActive = true;
+  sysState.appealingPeriodEnd = new Date(Date.now() + 3 * 60000);
+  sysState.activeSequenceIndex =
+    activeSlots.length > 0
+      ? activeSlots[0].sequencePosition
+      : 0;
+
+  responsePayload.systemAlertMessage = "txtUploadFormFrozen";
+}
 
     await sysState.save();
     res.json(responsePayload);
