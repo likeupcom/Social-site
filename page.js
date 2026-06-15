@@ -184,7 +184,9 @@ async function processAppealingPeriodEnd() {
   const freePositions = replacedUsers.map(
     s => s.sequencePosition
   ).sort((a, b) => a - b);
-
+  console.log("promotedUsers:", promotedUsers.length);
+console.log("replacedUsers:", replacedUsers.length);
+console.log("freePositions:", freePositions);
   // Insert promoted users into freed positions
   for (let i = 0; i < promotedUsers.length; i++) {
     const user = promotedUsers[i];
@@ -383,7 +385,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     details: err.message
   });
 }
-
+});
 /**
  * POST /api/youtube-dashboard/accept-conditions
  */
