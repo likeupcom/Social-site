@@ -425,28 +425,35 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     const sysState = await getOrCreateSystemState();
 
     // Block all visits unless the appealing period is active
-    if (!sysState.appealingPeriodActive) {
-      return res.status(403).json({
-        error: "Visits are not allowed right now."
-      });
-    }
+    if (sysState.appealingPeriodActive) {
 
-    // Secure operational phase check
-    if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
-      const remainingMs = sysState.appealingPeriodEnd - new Date();
-      const totalSecs = Math.floor(remainingMs / 1000);
+  const remainingMs =
+    sysState.appealingPeriodEnd - new Date();
 
-      if (totalSecs > 60) {
-        // Locked during Phase 1 completely
-        return res.status(403).json({ error: "Visits are completely frozen during the appealing phase." });
-      } else {
-        // Phase 2: Verify if this active slot user actually appealed against the current logged-in user
-        const myQueueRecord = await YTWaitingQueue.findOne({ userId });
-        if (!myQueueRecord || !myQueueRecord.appealedBy.includes(slot.userId)) {
-          return res.status(403).json({ error: "Unauthorized visit: This active user did not appeal against you." });
-        }
-      }
-    }
+  const totalSecs =
+    Math.floor(remainingMs / 1000);
+
+  if (totalSecs > 60) {
+    return res.status(403).json({
+      error:
+        "Visits are completely frozen during the appealing phase."
+    });
+  }
+
+  const myQueueRecord =
+    await YTWaitingQueue.findOne({ userId });
+
+  if (
+    !myQueueRecord ||
+    !myQueueRecord.appealedBy.includes(slot.userId)
+  ) {
+    return res.status(403).json({
+      error:
+        "Unauthorized visit."
+    });
+  }
+}
+
 
     // During Phase 2 we only record the verification visit.
 // No views, likes, subs, or comments are added.
