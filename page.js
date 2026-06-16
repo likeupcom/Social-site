@@ -549,9 +549,16 @@ if (!isPhase2Visit) {
 }
 
 // Record visit regardless of phase
+// Record visit regardless of phase while keeping your 30s timestamps safe
 await YTUserProfile.findOneAndUpdate(
   { userId },
-  { $addToSet: { visitedChannels: elementId } }
+  { 
+    $addToSet: { visitedChannels: elementId },
+    $set: { 
+      lastVisitAt: userProfile.lastVisitAt,
+      lastVisitElementId: userProfile.lastVisitElementId 
+    }
+  }
 );
 
     // If it's a Phase 2 verification visit, we bypass index modifications and just exit successfully
