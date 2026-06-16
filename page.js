@@ -579,11 +579,14 @@ await YTUserProfile.findOneAndUpdate(
       
       const checkNext = activeSlots.find(s => s.sequencePosition === nextIndex);
       if (checkNext) {
-        userProfile.activeSequenceIndex = nextIndex;
-await userProfile.save();
+        // Safe database update
+        await YTUserProfile.findOneAndUpdate(
+          { userId },
+          { $set: { activeSequenceIndex: nextIndex } }
+        );
 
-foundNextSlot = true;
-break;
+        foundNextSlot = true;
+        break;
       }
       nextIndex++;
       lookupsAttempted++;
@@ -604,16 +607,17 @@ const allUsersReachedTen = activeSlots.length >= 10 &&
 if (allUsersReachedTen) {
   sysState.appealingPeriodActive = true;
   sysState.appealingPeriodEnd = new Date(Date.now() + 3 * 60000);
-  userProfile.activeSequenceIndex =
-  activeSlots.length > 0
-    ? activeSlots[0].sequencePosition
-    : 0;
+  
+  const resetIndex = activeSlots.length > 0 ? activeSlots[0].sequencePosition : 0;
 
-await userProfile.save();
+  // Safe database update
+  await YTUserProfile.findOneAndUpdate(
+    { userId },
+    { $set: { activeSequenceIndex: resetIndex } }
+  );
 
   responsePayload.systemAlertMessage = "txtUploadFormFrozen";
 }
-
     await sysState.save();
     res.json(responsePayload);
 
