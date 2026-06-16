@@ -444,6 +444,7 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     const dbUser = await User.findOne({ username: req.user });
     const userId = dbUser._id.toString();  
     // === PASTE THIS NEW CODE BLOCK HERE ===
+    // 1. CHECK THE EXISTING SEQUENTIAL TIMELOCK
     const userProfileCheck = await YTUserProfile.findOne({ userId });
     if (userProfileCheck && userProfileCheck.lastVisitAt) {
       const timePassed = Date.now() - new Date(userProfileCheck.lastVisitAt).getTime();
@@ -451,11 +452,13 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
         return res.status(429).json({
           error: "Please wait before clicking again.",
           cooldownSeconds: Math.ceil((30000 - timePassed) / 1000),
-          elementId
+          // FORCE the returned ID to match what the frontend expects for the countdown lock
+          elementId: userProfileCheck.lastVisitElementId || elementId 
         });
       }
     }
 
+    // 2. SAVE THE NEW SELECTION TIMESTAMP
     const userProfile = await YTUserProfile.findOneAndUpdate(
       { userId },
       {
