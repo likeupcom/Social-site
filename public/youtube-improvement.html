@@ -1140,36 +1140,50 @@ async function submitAcceptedConditions() {
 function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
   window.open(videoUrl, '_blank');
 
-  // Trigger countdown visually on the DOM card container node immediately
   const container = document.getElementById(`btn-container-${sequencePosition}`);
+  if (!container) {
+    console.warn("Timer container missing");
+    return;
+  }
+
   let secondsLeft = 30;
-  container.innerHTML = `<span class="timer-chip">30s</span>`;
-  
-  // Disable all other operational view controls to enforce client runtime sync stability
-  document.querySelectorAll('.seq-btn').forEach(btn => btn.disabled = true);
+
+  let chip = container.querySelector('.timer-chip');
+  if (!chip) {
+    chip = document.createElement("span");
+    chip.className = "timer-chip";
+    container.appendChild(chip);
+  }
+
+  chip.innerText = `${secondsLeft}s`;
+
+  const btn = container.querySelector("button");
+  if (btn) btn.disabled = true;
 
   const countdown = setInterval(async () => {
     secondsLeft--;
+
     const chip = container.querySelector('.timer-chip');
-    if (chip) chip.innerText = `${secondsLeft}s`;
+    if (chip) {
+      chip.innerText = `${secondsLeft}s`;
+    }
 
     if (secondsLeft <= 0) {
       clearInterval(countdown);
-      
-      // Notify Backend that visit timer completed successfully
+
       try {
         const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-  elementId,
-  sequencePosition
-})
+            elementId,
+            sequencePosition
+          })
         });
-        
+
         if (response.ok) {
           const result = await response.json();
-          // Backend notifies client if special global state actions occurred (alerts)
+
           if (result.systemAlertMessage) {
             alert(localizationDictionary[activeLang][result.systemAlertMessage]);
           }
@@ -1182,7 +1196,6 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
     }
   }, 1000);
 }
-
 async function handleDatabaseAppealTrigger(queueUserId) {
   try {
     const response = await fetch(`${BACKEND_API_BASE}/appeal-user`, {
