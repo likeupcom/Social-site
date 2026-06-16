@@ -241,7 +241,9 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     // Process system clock variables for Appealing Period
     let appealingPeriod = { isActive: false, countdownText: "00:00", phase: 0 };
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
-      const remainingMs = sysState.appealingPeriodEnd - new Date();
+      const now = Date.now();
+const end = new Date(sysState.appealingPeriodEnd).getTime();
+const remainingMs = end - now;
       if (remainingMs <= 0) {
         await processAppealingPeriodEnd();
 
@@ -468,7 +470,25 @@ if (isActiveOnBoard || isInWaitingList) {
         error: "Cooldown active"
       });
     }
+    const recentVisit = await YTUserProfile.findOne({
+  userId,
+  lastVisitElementId: elementId,
+  lastVisitAt: { $gt: new Date(Date.now() - 5000) } // 5 seconds
+});
 
+if (recentVisit) {
+  return res.status(429).json({
+    error: "Please wait before clicking again."
+  });
+}
+
+await YTUserProfile.findOneAndUpdate(
+  { userId },
+  {
+    lastVisitElementId: elementId,
+    lastVisitAt: new Date()
+  }
+);
     const slot = await YTActiveSlot.findById(elementId);
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
     const sysState = await getOrCreateSystemState();
