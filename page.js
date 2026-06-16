@@ -442,8 +442,30 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     const { elementId, sequencePosition } = req.body;
     const User = mongoose.model("User");
     const dbUser = await User.findOne({ username: req.user });
-    const userId = dbUser._id.toString();
-    const userProfile = await YTUserProfile.findOne({ userId });
+    const userId = dbUser._id.toString();  
+    // === PASTE THIS NEW CODE BLOCK HERE ===
+    const userProfileCheck = await YTUserProfile.findOne({ userId });
+    if (userProfileCheck && userProfileCheck.lastVisitAt) {
+      const timePassed = Date.now() - new Date(userProfileCheck.lastVisitAt).getTime();
+      if (timePassed < 30000) {
+        return res.status(429).json({
+          error: "Please wait before clicking again.",
+          cooldownSeconds: Math.ceil((30000 - timePassed) / 1000),
+          elementId
+        });
+      }
+    }
+
+    const userProfile = await YTUserProfile.findOneAndUpdate(
+      { userId },
+      {
+        lastVisitElementId: elementId,
+        lastVisitAt: new Date()
+      },
+      { new: true, upsert: true }
+    );
+    // === END OF NEW CODE BLOCK ===
+
     const isActiveOnBoard = await YTActiveSlot.findOne({ userId });
 const isInWaitingList = await YTWaitingQueue.findOne({ userId });
 
@@ -470,29 +492,6 @@ if (isActiveOnBoard || isInWaitingList) {
         error: "Cooldown active"
       });
     }
-const recentVisit = await YTUserProfile.findOne({
-  userId,
-  lastVisitElementId: elementId,
-  lastVisitAt: { $gt: new Date(Date.now() - 30000) } // 30 seconds
-});
-
-if (recentVisit) {
-  return res.status(429).json({
-    error: "Please wait before clicking again.",
-    cooldownSeconds: Math.ceil(
-      (30000 - (Date.now() - new Date(recentVisit.lastVisitAt).getTime())) / 1000
-    ),
-    elementId
-  });
-}
-
-await YTUserProfile.findOneAndUpdate(
-  { userId },
-  {
-    lastVisitElementId: elementId,
-    lastVisitAt: new Date()
-  }
-);
     const slot = await YTActiveSlot.findById(elementId);
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
     const sysState = await getOrCreateSystemState();
