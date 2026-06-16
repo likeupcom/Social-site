@@ -470,20 +470,20 @@ if (isActiveOnBoard || isInWaitingList) {
         error: "Cooldown active"
       });
     }
-    const recentVisit = await YTUserProfile.findOne({
+const recentVisit = await YTUserProfile.findOne({
   userId,
   lastVisitElementId: elementId,
-  lastVisitAt: { $gt: new Date(Date.now() - 5000) } // 5 seconds
+  lastVisitAt: { $gt: new Date(Date.now() - 30000) } // 30 seconds
 });
 
 if (recentVisit) {
   return res.status(429).json({
-  error: "Please wait before clicking again.",
-  cooldownSeconds: Math.ceil(
-    (5000 - (Date.now() - new Date(recentVisit.lastVisitAt).getTime())) / 1000
-  ),
-  elementId
-});
+    error: "Please wait before clicking again.",
+    cooldownSeconds: Math.ceil(
+      (30000 - (Date.now() - new Date(recentVisit.lastVisitAt).getTime())) / 1000
+    ),
+    elementId
+  });
 }
 
 await YTUserProfile.findOneAndUpdate(
