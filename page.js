@@ -316,10 +316,21 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     const userIsActiveOnBoard = activeSlots.some(s => s.userId === userId);
 
     // Compute interactive button behaviors
-    let buttonSystemState = {
+    const vipSlots = activeSlots.filter(s => s.sequencePosition < 4);
+const regularSlots = activeSlots.filter(s => s.sequencePosition >= 4);
+
+// Decide correct starting point
+let startIndex = 0;
+
+if (vipSlots.length > 0) {
+  startIndex = vipSlots.sort((a, b) => a.sequencePosition - b.sequencePosition)[0].sequencePosition;
+} else if (regularSlots.length > 0) {
+  startIndex = regularSlots.sort((a, b) => a.sequencePosition - b.sequencePosition)[0].sequencePosition;
+}
+
+let buttonSystemState = {
   disabled: false,
-  activeSequenceIndex:
-    userProfile.activeSequenceIndex || 0
+  activeSequenceIndex: userProfile.activeSequenceIndex || startIndex
 };
     if (appealingPeriod.isActive) {
       buttonSystemState.disabled = true;
@@ -608,13 +619,31 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     const currentActiveSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
     
     let targetPosition = -1;
-    // Walk regular layout tracks (positions 4 to 13) looking for available open vectors
-    for (let i = 4; i < 14; i++) {
-      if (!currentActiveSlots.some(s => s.sequencePosition === i)) {
-        targetPosition = i;
-        break;
-      }
-    }
+
+// Try to reserve slot atomically (SAFE)
+for (let i = 4; i < 14; i++) {
+  const reserved = await YTActiveSlot.findOneAndUpdate(
+    { sequencePosition: i }, // slot exists?
+    { $setOnInsert: null },   // do nothing if exists
+    { upsert: false, new: true }
+  );
+
+  if (!reserved) {
+    // slot is free → reserve it immediately
+    targetPosition = i;
+
+    await YTActiveSlot.create({
+      userId,
+      username: dbUser.username,
+      youtubeChannel: cleanChannelUrl,
+      youtubeVideo: cleanVideoUrl,
+      sequencePosition: i,
+      isVip: false
+    });
+
+    break;
+  }
+}
 
     // If board is full, push item into waiting line queue list instead
     if (targetPosition === -1) {
