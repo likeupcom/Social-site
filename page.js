@@ -328,10 +328,20 @@ if (vipSlots.length > 0) {
   startIndex = regularSlots.sort((a, b) => a.sequencePosition - b.sequencePosition)[0].sequencePosition;
 }
 
+const isActiveOnBoard = await YTActiveSlot.exists({ userId });
+const isInWaitingList = await YTWaitingQueue.exists({ userId });
+
+// compute base state
 let buttonSystemState = {
   disabled: false,
   activeSequenceIndex: userProfile.activeSequenceIndex || startIndex
 };
+
+// ❌ YOUR RULE: system users cannot visit
+if (isActiveOnBoard || isInWaitingList) {
+  buttonSystemState.disabled = true;
+  buttonSystemState.lockReason = "SYSTEM_MEMBER_NO_VISIT";
+}
     if (appealingPeriod.isActive) {
       buttonSystemState.disabled = true;
     }
