@@ -432,7 +432,15 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     const dbUser = await User.findOne({ username: req.user });
     const userId = dbUser._id.toString();
     const userProfile = await YTUserProfile.findOne({ userId });
+    const isActiveOnBoard = await YTActiveSlot.findOne({ userId });
+const isInWaitingList = await YTWaitingQueue.findOne({ userId });
 
+// ❌ Once user enters system (active OR waiting), they lose visit rights
+if (isActiveOnBoard || isInWaitingList) {
+  return res.status(403).json({
+    error: "You are no longer allowed to visit other channels."
+  });
+}
     if (
       userProfile?.appealBanUntil &&
       userProfile.appealBanUntil > new Date()
