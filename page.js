@@ -63,6 +63,7 @@ const YTUserProfileSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   acceptedConditions: { type: Boolean, default: false },
   visitedChannels: { type: [String], default: [] }, // Array of ActiveSlot IDs successfully clicked
+  activeSequenceIndex: { type: Number, default: 0 },
   cooldownUntil: { type: Date, default: null },
   appealBanUntil: { type: Date, default: null }
 });
@@ -315,7 +316,11 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     const userIsActiveOnBoard = activeSlots.some(s => s.userId === userId);
 
     // Compute interactive button behaviors
-    let buttonSystemState = { disabled: false, activeSequenceIndex: sysState.activeSequenceIndex };
+    let buttonSystemState = {
+  disabled: false,
+  activeSequenceIndex:
+    userProfile.activeSequenceIndex || 0
+};
     if (appealingPeriod.isActive) {
       buttonSystemState.disabled = true;
     }
@@ -512,9 +517,11 @@ await YTUserProfile.findOneAndUpdate(
       
       const checkNext = activeSlots.find(s => s.sequencePosition === nextIndex);
       if (checkNext) {
-        sysState.activeSequenceIndex = nextIndex;
-        foundNextSlot = true;
-        break;
+        userProfile.activeSequenceIndex = nextIndex;
+await userProfile.save();
+
+foundNextSlot = true;
+break;
       }
       nextIndex++;
       lookupsAttempted++;
@@ -535,10 +542,12 @@ const allUsersReachedTen = activeSlots.length >= 10 &&
 if (allUsersReachedTen) {
   sysState.appealingPeriodActive = true;
   sysState.appealingPeriodEnd = new Date(Date.now() + 3 * 60000);
-  sysState.activeSequenceIndex =
-    activeSlots.length > 0
-      ? activeSlots[0].sequencePosition
-      : 0;
+  userProfile.activeSequenceIndex =
+  activeSlots.length > 0
+    ? activeSlots[0].sequencePosition
+    : 0;
+
+await userProfile.save();
 
   responsePayload.systemAlertMessage = "txtUploadFormFrozen";
 }
@@ -634,15 +643,17 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     await newSlot.save();
 
     // Reset user tracking arrays history values to guarantee complete sequential viewing tracking
-    await YTUserProfile.findOneAndUpdate({ userId }, { visitedChannels: [] });
+    await YTUserProfile.findOneAndUpdate(
+  { userId },
+  {
+    visitedChannels: [],
+    activeSequenceIndex: 0
+  }
+);
 
     // Sync baseline index sequence positions to avoid layout locks
     const sysState = await getOrCreateSystemState();
     const updatedSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
-    if (updatedSlots.length === 1) {
-      sysState.activeSequenceIndex = targetPosition;
-      await sysState.save();
-    }
 
     res.json({ successKey: "txtPromoZoneUnlocked" });
 
