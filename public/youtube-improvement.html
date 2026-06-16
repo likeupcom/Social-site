@@ -1139,7 +1139,14 @@ async function submitAcceptedConditions() {
 
 function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
   window.open(videoUrl, '_blank');
-
+  localStorage.setItem(
+  "activeCountdown",
+  JSON.stringify({
+    sequencePosition,
+    elementId,
+    endTime: Date.now() + 30000
+  })
+);
   const container = document.getElementById(`btn-container-${sequencePosition}`);
   if (!container) {
     console.warn("Timer container missing");
@@ -1170,7 +1177,7 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
 
     if (secondsLeft <= 0) {
       clearInterval(countdown);
-
+      localStorage.removeItem("activeCountdown");
       try {
         const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
           method: "POST",
@@ -1264,9 +1271,62 @@ console.log("submit-promotion response:", result);
 /**
  * 3. Window Initializers & Background Polling Loop Engine
  */
+  function restoreCountdown() {
+  const saved = localStorage.getItem("activeCountdown");
+  if (!saved) return;
+
+  const data = JSON.parse(saved);
+
+  const remaining = Math.ceil(
+    (data.endTime - Date.now()) / 1000
+  );
+
+  if (remaining <= 0) {
+    localStorage.removeItem("activeCountdown");
+    return;
+  }
+
+  const container = document.getElementById(
+    `btn-container-${data.sequencePosition}`
+  );
+
+  if (!container) return;
+
+  const btn = container.querySelector("button");
+  if (btn) btn.disabled = true;
+
+  let chip = container.querySelector(".timer-chip");
+
+  if (!chip) {
+    chip = document.createElement("span");
+    chip.className = "timer-chip";
+    container.appendChild(chip);
+  }
+
+  let secondsLeft = remaining;
+
+  chip.innerText = `${secondsLeft}s`;
+
+  const countdown = setInterval(() => {
+    secondsLeft--;
+
+    if (chip) {
+      chip.innerText = `${secondsLeft}s`;
+    }
+
+    if (secondsLeft <= 0) {
+      clearInterval(countdown);
+      localStorage.removeItem("activeCountdown");
+      fetchDashboardState();
+    }
+  }, 1000);
+}
 window.onload = function() {
   applyPageLocalization();
-  fetchDashboardState();
+
+  fetchDashboardState().then(() => {
+    restoreCountdown();
+  });
 
   // Long polling heartbeat loop matching previous architecture timing intervals safely
   setInterval(() => {
