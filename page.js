@@ -699,16 +699,7 @@ for (let i = 4; i < 14; i++) {
     }
 
     // Populate slot using direct data variables inputs without dummy seed variables placeholder logic
-    const newSlot = new YTActiveSlot({
-      userId,
-      username: dbUser.username,
-      youtubeChannel: cleanChannelUrl,
-      youtubeVideo: cleanVideoUrl,
-      sequencePosition: targetPosition,
-      isVip: false
-    });
-    await newSlot.save();
-
+    
     // Reset user tracking arrays history values to guarantee complete sequential viewing tracking
     await YTUserProfile.findOneAndUpdate(
   { userId },
