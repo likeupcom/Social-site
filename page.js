@@ -478,8 +478,12 @@ if (isActiveOnBoard || isInWaitingList) {
 
 if (recentVisit) {
   return res.status(429).json({
-    error: "Please wait before clicking again."
-  });
+  error: "Please wait before clicking again.",
+  cooldownSeconds: Math.ceil(
+    (5000 - (Date.now() - new Date(recentVisit.lastVisitAt).getTime())) / 1000
+  ),
+  elementId
+});
 }
 
 await YTUserProfile.findOneAndUpdate(
