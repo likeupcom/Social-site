@@ -1239,7 +1239,7 @@ async function processDatabaseVideoCommit() {
     });
 
     const result = await response.json();
-
+console.log("submit-promotion response:", result);
     if (!response.ok) {
       feedback.className = "notify-msg error-text";
       feedback.innerText = t[result.errorKey] || result.message;
