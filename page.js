@@ -620,7 +620,10 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     const dbUser = await User.findOne({ username: req.user });
     const userId = dbUser._id.toString();
     const userProfile = await YTUserProfile.findOne({ userId });
-
+    const alreadyExists = await YTActiveSlot.findOne({ userId });
+if (alreadyExists) {
+  return res.json({ successKey: "txtSingleUploadSecurity" });
+}
     if (
       userProfile?.appealBanUntil &&
       userProfile.appealBanUntil > new Date()
@@ -658,16 +661,10 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     
     let targetPosition = -1;
 
-// Try to reserve slot atomically (SAFE)
 for (let i = 4; i < 14; i++) {
-  const reserved = await YTActiveSlot.findOneAndUpdate(
-    { sequencePosition: i }, // slot exists?
-    { $setOnInsert: null },   // do nothing if exists
-    { upsert: false, new: true }
-  );
+  const exists = await YTActiveSlot.findOne({ sequencePosition: i });
 
-  if (!reserved) {
-    // slot is free → reserve it immediately
+  if (!exists) {
     targetPosition = i;
 
     await YTActiveSlot.create({
