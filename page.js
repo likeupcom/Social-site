@@ -268,7 +268,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         
         if (sysState.activeSequenceIndex === 999) {
           appealingPeriod.phase = 0; // Custom Phase 0: 1-Minute Upload Grace Phase
-        } else if (totalSecs > 60) {
+        } else if (totalSecs > 600) {
           appealingPeriod.phase = 1; // Phase 1: Main Appeal phase
         } else {
           appealingPeriod.phase = 2; // Phase 2: Targeted verification phase
@@ -340,20 +340,26 @@ const isActiveOnBoard = await YTActiveSlot.exists({ userId });
 const isInWaitingList = await YTWaitingQueue.exists({ userId });
 
 // compute base state
+    // compute base state
 let buttonSystemState = {
   disabled: false,
   activeSequenceIndex: userProfile.activeSequenceIndex || startIndex
 };
 
-// ❌ YOUR RULE: system users cannot visit
 if (isActiveOnBoard || isInWaitingList) {
   buttonSystemState.disabled = true;
   buttonSystemState.lockReason = "SYSTEM_MEMBER_NO_VISIT";
 }
-    if (appealingPeriod.isActive) {
-      buttonSystemState.disabled = true;
-    }
 
+// Allow interaction only if the user has target verification visits remaining in Phase 2
+if (appealingPeriod.isActive) {
+  if (appealingPeriod.phase === 2) {
+    const hasTargetedVisitsLeft = [...vipChannels, ...regularChannels].some(c => c.canVisitTargeted === true);
+    buttonSystemState.disabled = !hasTargetedVisitsLeft;
+  } else {
+    buttonSystemState.disabled = true;
+  }
+}
     // Format Queue List Data with targeted security flags
     const rawQueue = await YTWaitingQueue.find().sort({ timestamp: 1 });
     const waitingListUsers = rawQueue.map(q => ({
@@ -483,101 +489,71 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
       },
       { new: true, upsert: true }
     );
-    // === END OF NEW CODE BLOCK ===
-
-    const isActiveOnBoard = await YTActiveSlot.findOne({ userId });
-const isInWaitingList = await YTWaitingQueue.findOne({ userId });
-
-// ❌ Once user enters system (active OR waiting), they lose visit rights
-if (isActiveOnBoard || isInWaitingList) {
-  return res.status(403).json({
-    error: "You are no longer allowed to visit other channels."
-  });
-}
-    if (
-      userProfile?.appealBanUntil &&
-      userProfile.appealBanUntil > new Date()
-    ) {
-      return res.status(403).json({
-        error: "Appeal lockdown active"
-      });
-    }
-
-    if (
-      userProfile?.cooldownUntil &&
-      userProfile.cooldownUntil > new Date()
-    ) {
-      return res.status(403).json({
-        error: "Cooldown active"
-      });
-    }
+    const sysState = await getOrCreateSystemState();
     const slot = await YTActiveSlot.findById(elementId);
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
-    const sysState = await getOrCreateSystemState();
 
-    // Block all visits unless the appealing period is active
+    // Calculate exactly if we are in Phase 2 (Last 60 seconds of appealing window)
+      // Calculate exactly if we are in Phase 2 (Last 10 minutes / 600 seconds of appealing window)
+    let isPhase2Visit = false;
+    if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
+      const remainingMs = new Date(sysState.appealingPeriodEnd).getTime() - Date.now();
+      const totalSecs = Math.floor(remainingMs / 1000);
+      if (totalSecs <= 600 && totalSecs > 0 && sysState.activeSequenceIndex !== 999) {
+        isPhase2Visit = true;
+      }
+    }
+
+    const isActiveOnBoard = await YTActiveSlot.findOne({ userId });
+    const myQueueRecord = await YTWaitingQueue.findOne({ userId });
+
+    // STRICT PHASE 2 GATEWAY
     if (sysState.appealingPeriodActive) {
+      if (!isPhase2Visit) {
+        return res.status(403).json({
+          error: "Visits are completely frozen during the appealing phase."
+        });
+      }
 
-  const remainingMs =
-    sysState.appealingPeriodEnd - new Date();
+      // Explicitly allow ONLY the accused waiting user to visit their specific accuser
+      if (!myQueueRecord || !myQueueRecord.appealedBy.includes(slot.userId)) {
+        return res.status(403).json({
+          error: "Access Denied: You can only visit active users who submitted an appeal against you."
+        });
+      }
+    } else {
+      // Normal Operation Mode: Members inside the system cannot use standard visits
+      if (isActiveOnBoard || myQueueRecord) {
+        return res.status(403).json({
+          error: "You are no longer allowed to visit other channels."
+        });
+      }
+    }
 
-  const totalSecs =
-    Math.floor(remainingMs / 1000);
+    if (userProfile?.appealBanUntil && userProfile.appealBanUntil > new Date()) {
+      return res.status(403).json({ error: "Appeal lockdown active" });
+    }
 
-  if (totalSecs > 60) {
-    return res.status(403).json({
-      error:
-        "Visits are completely frozen during the appealing phase."
-    });
-  }
-
-  const myQueueRecord =
-    await YTWaitingQueue.findOne({ userId });
-
-  if (
-    !myQueueRecord ||
-    !myQueueRecord.appealedBy.includes(slot.userId)
-  ) {
-    return res.status(403).json({
-      error:
-        "Unauthorized visit."
-    });
-  }
-}
-
-
-    // During Phase 2 we only record the verification visit.
-// No views, likes, subs, or comments are added.
-    const isPhase2Visit =
-      sysState.appealingPeriodActive &&
-      sysState.appealingPeriodEnd &&
-      Math.floor(
-        (sysState.appealingPeriodEnd - new Date()) / 1000
-      ) <= 600;
+    if (userProfile?.cooldownUntil && userProfile.cooldownUntil > new Date()) {
+      return res.status(403).json({ error: "Cooldown active" });
+    }
 
     // EXPLOIT PROTECTION: Check if this user already recorded a successful visit on this item
     const hasAlreadyVisited = userProfileCheck && userProfileCheck.visitedChannels.includes(elementId);
-
     let currentSlotData = slot;
 
     // ONLY increment counters if it's a normal visit AND they haven't already clicked it
     if (!isPhase2Visit && !hasAlreadyVisited) {
-      // Use MongoDB atomic $inc to safely add exactly 1 point without concurrency collisions
       currentSlotData = await YTActiveSlot.findByIdAndUpdate(
         elementId,
         {
-          $inc: {
-            views: 1,
-            subs: 1,
-            likes: 1,
-            comments: 1
-          }
+          $inc: { views: 1, subs: 1, likes: 1, comments: 1 }
         },
-        { new: true } // Returns freshly updated counts
+        { new: true }
       );
     }
 
-    // Record visit regardless of phase while keeping your 30s timestamps safe
+    // Record visit tracking array safely
     await YTUserProfile.findOneAndUpdate(
       { userId },
       { 
@@ -589,11 +565,10 @@ if (isActiveOnBoard || isInWaitingList) {
       }
     );
 
-    // If it's a Phase 2 verification visit, we bypass index modifications and just exit successfully
-    if (sysState.appealingPeriodActive) {
+    // Phase 2 evaluation successfully terminates here, avoiding index logic updates
+    if (isPhase2Visit) {
       return res.json({ success: true });
     }
-
     // Fetch all slots to update user sequencing and run the threshold calculation
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
 
@@ -802,7 +777,7 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
     const sysState = await getOrCreateSystemState();
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = sysState.appealingPeriodEnd - new Date();
-      if (Math.floor(remainingMs / 1000) <= 60) {
+      if (Math.floor(remainingMs / 1000) <= 600) {
         return res.status(400).json({ error: "Appealing phase window has closed. Verification window active." });
       }
     } else {
