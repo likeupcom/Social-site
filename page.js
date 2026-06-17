@@ -532,43 +532,60 @@ if (isActiveOnBoard || isInWaitingList) {
 
     // During Phase 2 we only record the verification visit.
 // No views, likes, subs, or comments are added.
+    const isPhase2Visit =
+      sysState.appealingPeriodActive &&
+      sysState.appealingPeriodEnd &&
+      Math.floor(
+        (sysState.appealingPeriodEnd - new Date()) / 1000
+      ) <= 60;
 
-const isPhase2Visit =
-  sysState.appealingPeriodActive &&
-  sysState.appealingPeriodEnd &&
-  Math.floor(
-    (sysState.appealingPeriodEnd - new Date()) / 1000
-  ) <= 60;
+    // EXPLOIT PROTECTION: Check if this user already recorded a successful visit on this item
+    const hasAlreadyVisited = userProfileCheck && userProfileCheck.visitedChannels.includes(elementId);
 
-if (!isPhase2Visit) {
-  slot.views += 1;
-  slot.subs += 1;
-  slot.likes += 1;
-  slot.comments += 1;
-  await slot.save();
-}
+    let currentSlotData = slot;
 
-// Record visit regardless of phase
-// Record visit regardless of phase while keeping your 30s timestamps safe
-await YTUserProfile.findOneAndUpdate(
-  { userId },
-  { 
-    $addToSet: { visitedChannels: elementId },
-    $set: { 
-      lastVisitAt: userProfile.lastVisitAt,
-      lastVisitElementId: userProfile.lastVisitElementId 
+    // ONLY increment counters if it's a normal visit AND they haven't already clicked it
+    if (!isPhase2Visit && !hasAlreadyVisited) {
+      // Use MongoDB atomic $inc to safely add exactly 1 point without concurrency collisions
+      currentSlotData = await YTActiveSlot.findByIdAndUpdate(
+        elementId,
+        {
+          $inc: {
+            views: 1,
+            subs: 1,
+            likes: 1,
+            comments: 1
+          }
+        },
+        { new: true } // Returns freshly updated counts
+      );
     }
-  }
-);
+
+    // Record visit regardless of phase while keeping your 30s timestamps safe
+    await YTUserProfile.findOneAndUpdate(
+      { userId },
+      { 
+        $addToSet: { visitedChannels: elementId },
+        $set: { 
+          lastVisitAt: userProfile.lastVisitAt,
+          lastVisitElementId: userProfile.lastVisitElementId 
+        }
+      }
+    );
 
     // If it's a Phase 2 verification visit, we bypass index modifications and just exit successfully
     if (sysState.appealingPeriodActive) {
       return res.json({ success: true });
     }
 
-    // 3. Increment board indexing values or launch Appealing Period rules engine dynamically
+    // Fetch all slots to update user sequencing and run the threshold calculation
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
-    
+
+    // Sync array data references so the 10-visit verification threshold calculation below uses accurate values
+    const slotIndex = activeSlots.findIndex(s => s._id.toString() === elementId);
+    if (slotIndex !== -1 && !isPhase2Visit) {
+      activeSlots[slotIndex] = currentSlotData;
+    }
     // Find next non-empty positional coordinate in layout list
     let nextIndex = sequencePosition + 1;
     let lookupsAttempted = 0;
