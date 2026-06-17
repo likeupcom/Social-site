@@ -522,6 +522,25 @@ footer{
   justify-content: space-between;
   margin-bottom: 25px;
 }
+  /* Highlights the channel card that accused the user */
+.targeted-verification-card {
+  border: 1px dashed #ec4899 !important;
+  background: rgba(236, 72, 153, 0.05) !important;
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.2);
+}
+
+/* Gives the verification button a continuous glowing pulse */
+.verification-pulse {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
+  box-shadow: 0 0 10px rgba(236, 72, 153, 0.6) !important;
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1); box-shadow: 0 0 10px rgba(236, 72, 153, 0.6); }
+  50% { transform: scale(1.02); box-shadow: 0 0 20px rgba(236, 72, 153, 0.9); }
+  100% { transform: scale(1); box-shadow: 0 0 10px rgba(236, 72, 153, 0.6); }
+}
 </style>
 </head>
 
@@ -964,12 +983,16 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
 
   // Active or Locked Button state dynamically mapped directly from backend array rules calculation
   const isBtnDisabled = targetedVisitAllowed
-  ? false
-  : (buttonSystemState.disabled ||
-     sequencePosition !== buttonSystemState.activeSequenceIndex);
+    ? false
+    : (buttonSystemState.disabled || sequencePosition !== buttonSystemState.activeSequenceIndex);
+
+  // Dynamic Neon/Cyan Accent Glow if the channel requires a counter-verification visit
+  const activeBtnClass = targetedVisitAllowed 
+    ? "action-btn visit-style seq-btn verification-pulse" 
+    : "action-btn visit-style seq-btn";
 
   return `
-    <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item._id}">
+    <div class="channel-card ${isVip ? 'vip-card' : ''} ${targetedVisitAllowed ? 'targeted-verification-card' : ''}" id="card-element-${item._id}">
       <div class="card-info">
         <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
@@ -984,10 +1007,10 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
         </div>
       </div>
       <div id="btn-container-${sequencePosition}">
-        <button class="action-btn visit-style seq-btn" ${isBtnDisabled ? 'disabled' : ''} onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item._id}')">
+        <button class="${activeBtnClass}" ${isBtnDisabled ? 'disabled' : ''} onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item._id}')">
           <span>
-  ${targetedVisitAllowed ? 'Verify Visit' : t.txtVisitBtn}
-</span>
+            ${targetedVisitAllowed ? '<i class="fa-solid fa-shield-check"></i> Counter-Verify Visit' : t.txtVisitBtn}
+          </span>
         </button>
       </div>
     </div>`;
