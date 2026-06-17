@@ -239,36 +239,42 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     const sysState = await getOrCreateSystemState();
     
     // Process system clock variables for Appealing Period
+     // Process system clock variables for Appealing Period
     let appealingPeriod = { isActive: false, countdownText: "00:00", phase: 0 };
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const now = Date.now();
-const end = new Date(sysState.appealingPeriodEnd).getTime();
-const remainingMs = end - now;
+      const end = new Date(sysState.appealingPeriodEnd).getTime();
+      const remainingMs = end - now;
+
       if (remainingMs <= 0) {
-        await processAppealingPeriodEnd();
-
-        sysState.appealingPeriodActive = false;
-        sysState.appealingPeriodEnd = null;
-
-        await sysState.save();
-      }
-      else {
+        // If 1-Minute Upload Grace Phase (Marker 999) just ended, transition immediately to the 25-minute Appeal Window!
+        if (sysState.activeSequenceIndex === 999) {
+          sysState.activeSequenceIndex = 0; // reset temporary tracker marker
+          sysState.appealingPeriodEnd = new Date(Date.now() + 25 * 60000); // 25-minute Appealing Period starts now
+          await sysState.save();
+        } else {
+          // If the main appeal period is completely finished, perform regular routine resets
+          await processAppealingPeriodEnd();
+          sysState.appealingPeriodActive = false;
+          sysState.appealingPeriodEnd = null;
+          await sysState.save();
+        }
+      } else {
         appealingPeriod.isActive = true;
         const totalSecs = Math.floor(remainingMs / 1000);
         const mins = Math.floor(totalSecs / 60);
         const secs = totalSecs % 60;
         appealingPeriod.countdownText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         
-        // Phase 1 (Appealing window): First 2 mins (Remaining time: 180s down to 60s)
-        // Phase 2 (Targeted Visit window): Last 1 min (Remaining time: under 60s)
-        if (totalSecs > 600) {
-          appealingPeriod.phase = 1; 
+        if (sysState.activeSequenceIndex === 999) {
+          appealingPeriod.phase = 0; // Custom Phase 0: 1-Minute Upload Grace Phase
+        } else if (totalSecs > 60) {
+          appealingPeriod.phase = 1; // Phase 1: Main Appeal phase
         } else {
-          appealingPeriod.phase = 2;
+          appealingPeriod.phase = 2; // Phase 2: Targeted verification phase
         }
       }
     }
-
     // Process board layouts (First 10 users rules apply dynamically)
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
     
@@ -370,9 +376,19 @@ if (isActiveOnBoard || isInWaitingList) {
       controlZoneState.status = "LOCKDOWN_COOLDOWN";
       controlZoneState.remainingMinutes = Math.ceil((userProfile.cooldownUntil - new Date()) / 60000);
     } else {
-      const alreadyInSystem = userIsActiveOnBoard || !!myQueueRecord;
+       const alreadyInSystem = userIsActiveOnBoard || !!myQueueRecord;
       if (alreadyInSystem && appealingPeriod.phase !== 2) {
         controlZoneState.status = "TRACKING_SECURITY";
+      } else if (appealingPeriod.isActive && appealingPeriod.phase === 0) {
+        // EXCLUSIVE PHASE 0 RULE: If you finished all active visits but aren't in system yet, your form is UNLOCKED to upload right now!
+        let targetedSlotsToClick = activeSlots.map(s => s._id.toString());
+        const finishedAllVisits = targetedSlotsToClick.every(id => userProfile.visitedChannels.includes(id));
+
+        if (finishedAllVisits && !userIsActiveOnBoard && !myQueueRecord) {
+          controlZoneState.status = "UNLOCKED";
+        } else {
+          controlZoneState.status = "FROZEN_APPEALING";
+        }
       } else if (appealingPeriod.isActive && appealingPeriod.phase === 1) {
         controlZoneState.status = "FROZEN_APPEALING";
       } else {
@@ -621,9 +637,10 @@ const allUsersReachedTen = activeSlots.length >= 10 &&
     slot.comments >= 10
   );
 
-if (allUsersReachedTen) {
+   if (allUsersReachedTen) {
   sysState.appealingPeriodActive = true;
-  sysState.appealingPeriodEnd = new Date(Date.now() + 25 * 60000);
+  sysState.appealingPeriodEnd = new Date(Date.now() + 1 * 60000); // 1-Minute Upload Grace Phase triggers first!
+  sysState.activeSequenceIndex = 999; // Temporary marker denoting system is currently in Phase 0
   
   const resetIndex = activeSlots.length > 0 ? activeSlots[0].sequencePosition : 0;
 
