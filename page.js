@@ -261,7 +261,7 @@ const remainingMs = end - now;
         
         // Phase 1 (Appealing window): First 2 mins (Remaining time: 180s down to 60s)
         // Phase 2 (Targeted Visit window): Last 1 min (Remaining time: under 60s)
-        if (totalSecs > 60) {
+        if (totalSecs > 600) {
           appealingPeriod.phase = 1; 
         } else {
           appealingPeriod.phase = 2;
@@ -537,7 +537,7 @@ if (isActiveOnBoard || isInWaitingList) {
       sysState.appealingPeriodEnd &&
       Math.floor(
         (sysState.appealingPeriodEnd - new Date()) / 1000
-      ) <= 60;
+      ) <= 600;
 
     // EXPLOIT PROTECTION: Check if this user already recorded a successful visit on this item
     const hasAlreadyVisited = userProfileCheck && userProfileCheck.visitedChannels.includes(elementId);
@@ -623,7 +623,7 @@ const allUsersReachedTen = activeSlots.length >= 10 &&
 
 if (allUsersReachedTen) {
   sysState.appealingPeriodActive = true;
-  sysState.appealingPeriodEnd = new Date(Date.now() + 3 * 60000);
+  sysState.appealingPeriodEnd = new Date(Date.now() + 25 * 60000);
   
   const resetIndex = activeSlots.length > 0 ? activeSlots[0].sequencePosition : 0;
 
