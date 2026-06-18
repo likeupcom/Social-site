@@ -483,10 +483,10 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
 
     if (userProfileCheck && userProfileCheck.lastVisitAt) {
       const timePassed = Date.now() - new Date(userProfileCheck.lastVisitAt).getTime();
-      if (timePassed < 30000) {
+      if (timePassed < 3000) {
         return res.status(429).json({
           error: "Please wait before clicking again.",
-          cooldownSeconds: Math.ceil((30000 - timePassed) / 1000),
+          cooldownSeconds: Math.ceil((3000 - timePassed) / 1000),
           elementId: userProfileCheck.lastVisitElementId || elementId 
         });
       }
