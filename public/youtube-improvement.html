@@ -1203,7 +1203,7 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
   JSON.stringify({
     sequencePosition,
     elementId,
-    endTime: Date.now() + 30000
+    endTime: Date.now() + 3000
   })
 );
   const container = document.getElementById(`btn-container-${sequencePosition}`);
@@ -1212,7 +1212,7 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
     return;
   }
 
-  let secondsLeft = 30;
+  let secondsLeft = 3;
 
   let chip = container.querySelector('.timer-chip');
   if (!chip) {
