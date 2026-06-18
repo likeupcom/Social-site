@@ -134,8 +134,7 @@ async function processAppealingPeriodEnd() {
       _id: rejected._id
     });
   }
-
-  waitingUsers = await YTWaitingQueue.find()
+   waitingUsers = await YTWaitingQueue.find()
     .sort({ timestamp: 1 });
     
   // First 10 waiting users get priority
@@ -146,65 +145,37 @@ async function processAppealingPeriodEnd() {
     s => s.sequencePosition >= 4
   );
 
-  // How many waiting users are available
-  const waitingCount = promotedUsers.length;
-
-  // Number of active users that must be replaced
-  const replacementCount = waitingCount;
-
-  // Shuffle active users randomly
-  const shuffled = [...regularActiveSlots].sort(
-    () => Math.random() - 0.5
-  );
-
-  // Select users that will be removed
-  const replacedUsers = shuffled.slice(
-    0,
-    replacementCount
-  );
-
-  // Apply cooldown only to replaced users
-  for (const slot of replacedUsers) {
+  // Apply cooldown and clear ALL regular active slots completely from the board
+  for (const slot of regularActiveSlots) {
     await YTUserProfile.findOneAndUpdate(
       { userId: slot.userId },
       {
-        cooldownUntil:
-          new Date(Date.now() + (3 * 60 * 60 * 1000)),
+        cooldownUntil: new Date(Date.now() + (3 * 60 * 60 * 1000)),
         acceptedConditions: false,
         visitedChannels: []
       },
       { upsert: true }
     );
 
-    await YTActiveSlot.deleteOne({
-      _id: slot._id
-    });
+    await YTActiveSlot.deleteOne({ _id: slot._id });
   }
 
-  // Collect available positions
-  const freePositions = replacedUsers.map(
-    s => s.sequencePosition
-  ).sort((a, b) => a - b);
-  console.log("promotedUsers:", promotedUsers.length);
-console.log("replacedUsers:", replacedUsers.length);
-console.log("freePositions:", freePositions);
-  // Insert promoted users into freed positions
+  // Sequentially insert promoted users into clear incremental positions (4 to 13)
   for (let i = 0; i < promotedUsers.length; i++) {
     const user = promotedUsers[i];
+    const targetPos = 4 + i;
 
     await YTActiveSlot.create({
       userId: user.userId,
       username: user.username,
       youtubeChannel: user.youtubeChannel,
       youtubeVideo: user.youtubeVideo,
-      sequencePosition: freePositions[i],
+      sequencePosition: targetPos,
       isVip: false
     });
 
-    await YTWaitingQueue.deleteOne({
-  _id: user._id
-});
-}
+    await YTWaitingQueue.deleteOne({ _id: user._id });
+  }
     await YTActiveSlot.updateMany(
       { sequencePosition: { $gte: 4 } },
       { $set: { views: 0, subs: 0, likes: 0, comments: 0 } }
@@ -368,15 +339,39 @@ if (appealingPeriod.isActive) {
   }
 }
     // Format Queue List Data with targeted security flags
+     // Format Queue List Data with targeted security flags and cross-referenced accuser objects
     const rawQueue = await YTWaitingQueue.find().sort({ timestamp: 1 });
-    const waitingListUsers = rawQueue.map(q => ({
-      id: q._id.toString(),
-      youtubeChannel: q.youtubeChannel,
-      appealCount: q.appealCount,
-      appealedBy: q.appealedBy, // Show who appealed them during the phase windows
-      canBeAppealedByMe: appealingPeriod.phase === 1 && !q.appealedBy.includes(userId) && q.userId !== userId
-    }));
+    const waitingListUsers = [];
 
+    for (const q of rawQueue) {
+      const accusersDetails = [];
+      
+      // If we are in Phase 2 and the logged-in user is looking at their own profile line item, assemble the accusers buttons
+      if (appealingPeriod.phase === 2 && q.userId === userId) {
+        for (const accuserUserId of q.appealedBy) {
+          const activeMatch = activeSlots.find(s => s.userId === accuserUserId);
+          if (activeMatch) {
+            const hasVisitedAccuser = userProfile.visitedChannels.includes(activeMatch._id.toString());
+            accusersDetails.push({
+              activeSlotId: activeMatch._id.toString(),
+              username: activeMatch.username,
+              canVisitTargeted: !hasVisitedAccuser
+            });
+          }
+        }
+      }
+
+      waitingListUsers.push({
+        id: q._id.toString(),
+        userId: q.userId,
+        username: q.username,
+        youtubeChannel: q.youtubeChannel,
+        appealCount: q.appealCount,
+        appealedBy: q.appealedBy, 
+        canBeAppealedByMe: appealingPeriod.phase === 1 && !q.appealedBy.includes(userId) && q.userId !== userId,
+        accusers: accusersDetails // Feeds array containing [{ activeSlotId, username, canVisitTargeted }] to UI
+      });
+    }
     // Calculate status of lower promotional interaction forms zones
     let controlZoneState = { status: "INITIAL_GATEWAY" };
     
@@ -392,7 +387,7 @@ if (appealingPeriod.isActive) {
        const alreadyInSystem = userIsActiveOnBoard || !!myQueueRecord;
       if (alreadyInSystem && appealingPeriod.phase !== 2) {
         controlZoneState.status = "TRACKING_SECURITY";
-      } else if (appealingPeriod.isActive && appealingPeriod.phase === 0) {
+       } else if (appealingPeriod.isActive && appealingPeriod.phase === 0) {
         // EXCLUSIVE PHASE 0 RULE: If you finished all active visits but aren't in system yet, your form is UNLOCKED to upload right now!
         let targetedSlotsToClick = activeSlots.map(s => s._id.toString());
         const finishedAllVisits = targetedSlotsToClick.every(id => userProfile.visitedChannels.includes(id));
@@ -402,7 +397,8 @@ if (appealingPeriod.isActive) {
         } else {
           controlZoneState.status = "FROZEN_APPEALING";
         }
-      } else if (appealingPeriod.isActive && appealingPeriod.phase === 1) {
+      } else if (appealingPeriod.isActive && (appealingPeriod.phase === 1 || appealingPeriod.phase === 2)) {
+        // Enforce total lockdown for both Phase 1 (Appeals) and Phase 2 (Targeted Verification)
         controlZoneState.status = "FROZEN_APPEALING";
       } else {
         // User must click all occupied operational board items to clear verification sequences
