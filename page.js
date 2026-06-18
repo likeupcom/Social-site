@@ -264,16 +264,18 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     let regularChannels = [];
 
     // Initialize 4 VIP slots structures explicitly
+    // Initialize 4 VIP slots structures explicitly
     for (let i = 0; i < 4; i++) {
       const match = activeSlots.find(s => s.sequencePosition === i);
       if (match) {
-        // In Phase 2, if this active user appealed against me, allow me to visit them
-        const wasAppealedByThisActiveUser = myQueueRecord && myQueueRecord.appealedBy.includes(match.userId);
+        // FIX: Force everything to a clean plain string array before running .includes()
+        const stringAppealers = myQueueRecord ? myQueueRecord.appealedBy.map(id => id.toString()) : [];
+        const wasAppealedByThisActiveUser = match.userId && stringAppealers.includes(match.userId.toString());
         const hasVisited = userProfile.visitedChannels.includes(match._id.toString());
         
         vipChannels.push({
           ...match.toObject(),
-          canVisitTargeted: appealingPeriod.phase === 2 && wasAppealedByThisActiveUser && !hasVisited
+          canVisitTargeted: appealingPeriod.phase === 2 && !!wasAppealedByThisActiveUser && !hasVisited
         });
       } else {
         vipChannels.push({ empty: true, sequencePosition: i });
@@ -284,13 +286,14 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     for (let i = 4; i < 14; i++) {
       const match = activeSlots.find(s => s.sequencePosition === i);
       if (match) {
-        // In Phase 2, if this active user appealed against me, allow me to visit them
-        const wasAppealedByThisActiveUser = myQueueRecord && myQueueRecord.appealedBy.includes(match.userId);
+        // FIX: Force everything to a clean plain string array before running .includes()
+        const stringAppealers = myQueueRecord ? myQueueRecord.appealedBy.map(id => id.toString()) : [];
+        const wasAppealedByThisActiveUser = match.userId && stringAppealers.includes(match.userId.toString());
         const hasVisited = userProfile.visitedChannels.includes(match._id.toString());
         
         regularChannels.push({
           ...match.toObject(),
-          canVisitTargeted: appealingPeriod.phase === 2 && wasAppealedByThisActiveUser && !hasVisited
+          canVisitTargeted: appealingPeriod.phase === 2 && !!wasAppealedByThisActiveUser && !hasVisited
         });
       } else {
         regularChannels.push({ empty: true, sequencePosition: i });
@@ -299,8 +302,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
 
     // Count non-empty boards items to see if client needs to complete requirements
     const realActiveCount = activeSlots.length;
-    const userIsActiveOnBoard = activeSlots.some(s => s.userId === userId);
-
+    const userIsActiveOnBoard = activeSlots.some(s => s.userId.toString() === userId.toString());
     // Compute interactive button behaviors
     const vipSlots = activeSlots.filter(s => s.sequencePosition < 4);
 const regularSlots = activeSlots.filter(s => s.sequencePosition >= 4);
@@ -349,7 +351,7 @@ if (appealingPeriod.isActive) {
       // If we are in Phase 2 and the logged-in user is looking at their own profile line item, assemble the accusers buttons
       if (appealingPeriod.phase === 2 && q.userId === userId) {
         for (const accuserUserId of q.appealedBy) {
-          const activeMatch = activeSlots.find(s => s.userId === accuserUserId);
+  const activeMatch = activeSlots.find(s => s.userId.toString() === accuserUserId.toString());
           if (activeMatch) {
             const hasVisitedAccuser = userProfile.visitedChannels.includes(activeMatch._id.toString());
             accusersDetails.push({
@@ -518,7 +520,8 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
       }
 
       // Explicitly allow ONLY the accused waiting user to visit their specific accuser
-      if (!myQueueRecord || !myQueueRecord.appealedBy.includes(slot.userId)) {
+      const stringAppealers = myQueueRecord ? myQueueRecord.appealedBy.map(id => id.toString()) : [];
+      if (!myQueueRecord || !stringAppealers.includes(slot.userId.toString())) {
         return res.status(403).json({
           error: "Access Denied: You can only visit active users who submitted an appeal against you."
         });
