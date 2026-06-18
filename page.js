@@ -383,12 +383,18 @@ if (appealingPeriod.isActive) {
     } else if (userProfile.cooldownUntil && userProfile.cooldownUntil > new Date()) {
       controlZoneState.status = "LOCKDOWN_COOLDOWN";
       controlZoneState.remainingMinutes = Math.ceil((userProfile.cooldownUntil - new Date()) / 60000);
-    } else {
-       const alreadyInSystem = userIsActiveOnBoard || !!myQueueRecord;
-      if (alreadyInSystem && appealingPeriod.phase !== 2) {
+        } else {
+      if (appealingPeriod.isActive && appealingPeriod.phase === 2) {
+        // If the user is in the waiting list and has active targets to defend against, route them to target verification status
+        const hasTargetedVisitsLeft = [...vipChannels, ...regularChannels].some(c => c.canVisitTargeted === true);
+        if (hasTargetedVisitsLeft) {
+          controlZoneState.status = "TARGETED_VERIFICATION_ACTIVE";
+        } else {
+          controlZoneState.status = "TRACKING_SECURITY";
+        }
+      } else if (userIsActiveOnBoard || (!!myQueueRecord && appealingPeriod.phase !== 2)) {
         controlZoneState.status = "TRACKING_SECURITY";
-       } else if (appealingPeriod.isActive && appealingPeriod.phase === 0) {
-        // EXCLUSIVE PHASE 0 RULE: If you finished all active visits but aren't in system yet, your form is UNLOCKED to upload right now!
+      } else if (appealingPeriod.isActive && appealingPeriod.phase === 0) {
         let targetedSlotsToClick = activeSlots.map(s => s._id.toString());
         const finishedAllVisits = targetedSlotsToClick.every(id => userProfile.visitedChannels.includes(id));
 
@@ -397,8 +403,7 @@ if (appealingPeriod.isActive) {
         } else {
           controlZoneState.status = "FROZEN_APPEALING";
         }
-      } else if (appealingPeriod.isActive && (appealingPeriod.phase === 1 || appealingPeriod.phase === 2)) {
-        // Enforce total lockdown for both Phase 1 (Appeals) and Phase 2 (Targeted Verification)
+      } else if (appealingPeriod.isActive && appealingPeriod.phase === 1) {
         controlZoneState.status = "FROZEN_APPEALING";
       } else {
         // User must click all occupied operational board items to clear verification sequences
@@ -462,42 +467,36 @@ router.post("/api/youtube-dashboard/accept-conditions", auth, async (req, res) =
 /**
  * POST /api/youtube-dashboard/verify-visit
  */
+  /**
+ * POST /api/youtube-dashboard/verify-visit
+ */
 router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
   try {
     const { elementId, sequencePosition } = req.body;
     const User = mongoose.model("User");
     const dbUser = await User.findOne({ username: req.user });
     const userId = dbUser._id.toString();  
-    // === PASTE THIS NEW CODE BLOCK HERE ===
+
     // 1. CHECK THE EXISTING SEQUENTIAL TIMELOCK
     const userProfileCheck = await YTUserProfile.findOne({ userId });
+    const nowTime = new Date();
+
     if (userProfileCheck && userProfileCheck.lastVisitAt) {
       const timePassed = Date.now() - new Date(userProfileCheck.lastVisitAt).getTime();
       if (timePassed < 30000) {
         return res.status(429).json({
           error: "Please wait before clicking again.",
           cooldownSeconds: Math.ceil((30000 - timePassed) / 1000),
-          // FORCE the returned ID to match what the frontend expects for the countdown lock
           elementId: userProfileCheck.lastVisitElementId || elementId 
         });
       }
     }
 
-    // 2. SAVE THE NEW SELECTION TIMESTAMP
-    const userProfile = await YTUserProfile.findOneAndUpdate(
-      { userId },
-      {
-        lastVisitElementId: elementId,
-        lastVisitAt: new Date()
-      },
-      { new: true, upsert: true }
-    );
     const sysState = await getOrCreateSystemState();
     const slot = await YTActiveSlot.findById(elementId);
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
 
-    // Calculate exactly if we are in Phase 2 (Last 60 seconds of appealing window)
-      // Calculate exactly if we are in Phase 2 (Last 10 minutes / 600 seconds of appealing window)
+    // Calculate exactly if we are in Phase 2 (Last 10 minutes / 600 seconds of appealing window)
     let isPhase2Visit = false;
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = new Date(sysState.appealingPeriodEnd).getTime() - Date.now();
@@ -533,11 +532,11 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
       }
     }
 
-    if (userProfile?.appealBanUntil && userProfile.appealBanUntil > new Date()) {
+    if (userProfileCheck?.appealBanUntil && userProfileCheck.appealBanUntil > new Date()) {
       return res.status(403).json({ error: "Appeal lockdown active" });
     }
 
-    if (userProfile?.cooldownUntil && userProfile.cooldownUntil > new Date()) {
+    if (userProfileCheck?.cooldownUntil && userProfileCheck.cooldownUntil > new Date()) {
       return res.status(403).json({ error: "Cooldown active" });
     }
 
@@ -549,37 +548,35 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     if (!isPhase2Visit && !hasAlreadyVisited) {
       currentSlotData = await YTActiveSlot.findByIdAndUpdate(
         elementId,
-        {
-          $inc: { views: 1, subs: 1, likes: 1, comments: 1 }
-        },
+        { $inc: { views: 1, subs: 1, likes: 1, comments: 1 } },
         { new: true }
       );
     }
 
-    // Record visit tracking array safely
-    await YTUserProfile.findOneAndUpdate(
-      { userId },
-      { 
-        $addToSet: { visitedChannels: elementId },
-        $set: { 
-          lastVisitAt: userProfile.lastVisitAt,
-          lastVisitElementId: userProfile.lastVisitElementId 
-        }
+    // Setup atomic object to store changes locally in server memory
+    let profileUpdates = {
+      $addToSet: { visitedChannels: elementId },
+      $set: {
+        lastVisitElementId: elementId,
+        lastVisitAt: nowTime
       }
-    );
+    };
 
-    // Phase 2 evaluation successfully terminates here, avoiding index logic updates
+    // Phase 2 early return route
     if (isPhase2Visit) {
+      await YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
       return res.json({ success: true });
     }
+
     // Fetch all slots to update user sequencing and run the threshold calculation
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
 
-    // Sync array data references so the 10-visit verification threshold calculation below uses accurate values
+    // Sync array data references for threshold checks
     const slotIndex = activeSlots.findIndex(s => s._id.toString() === elementId);
-    if (slotIndex !== -1 && !isPhase2Visit) {
+    if (slotIndex !== -1) {
       activeSlots[slotIndex] = currentSlotData;
     }
+
     // Find next non-empty positional coordinate in layout list
     let nextIndex = sequencePosition + 1;
     let lookupsAttempted = 0;
@@ -590,12 +587,7 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
       
       const checkNext = activeSlots.find(s => s.sequencePosition === nextIndex);
       if (checkNext) {
-        // Safe database update
-        await YTUserProfile.findOneAndUpdate(
-          { userId },
-          { $set: { activeSequenceIndex: nextIndex } }
-        );
-
+        profileUpdates.$set.activeSequenceIndex = nextIndex;
         foundNextSlot = true;
         break;
       }
@@ -605,32 +597,30 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
 
     let responsePayload = { success: true, systemAlertMessage: null };
 
-    // If current user just clicked the last active item on the sequence rotation, trigger validation audits phase
     // Start appealing period ONLY when every active user has reached 10 interactions
-const allUsersReachedTen = activeSlots.length >= 10 &&
-  activeSlots.every(slot =>
-    slot.views >= 10 &&
-    slot.subs >= 10 &&
-    slot.likes >= 10 &&
-    slot.comments >= 10
-  );
+    const allUsersReachedTen = activeSlots.length >= 10 &&
+      activeSlots.every(slot =>
+        slot.views >= 10 &&
+        slot.subs >= 10 &&
+        slot.likes >= 10 &&
+        slot.comments >= 10
+      );
 
-   if (allUsersReachedTen) {
-  sysState.appealingPeriodActive = true;
-  sysState.appealingPeriodEnd = new Date(Date.now() + 1 * 60000); // 1-Minute Upload Grace Phase triggers first!
-  sysState.activeSequenceIndex = 999; // Temporary marker denoting system is currently in Phase 0
-  
-  const resetIndex = activeSlots.length > 0 ? activeSlots[0].sequencePosition : 0;
+    if (allUsersReachedTen) {
+      sysState.appealingPeriodActive = true;
+      sysState.appealingPeriodEnd = new Date(Date.now() + 1 * 60000); // 1-Minute Upload Grace Phase triggers first!
+      sysState.activeSequenceIndex = 999; // Temporary marker denoting system is currently in Phase 0
+      
+      const resetIndex = activeSlots.length > 0 ? activeSlots[0].sequencePosition : 0;
+      profileUpdates.$set.activeSequenceIndex = resetIndex;
 
-  // Safe database update
-  await YTUserProfile.findOneAndUpdate(
-    { userId },
-    { $set: { activeSequenceIndex: resetIndex } }
-  );
+      responsePayload.systemAlertMessage = "txtUploadFormFrozen";
+    }
 
-  responsePayload.systemAlertMessage = "txtUploadFormFrozen";
-}
+    // Commit a single, consolidated atomic database write safely
+    await YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
     await sysState.save();
+    
     res.json(responsePayload);
 
   } catch (err) {
@@ -638,7 +628,6 @@ const allUsersReachedTen = activeSlots.length >= 10 &&
     res.status(500).json({ error: "Visit verification process crash" });
   }
 });
-
 /**
  * POST /api/youtube-dashboard/submit-promotion
  */
