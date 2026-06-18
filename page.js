@@ -205,7 +205,14 @@ console.log("freePositions:", freePositions);
   _id: user._id
 });
 }
-
+    await YTActiveSlot.updateMany(
+      { sequencePosition: { $gte: 4 } },
+      { $set: { views: 0, subs: 0, likes: 0, comments: 0 } }
+    );
+    await YTUserProfile.updateMany(
+      {}, 
+      { $set: { visitedChannels: [], activeSequenceIndex: 0 } }
+    );
 console.log("=== processAppealingPeriodEnd FINISHED ===");
 
 } catch (err) {
