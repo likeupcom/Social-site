@@ -1057,21 +1057,19 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
           <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px; font-weight: bold;"><i class="fa-solid fa-shield-halved"></i> Required Defense Actions:</p>
           <div style="display: flex; flex-direction: column; gap: 6px;">
       `;
-
-      user.accusers.forEach(accuser => {
-        cardHtml += `
-          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px;">
-            <span style="font-size: 12px; color: #e2e8f0;">Appealed by: <strong style="color: #f43f5e;">${accuser.username}</strong></span>
-            <div id="btn-container-defense-${accuser.activeSlotId}">
-              ${accuser.canVisitTargeted 
-                ? `<button class="action-btn visit-style" style="padding: 4px 10px; font-size: 11px; background: #ec4899;" onclick="handleTargetedDefenseVisit('${accuser.activeSlotId}')">Visit to Clear</button>`
-                : `<span style="font-size: 11px; color: #22c55e; font-weight: bold;"><i class="fa-solid fa-circle-check"></i> Cleared</span>`
-              }
-            </div>
-          </div>
-        `;
-      });
-
+  user.accusers.forEach(accuser => {
+  cardHtml += `
+    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px;">
+      <span style="font-size: 12px; color: #e2e8f0;">Appealed by: <strong style="color: #f43f5e;">${accuser.username}</strong></span>
+      <div id="btn-container-defense-${accuser.activeSlotId}">
+        ${accuser.canVisitTargeted 
+          ? `<button class="action-btn visit-style" style="padding: 4px 10px; font-size: 11px; background: #ec4899;" onclick="handleTargetedDefenseVisit('${accuser.activeSlotId}', '${accuser.youtubeVideo || '#'}')">Visit to Clear</button>`
+          : `<span style="font-size: 11px; color: #22c55e; font-weight: bold;"><i class="fa-solid fa-circle-check"></i> Cleared</span>`
+        }
+      </div>
+    </div>
+  `;
+});
       cardHtml += `
           </div>
         </div>
@@ -1281,27 +1279,36 @@ async function handleDatabaseAppealTrigger(queueUserId) {
     console.error("Failed handling systemic database appeal parameters execution:", err);
   }
 }
- async function handleTargetedDefenseVisit(activeSlotId) {
+async function handleTargetedDefenseVisit(activeSlotId, videoUrl) {
+  // 1. Open the video tab instantly for the user
+  if (videoUrl && videoUrl !== '#') {
+    window.open(videoUrl, '_blank');
+  }
+
+  // 2. Fire off the backend verification immediately with zero delays
   try {
     const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         elementId: activeSlotId,
-        sequencePosition: 0 // Bypassed structural sequence checks during phase 2 execution rules
+        sequencePosition: 0 // Bypassed sequence checks in backend during Phase 2
       })
     });
 
     if (response.ok) {
+      // Refresh the UI state instantly
       fetchDashboardState();
     } else {
       const data = await response.json();
       alert(data.error || "Verification tracking error occurred.");
+      fetchDashboardState();
     }
   } catch (err) {
     console.error("Targeted validation request network bridge error:", err);
+    fetchDashboardState();
   }
-} 
+}
 async function processDatabaseVideoCommit() {
   const videoInput = document.getElementById("ytVideoInput");
   const channelInput = document.getElementById("ytChannelInput");
