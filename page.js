@@ -228,7 +228,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         // If 1-Minute Upload Grace Phase (Marker 999) just ended, transition immediately to the 25-minute Appeal Window!
         if (sysState.activeSequenceIndex === 999) {
           sysState.activeSequenceIndex = 0; // reset temporary tracker marker
-          sysState.appealingPeriodEnd = new Date(Date.now() + 25 * 60000); // 25-minute Appealing Period starts now
+          sysState.appealingPeriodEnd = new Date(Date.now() + 10 * 60000); // 10-minute Appealing Period starts now
           await sysState.save();
         } else {
           // If the main appeal period is completely finished, perform regular routine resets
@@ -246,7 +246,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         
         if (sysState.activeSequenceIndex === 999) {
           appealingPeriod.phase = 0; // Custom Phase 0: 1-Minute Upload Grace Phase
-        } else if (totalSecs > 600) {
+        } else if (totalSecs > 240) {
           appealingPeriod.phase = 1; // Phase 1: Main Appeal phase
         } else {
           appealingPeriod.phase = 2; // Phase 2: Targeted verification phase
@@ -521,7 +521,7 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = new Date(sysState.appealingPeriodEnd).getTime() - Date.now();
       const totalSecs = Math.floor(remainingMs / 1000);
-      if (totalSecs <= 600 && totalSecs > 0 && sysState.activeSequenceIndex !== 999) {
+      if (totalSecs <= 240 && totalSecs > 0 && sysState.activeSequenceIndex !== 999) {
         isPhase2Visit = true;
       }
     }
@@ -792,7 +792,7 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
     const sysState = await getOrCreateSystemState();
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = sysState.appealingPeriodEnd - new Date();
-      if (Math.floor(remainingMs / 1000) <= 600) {
+      if (Math.floor(remainingMs / 1000) <= 240) {
         return res.status(400).json({ error: "Appealing phase window has closed. Verification window active." });
       }
     } else {
