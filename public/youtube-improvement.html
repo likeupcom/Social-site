@@ -878,7 +878,8 @@ function renderBanner(appealingPeriod) {
         '<i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active';
 
       desc.innerText =
-        "Active users may submit appeals. Standard visits are locked.";
+        "Active users, please verify your YouTube channel. If you have fewer than 10 interactions, you may appeal to waiting-list users. Note: appeals will not return you to the Active Board but will affect the appealed user.
+";
     }
 
     if (appealingPeriod.phase === 2) {
@@ -886,7 +887,8 @@ function renderBanner(appealingPeriod) {
         '<i class="fa-solid fa-shield-check"></i> Verification Period Active';
 
       desc.innerText =
-        "Appeals are closed. Appealed waiting-list users may now verify the channels that appealed them.";
+        "Waiting-list users can now verify appealed active users. If a user cheated you, please unsubscribe from their channel.
+.";
     }
 
   } else {
