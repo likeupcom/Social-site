@@ -342,22 +342,30 @@ if (appealingPeriod.isActive) {
 }
     // Format Queue List Data with targeted security flags
      // Format Queue List Data with targeted security flags and cross-referenced accuser objects
+    // Format Queue List Data with type-safe checks and cross-referenced accuser objects
     const rawQueue = await YTWaitingQueue.find().sort({ timestamp: 1 });
     const waitingListUsers = [];
+    let loggedInUserHasVisitsLeft = false;
 
     for (const q of rawQueue) {
       const accusersDetails = [];
       
-      // If we are in Phase 2 and the logged-in user is looking at their own profile line item, assemble the accusers buttons
-      if (appealingPeriod.phase === 2 && q.userId === userId) {
+      // FIX: Force both IDs to plain string types using .toString() so the match evaluates correctly
+      if (appealingPeriod.phase === 2 && q.userId.toString() === userId.toString()) {
         for (const accuserUserId of q.appealedBy) {
-  const activeMatch = activeSlots.find(s => s.userId.toString() === accuserUserId.toString());
+          const activeMatch = activeSlots.find(s => s.userId.toString() === accuserUserId.toString());
           if (activeMatch) {
             const hasVisitedAccuser = userProfile.visitedChannels.includes(activeMatch._id.toString());
+            const canVisit = !hasVisitedAccuser;
+            
+            if (canVisit) {
+              loggedInUserHasVisitsLeft = true;
+            }
+
             accusersDetails.push({
               activeSlotId: activeMatch._id.toString(),
               username: activeMatch.username,
-              canVisitTargeted: !hasVisitedAccuser
+              canVisitTargeted: canVisit
             });
           }
         }
@@ -371,9 +379,26 @@ if (appealingPeriod.isActive) {
         appealCount: q.appealCount,
         appealedBy: q.appealedBy, 
         canBeAppealedByMe: appealingPeriod.phase === 1 && !q.appealedBy.includes(userId) && q.userId !== userId,
-        accusers: accusersDetails // Feeds array containing [{ activeSlotId, username, canVisitTargeted }] to UI
+        accusers: accusersDetails 
       });
     }
+
+    // Master Button System Overrides to lift the standard lockout wall exclusively during Phase 2
+    if (appealingPeriod.isActive && appealingPeriod.phase === 2) {
+      if (isInWaitingList) {
+        if (loggedInUserHasVisitsLeft) {
+          buttonSystemState.disabled = false;
+          delete buttonSystemState.lockReason; // Unlocks clicking mechanisms on frontend
+        } else {
+          buttonSystemState.disabled = true;
+          buttonSystemState.lockReason = "TARGETED_VISITS_COMPLETED";
+        }
+      } else {
+        buttonSystemState.disabled = true;
+        buttonSystemState.lockReason = "ACTIVE_USERS_FROZEN";
+      }
+    }
+
     // Calculate status of lower promotional interaction forms zones
     let controlZoneState = { status: "INITIAL_GATEWAY" };
     
@@ -385,11 +410,9 @@ if (appealingPeriod.isActive) {
     } else if (userProfile.cooldownUntil && userProfile.cooldownUntil > new Date()) {
       controlZoneState.status = "LOCKDOWN_COOLDOWN";
       controlZoneState.remainingMinutes = Math.ceil((userProfile.cooldownUntil - new Date()) / 60000);
-        } else {
+    } else {
       if (appealingPeriod.isActive && appealingPeriod.phase === 2) {
-        // If the user is in the waiting list and has active targets to defend against, route them to target verification status
-        const hasTargetedVisitsLeft = [...vipChannels, ...regularChannels].some(c => c.canVisitTargeted === true);
-        if (hasTargetedVisitsLeft) {
+        if (isInWaitingList && loggedInUserHasVisitsLeft) {
           controlZoneState.status = "TARGETED_VERIFICATION_ACTIVE";
         } else {
           controlZoneState.status = "TRACKING_SECURITY";
@@ -408,23 +431,18 @@ if (appealingPeriod.isActive) {
       } else if (appealingPeriod.isActive && appealingPeriod.phase === 1) {
         controlZoneState.status = "FROZEN_APPEALING";
       } else {
-        // User must click all occupied operational board items to clear verification sequences
         let targetedSlotsToClick = activeSlots.map(s => s._id.toString());
         const finishedAllVisits = targetedSlotsToClick.every(id => userProfile.visitedChannels.includes(id));
 
-        // Bootstrap mode until 10 standard slots are filled
         if (realActiveCount < 10) {
           controlZoneState.status = "UNLOCKED";
-        }
-        else if (!finishedAllVisits) {
+        } else if (!finishedAllVisits) {
           controlZoneState.status = "VISITS_INCOMPLETE";
-        }
-        else {
+        } else {
           controlZoneState.status = "UNLOCKED";
         }
       }
     }
-
     res.json({
       userAccount: { username: dbUser.username, channelUrl: dbUser.youtubeChannel || "https://youtube.com/channel_placeholder" },
       appealingPeriod,
@@ -520,8 +538,10 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
       }
 
       // Explicitly allow ONLY the accused waiting user to visit their specific accuser
-      const stringAppealers = myQueueRecord ? myQueueRecord.appealedBy.map(id => id.toString()) : [];
-      if (!myQueueRecord || !stringAppealers.includes(slot.userId.toString())) {
+const stringAppealers = myQueueRecord && myQueueRecord.appealedBy ? myQueueRecord.appealedBy.map(id => String(id).trim()) : [];
+      const targetActiveOwnerId = String(slot.userId).trim();
+
+      if (!myQueueRecord || !stringAppealers.includes(targetActiveOwnerId)) {
         return res.status(403).json({
           error: "Access Denied: You can only visit active users who submitted an appeal against you."
         });
