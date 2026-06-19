@@ -108,74 +108,65 @@ async function processAppealingPeriodEnd() {
   console.log("=== processAppealingPeriodEnd STARTED ===");
 
   try {
-  const activeSlots = await YTActiveSlot.find()
-    .sort({ sequencePosition: 1 });
+    const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
+    let waitingUsers = await YTWaitingQueue.find().sort({ timestamp: 1 });
 
-  let waitingUsers = await YTWaitingQueue.find()
-    .sort({ timestamp: 1 });
+    const rejectedUsers = waitingUsers.filter(u => u.appealCount >= 3);
 
-  const rejectedUsers = waitingUsers.filter(
-    u => u.appealCount >= 3
-  );
+    for (const rejected of rejectedUsers) {
+      await YTUserProfile.findOneAndUpdate(
+        { userId: rejected.userId },
+        {
+          appealBanUntil: new Date(Date.now() + (4 * 60 * 60 * 1000)),
+          acceptedConditions: false,
+          visitedChannels: []
+        },
+        { upsert: true }
+      );
 
-  for (const rejected of rejectedUsers) {
-    await YTUserProfile.findOneAndUpdate(
-      { userId: rejected.userId },
-      {
-        appealBanUntil:
-          new Date(Date.now() + (4 * 60 * 60 * 1000)),
-        acceptedConditions: false,
-        visitedChannels: []
-      },
-      { upsert: true }
-    );
+      await YTWaitingQueue.deleteOne({ _id: rejected._id });
+    }
 
-    await YTWaitingQueue.deleteOne({
-      _id: rejected._id
-    });
-  }
-   waitingUsers = await YTWaitingQueue.find()
-    .sort({ timestamp: 1 });
-    
-  // First 10 waiting users get priority
-  const promotedUsers = waitingUsers.slice(0, 10);
+    waitingUsers = await YTWaitingQueue.find().sort({ timestamp: 1 });
+      
+    // First 10 waiting users get priority
+    const promotedUsers = waitingUsers.slice(0, 10);
 
-  // Regular active slots only (4-13)
-  const regularActiveSlots = activeSlots.filter(
-    s => s.sequencePosition >= 4
-  );
+    // Regular active slots only (4-13)
+    const regularActiveSlots = activeSlots.filter(s => s.sequencePosition >= 4);
 
-  // Apply cooldown and clear ALL regular active slots completely from the board
-  for (const slot of regularActiveSlots) {
-    await YTUserProfile.findOneAndUpdate(
-      { userId: slot.userId },
-      {
-        cooldownUntil: new Date(Date.now() + (3 * 60 * 60 * 1000)),
-        acceptedConditions: false,
-        visitedChannels: []
-      },
-      { upsert: true }
-    );
+    // Apply cooldown and clear ALL regular active slots completely from the board
+    for (const slot of regularActiveSlots) {
+      await YTUserProfile.findOneAndUpdate(
+        { userId: slot.userId },
+        {
+          cooldownUntil: new Date(Date.now() + (3 * 60 * 60 * 1000)),
+          acceptedConditions: false,
+          visitedChannels: []
+        },
+        { upsert: true }
+      );
 
-    await YTActiveSlot.deleteOne({ _id: slot._id });
-  }
+      await YTActiveSlot.deleteOne({ _id: slot._id });
+    }
 
-  // Sequentially insert promoted users into clear incremental positions (4 to 13)
-  for (let i = 0; i < promotedUsers.length; i++) {
-    const user = promotedUsers[i];
-    const targetPos = 4 + i;
+    // Sequentially insert promoted users into clear incremental positions (4 to 13)
+    for (let i = 0; i < promotedUsers.length; i++) {
+      const user = promotedUsers[i];
+      const targetPos = 4 + i;
 
-    await YTActiveSlot.create({
-      userId: user.userId,
-      username: user.username,
-      youtubeChannel: user.youtubeChannel,
-      youtubeVideo: user.youtubeVideo,
-      sequencePosition: targetPos,
-      isVip: false
-    });
+      await YTActiveSlot.create({
+        userId: user.userId,
+        username: user.username,
+        youtubeChannel: user.youtubeChannel,
+        youtubeVideo: user.youtubeVideo,
+        sequencePosition: targetPos,
+        isVip: false
+      });
 
-    await YTWaitingQueue.deleteOne({ _id: user._id });
-  }
+      await YTWaitingQueue.deleteOne({ _id: user._id });
+    }
+
     await YTActiveSlot.updateMany(
       { sequencePosition: { $gte: 4 } },
       { $set: { views: 0, subs: 0, likes: 0, comments: 0 } }
@@ -184,12 +175,12 @@ async function processAppealingPeriodEnd() {
       {}, 
       { $set: { visitedChannels: [], activeSequenceIndex: 0 } }
     );
-console.log("=== processAppealingPeriodEnd FINISHED ===");
+    console.log("=== processAppealingPeriodEnd FINISHED ===");
 
-} catch (err) {
-  console.error("processAppealingPeriodEnd ERROR:", err);
-  throw err;
-}
+  } catch (err) {
+    console.error("processAppealingPeriodEnd ERROR:", err);
+    throw err;
+  }
 }
 
 
@@ -202,7 +193,10 @@ console.log("=== processAppealingPeriodEnd FINISHED ===");
 router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
   try {
     const User = mongoose.model("User");
-    const dbUser = await User.findOne({ username: req.user });
+    
+    // ==================== FIXED JWT OBJECT MATCH BUG ====================
+    const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
+    const dbUser = await User.findOne({ username: lookupUsername });
     if (!dbUser) return res.status(404).json({ error: "Profile node missing." });
     
     const userId = dbUser._id.toString();
@@ -217,27 +211,37 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     const sysState = await getOrCreateSystemState();
     
     // Process system clock variables for Appealing Period
-     // Process system clock variables for Appealing Period
     let appealingPeriod = { isActive: false, countdownText: "00:00", phase: 0 };
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const now = Date.now();
       const end = new Date(sysState.appealingPeriodEnd).getTime();
       const remainingMs = end - now;
 
+      // ==================== FIXED LOGICAL BRACKETS HERE ====================
       if (remainingMs <= 0) {
-        // If 1-Minute Upload Grace Phase (Marker 999) just ended, transition immediately to the 25-minute Appeal Window!
+        // If 1-Minute Upload Grace Phase (Marker 999) just ended, transition immediately to the 10-minute Appeal Window!
         if (sysState.activeSequenceIndex === 999) {
           sysState.activeSequenceIndex = 0; // reset temporary tracker marker
           sysState.appealingPeriodEnd = new Date(Date.now() + 10 * 60000); // 10-minute Appealing Period starts now
           await sysState.save();
         } else {
-          // If the main appeal period is completely finished, perform regular routine resets
-          await processAppealingPeriodEnd();
-          sysState.appealingPeriodActive = false;
-          sysState.appealingPeriodEnd = null;
-          await sysState.save();
+          // ATOMIC LOCK: Only executes when the remainingMs is explicitly <= 0
+          const lockedState = await YTBoardState.findOneAndUpdate(
+            { _id: sysState._id, appealingPeriodActive: true }, 
+            { $set: { appealingPeriodActive: false, appealingPeriodEnd: null } },
+            { new: false } // Crucial: Returns the state BEFORE the update
+          );
+
+          // Check if this specific concurrent request won the database modification race
+          if (lockedState && lockedState.appealingPeriodActive === true) {
+            console.log("SUCCESS: This instance won the lock. Processing cleanup...");
+            await processAppealingPeriodEnd();
+          } else {
+            console.log("BLOCKED: Cleanup already handled by another concurrent request.");
+          }
         }
       } else {
+        // This block now safely runs exclusively when time is still active (remainingMs > 0)
         appealingPeriod.isActive = true;
         const totalSecs = Math.floor(remainingMs / 1000);
         const mins = Math.floor(totalSecs / 60);
@@ -253,22 +257,20 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         }
       }
     }
+
     // Process board layouts (First 10 users rules apply dynamically)
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
     
     // Check if the current logged-in user (waiting list user) was appealed by any active slot user
-    // We fetch all waiting queue slots where this user might be listed to see who appealed them
     const myQueueRecord = await YTWaitingQueue.findOne({ userId });
 
     let vipChannels = [];
     let regularChannels = [];
 
     // Initialize 4 VIP slots structures explicitly
-    // Initialize 4 VIP slots structures explicitly
     for (let i = 0; i < 4; i++) {
       const match = activeSlots.find(s => s.sequencePosition === i);
       if (match) {
-        // FIX: Force everything to a clean plain string array before running .includes()
         const stringAppealers = myQueueRecord ? myQueueRecord.appealedBy.map(id => id.toString()) : [];
         const wasAppealedByThisActiveUser = match.userId && stringAppealers.includes(match.userId.toString());
         const hasVisited = userProfile.visitedChannels.includes(match._id.toString());
@@ -286,7 +288,6 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     for (let i = 4; i < 14; i++) {
       const match = activeSlots.find(s => s.sequencePosition === i);
       if (match) {
-        // FIX: Force everything to a clean plain string array before running .includes()
         const stringAppealers = myQueueRecord ? myQueueRecord.appealedBy.map(id => id.toString()) : [];
         const wasAppealedByThisActiveUser = match.userId && stringAppealers.includes(match.userId.toString());
         const hasVisited = userProfile.visitedChannels.includes(match._id.toString());
@@ -303,45 +304,43 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
     // Count non-empty boards items to see if client needs to complete requirements
     const realActiveCount = activeSlots.length;
     const userIsActiveOnBoard = activeSlots.some(s => s.userId.toString() === userId.toString());
+    
     // Compute interactive button behaviors
     const vipSlots = activeSlots.filter(s => s.sequencePosition < 4);
-const regularSlots = activeSlots.filter(s => s.sequencePosition >= 4);
+    const regularSlots = activeSlots.filter(s => s.sequencePosition >= 4);
 
-// Decide correct starting point
-let startIndex = 0;
+    // Decide correct starting point
+    let startIndex = 0;
+    if (vipSlots.length > 0) {
+      startIndex = vipSlots.sort((a, b) => a.sequencePosition - b.sequencePosition)[0].sequencePosition;
+    } else if (regularSlots.length > 0) {
+      startIndex = regularSlots.sort((a, b) => a.sequencePosition - b.sequencePosition)[0].sequencePosition;
+    }
 
-if (vipSlots.length > 0) {
-  startIndex = vipSlots.sort((a, b) => a.sequencePosition - b.sequencePosition)[0].sequencePosition;
-} else if (regularSlots.length > 0) {
-  startIndex = regularSlots.sort((a, b) => a.sequencePosition - b.sequencePosition)[0].sequencePosition;
-}
+    const isActiveOnBoard = await YTActiveSlot.exists({ userId });
+    const isInWaitingList = await YTWaitingQueue.exists({ userId });
 
-const isActiveOnBoard = await YTActiveSlot.exists({ userId });
-const isInWaitingList = await YTWaitingQueue.exists({ userId });
-
-// compute base state
     // compute base state
-let buttonSystemState = {
-  disabled: false,
-  activeSequenceIndex: userProfile.activeSequenceIndex || startIndex
-};
+    let buttonSystemState = {
+      disabled: false,
+      activeSequenceIndex: userProfile.activeSequenceIndex || startIndex
+    };
 
-if (isActiveOnBoard || isInWaitingList) {
-  buttonSystemState.disabled = true;
-  buttonSystemState.lockReason = "SYSTEM_MEMBER_NO_VISIT";
-}
+    if (isActiveOnBoard || isInWaitingList) {
+      buttonSystemState.disabled = true;
+      buttonSystemState.lockReason = "SYSTEM_MEMBER_NO_VISIT";
+    }
 
-// Allow interaction only if the user has target verification visits remaining in Phase 2
-if (appealingPeriod.isActive) {
-  if (appealingPeriod.phase === 2) {
-    const hasTargetedVisitsLeft = [...vipChannels, ...regularChannels].some(c => c.canVisitTargeted === true);
-    buttonSystemState.disabled = !hasTargetedVisitsLeft;
-  } else {
-    buttonSystemState.disabled = true;
-  }
-}
-    // Format Queue List Data with targeted security flags
-     // Format Queue List Data with targeted security flags and cross-referenced accuser objects
+    // Allow interaction only if the user has target verification visits remaining in Phase 2
+    if (appealingPeriod.isActive) {
+      if (appealingPeriod.phase === 2) {
+        const hasTargetedVisitsLeft = [...vipChannels, ...regularChannels].some(c => c.canVisitTargeted === true);
+        buttonSystemState.disabled = !hasTargetedVisitsLeft;
+      } else {
+        buttonSystemState.disabled = true;
+      }
+    }
+
     // Format Queue List Data with type-safe checks and cross-referenced accuser objects
     const rawQueue = await YTWaitingQueue.find().sort({ timestamp: 1 });
     const waitingListUsers = [];
@@ -350,27 +349,22 @@ if (appealingPeriod.isActive) {
     for (const q of rawQueue) {
       const accusersDetails = [];
       
-      // FIX: Force both IDs to plain string types using .toString() so the match evaluates correctly
-      if (appealingPeriod.phase === 2 && q.userId.toString() === userId.toString()) {
-        for (const accuserUserId of q.appealedBy) {
-          const activeMatch = activeSlots.find(s => s.userId.toString() === accuserUserId.toString());
-          if (activeMatch) {
-            const hasVisitedAccuser = userProfile.visitedChannels.includes(activeMatch._id.toString());
-            const canVisit = !hasVisitedAccuser;
-            
-            if (canVisit) {
-              loggedInUserHasVisitsLeft = true;
-            }
-
-            accusersDetails.push({
-              activeSlotId: activeMatch._id.toString(),
-              username: activeMatch.username,
-              canVisitTargeted: canVisit
-            });
+      for (const accuserUserId of q.appealedBy) {
+        const activeMatch = activeSlots.find(s => s.userId.toString() === accuserUserId.toString());
+        if (activeMatch) {
+          const canVisit = (appealingPeriod.phase === 2);
+          
+          if (canVisit && q.userId.toString() === userId.toString()) {
+            loggedInUserHasVisitsLeft = true;
           }
+
+          accusersDetails.push({
+            activeSlotId: activeMatch._id.toString(),
+            username: activeMatch.username,
+            canVisitTargeted: canVisit 
+          });
         }
       }
-
       waitingListUsers.push({
         id: q._id.toString(),
         userId: q.userId,
@@ -388,7 +382,7 @@ if (appealingPeriod.isActive) {
       if (isInWaitingList) {
         if (loggedInUserHasVisitsLeft) {
           buttonSystemState.disabled = false;
-          delete buttonSystemState.lockReason; // Unlocks clicking mechanisms on frontend
+          delete buttonSystemState.lockReason; 
         } else {
           buttonSystemState.disabled = true;
           buttonSystemState.lockReason = "TARGETED_VISITS_COMPLETED";
@@ -456,21 +450,22 @@ if (appealingPeriod.isActive) {
     });
 
   } catch (err) {
-  console.error("STATE ROUTE ERROR:", err);
-
-  res.status(500).json({
-    error: "State compilation failure",
-    details: err.message
-  });
-}
+    console.error("STATE ROUTE ERROR:", err);
+    res.status(500).json({
+      error: "State compilation failure",
+      details: err.message
+    });
+  }
 });
+
 /**
  * POST /api/youtube-dashboard/accept-conditions
  */
 router.post("/api/youtube-dashboard/accept-conditions", auth, async (req, res) => {
   try {
     const User = mongoose.model("User");
-    const dbUser = await User.findOne({ username: req.user });
+    const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
+    const dbUser = await User.findOne({ username: lookupUsername });
     if (!dbUser) return res.status(404).json({ error: "User identity unverified" });
 
     await YTUserProfile.findOneAndUpdate(
@@ -487,14 +482,12 @@ router.post("/api/youtube-dashboard/accept-conditions", auth, async (req, res) =
 /**
  * POST /api/youtube-dashboard/verify-visit
  */
-  /**
- * POST /api/youtube-dashboard/verify-visit
- */
 router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
   try {
     const { elementId, sequencePosition } = req.body;
     const User = mongoose.model("User");
-    const dbUser = await User.findOne({ username: req.user });
+    const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
+    const dbUser = await User.findOne({ username: lookupUsername });
     const userId = dbUser._id.toString();  
 
     // 1. CHECK THE EXISTING SEQUENTIAL TIMELOCK
@@ -516,7 +509,7 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     const slot = await YTActiveSlot.findById(elementId);
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
 
-    // Calculate exactly if we are in Phase 2 (Last 10 minutes / 600 seconds of appealing window)
+    // Calculate exactly if we are in Phase 2
     let isPhase2Visit = false;
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
       const remainingMs = new Date(sysState.appealingPeriodEnd).getTime() - Date.now();
@@ -538,7 +531,7 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
       }
 
       // Explicitly allow ONLY the accused waiting user to visit their specific accuser
-const stringAppealers = myQueueRecord && myQueueRecord.appealedBy ? myQueueRecord.appealedBy.map(id => String(id).trim()) : [];
+      const stringAppealers = myQueueRecord && myQueueRecord.appealedBy ? myQueueRecord.appealedBy.map(id => String(id).trim()) : [];
       const targetActiveOwnerId = String(slot.userId).trim();
 
       if (!myQueueRecord || !stringAppealers.includes(targetActiveOwnerId)) {
@@ -567,7 +560,7 @@ const stringAppealers = myQueueRecord && myQueueRecord.appealedBy ? myQueueRecor
     const hasAlreadyVisited = userProfileCheck && userProfileCheck.visitedChannels.includes(elementId);
     let currentSlotData = slot;
 
-    // ONLY increment counters if it's a normal visit AND they haven't already clicked it
+    // ONLY increment counter increments if it's a normal operation visit loop
     if (!isPhase2Visit && !hasAlreadyVisited) {
       currentSlotData = await YTActiveSlot.findByIdAndUpdate(
         elementId,
@@ -578,19 +571,19 @@ const stringAppealers = myQueueRecord && myQueueRecord.appealedBy ? myQueueRecor
 
     // Setup atomic object to store changes locally in server memory
     let profileUpdates = {
-      $addToSet: { visitedChannels: elementId },
+      ...(isPhase2Visit ? {} : { $addToSet: { visitedChannels: elementId } }),
       $set: {
         lastVisitElementId: elementId,
         lastVisitAt: nowTime
       }
     };
 
-    // Phase 2 early return route
+    // Phase 2 early return route: Allows infinite clicks by safely resolving without tracking blockers
     if (isPhase2Visit) {
       await YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
       return res.json({ success: true });
     }
-
+    
     // Fetch all slots to update user sequencing and run the threshold calculation
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
 
@@ -651,6 +644,7 @@ const stringAppealers = myQueueRecord && myQueueRecord.appealedBy ? myQueueRecor
     res.status(500).json({ error: "Visit verification process crash" });
   }
 });
+
 /**
  * POST /api/youtube-dashboard/submit-promotion
  */
@@ -658,13 +652,14 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
   try {
     let { rawVideoUrl, rawChannelUrl } = req.body;
     const User = mongoose.model("User");
-    const dbUser = await User.findOne({ username: req.user });
+    const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
+    const dbUser = await User.findOne({ username: lookupUsername });
     const userId = dbUser._id.toString();
     const userProfile = await YTUserProfile.findOne({ userId });
     const alreadyExists = await YTActiveSlot.findOne({ userId });
-if (alreadyExists) {
-  return res.json({ successKey: "txtSingleUploadSecurity" });
-}
+    if (alreadyExists) {
+      return res.json({ successKey: "txtSingleUploadSecurity" });
+    }
     if (
       userProfile?.appealBanUntil &&
       userProfile.appealBanUntil > new Date()
@@ -702,24 +697,24 @@ if (alreadyExists) {
     
     let targetPosition = -1;
 
-for (let i = 4; i < 14; i++) {
-  const exists = await YTActiveSlot.findOne({ sequencePosition: i });
+    for (let i = 4; i < 14; i++) {
+      const exists = await YTActiveSlot.findOne({ sequencePosition: i });
 
-  if (!exists) {
-    targetPosition = i;
+      if (!exists) {
+        targetPosition = i;
 
-    await YTActiveSlot.create({
-      userId,
-      username: dbUser.username,
-      youtubeChannel: cleanChannelUrl,
-      youtubeVideo: cleanVideoUrl,
-      sequencePosition: i,
-      isVip: false
-    });
+        await YTActiveSlot.create({
+          userId,
+          username: dbUser.username,
+          youtubeChannel: cleanChannelUrl,
+          youtubeVideo: cleanVideoUrl,
+          sequencePosition: i,
+          isVip: false
+        });
 
-    break;
-  }
-}
+        break;
+      }
+    }
 
     // If board is full, push item into waiting line queue list instead
     if (targetPosition === -1) {
@@ -735,17 +730,15 @@ for (let i = 4; i < 14; i++) {
       }
       return res.json({ successKey: "txtSingleUploadSecurity" });
     }
-
-    // Populate slot using direct data variables inputs without dummy seed variables placeholder logic
     
     // Reset user tracking arrays history values to guarantee complete sequential viewing tracking
     await YTUserProfile.findOneAndUpdate(
-  { userId },
-  {
-    visitedChannels: [],
-    activeSequenceIndex: 0
-  }
-);
+      { userId },
+      {
+        visitedChannels: [],
+        activeSequenceIndex: 0
+      }
+    );
 
     // Sync baseline index sequence positions to avoid layout locks
     const sysState = await getOrCreateSystemState();
@@ -766,7 +759,8 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
   try {
     const { queueUserId } = req.body;
     const User = mongoose.model("User");
-    const dbUser = await User.findOne({ username: req.user });
+    const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
+    const dbUser = await User.findOne({ username: lookupUsername });
     const currentOperatorId = dbUser._id.toString();
     const isActiveUser = await YTActiveSlot.findOne({
       userId: currentOperatorId
@@ -788,10 +782,10 @@ router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
       });
     }
 
-    // Securely check if we are in Phase 1 (Appealing Window)
+    // ==================== FIXED DATE MATH COERCION SUBTRACTION ERROR ====================
     const sysState = await getOrCreateSystemState();
     if (sysState.appealingPeriodActive && sysState.appealingPeriodEnd) {
-      const remainingMs = sysState.appealingPeriodEnd - new Date();
+      const remainingMs = new Date(sysState.appealingPeriodEnd).getTime() - Date.now();
       if (Math.floor(remainingMs / 1000) <= 240) {
         return res.status(400).json({ error: "Appealing phase window has closed. Verification window active." });
       }
