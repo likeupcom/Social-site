@@ -795,613 +795,1247 @@ const localizationDictionary = {
 };
 
 <script>
-let activeLang = localStorage.getItem("selectedLanguage") || "en";
+et activeLang = localStorage.getItem("selectedLanguage") || "en";
+
 if (!["en", "fr", "rw"].includes(activeLang)) {
-  activeLang = "en";
+
+activeLang = "en";
+
 }
+
+
 
 function applyPageLocalization() {
-  const t = localizationDictionary[activeLang];
-  
-  document.getElementById("headerLogo").innerText = t.headerLogo;
-  document.getElementById("mainDashboardTitle").innerText = t.mainDashboardTitle;
-  document.getElementById("appealingActiveTitle").innerHTML = t.appealingActiveTitle;
-  document.getElementById("appealingActiveDesc").innerText = t.appealingActiveDesc;
-  document.getElementById("vipSectionTitle").innerText = t.vipSectionTitle;
-  document.getElementById("regularSectionTitle").innerText = t.regularSectionTitle;
-  document.getElementById("waitingListSectionTitle").innerText = t.waitingListSectionTitle;
-  
-  const actionGateBtn = document.getElementById("actionGateBtn");
-  if (actionGateBtn) actionGateBtn.innerText = t.actionGateBtn;
-  
-  document.getElementById("modalTitle").innerText = t.modalTitle;
-  document.getElementById("modalSub").innerText = t.modalSub;
-  document.getElementById("rule1Text").innerText = t.rule1;
-  document.getElementById("rule2Text").innerText = t.rule2;
-  document.getElementById("rule3Text").innerText = t.rule3;
-  document.getElementById("rule4Text").innerText = t.rule4;
-  document.getElementById("rule5Text").innerText = t.rule5;
-  document.getElementById("rule6Text").innerText = t.rule6;
-  document.getElementById("rule7Text").innerText = t.rule7;
-  document.getElementById("acceptBtn").innerText = t.acceptBtn;
-  
-  document.getElementById("lblNavHome").innerText = t.lblNavHome;
-  document.getElementById("lblNavServices").innerText = t.lblNavServices;
-  document.getElementById("lblNavVip").innerText = t.lblNavVip;
-  document.getElementById("lblNavBonus").innerText = t.lblNavBonus;
-  document.getElementById("lblNavRules").innerText = t.lblNavRules;
-  document.getElementById("footerText").innerHTML = t.footerText;
+
+const t = localizationDictionary[activeLang];
+
+
+
+document.getElementById("headerLogo").innerText = t.headerLogo;
+
+document.getElementById("mainDashboardTitle").innerText = t.mainDashboardTitle;
+
+document.getElementById("appealingActiveTitle").innerHTML = t.appealingActiveTitle;
+
+document.getElementById("appealingActiveDesc").innerText = t.appealingActiveDesc;
+
+document.getElementById("vipSectionTitle").innerText = t.vipSectionTitle;
+
+document.getElementById("regularSectionTitle").innerText = t.regularSectionTitle;
+
+document.getElementById("waitingListSectionTitle").innerText = t.waitingListSectionTitle;
+
+
+
+const actionGateBtn = document.getElementById("actionGateBtn");
+
+if (actionGateBtn) actionGateBtn.innerText = t.actionGateBtn;
+
+
+
+document.getElementById("modalTitle").innerText = t.modalTitle;
+
+document.getElementById("modalSub").innerText = t.modalSub;
+
+document.getElementById("rule1Text").innerText = t.rule1;
+
+document.getElementById("rule2Text").innerText = t.rule2;
+
+document.getElementById("rule3Text").innerText = t.rule3;
+
+document.getElementById("rule4Text").innerText = t.rule4;
+
+document.getElementById("rule5Text").innerText = t.rule5;
+
+document.getElementById("rule6Text").innerText = t.rule6;
+
+document.getElementById("rule7Text").innerText = t.rule7;
+
+document.getElementById("acceptBtn").innerText = t.acceptBtn;
+
+
+
+document.getElementById("lblNavHome").innerText = t.lblNavHome;
+
+document.getElementById("lblNavServices").innerText = t.lblNavServices;
+
+document.getElementById("lblNavVip").innerText = t.lblNavVip;
+
+document.getElementById("lblNavBonus").innerText = t.lblNavBonus;
+
+document.getElementById("lblNavRules").innerText = t.lblNavRules;
+
+document.getElementById("footerText").innerHTML = t.footerText;
+
 }
+
+
 
 // PRODUCTION CONFIGURATION: Target base route path of your secure Node.js instance
- const BACKEND_API_BASE = "/api/youtube-dashboard";
+
+const BACKEND_API_BASE = "/api/youtube-dashboard";
+
 let userCurrentlyTyping = false;
 
+
+
 /**
- * 1. Synchronized Dynamic Display Engine
- * Fetches computed architectural state from backend and renders UI.
- */
+
+
+
+Synchronized Dynamic Display Engine
+
+Fetches computed architectural state from backend and renders UI.
+
+*/
+
 async function fetchDashboardState() {
-  try {
-    // Note: Backend handles absolute security authentication validation directly via HTTPS JWT cookies.
-    const response = await fetch(`${BACKEND_API_BASE}/state`);
-    if (!response.ok) throw new Error("Dashboard synchronizer network connection failure.");
-    
-    const state = await response.json();
-    
-    // Dynamic Application UI Upgrades triggered directly from backend response state parameters
-    renderBanner(state.appealingPeriod);
-    renderUserIdentityBadge(state.userAccount);
-    renderGrids(state.vipChannels, state.regularChannels, state.visitedChannelIds, state.buttonSystemState);
-    renderWaitingList(state.waitingListUsers, state.appealingPeriod, state.userIsActiveOnBoard);
-    renderControlZonePresentation(state.controlZoneState);
-    
-  } catch (err) {
-    console.error("Database sync loop link failure:", err);
-  }
+
+try {
+
+// Note: Backend handles absolute security authentication validation directly via HTTPS JWT cookies.
+
+const response = await fetch(`${BACKEND_API_BASE}/state`);
+
+if (!response.ok) throw new Error("Dashboard synchronizer network connection failure.");
+
+
+
+const state = await response.json();
+
+
+
+// Dynamic Application UI Upgrades triggered directly from backend response state parameters
+
+renderBanner(state.appealingPeriod);
+
+renderUserIdentityBadge(state.userAccount);
+
+renderGrids(state.vipChannels, state.regularChannels, state.visitedChannelIds, state.buttonSystemState);
+
+renderWaitingList(state.waitingListUsers, state.appealingPeriod, state.userIsActiveOnBoard);
+
+renderControlZonePresentation(state.controlZoneState);
+
+
+} catch (err) {
+
+console.error("Database sync loop link failure:", err);
+
 }
+
+}
+
+
 
 /**
- * UI DISPLAY RENDER PIPELINES
- */
+
+UI DISPLAY RENDER PIPELINES
+
+*/
+
 function renderBanner(appealingPeriod) {
-  const banner = document.getElementById("appealingPeriodBanner");
-  const display = document.getElementById("appealingCountdown");
-  const title = document.getElementById("appealingActiveTitle");
-  const desc = document.getElementById("appealingActiveDesc");
 
-  if (appealingPeriod && appealingPeriod.isActive) {
-    banner.style.display = "block";
-    display.innerText = appealingPeriod.countdownText || "00:00";
+const banner = document.getElementById("appealingPeriodBanner");
 
-    if (appealingPeriod.phase === 1) {
-      title.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active';
-      desc.innerText = "Active users, please verify your YouTube channel. If you have fewer than 10 interactions, you may appeal to waiting-list users. Note: appeals will not return you to the Active Board but will affect the appealed user.";
-    }
+const display = document.getElementById("appealingCountdown");
 
-    if (appealingPeriod.phase === 2) {
-      title.innerHTML = '<i class="fa-solid fa-shield-check"></i> Verification Period Active';
-      desc.innerText = "Waiting-list users can now verify appealed active users. If a user cheated you, please unsubscribe from their channel.";
-    }
-  } else {
-    banner.style.display = "none";
-  }
+const title = document.getElementById("appealingActiveTitle");
+
+const desc = document.getElementById("appealingActiveDesc");
+
+
+
+if (appealingPeriod && appealingPeriod.isActive) {
+
+banner.style.display = "block";
+
+display.innerText = appealingPeriod.countdownText || "00:00";
+
+
+
+if (appealingPeriod.phase === 1) {
+
+  title.innerHTML =
+
+    '<i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active';
+
+
+
+  desc.innerText =
+
+    "Active users may submit appeals. Standard visits are locked.";
+
 }
+
+
+
+if (appealingPeriod.phase === 2) {
+
+  title.innerHTML =
+
+    '<i class="fa-solid fa-shield-check"></i> Verification Period Active';
+
+
+
+  desc.innerText =
+
+    "Appeals are closed. Appealed waiting-list users may now verify the channels that appealed them.";
+
+}
+
+
+
+} else {
+
+banner.style.display = "none";
+
+}
+
+}
+
+
 
 function renderUserIdentityBadge(userAccount) {
-  const t = localizationDictionary[activeLang];
-  const container = document.getElementById("preUploadedProfileArea");
-  if (!userAccount) {
-    container.innerHTML = "";
-    return;
-  }
 
-  container.innerHTML = `
-    <div class="user-identity-card">
-      <div class="card-info">
-        <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
-        <div class="user-details">
-          <span class="username-txt">${userAccount.username} <small style="color:#38bdf8;">${t.txtSecurityNode}</small></span>
-          <span class="raw-link-txt">${userAccount.channelUrl.replace("https://", "")}</span>
-        </div>
-      </div>
-      <button class="action-btn appear-style" id="appearTriggerBtn" disabled>
-        <i class="fa-solid fa-eye"></i> <span>${t.txtAppearBtn}</span>
-      </button>
-    </div>
-  `;
+const t = localizationDictionary[activeLang];
+
+const container = document.getElementById("preUploadedProfileArea");
+
+if (!userAccount) {
+
+container.innerHTML = "";
+
+return;
+
 }
+
+
+
+container.innerHTML = `
+
+<div class="user-identity-card">
+
+  <div class="card-info">
+
+    <div class="user-avatar" style="color:#eab308; background:rgba(234,179,8,0.1);"><i class="fa-solid fa-user"></i></div>
+
+    <div class="user-details">
+
+      <span class="username-txt">${userAccount.username} <small style="color:#38bdf8;">${t.txtSecurityNode}</small></span>
+
+      <span class="raw-link-txt">${userAccount.channelUrl.replace("https://", "")}</span>
+
+    </div>
+
+  </div>
+
+  <button class="action-btn appear-style" id="appearTriggerBtn" disabled>
+
+    <i class="fa-solid fa-eye"></i> <span>${t.txtAppearBtn}</span>
+
+  </button>
+
+</div>
+
+`;
+
+}
+
+
 
 function renderGrids(vipChannels, regularChannels, visitedChannelIds, buttonSystemState) {
-  const vipGrid = document.getElementById("realVipGrid");
-  const regularGrid = document.getElementById("realRegularGrid");
-  
-  vipGrid.innerHTML = "";
-  regularGrid.innerHTML = "";
 
-  vipChannels.forEach((item) => {
-    vipGrid.innerHTML += generateCardHTML(item, item.sequencePosition, true, visitedChannelIds, buttonSystemState);
-  });
+const vipGrid = document.getElementById("realVipGrid");
 
-  regularChannels.forEach((item) => {
-    regularGrid.innerHTML += generateCardHTML(item, item.sequencePosition, false, visitedChannelIds, buttonSystemState);
-  });
+const regularGrid = document.getElementById("realRegularGrid");
+
+
+
+vipGrid.innerHTML = "";
+
+regularGrid.innerHTML = "";
+
+
+
+vipChannels.forEach((item, index) => {
+
+vipGrid.innerHTML += generateCardHTML(item, item.sequencePosition, true, visitedChannelIds, buttonSystemState);
+
+});
+
+
+
+regularChannels.forEach((item, index) => {
+
+regularGrid.innerHTML += generateCardHTML(item, item.sequencePosition, false, visitedChannelIds, buttonSystemState);
+
+});
+
 }
+
+
 
 function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, buttonSystemState) {
-  const t = localizationDictionary[activeLang];
-  if (item.empty) {
-    return `
-      <div class="channel-card ${isVip ? 'vip-card' : ''}">
-        <div class="card-info">
-          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
-          <div class="user-details">
-            <span class="username-txt" style="color:#64748b; font-style:italic;">${t.txtAvailableSlot}</span>
-            <span class="raw-link-txt" style="color:#334155;">${t.txtWaitingInteraction}</span>
-          </div>
-        </div>
-        <div>
-          <button class="action-btn visit-style seq-btn" disabled>
-            <span>${t.txtVisitBtn}</span>
-          </button>
-        </div>
-      </div>`;
-  }
 
-  const alreadyVisited = visitedChannelIds.includes(item._id);
-  const targetedVisitAllowed = item.canVisitTargeted === true;
+const t = localizationDictionary[activeLang];
 
-  if (alreadyVisited) {
-    return `
-      <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item._id}">
-        <div class="card-info">
-          <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
-          <div class="user-details">
-            <span class="username-txt">${item.username}</span>
-            <span class="raw-link-txt">${item.youtubeChannel.replace("https://", "")}</span>
-            <div class="metrics-display">
-              <span class="metric-item"><i class="fa-solid fa-eye"></i> Views: ${item.views || 0}</span>
-              <span class="metric-item"><i class="fa-solid fa-bell"></i> Subs: ${item.subs || 0}</span>
-              <span class="metric-item"><i class="fa-solid fa-thumbs-up"></i> Likes: ${item.likes || 0}</span>
-              <span class="metric-item"><i class="fa-solid fa-comment"></i> Comments: ${item.comments || 0}</span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <span class="success-text" style="font-size:13px; font-weight:bold; padding: 10px 12px; display:flex; align-items:center; gap:4px;">
-            <i class="fa-solid fa-circle-check"></i> ${t.txtVisited}
-          </span>
-        </div>
-      </div>`;
-  }
+if (item.empty) {
 
-  const isBtnDisabled = targetedVisitAllowed
-    ? false
-    : (buttonSystemState.disabled || sequencePosition !== buttonSystemState.activeSequenceIndex);
+return `
 
-  const activeBtnClass = targetedVisitAllowed 
-    ? "action-btn visit-style seq-btn verification-pulse" 
-    : "action-btn visit-style seq-btn";
+  <div class="channel-card ${isVip ? 'vip-card' : ''}">
 
-  return `
-    <div class="channel-card ${isVip ? 'vip-card' : ''} ${targetedVisitAllowed ? 'targeted-verification-card' : ''}" id="card-element-${item._id}">
-      <div class="card-info">
-        <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
-        <div class="user-details">
-          <span class="username-txt">${item.username}</span>
-          <span class="raw-link-txt">${item.youtubeChannel.replace("https://", "")}</span>
-          <div class="metrics-display">
-            <span class="metric-item"><i class="fa-solid fa-eye"></i> Views: ${item.views || 0}</span>
-            <span class="metric-item"><i class="fa-solid fa-bell"></i> Subs: ${item.subs || 0}</span>
-            <span class="metric-item"><i class="fa-solid fa-thumbs-up"></i> Likes: ${item.likes || 0}</span>
-            <span class="metric-item"><i class="fa-solid fa-comment"></i> Comments: ${item.comments || 0}</span>
-          </div>
-        </div>
+    <div class="card-info">
+
+      <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+
+      <div class="user-details">
+
+        <span class="username-txt" style="color:#64748b; font-style:italic;">${t.txtAvailableSlot}</span>
+
+        <span class="raw-link-txt" style="color:#334155;">${t.txtWaitingInteraction}</span>
+
       </div>
-      <div id="btn-container-${sequencePosition}">
-        <button class="${activeBtnClass}" ${isBtnDisabled ? 'disabled' : ''} onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item._id}')">
-          <span>
-            ${targetedVisitAllowed ? '<i class="fa-solid fa-shield-check"></i> Counter-Verify Visit' : t.txtVisitBtn}
-          </span>
-        </button>
-      </div>
-    </div>`;
+
+    </div>
+
+    <div>
+
+      <button class="action-btn visit-style seq-btn" disabled>
+
+        <span>${t.txtVisitBtn}</span>
+
+      </button>
+
+    </div>
+
+  </div>`;
+
 }
 
-function renderWaitingList(waitingListUsers, appealingPeriod, userIsActiveOnBoard) {
-  const t = localizationDictionary[activeLang];
-  const container = document.getElementById("realWaitingContainer");
-  container.innerHTML = "";
 
-  if(!waitingListUsers || waitingListUsers.length === 0) {
-    container.innerHTML = `<p style="color:#4b5563; font-style:italic; font-size:14px; text-align:center; padding:15px;">${t.txtNoUsersQueue}</p>`;
-    return;
-  }
 
-  waitingListUsers.forEach(user => {
-    const isAllowedToClickAppeal = appealingPeriod.isActive && userIsActiveOnBoard && user.canBeAppealedByMe;
+const alreadyVisited = visitedChannelIds.includes(item._id);
 
-    let cardHtml = `
-      <div class="channel-card" style="border-color: #3b82f6; flex-direction: column; align-items: stretch; gap: 12px;" id="waiting-node-${user.id}">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div class="card-info" style="min-width: 0; flex: 1;">
-          <div class="user-avatar" style="color:#3b82f6; background:rgba(59,130,246,0.1); flex-shrink: 0;"><i class="fa-solid fa-user"></i></div>
-          <div class="user-details" style="min-width: 0; flex: 1;">
-            <span class="raw-link-txt" style="font-size:14px; color:#f1f5f9; font-family:monospace; word-break: break-all; display: block;">
-              <i class="fa-solid fa-link" style="font-size:11px; color:#38bdf8; margin-right:4px;"></i>${user.youtubeChannel}
-            </span>
-            <span style="font-size:11px; color:#ef4444; margin-top:4px; font-weight:bold; display: block;"><i class="fa-solid fa-gavel"></i> ${t.txtAppealsRegistered}: ${user.appealCount || 0} / 3</span>
-          </div>
+const targetedVisitAllowed = item.canVisitTargeted === true;
+
+
+
+if (alreadyVisited) {
+
+return `
+
+  <div class="channel-card ${isVip ? 'vip-card' : ''}" id="card-element-${item._id}">
+
+    <div class="card-info">
+
+      <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+
+      <div class="user-details">
+
+        <span class="username-txt">${item.username}</span>
+
+        <span class="raw-link-txt">${item.youtubeChannel.replace("https://", "")}</span>
+
+        <div class="metrics-display">
+
+          <span class="metric-item"><i class="fa-solid fa-eye"></i> Views: ${item.views || 0}</span>
+
+          <span class="metric-item"><i class="fa-solid fa-bell"></i> Subs: ${item.subs || 0}</span>
+
+          <span class="metric-item"><i class="fa-solid fa-thumbs-up"></i> Likes: ${item.likes || 0}</span>
+
+          <span class="metric-item"><i class="fa-solid fa-comment"></i> Comments: ${item.comments || 0}</span>
+
         </div>
-        <div style="flex-shrink: 0; margin-left: 12px;">
-          <button class="action-btn appeal-style" ${isAllowedToClickAppeal ? '' : 'disabled'} onclick="handleDatabaseAppealTrigger('${user.id}')">
-            <i class="fa-solid fa-gavel"></i> ${t.txtAppealBtn}
-          </button>
-        </div>
+
       </div>
-    `;
 
-    if (appealingPeriod && appealingPeriod.phase === 2 && user.accusers && user.accusers.length > 0) {
-      cardHtml += `
-        <div class="accusers-defense-zone" style="margin-top: 4px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1);">
-          <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px; font-weight: bold;"><i class="fa-solid fa-shield-halved"></i> Required Defense Actions:</p>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-      `;
-      user.accusers.forEach(accuser => {
-        cardHtml += `
-          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px;">
-            <span style="font-size: 12px; color: #e2e8f0;">Appealed by: <strong style="color: #f43f5e;">${accuser.username}</strong></span>
-            <div id="btn-container-defense-${accuser.activeSlotId}">
-              ${accuser.canVisitTargeted 
-                ? `<button class="action-btn visit-style" style="padding: 4px 10px; font-size: 11px; background: #ec4899;" onclick="handleTargetedDefenseVisit('${accuser.activeSlotId}', '${accuser.youtubeVideo || '#'}')">Visit to Clear</button>`
-                : `<span style="font-size: 11px; color: #22c55e; font-weight: bold;"><i class="fa-solid fa-circle-check"></i> Cleared</span>`
-              }
-            </div>
-          </div>
-        `;
-      });
-      cardHtml += `
-          </div>
+    </div>
+
+    <div>
+
+      <span class="success-text" style="font-size:13px; font-weight:bold; padding: 10px 12px; display:flex; align-items:center; gap:4px;">
+
+        <i class="fa-solid fa-circle-check"></i> ${t.txtVisited}
+
+      </span>
+
+    </div>
+
+  </div>`;
+
+}
+
+
+
+// Active or Locked Button state dynamically mapped directly from backend array rules calculation
+
+const isBtnDisabled = targetedVisitAllowed
+
+? false
+
+: (buttonSystemState.disabled || sequencePosition !== buttonSystemState.activeSequenceIndex);
+
+
+
+// Dynamic Neon/Cyan Accent Glow if the channel requires a counter-verification visit
+
+const activeBtnClass = targetedVisitAllowed
+
+? "action-btn visit-style seq-btn verification-pulse" 
+
+: "action-btn visit-style seq-btn";
+
+
+
+return `
+
+<div class="channel-card ${isVip ? 'vip-card' : ''} ${targetedVisitAllowed ? 'targeted-verification-card' : ''}" id="card-element-${item._id}">
+
+  <div class="card-info">
+
+    <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
+
+    <div class="user-details">
+
+      <span class="username-txt">${item.username}</span>
+
+      <span class="raw-link-txt">${item.youtubeChannel.replace("https://", "")}</span>
+
+      <div class="metrics-display">
+
+        <span class="metric-item"><i class="fa-solid fa-eye"></i> Views: ${item.views || 0}</span>
+
+        <span class="metric-item"><i class="fa-solid fa-bell"></i> Subs: ${item.subs || 0}</span>
+
+        <span class="metric-item"><i class="fa-solid fa-thumbs-up"></i> Likes: ${item.likes || 0}</span>
+
+        <span class="metric-item"><i class="fa-solid fa-comment"></i> Comments: ${item.comments || 0}</span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div id="btn-container-${sequencePosition}">
+
+    <button class="${activeBtnClass}" ${isBtnDisabled ? 'disabled' : ''} onclick="handleSequentialVisit('${item.youtubeVideo}', ${sequencePosition}, '${item._id}')">
+
+      <span>
+
+        ${targetedVisitAllowed ? '<i class="fa-solid fa-shield-check"></i> Counter-Verify Visit' : t.txtVisitBtn}
+
+      </span>
+
+    </button>
+
+  </div>
+
+</div>`;
+
+}
+
+
+
+function renderWaitingList(waitingListUsers, appealingPeriod, userIsActiveOnBoard) {
+
+const t = localizationDictionary[activeLang];
+
+const container = document.getElementById("realWaitingContainer");
+
+container.innerHTML = "";
+
+
+
+if(!waitingListUsers || waitingListUsers.length === 0) {
+
+container.innerHTML = `<p style="color:#4b5563; font-style:italic; font-size:14px; text-align:center; padding:15px;">${t.txtNoUsersQueue}</p>`;
+
+return;
+
+}
+
+
+
+waitingListUsers.forEach(user => {
+
+const isAllowedToClickAppeal = appealingPeriod.isActive && userIsActiveOnBoard && user.canBeAppealedByMe;
+
+
+
+// Start building the base card structure natively
+
+let cardHtml = `
+
+  <div class="channel-card" style="border-color: #3b82f6; flex-direction: column; align-items: stretch; gap: 12px;" id="waiting-node-${user.id}">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+
+      <div class="card-info">
+
+        <div class="user-avatar" style="color:#3b82f6; background:rgba(59,130,246,0.1);"><i class="fa-solid fa-user"></i></div>
+
+        <div class="user-details">
+
+          <span class="raw-link-txt" style="font-size:14px; color:#f1f5f9; font-family:monospace; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 200px;">
+
+            <i class="fa-solid fa-link" style="font-size:11px; color:#38bdf8; margin-right:4px;"></i>${user.youtubeChannel}
+
+          </span>
+
+          <span style="font-size:11px; color:#ef4444; margin-top:4px; font-weight:bold;"><i class="fa-solid fa-gavel"></i> ${t.txtAppealsRegistered}: ${user.appealCount || 0} / 3</span>
+
         </div>
-      `;
+
+      </div>
+
+      <div>
+
+        <button class="action-btn appeal-style" ${isAllowedToClickAppeal ? '' : 'disabled'} onclick="handleDatabaseAppealTrigger('${user.id}')">
+
+          <i class="fa-solid fa-gavel"></i> ${t.txtAppealBtn}
+
+        </button>
+
+      </div>
+
+    </div>
+
+`;
+
+
+
+// PHASE 2 TARGETED ACCUSERS INTERFACE
+
+if (appealingPeriod && appealingPeriod.phase === 2 && user.accusers && user.accusers.length > 0) {
+
+  cardHtml += `
+
+    <div class="accusers-defense-zone" style="margin-top: 4px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1);">
+
+      <p style="font-size: 12px; color: #94a3b8; margin-bottom: 8px; font-weight: bold;"><i class="fa-solid fa-shield-halved"></i> Required Defense Actions:</p>
+
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+
+  `;
+
+user.accusers.forEach(accuser => {
+
+cardHtml += `
+
+<div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 6px 10px; border-radius: 6px;">
+
+  <span style="font-size: 12px; color: #e2e8f0;">Appealed by: <strong style="color: #f43f5e;">${accuser.username}</strong></span>
+
+  <div id="btn-container-defense-${accuser.activeSlotId}">
+
+    ${accuser.canVisitTargeted 
+
+      ? `<button class="action-btn visit-style" style="padding: 4px 10px; font-size: 11px; background: #ec4899;" onclick="handleTargetedDefenseVisit('${accuser.activeSlotId}', '${accuser.youtubeVideo || '#'}')">Visit to Clear</button>`
+
+      : `<span style="font-size: 11px; color: #22c55e; font-weight: bold;"><i class="fa-solid fa-circle-check"></i> Cleared</span>`
+
     }
 
-    cardHtml += `</div>`;
-    container.innerHTML += cardHtml;
-  });
+  </div>
+
+</div>
+
+`;
+
+});
+
+  cardHtml += `
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+
+cardHtml += `</div>`;
+
+container.innerHTML += cardHtml;
+
+});
+
 }
 
 function renderControlZonePresentation(controlZone) {
-  const bottomZone = document.getElementById("bottomControlZone");
-  const t = localizationDictionary[activeLang];
 
-  if (controlZone.status === "INITIAL_GATEWAY") {
-    bottomZone.innerHTML = `<button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">${t.actionGateBtn}</button>`;
-    return;
-  }
+const bottomZone = document.getElementById("bottomControlZone");
 
-  if (controlZone.status === "LOCKDOWN_APPEALS") {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-gavel"></i> ${t.txtUploadBlockedAppeals.replace("{min}", controlZone.remainingMinutes)}</p>`;
-    return;
-  }
+const t = localizationDictionary[activeLang];
 
-  if (controlZone.status === "LOCKDOWN_COOLDOWN") {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-clock"></i> ${t.txtUploadBlockedCooldown.replace("{min}", controlZone.remainingMinutes)}</p>`;
-    return;
-  }
 
-  if (controlZone.status === "TRACKING_SECURITY") {
-    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-circle-info"></i> ${t.txtSingleUploadSecurity}</p>`;
-    return;
-  }
 
-  if (controlZone.status === "FROZEN_APPEALING") {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtUploadFormFrozen}</p>`;
-    return;
-  }
+if (controlZone.status === "INITIAL_GATEWAY") {
 
-  if (controlZone.status === "VISITS_INCOMPLETE") {
-    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtCompleteVisitsToUnlock}</p>`;
-    return;
-  }
+bottomZone.innerHTML = `<button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">${t.actionGateBtn}</button>`;
 
-  if (controlZone.status === "TARGETED_VERIFICATION_ACTIVE") {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Verification Period Active. Complete counter visits above to clear outstanding appeals.</p>`;
-    return;
-  }
+return;
 
-  if (controlZone.status === "UNLOCKED") {
-    const inputAlreadyExists = document.getElementById("ytVideoInput");
-    
-    if (inputAlreadyExists) {
-      return;
-    }
-
-    const savedVideoDraft = localStorage.getItem("draft_ytVideoInput") || "";
-    const savedChannelDraft = localStorage.getItem("draft_ytChannelInput") || "";
-
-    bottomZone.innerHTML = `
-      <div class="upload-form-container">
-        <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> ${t.txtPromoZoneUnlocked}</h3>
-        <div class="input-group">
-          <label style="font-size:13px; color:#94a3b8;">${t.lblTargetVideo}</label>
-          <input
-            type="url"
-            class="link-input"
-            id="ytVideoInput"
-            placeholder="https://www.youtube.com/watch?v=..."
-            value="${savedVideoDraft}"
-            required
-            oninput="localStorage.setItem('draft_ytVideoInput', this.value)"
-            onfocus="userCurrentlyTyping = true"
-            onblur="userCurrentlyTyping = false"
-          />
-
-          <label style="font-size:13px; color:#94a3b8; margin-top:4px;">${t.lblYourChannel}</label>
-          <input
-            type="url"
-            class="link-input"
-            id="ytChannelInput"
-            placeholder="https://www.youtube.com/..."
-            value="${savedChannelDraft}"
-            required
-            oninput="localStorage.setItem('draft_ytChannelInput', this.value)"
-            onfocus="userCurrentlyTyping = true"
-            onblur="userCurrentlyTyping = false"
-          />
-          <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">${t.btnSubmitDocument}</button>
-        </div>
-        <div id="uploadFeedback" class="notify-msg"></div>
-      </div>
-    `;
-    return;
-  }
 }
+
+
+
+if (controlZone.status === "LOCKDOWN_APPEALS") {
+
+bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-gavel"></i> ${t.txtUploadBlockedAppeals.replace("{min}", controlZone.remainingMinutes)}</p>`;
+
+return;
+
+}
+
+
+
+if (controlZone.status === "LOCKDOWN_COOLDOWN") {
+
+bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-clock"></i> ${t.txtUploadBlockedCooldown.replace("{min}", controlZone.remainingMinutes)}</p>`;
+
+return;
+
+}
+
+
+
+if (controlZone.status === "TRACKING_SECURITY") {
+
+bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-circle-info"></i> ${t.txtSingleUploadSecurity}</p>`;
+
+return;
+
+}
+
+
+
+if (controlZone.status === "FROZEN_APPEALING") {
+
+bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtUploadFormFrozen}</p>`;
+
+return;
+
+}
+
+
+
+if (controlZone.status === "VISITS_INCOMPLETE") {
+
+bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtCompleteVisitsToUnlock}</p>`;
+
+return;
+
+}
+
+
+
+if (controlZone.status === "TARGETED_VERIFICATION_ACTIVE") {
+
+bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Verification Period Active. Complete counter visits above to clear outstanding appeals.</p>`;
+
+return;
+
+}
+
+
+
+if (controlZone.status === "UNLOCKED") {
+
+bottomZone.innerHTML = `
+
+<div class="upload-form-container">
+
+  <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> ${t.txtPromoZoneUnlocked}</h3>
+
+  <div class="input-group">
+
+
+
+    <label style="font-size:13px; color:#94a3b8;">${t.lblTargetVideo}</label>
+
+
+
+    <input
+
+      type="url"
+
+      class="link-input"
+
+      id="ytVideoInput"
+
+      placeholder="https://www.youtube.com/watch?v=..."
+
+      required
+
+      onfocus="userCurrentlyTyping = true"
+
+      onblur="userCurrentlyTyping = false"
+
+    />
+
+
+
+    <label style="font-size:13px; color:#94a3b8; margin-top:4px;">${t.lblYourChannel}</label>
+
+
+
+    <input
+
+      type="url"
+
+      class="link-input"
+
+      id="ytChannelInput"
+
+      placeholder="https://www.youtube.com/..."
+
+      required
+
+      onfocus="userCurrentlyTyping = true"
+
+      onblur="userCurrentlyTyping = false"
+
+    />
+
+
+
+    <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">${t.btnSubmitDocument}</button>
+
+
+
+  </div>
+
+
+
+  <div id="uploadFeedback" class="notify-msg"></div>
+
+</div>
+
+`;
+
+
+
+return;
+
+}
+
+}
+
+
 
 /**
- * 2. Collect User Input & Send Requests to Backend Trigger Pipelines
- */
+
+
+
+Collect User Input & Send Requests to Backend Trigger Pipelines
+
+*/
+
 function openRegulationsModal() {
-  document.getElementById("rulesModal").style.display = "block";
+
+document.getElementById("rulesModal").style.display = "block";
+
 }
+
+
 
 function validateCheckboxes() {
-  let allChecked = true;
-  for (let i = 1; i <= 7; i++) {
-    if (!document.getElementById(`check${i}`).checked) {
-      allChecked = false;
-      break;
-    }
-  }
-  document.getElementById("acceptBtn").disabled = !allChecked;
+
+let allChecked = true;
+
+for (let i = 1; i <= 7; i++) {
+
+if (!document.getElementById(`check${i}`).checked) {
+
+  allChecked = false;
+
+  break;
+
 }
+
+}
+
+document.getElementById("acceptBtn").disabled = !allChecked;
+
+}
+
+
 
 async function submitAcceptedConditions() {
-  try {
-    const response = await fetch(`${BACKEND_API_BASE}/accept-conditions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" }
-    });
-    if (response.ok) {
-      document.getElementById("rulesModal").style.display = "none";
-      fetchDashboardState();
-    }
-  } catch (err) {
-    console.error("Failed to commit condition declarations:", err);
-  }
+
+try {
+
+const response = await fetch(`${BACKEND_API_BASE}/accept-conditions`, {
+
+  method: "POST",
+
+  headers: { "Content-Type": "application/json" }
+
+});
+
+if (response.ok) {
+
+  document.getElementById("rulesModal").style.display = "none";
+
+  fetchDashboardState();
+
 }
 
-function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
-  window.open(videoUrl, '_blank');
-  localStorage.setItem(
-    "activeCountdown",
-    JSON.stringify({ sequencePosition, elementId, endTime: Date.now() + 3000 })
-  );
-  const container = document.getElementById(`btn-container-${sequencePosition}`);
-  if (!container) {
-    console.warn("Timer container missing");
-    return;
-  }
+} catch (err) {
 
-  let secondsLeft = 3;
-  let chip = container.querySelector('.timer-chip');
-  if (!chip) {
-    chip = document.createElement("span");
-    chip.className = "timer-chip";
-    container.appendChild(chip);
-  }
+console.error("Failed to commit condition declarations:", err);
+
+}
+
+}
+
+
+
+function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
+
+window.open(videoUrl, '_blank');
+
+localStorage.setItem(
+
+"activeCountdown",
+
+JSON.stringify({
+
+sequencePosition,
+
+elementId,
+
+endTime: Date.now() + 3000
+
+})
+
+);
+
+const container = document.getElementById(btn-container-${sequencePosition});
+
+if (!container) {
+
+console.warn("Timer container missing");
+
+return;
+
+}
+
+
+
+let secondsLeft = 3;
+
+
+
+let chip = container.querySelector('.timer-chip');
+
+if (!chip) {
+
+chip = document.createElement("span");
+
+chip.className = "timer-chip";
+
+container.appendChild(chip);
+
+}
+
+
+
+chip.innerText = ${secondsLeft}s;
+
+
+
+const btn = container.querySelector("button");
+
+if (btn) btn.disabled = true;
+
+
+
+const countdown = setInterval(async () => {
+
+secondsLeft--;
+
+
+
+const chip = container.querySelector('.timer-chip');
+
+if (chip) {
 
   chip.innerText = `${secondsLeft}s`;
 
-  const btn = container.querySelector("button");
-  if (btn) btn.disabled = true;
+}
 
-  const countdown = setInterval(async () => {
-    secondsLeft--;
-    const chip = container.querySelector('.timer-chip');
-    if (chip) chip.innerText = `${secondsLeft}s`;
 
-    if (secondsLeft <= 0) {
-      clearInterval(countdown);
-      localStorage.removeItem("activeCountdown");
-      try {
-        const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ elementId, sequencePosition })
-        });
 
-        if (response.ok) {
-          const result = await response.json();
-          if (result.systemAlertMessage) {
-            alert(localizationDictionary[activeLang][result.systemAlertMessage]);
-          }
-        }
-      } catch (err) {
-        console.error("Failed tracking visit verification loop:", err);
-      } finally {
-        fetchDashboardState();
+if (secondsLeft <= 0) {
+
+  clearInterval(countdown);
+
+  localStorage.removeItem("activeCountdown");
+
+  try {
+
+    const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
+
+      method: "POST",
+
+      headers: { "Content-Type": "application/json" },
+
+      body: JSON.stringify({
+
+        elementId,
+
+        sequencePosition
+
+      })
+
+    });
+
+
+
+    if (response.ok) {
+
+      const result = await response.json();
+
+
+
+      if (result.systemAlertMessage) {
+
+        alert(localizationDictionary[activeLang][result.systemAlertMessage]);
+
       }
+
     }
-  }, 1000);
+
+  } catch (err) {
+
+    console.error("Failed tracking visit verification loop:", err);
+
+  } finally {
+
+    fetchDashboardState();
+
+  }
+
+}
+
+}, 1000);
+
 }
 
 async function handleDatabaseAppealTrigger(queueUserId) {
-  try {
-    const response = await fetch(`${BACKEND_API_BASE}/appeal-user`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ queueUserId })
-    });
-    
-    if (response.ok) {
-      const result = await response.json();
-      if (result.systemAlertMessage) {
-        alert(localizationDictionary[activeLang][result.systemAlertMessage]);
-      }
-      fetchDashboardState();
-    }
-  } catch (err) {
-    console.error("Failed handling systemic database appeal parameters execution:", err);
+
+try {
+
+const response = await fetch(`${BACKEND_API_BASE}/appeal-user`, {
+
+  method: "POST",
+
+  headers: { "Content-Type": "application/json" },
+
+  body: JSON.stringify({ queueUserId })
+
+});
+
+
+
+if (response.ok) {
+
+  const result = await response.json();
+
+  if (result.systemAlertMessage) {
+
+    alert(localizationDictionary[activeLang][result.systemAlertMessage]);
+
   }
+
+  fetchDashboardState();
+
+}
+
+} catch (err) {
+
+console.error("Failed handling systemic database appeal parameters execution:", err);
+
+}
+
 }
 
 async function handleTargetedDefenseVisit(activeSlotId, videoUrl) {
-  if (videoUrl && videoUrl !== '#') {
-    window.open(videoUrl, '_blank');
-  }
 
-  try {
-    const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ elementId: activeSlotId, sequencePosition: 0 })
-    });
+// 1. Open the video tab instantly for the user
 
-    if (response.ok) {
-      fetchDashboardState();
-    } else {
-      const data = await response.json();
-      alert(data.error || "Verification tracking error occurred.");
-      fetchDashboardState();
-    }
-  } catch (err) {
-    console.error("Targeted validation request network bridge error:", err);
-    fetchDashboardState();
-  }
+if (videoUrl && videoUrl !== '#') {
+
+window.open(videoUrl, '_blank');
+
+}
+
+
+
+// 2. Fire off the backend verification immediately with zero delays
+
+try {
+
+const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
+
+  method: "POST",
+
+  headers: { "Content-Type": "application/json" },
+
+  body: JSON.stringify({
+
+    elementId: activeSlotId,
+
+    sequencePosition: 0 // Bypassed sequence checks in backend during Phase 2
+
+  })
+
+});
+
+
+
+if (response.ok) {
+
+  // Refresh the UI state instantly
+
+  fetchDashboardState();
+
+} else {
+
+  const data = await response.json();
+
+  alert(data.error || "Verification tracking error occurred.");
+
+  fetchDashboardState();
+
+}
+
+} catch (err) {
+
+console.error("Targeted validation request network bridge error:", err);
+
+fetchDashboardState();
+
+}
+
 }
 
 async function processDatabaseVideoCommit() {
-  const videoInput = document.getElementById("ytVideoInput");
-  const channelInput = document.getElementById("ytChannelInput");
-  const feedback = document.getElementById("uploadFeedback");
-  const t = localizationDictionary[activeLang];
 
-  let rawVideoUrl = videoInput.value.trim();
-  let rawChannelUrl = channelInput.value.trim();
+const videoInput = document.getElementById("ytVideoInput");
 
-  if (!rawVideoUrl || !rawChannelUrl) return;
+const channelInput = document.getElementById("ytChannelInput");
 
-  feedback.className = "notify-msg info-text";
-  feedback.innerText = t.txtProcessingParams;
+const feedback = document.getElementById("uploadFeedback");
 
-  try {
-    const response = await fetch(`${BACKEND_API_BASE}/submit-promotion`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rawVideoUrl, rawChannelUrl })
-    });
+const t = localizationDictionary[activeLang];
 
-    const result = await response.json();
-    console.log("submit-promotion response:", result);
-    
-    if (!response.ok) {
-      feedback.className = "notify-msg error-text";
-      feedback.innerText = t[result.errorKey] || result.message;
-      return;
-    }
 
-    feedback.className = "notify-msg success-text";
-    feedback.innerText = t[result.successKey];
-    
-    videoInput.value = "";
-    channelInput.value = "";
-    
-    localStorage.removeItem("draft_ytVideoInput");
-    localStorage.removeItem("draft_ytChannelInput");
-    
-    setTimeout(() => fetchDashboardState(), 1000);
 
-  } catch (err) {
-    console.error("Submission breakdown pipeline fault:", err);
-    feedback.className = "notify-msg error-text";
-    feedback.innerText = "System connection failure.";
-  }
+let rawVideoUrl = videoInput.value.trim();
+
+let rawChannelUrl = channelInput.value.trim();
+
+
+
+// Basic basic validation block before transmission
+
+if (!rawVideoUrl || !rawChannelUrl) return;
+
+
+
+feedback.className = "notify-msg info-text";
+
+feedback.innerText = t.txtProcessingParams;
+
+
+
+try {
+
+const response = await fetch(`${BACKEND_API_BASE}/submit-promotion`, {
+
+  method: "POST",
+
+  headers: { "Content-Type": "application/json" },
+
+  body: JSON.stringify({ rawVideoUrl, rawChannelUrl })
+
+});
+
+
+
+const result = await response.json();
+
+console.log("submit-promotion response:", result);
+
+if (!response.ok) {
+
+  feedback.className = "notify-msg error-text";
+
+  feedback.innerText = t[result.errorKey] || result.message;
+
+  return;
+
 }
+
+
+
+feedback.className = "notify-msg success-text";
+
+feedback.innerText = t[result.successKey];
+
+
+
+videoInput.value = "";
+
+channelInput.value = "";
+
+
+
+setTimeout(() => fetchDashboardState(), 1000);
+
+
+
+} catch (err) {
+
+console.error("Submission breakdown pipeline fault:", err);
+
+feedback.className = "notify-msg error-text";
+
+feedback.innerText = "System connection failure.";
+
+}
+
+}
+
+
 
 /**
- * 3. Window Initializers & Background Polling Loop Engine
- */
+
+
+
+Window Initializers & Background Polling Loop Engine
+
+*/
+
 function restoreCountdown() {
-  const saved = localStorage.getItem("activeCountdown");
-  if (!saved) return;
 
-  const data = JSON.parse(saved);
-  const remaining = Math.ceil((data.endTime - Date.now()) / 1000);
+const saved = localStorage.getItem("activeCountdown");
 
-  if (remaining <= 0) {
-    localStorage.removeItem("activeCountdown");
-    return;
-  }
+if (!saved) return;
 
-  const container = document.getElementById(`btn-container-${data.sequencePosition}`);
-  if (!container) return;
 
-  const btn = container.querySelector("button");
-  if (btn) btn.disabled = true;
 
-  let chip = container.querySelector(".timer-chip");
-  if (!chip) {
-    chip = document.createElement("span");
-    chip.className = "timer-chip";
-    container.appendChild(chip);
-  }
+const data = JSON.parse(saved);
 
-  let secondsLeft = remaining;
+
+
+const remaining = Math.ceil(
+
+(data.endTime - Date.now()) / 1000
+
+);
+
+
+
+if (remaining <= 0) {
+
+localStorage.removeItem("activeCountdown");
+
+return;
+
+}
+
+
+
+const container = document.getElementById(
+
+`btn-container-${data.sequencePosition}`
+
+);
+
+
+
+if (!container) return;
+
+
+
+const btn = container.querySelector("button");
+
+if (btn) btn.disabled = true;
+
+
+
+let chip = container.querySelector(".timer-chip");
+
+
+
+if (!chip) {
+
+chip = document.createElement("span");
+
+chip.className = "timer-chip";
+
+container.appendChild(chip);
+
+}
+
+
+
+let secondsLeft = remaining;
+
+
+
+chip.innerText = ${secondsLeft}s;
+
+
+
+const countdown = setInterval(() => {
+
+secondsLeft--;
+
+
+
+if (chip) {
+
   chip.innerText = `${secondsLeft}s`;
 
-  const countdown = setInterval(() => {
-    secondsLeft--;
-    if (chip) chip.innerText = `${secondsLeft}s`;
-
-    if (secondsLeft <= 0) {
-      clearInterval(countdown);
-      localStorage.removeItem("activeCountdown");
-      fetchDashboardState();
-    }
-  }, 1000);
 }
 
- async function startSafeDashboardPolling() {
-  const localizedTimerRunning =
-    document.querySelector(".timer-chip");
 
-  if (!localizedTimerRunning && !userCurrentlyTyping) {
-    await fetchDashboardState();
-  }
 
-  setTimeout(startSafeDashboardPolling, 5000);
+if (secondsLeft <= 0) {
+
+  clearInterval(countdown);
+
+  localStorage.removeItem("activeCountdown");
+
+  fetchDashboardState();
+}
+}, 1000);
+}
+window.onload = function() {
+applyPageLocalization();
+fetchDashboardState().then(() => {
+restoreCountdown();
+});
+// Long polling heartbeat loop matching previous architecture timing intervals safely
+setInterval(() => {
+const localizedTimerRunning = document.querySelector('.timer-chip');
+if (!localizedTimerRunning && !userCurrentlyTyping) {
+
+fetchDashboardState();
+
 }
 
-window.onload = function () {
-  applyPageLocalization();
+}, 5000);
 
-  fetchDashboardState().then(() => {
-    restoreCountdown();
-    startSafeDashboardPolling();
-  });
 };
-
-</script>
-</body>
-</html>
