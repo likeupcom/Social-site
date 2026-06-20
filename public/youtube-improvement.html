@@ -842,25 +842,41 @@ let userCurrentlyTyping = false;
  * 1. Synchronized Dynamic Display Engine
  * Fetches computed architectural state from backend and renders UI.
  */
-async function fetchDashboardState() {
- try {
-   // Explicitly include credentials to verify JWT cookie elements across ports
-   const response = await fetch(`${BACKEND_API_BASE}/state`, {
-     credentials: "include"
-   });
-   if (!response.ok) throw new Error("Dashboard synchronizer network connection failure.");
-   
-   const state = await response.json();
-   
-   renderBanner(state.appealingPeriod);
-   renderUserIdentityBadge(state.userAccount);
-   renderGrids(state.vipChannels, state.regularChannels, state.visitedChannelIds, state.buttonSystemState);
-   renderWaitingList(state.waitingListUsers, state.appealingPeriod, state.userIsActiveOnBoard);
-   renderControlZonePresentation(state.controlZoneState);
-   
- } catch (err) {
-   console.error("Database sync loop link failure:", err);
- }
+ async function fetchDashboardState() {
+  try {
+    // 1. Extract the token from the URL bar if it exists
+    const urlParams = new URLSearchParams(window.location.search);
+    let token = urlParams.get('auth_token') || urlParams.get('token') || '';
+    
+    // 2. Fallback to parse it from document cookies if URL parameters are missing
+    if (!token) {
+      const cookieMatch = document.cookie.match(/(^| )token=([^;]+)/);
+      if (cookieMatch) token = cookieMatch[2];
+    }
+
+    // 3. Append the token directly to the URL query string to clear backend auth loops securely
+    const urlWithAuth = token 
+      ? `${BACKEND_API_BASE}/state?token=${token}` 
+      : `${BACKEND_API_BASE}/state`;
+
+    const response = await fetch(urlWithAuth, {
+      credentials: "include"
+    });
+    
+    if (!response.ok) throw new Error("Dashboard synchronizer network connection failure.");
+    
+    const state = await response.json();
+    
+    // Dynamic Application UI Upgrades
+    renderBanner(state.appealingPeriod);
+    renderUserIdentityBadge(state.userAccount);
+    renderGrids(state.vipChannels, state.regularChannels, state.visitedChannelIds, state.buttonSystemState);
+    renderWaitingList(state.waitingListUsers, state.appealingPeriod, state.userIsActiveOnBoard);
+    renderControlZonePresentation(state.controlZoneState);
+    
+  } catch (err) {
+    console.error("Database sync loop link failure:", err);
+  }
 }
 /**
  * UI DISPLAY RENDER PIPELINES
