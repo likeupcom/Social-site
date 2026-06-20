@@ -1389,13 +1389,30 @@ window.onload = function() {
     restoreCountdown();
   });
 
-  setInterval(() => {
-    const localizedTimerRunning = document.querySelector('.timer-chip');
-    if (!localizedTimerRunning && !userCurrentlyTyping) {
-      fetchDashboardState();
-    }
-  }, 5000);
-};
+// ... (rest of your script above)
+
+// New helper function that protects your network connection
+async function startSafeDashboardPolling() {
+  const localizedTimerRunning = document.querySelector('.timer-chip');
+  
+  if (!localizedTimerRunning && !userCurrentlyTyping) {
+    // 'await' forces the frontend to wait until the server responds completely
+    await fetchDashboardState();
+  }
+  
+  // Only schedules the next check 5 seconds AFTER the current one finishes
+  setTimeout(startSafeDashboardPolling, 5000);
+}
+
+window.onload = function() {
+  applyPageLocalization();
+
+  fetchDashboardState().then(() => {
+    restoreCountdown();
+    // Starts the safe, self-spacing loop
+    startSafeDashboardPolling();
+  });
+};  
 </script>
 </body>
 </html>
