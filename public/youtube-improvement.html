@@ -834,7 +834,7 @@ function applyPageLocalization() {
 }
 
 // PRODUCTION CONFIGURATION: Target base route path of your secure Node.js instance
- const BACKEND_API_BASE = "";
+ const BACKEND_API_BASE = "/api/youtube-dashboard";
 let userCurrentlyTyping = false;
 
 /**
@@ -1382,37 +1382,26 @@ function restoreCountdown() {
   }, 1000);
 }
 
-window.onload = function() {
-  applyPageLocalization();
+ async function startSafeDashboardPolling() {
+  const localizedTimerRunning =
+    document.querySelector(".timer-chip");
 
-  fetchDashboardState().then(() => {
-    restoreCountdown();
-  });
-
-// ... (rest of your script above)
-
-// New helper function that protects your network connection
-async function startSafeDashboardPolling() {
-  const localizedTimerRunning = document.querySelector('.timer-chip');
-  
   if (!localizedTimerRunning && !userCurrentlyTyping) {
-    // 'await' forces the frontend to wait until the server responds completely
     await fetchDashboardState();
   }
-  
-  // Only schedules the next check 5 seconds AFTER the current one finishes
+
   setTimeout(startSafeDashboardPolling, 5000);
 }
 
-window.onload = function() {
+window.onload = function () {
   applyPageLocalization();
 
   fetchDashboardState().then(() => {
     restoreCountdown();
-    // Starts the safe, self-spacing loop
     startSafeDashboardPolling();
   });
-};  
+};
+
 </script>
 </body>
 </html>
