@@ -524,20 +524,15 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
 
     // STRICT PHASE 2 GATEWAY
     if (sysState.appealingPeriodActive) {
-      if (!isPhase2Visit) {
-        return res.status(403).json({
-          error: "Visits are completely frozen during the appealing phase."
-        });
+    if (!isPhase2Visit) {
+        return res.status(403).json({ error: "Visits are frozen during appealing phase." });
       }
 
-      // Explicitly allow ONLY the accused waiting user to visit their specific accuser
       const stringAppealers = myQueueRecord && myQueueRecord.appealedBy ? myQueueRecord.appealedBy.map(id => String(id).trim()) : [];
       const targetActiveOwnerId = String(slot.userId).trim();
 
       if (!myQueueRecord || !stringAppealers.includes(targetActiveOwnerId)) {
-        return res.status(403).json({
-          error: "Access Denied: You can only visit active users who submitted an appeal against you."
-        });
+        return res.status(403).json({ error: "Access Denied: Unapproved validation channel target." });
       }
     } else {
       // Normal Operation Mode: Members inside the system cannot use standard visits
@@ -656,9 +651,9 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     const dbUser = await User.findOne({ username: lookupUsername });
     const userId = dbUser._id.toString();
     const userProfile = await YTUserProfile.findOne({ userId });
-    const alreadyExists = await YTActiveSlot.findOne({ userId });
+   const alreadyExists = await YTActiveSlot.findOne({ userId });
     if (alreadyExists) {
-      return res.json({ successKey: "txtSingleUploadSecurity" });
+      return res.status(400).json({ errorKey: "txtSingleUploadSecurity" });
     }
     if (
       userProfile?.appealBanUntil &&
@@ -741,11 +736,7 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     );
 
     // Sync baseline index sequence positions to avoid layout locks
-    const sysState = await getOrCreateSystemState();
-    const updatedSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
-
-    res.json({ successKey: "txtPromoZoneUnlocked" });
-
+ res.json({ successKey: "txtPromoZoneUnlocked" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Promotion submission cycle break" });
