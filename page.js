@@ -736,7 +736,7 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     );
 
     // Sync baseline index sequence positions to avoid layout locks
- return res.json({ successKey: "txtPromoZoneUnlocked" });
+    return res.json({ successKey: "txtPromoZoneUnlocked" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Promotion submission cycle break" });
