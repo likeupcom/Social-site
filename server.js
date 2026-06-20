@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 7860;
 const JWT_SECRET = process.env.JWT_SECRET || "ns-platform-super-secret-key";
 
 /* ---------------- 1. SECURITY & MIDDLEWARE ---------------- */
