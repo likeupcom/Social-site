@@ -4,7 +4,6 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
-
 const JWT_SECRET = process.env.JWT_SECRET || "ns-platform-super-secret-key";
 
 // Helper Auth Middleware
