@@ -1082,84 +1082,53 @@ function generateCardHTML(item, sequencePosition, isVip, visitedChannelIds, butt
     container.innerHTML += cardHtml;
   });
 }
-function renderControlZonePresentation(controlZone) {
-  const bottomZone = document.getElementById("bottomControlZone");
+async function processDatabaseVideoCommit() {
+  const videoInput = document.getElementById("ytVideoInput");
+  const channelInput = document.getElementById("ytChannelInput");
+  const feedback = document.getElementById("uploadFeedback");
   const t = localizationDictionary[activeLang];
 
-  if (controlZone.status === "INITIAL_GATEWAY") {
-    bottomZone.innerHTML = `<button class="gate-btn" id="actionGateBtn" onclick="openRegulationsModal()">${t.actionGateBtn}</button>`;
-    return;
-  }
+  let rawVideoUrl = videoInput.value.trim();
+  let rawChannelUrl = channelInput.value.trim();
 
-  if (controlZone.status === "LOCKDOWN_APPEALS") {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-gavel"></i> ${t.txtUploadBlockedAppeals.replace("{min}", controlZone.remainingMinutes)}</p>`;
-    return;
-  }
+  if (!rawVideoUrl || !rawChannelUrl) return;
 
-  if (controlZone.status === "LOCKDOWN_COOLDOWN") {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-clock"></i> ${t.txtUploadBlockedCooldown.replace("{min}", controlZone.remainingMinutes)}</p>`;
-    return;
-  }
+  feedback.className = "notify-msg info-text";
+  feedback.innerText = t.txtProcessingParams;
 
-  if (controlZone.status === "TRACKING_SECURITY") {
-    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-circle-info"></i> ${t.txtSingleUploadSecurity}</p>`;
-    return;
-  }
+  try {
+    const response = await fetch(`${BACKEND_API_BASE}/submit-promotion`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rawVideoUrl, rawChannelUrl })
+    });
 
-  if (controlZone.status === "FROZEN_APPEALING") {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtUploadFormFrozen}</p>`;
-    return;
-  }
+    const result = await response.json();
+    console.log("submit-promotion response:", result);
+    
+    if (!response.ok) {
+      feedback.className = "notify-msg error-text";
+      feedback.innerText = t[result.errorKey] || result.message;
+      return;
+    }
 
-   if (controlZone.status === "VISITS_INCOMPLETE") {
-    bottomZone.innerHTML = `<p class="info-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> ${t.txtCompleteVisitsToUnlock}</p>`;
-    return;
-  }
+    feedback.className = "notify-msg success-text";
+    feedback.innerText = t[result.successKey];
+    
+    // Clear elements from HTML display
+    videoInput.value = "";
+    channelInput.value = "";
+    
+    // CLEAR SAVED DRAFTS FROM STORAGE UPON SUCCESSFUL SUBMISSION
+    localStorage.removeItem("draft_ytVideoInput");
+    localStorage.removeItem("draft_ytChannelInput");
+    
+    setTimeout(() => fetchDashboardState(), 1000);
 
-  if (controlZone.status === "TARGETED_VERIFICATION_ACTIVE") {
-    bottomZone.innerHTML = `<p class="error-text" style="font-size:14px;"><i class="fa-solid fa-lock"></i> Verification Period Active. Complete counter visits above to clear outstanding appeals.</p>`;
-    return;
-  }
-
-  if (controlZone.status === "UNLOCKED") {
-  bottomZone.innerHTML = `
-    <div class="upload-form-container">
-      <h3><i class="fa-solid fa-unlock-keyhole" style="color:#22c55e;"></i> ${t.txtPromoZoneUnlocked}</h3>
-      <div class="input-group">
-
-        <label style="font-size:13px; color:#94a3b8;">${t.lblTargetVideo}</label>
-
-        <input
-          type="url"
-          class="link-input"
-          id="ytVideoInput"
-          placeholder="https://www.youtube.com/watch?v=..."
-          required
-          onfocus="userCurrentlyTyping = true"
-          onblur="userCurrentlyTyping = false"
-        />
-
-        <label style="font-size:13px; color:#94a3b8; margin-top:4px;">${t.lblYourChannel}</label>
-
-        <input
-          type="url"
-          class="link-input"
-          id="ytChannelInput"
-          placeholder="https://www.youtube.com/..."
-          required
-          onfocus="userCurrentlyTyping = true"
-          onblur="userCurrentlyTyping = false"
-        />
-
-        <button class="submit-link-btn" style="margin-top:6px;" onclick="processDatabaseVideoCommit()">${t.btnSubmitDocument}</button>
-
-      </div>
-
-      <div id="uploadFeedback" class="notify-msg"></div>
-    </div>
-  `;
-  
-  return;
+  } catch (err) {
+    console.error("Submission breakdown pipeline fault:", err);
+    feedback.className = "notify-msg error-text";
+    feedback.innerText = "System connection failure.";
   }
 }
 
