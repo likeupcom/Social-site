@@ -81,6 +81,10 @@ function auth(req, res, next) {
     req.user = decoded.user;
     next();
   } catch (err) {
+    // If it's a background data fetch request, return an unauthorized JSON status instead of an HTML page redirect
+    if (req.xhr || req.headers.accept?.includes('json') || req.url.includes('/api/')) {
+      return res.status(401).json({ error: "Unauthorized", sessionExpired: true });
+    }
     res.redirect("/login.html");
   }
 }
