@@ -252,7 +252,7 @@ app.delete("/api/user/profile", async (req, res) => {
 
 // External router fallback logic
 const otherPagesRouter = require("./page.js");
-//app.use("/", otherPagesRouter);
+app.use("/", otherPagesRouter);
 
 // Dynamic HTML page router
 app.get("/:page.html", auth, (req, res) => {
