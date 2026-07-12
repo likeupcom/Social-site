@@ -282,15 +282,18 @@ app.get("/:page.html", auth, (req, res) => {
     path.join(__dirname, "public", `${pageName}.html`)
   ];
 
-  for (const filePath of filePaths) {
-    try {
-      return res.sendFile(filePath);
-    } catch {
-      continue; // Skips to next path fallback if file doesn't exist
+    let index = 0;
+  function tryNext() {
+    if (index >= filePaths.length) {
+      return res.status(404).send(`Error: File ${pageName}.html cannot be located.`);
     }
+    res.sendFile(filePaths[index++], (err) => {
+      if (err) tryNext();
+    });
   }
+  tryNext();
 
-  return res.status(404).send(`Error: File ${pageName}.html cannot be located.`);
+    
 });
 
 /* ---------------- 9. INITIALIZE SERVER ---------------- */
