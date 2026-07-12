@@ -33,9 +33,9 @@ if (!process.env.MONGODB_URI) {
 }
 
 mongoose
-  .connect(process.env.MONGODB_URI, {
-    tlsAllowInvalidCertificates: true // Bypasses Hugging Face/self-signed cert validation issues
-  })
+  .connect(process.env.MONGODB_URI)
+  //   tlsAllowInvalidCertificates: true // Bypasses Hugging Face/self-signed cert validation issues
+ // })
   .then(() => console.log("✅ Database connected successfully"))
   .catch((err) => {
     console.error("❌ Database connection failed:", err.message);
