@@ -131,10 +131,22 @@ app.post("/login", async (req, res) => {
     if (!username || !password) return res.status(400).json({ error: "Fill all fields." });
     if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database offline." });
 
-    const user = await User.findOne({ username });
-    if (!user) return res.status(401).json({ error: "Incorrect username or password." });
+   // Look up the user matching the username case-insensitively and trim any input data
+const cleanUsername = username.trim();
+const user = await User.findOne({ username: { $regex: new RegExp("^" + cleanUsername + "$", "i") } });
 
-    const match = await bcrypt.compare(password, user.password);
+if (!user) {
+  console.log(User not found in DB for input: "${cleanUsername}");
+  return res.status(401).json({ error: "Incorrect username or password." });
+}
+
+// Force clean string comparison
+const match = await bcrypt.compare(password.trim(), user.password);
+if (!match) {
+  console.log(Password mismatch for user: ${user.username}');
+  console.log(Input password: ${password.trim()}');
+  console.log(Stored hash in DB: ${user.password}');
+}
     if (!match) return res.status(401).json({ error: "Incorrect username or password." });
 
     const token = sendTokenCookie(res, username);
