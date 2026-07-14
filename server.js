@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
 const app = express();
-const PORT = 7860;
+const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || "ns-platform-super-secret-key";
 
 /* ---------------- 1. SECURITY & MIDDLEWARE ---------------- */
@@ -136,16 +136,16 @@ const cleanUsername = username.trim();
 const user = await User.findOne({ username: { $regex: new RegExp("^" + cleanUsername + "$", "i") } });
 
 if (!user) {
-  console.log(User not found in DB for input: "${cleanUsername}");
+  console.log(`User not found in DB for input: "${cleanUsername}"`);
   return res.status(401).json({ error: "Incorrect username or password." });
 }
 
 // Force clean string comparison
 const match = await bcrypt.compare(password.trim(), user.password);
 if (!match) {
-  console.log(Password mismatch for user: ${user.username}');
-  console.log(Input password: ${password.trim()}');
-  console.log(Stored hash in DB: ${user.password}');
+  console.log(`Password mismatch for user: ${user.username}`);
+  console.log(`Input password: ${password.trim()}`);
+  console.log(`Stored hash in DB: ${user.password}`);
 }
     if (!match) return res.status(401).json({ error: "Incorrect username or password." });
 
