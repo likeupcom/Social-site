@@ -297,6 +297,7 @@ app.get("/:page.html", auth, (req, res) => {
 });
 
 /* ---------------- 9. INITIALIZE SERVER ---------------- */
-app.listen(PORT, () => {
-  console.log(`🚀 Server is listening securely on port ${PORT}`);
-});
+//app.listen(PORT, () => {
+//  console.log(`🚀 Server is listening securely on port ${PORT}`);
+//});
+module.exports=app;
