@@ -5,14 +5,13 @@ const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
+const { connectToDatabase } = require("./lib/db");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || "ns-platform-super-secret-key";
 
 /* ---------------- 1. SECURITY & MIDDLEWARE ---------------- */
 
-// Content Security Policy (CSP) Fix
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
@@ -26,23 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-/* ---------------- 2. DATABASE CONNECTION ---------------- */
-if (!process.env.MONGODB_URI) {
-  console.error("❌ ERROR: MONGODB_URI missing from environment variables!");
-  process.exit(1);
-}
-
-mongoose
-  .connect(process.env.MONGODB_URI)
-  //   tlsAllowInvalidCertificates: true // Bypasses Hugging Face/self-signed cert validation issues
- // })
-  .then(() => console.log("✅ Database connected successfully"))
-  .catch((err) => {
-    console.error("❌ Database connection failed:", err.message);
-    console.log("⚠️ Application running in degraded state. Check MongoDB credentials.");
-  });
-
-/* ---------------- 3. DATABASE SCHEMA & MODEL ---------------- */
+/* ---------------- 2. DATABASE SCHEMA & MODEL ---------------- */
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   username: { type: String, required: true, unique: true },
@@ -53,12 +36,12 @@ const userSchema = new mongoose.Schema({
   facebook_link: { type: String, default: "" }
 });
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
-/* ---------------- 4. UTILITY & VALIDATION FUNCTIONS ---------------- */
+/* ---------------- 3. UTILITY & VALIDATION FUNCTIONS ---------------- */
 const isGmail = (email) => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
 const isUsername = (username) => /^[a-zA-Z0-9]+$/.test(username);
-const isPasswordValid = (password) => password && password.length >= 6; // Refactored from digits-only to min 6 chars
+const isPasswordValid = (password) => password && password.length >= 6;
 
 function sendTokenCookie(res, username) {
   const token = jwt.sign({ user: username }, JWT_SECRET, { expiresIn: "24h" });
@@ -71,7 +54,7 @@ function sendTokenCookie(res, username) {
   return token;
 }
 
-/* ---------------- 5. AUTHENTICATION MIDDLEWARE ---------------- */
+/* ---------------- 4. AUTHENTICATION MIDDLEWARE ---------------- */
 function auth(req, res, next) {
   const token = req.cookies.token || req.query.auth_token || req.query.token;
   if (!token) return res.redirect("/login.html");
@@ -81,19 +64,19 @@ function auth(req, res, next) {
     req.user = decoded.user;
     next();
   } catch (err) {
-    // If it's a background data fetch request, return an unauthorized JSON status instead of an HTML page redirect
-    if (req.xhr || req.headers.accept?.includes('json') || req.url.includes('/api/')) {
+    if (req.xhr || req.headers.accept?.includes("json") || req.url.includes("/api/")) {
       return res.status(401).json({ error: "Unauthorized", sessionExpired: true });
     }
     res.redirect("/login.html");
   }
 }
 
-/* ---------------- 6. AUTHENTICATION ROUTES ---------------- */
+/* ---------------- 5. AUTHENTICATION ROUTES ---------------- */
 
 // SIGNUP
 app.post("/signup", async (req, res) => {
   try {
+    await connectToDatabase();
     const { email, username, password } = req.body;
 
     if (!email || !username || !password) {
@@ -126,27 +109,26 @@ app.post("/signup", async (req, res) => {
 // LOGIN
 app.post("/login", async (req, res) => {
   try {
+    await connectToDatabase();
     const { username, password } = req.body;
 
     if (!username || !password) return res.status(400).json({ error: "Fill all fields." });
     if (mongoose.connection.readyState !== 1) return res.status(503).json({ error: "Database offline." });
 
-   // Look up the user matching the username case-insensitively and trim any input data
-const cleanUsername = username.trim();
-const user = await User.findOne({ username: { $regex: new RegExp("^" + cleanUsername + "$", "i") } });
+    const cleanUsername = username.trim();
+    const user = await User.findOne({ username: { $regex: new RegExp("^" + cleanUsername + "$", "i") } });
 
-if (!user) {
-  console.log(`User not found in DB for input: "${cleanUsername}"`);
-  return res.status(401).json({ error: "Incorrect username or password." });
-}
+    if (!user) {
+      console.log(`User not found in DB for input: "${cleanUsername}"`);
+      return res.status(401).json({ error: "Incorrect username or password." });
+    }
 
-// Force clean string comparison
-const match = await bcrypt.compare(password.trim(), user.password);
-if (!match) {
-  console.log(`Password mismatch for user: ${user.username}`);
-  console.log(`Input password: ${password.trim()}`);
-  console.log(`Stored hash in DB: ${user.password}`);
-}
+    const match = await bcrypt.compare(password.trim(), user.password);
+    if (!match) {
+      console.log(`Password mismatch for user: ${user.username}`);
+      console.log(`Input password: ${password.trim()}`);
+      console.log(`Stored hash in DB: ${user.password}`);
+    }
     if (!match) return res.status(401).json({ error: "Incorrect username or password." });
 
     const token = sendTokenCookie(res, username);
@@ -158,11 +140,12 @@ if (!match) {
 });
 
 // CHECK SESSION
-app.get("/me", (req, res) => {
-  const token = req.cookies.token || req.query.token;
-  if (!token) return res.json({ user: null, token: null });
-
+app.get("/me", async (req, res) => {
   try {
+    await connectToDatabase();
+    const token = req.cookies.token || req.query.token;
+    if (!token) return res.json({ user: null, token: null });
+
     const decoded = jwt.verify(token, JWT_SECRET);
     return res.json({ user: decoded.user, token });
   } catch (err) {
@@ -171,19 +154,21 @@ app.get("/me", (req, res) => {
 });
 
 // LOGOUT
-app.get("/logout", (req, res) => {
+app.get("/logout", async (req, res) => {
+  await connectToDatabase();
   res.clearCookie("token", { secure: true, sameSite: "none" });
   return res.redirect("/login.html");
 });
 
-/* ---------------- 7. PROFILE ENDPOINTS ---------------- */
+/* ---------------- 6. PROFILE ENDPOINTS ---------------- */
 
 // GET PROFILE LINKS
 app.get("/api/user/profile", async (req, res) => {
-  const token = req.cookies.token || req.query.token || req.query.auth_token;
-  if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
-
   try {
+    await connectToDatabase();
+    const token = req.cookies.token || req.query.token || req.query.auth_token;
+    if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
+
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await User.findOne({ username: decoded.user });
     if (!user) return res.status(404).json({ error: "User not found." });
@@ -199,15 +184,16 @@ app.get("/api/user/profile", async (req, res) => {
   }
 });
 
-// POST UPDATE PROFILE LINKS (Optimized validation block)
+// POST UPDATE PROFILE LINKS
 app.post("/api/user/profile", async (req, res) => {
-  const token = req.cookies.token || req.query.token || req.query.auth_token;
-  if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
-
   try {
+    await connectToDatabase();
+    const token = req.cookies.token || req.query.token || req.query.auth_token;
+    if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
+
     const decoded = jwt.verify(token, JWT_SECRET);
     const incomingFields = req.body;
-    
+
     const platforms = {
       youtubeChannel: "Channel link",
       tiktok_link: "TikTok link",
@@ -240,10 +226,11 @@ app.post("/api/user/profile", async (req, res) => {
 
 // DELETE INDIVIDUAL LINK
 app.delete("/api/user/profile", async (req, res) => {
-  const token = req.cookies.token || req.query.token || req.query.auth_token;
-  if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
-
   try {
+    await connectToDatabase();
+    const token = req.cookies.token || req.query.token || req.query.auth_token;
+    if (!token) return res.status(401).json({ error: "Unauthorized access token missing." });
+
     const decoded = jwt.verify(token, JWT_SECRET);
     const { platform } = req.query;
 
@@ -260,13 +247,11 @@ app.delete("/api/user/profile", async (req, res) => {
   }
 });
 
-/* ---------------- 8. ROUTING & PAGES ---------------- */
+/* ---------------- 7. ROUTING & PAGES ---------------- */
 
-// External router fallback logic
 const otherPagesRouter = require("./page.js");
 app.use("/", otherPagesRouter);
 
-// Dynamic HTML page router
 app.get("/:page.html", auth, (req, res) => {
   const allowedPages = ["youtube", "tiktok", "instagram", "facebook"];
   const pageName = req.params.page;
@@ -275,14 +260,13 @@ app.get("/:page.html", auth, (req, res) => {
     return res.status(404).send("Page not found.");
   }
 
-  // Searches fallback paths sequentially
   const filePaths = [
     path.join(__dirname, "private", `${pageName}.html`),
     path.join(__dirname, `${pageName}.html`),
     path.join(__dirname, "public", `${pageName}.html`)
   ];
 
-    let index = 0;
+  let index = 0;
   function tryNext() {
     if (index >= filePaths.length) {
       return res.status(404).send(`Error: File ${pageName}.html cannot be located.`);
@@ -292,12 +276,12 @@ app.get("/:page.html", auth, (req, res) => {
     });
   }
   tryNext();
-
-    
 });
 
-/* ---------------- 9. INITIALIZE SERVER ---------------- */
-//app.listen(PORT, () => {
-//  console.log(`🚀 Server is listening securely on port ${PORT}`);
-//});
-module.exports=app;
+/* ---------------- 8. INITIALIZE SERVER ---------------- */
+if (process.env.REPL_ID || process.env.PORT) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => console.log(`🚀 Server active on Replit port ${PORT}`));
+}
+
+module.exports = app;

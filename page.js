@@ -1,9 +1,10 @@
- // page.js
+// page.js
 
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const { connectToDatabase } = require("./lib/db");
 const JWT_SECRET = process.env.JWT_SECRET || "ns-platform-super-secret-key";
 
 // Helper Auth Middleware
@@ -191,6 +192,7 @@ async function processAppealingPeriodEnd() {
  */
 router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
   try {
+    await connectToDatabase();
     const User = mongoose.model("User");
     
     // ==================== FIXED JWT OBJECT MATCH BUG ====================
@@ -462,6 +464,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
  */
 router.post("/api/youtube-dashboard/accept-conditions", auth, async (req, res) => {
   try {
+    await connectToDatabase();
     const User = mongoose.model("User");
     const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
     const dbUser = await User.findOne({ username: lookupUsername });
@@ -483,6 +486,7 @@ router.post("/api/youtube-dashboard/accept-conditions", auth, async (req, res) =
  */
 router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
   try {
+    await connectToDatabase();
     const { elementId, sequencePosition } = req.body;
     const User = mongoose.model("User");
     const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
@@ -644,6 +648,7 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
  */
 router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) => {
   try {
+    await connectToDatabase();
     let { rawVideoUrl, rawChannelUrl } = req.body;
     const User = mongoose.model("User");
     const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
@@ -747,6 +752,7 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
  */
 router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
   try {
+    await connectToDatabase();
     const { queueUserId } = req.body;
     const User = mongoose.model("User");
     const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
