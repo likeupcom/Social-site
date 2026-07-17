@@ -248,6 +248,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         const mins = Math.floor(totalSecs / 60);
         const secs = totalSecs % 60;
         appealingPeriod.countdownText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        appealingPeriod.remainingSeconds = totalSecs;
         
         if (sysState.activeSequenceIndex === 999) {
           appealingPeriod.phase = 0; // Custom Phase 0: 1-Minute Upload Grace Phase
