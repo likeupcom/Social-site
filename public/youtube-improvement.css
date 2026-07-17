@@ -125,7 +125,6 @@ h1{
   align-items: center;
   gap: 12px;
   flex: 1;
-  overflow: hidden;
 }
 
 .user-avatar {
@@ -149,7 +148,6 @@ h1{
 .user-details {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   width: 100%;
 }
 
@@ -157,18 +155,16 @@ h1{
   font-weight: bold;
   font-size: 15px;
   color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .raw-link-txt {
   font-family: monospace;
   font-size: 13px;
   color: #94a3b8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* METRICS LAYOUT IN THE CARD */
