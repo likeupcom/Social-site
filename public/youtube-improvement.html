@@ -353,7 +353,16 @@ function renderBanner(appealingPeriod) {
 
   if (appealingPeriod && appealingPeriod.isActive) {
     banner.style.display = "block";
+    if (window._appealInterval) clearInterval(window._appealInterval);
+    const _appealEndTime = Date.now() + ((appealingPeriod.remainingSeconds || 0) * 1000);
     display.innerText = appealingPeriod.countdownText || "00:00";
+    window._appealInterval = setInterval(() => {
+      const s = Math.max(0, Math.floor((_appealEndTime - Date.now()) / 1000));
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      display.innerText = `${m.toString().padStart(2,"0")}:${sec.toString().padStart(2,"0")}`;
+      if (s <= 0) clearInterval(window._appealInterval);
+    }, 1000);
 
     if (appealingPeriod.phase === 1) {
       title.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Appealing Period Active';
@@ -686,48 +695,46 @@ function handleSequentialVisit(videoUrl, sequencePosition, elementId) {
     return;
   }
 
-  let secondsLeft = 3;
+  const visitEndTime = (JSON.parse(localStorage.getItem("activeCountdown") || "{}").endTime) || (Date.now() + 3000);
   let chip = container.querySelector('.timer-chip');
   if (!chip) {
-    chip = document.createElement("span");
-    chip.className = "timer-chip";
-    container.appendChild(chip);
+    chip = document.createElement("span");
+    chip.className = "timer-chip";
+    container.appendChild(chip);
   }
-
-  chip.innerText = `${secondsLeft}s`;
-
-  const btn = container.querySelector("button");
+  const btn = container.querySelector('button');
   if (btn) btn.disabled = true;
-
-  const countdown = setInterval(async () => {
-    secondsLeft--;
-    const chip = container.querySelector('.timer-chip');
-    if (chip) chip.innerText = `${secondsLeft}s`;
-
-    if (secondsLeft <= 0) {
-      clearInterval(countdown);
-      localStorage.removeItem("activeCountdown");
-      try {
-   const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
-  method: "POST",
-  credentials: "include", // <-- Add this line right here
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ elementId, sequencePosition })
-});
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.systemAlertMessage) {
-            alert(localizationDictionary[activeLang][result.systemAlertMessage]);
-          }
-        }
-      } catch (err) {
-        console.error("Failed tracking visit verification loop:", err);
-      } finally {
-        fetchDashboardState();
-      }
-    }
-  }, 1000);
+  
+  (function tickVisit() {
+    const secondsLeft = Math.max(0, Math.ceil((visitEndTime - Date.now()) / 1000));
+    const chip = container.querySelector('.timer-chip');
+    if (chip) chip.innerText = `${secondsLeft}s`;
+    if (secondsLeft <= 0) {
+      localStorage.removeItem("activeCountdown");
+      (async () => {
+        try {
+          const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ elementId, sequencePosition })
+          });
+          if (response.ok) {
+            const result = await response.json();
+            if (result.systemAlertMessage) {
+              alert(localizationDictionary[activeLang][result.systemAlertMessage]);
+            }
+          }
+        } catch (err) {
+          console.error("Failed tracking visit verification loop:", err);
+        } finally {
+          fetchDashboardState();
+        }
+      })();
+    } else {
+      setTimeout(tickVisit, 250);
+    }
+  })();
 }
 
 async function handleDatabaseAppealTrigger(queueUserId) {
@@ -851,19 +858,17 @@ function restoreCountdown() {
     container.appendChild(chip);
   }
 
-  let secondsLeft = remaining;
-  chip.innerText = `${secondsLeft}s`;
-
-  const countdown = setInterval(() => {
-    secondsLeft--;
-    if (chip) chip.innerText = `${secondsLeft}s`;
-
-    if (secondsLeft <= 0) {
-      clearInterval(countdown);
-      localStorage.removeItem("activeCountdown");
-      fetchDashboardState();
-    }
-  }, 1000);
+  chip.innerText = `${remaining}s`;
+  (function tickRestore() {
+    const left = Math.max(0, Math.ceil((data.endTime - Date.now()) / 1000));
+    if (chip) chip.innerText = `${left}s`;
+    if (left <= 0) {
+      localStorage.removeItem("activeCountdown");
+      fetchDashboardState();
+    } else {
+      setTimeout(tickRestore, 250);
+    }
+  })();
 }
 
 // Safe self-spacing loop definition
