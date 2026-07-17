@@ -101,11 +101,6 @@ h1{
   gap: 20px;
 }
 
-@media(max-width: 768px) {
-  .vip-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 /* CARD LAYOUTS */
 .channel-card {
@@ -207,11 +202,6 @@ h1{
   gap: 15px;
 }
 
-@media(max-width: 768px) {
-  .regular-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 /* WAITING LIST SECTION */
 .waiting-section {
@@ -563,22 +553,7 @@ footer{
   margin-left: auto;
 }
 
-/* ── MOBILE 768px: tablet tweaks ── */
-@media (max-width: 768px) {
-  .appealing-alert-banner {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-  }
-
-  .user-identity-card {
-    flex-direction: column;
-    gap: 10px;
-    text-align: center;
-  }
-}
-
-/* ── MOBILE 480px: phone-specific fixes ── */
+/* ── MOBILE 480px: spacing & font only — no layout changes ── */
 @media (max-width: 480px) {
   header {
     padding: 12px 16px;
@@ -593,68 +568,31 @@ footer{
     margin-bottom: 18px;
   }
 
-  /* Cards: single column, no overflow */
-  .vip-grid,
-  .regular-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
+  /* Tighter card padding — same flex row layout as desktop */
   .channel-card {
-    padding: 12px 14px;
-    min-height: unset;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .card-info {
-    width: 100%;
+    padding: 10px 12px;
   }
 
   .username-txt {
     font-size: 14px;
   }
 
-  .raw-link-txt {
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
-
   .metrics-display {
-    gap: 5px;
+    gap: 4px;
   }
 
-  /* Waiting list card: stacks appeal button below info row */
-  .waiting-list-container .channel-card > div:first-child {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .waiting-list-container .channel-card > div:first-child > div:last-child {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .waiting-list-container .channel-card > div:first-child > div:last-child .action-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  /* Buttons: full width on small screens */
   .action-btn {
-    padding: 9px 14px;
-    font-size: 13px;
+    padding: 8px 12px;
+    font-size: 12px;
   }
 
-  /* Bottom nav: tighter on phones */
+  /* Bottom nav: tighter spacing */
   .bottom-nav {
     padding: 10px 4px;
   }
 
   .nav-item {
     font-size: 10px;
-    gap: 2px;
   }
 
   .nav-item span:first-child {
@@ -662,27 +600,18 @@ footer{
     margin-bottom: 2px;
   }
 
-  /* Appealing banner: stack vertically */
-  .appealing-alert-banner {
-    flex-direction: column;
-    gap: 10px;
-    text-align: center;
-    padding: 14px;
-  }
-
   .alert-timer-box {
-    font-size: 16px;
-    padding: 8px 16px;
+    font-size: 15px;
+    padding: 8px 14px;
   }
 
-  /* Gateway box: full width */
   .gateway-box {
-    padding: 20px 16px;
+    padding: 20px 14px;
   }
 
   .gate-btn {
-    font-size: 16px;
-    padding: 14px 24px;
+    font-size: 15px;
+    padding: 13px 20px;
     width: 100%;
   }
 
