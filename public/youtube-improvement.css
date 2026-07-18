@@ -1,3 +1,4 @@
+/* YOUR EXACT CSS CODE INTEGRATED */
 *{
   margin:0;
   padding:0;
@@ -101,7 +102,6 @@ h1{
   gap: 20px;
 }
 
-
 /* CARD LAYOUTS */
 .channel-card {
   background: #111827;
@@ -198,7 +198,6 @@ h1{
   gap: 15px;
 }
 
-
 /* WAITING LIST SECTION */
 .waiting-section {
   margin-bottom: 40px;
@@ -210,14 +209,12 @@ h1{
   gap: 12px;
 }
 
-/* Waiting list cards: auto height, no min-height inflation */
 .waiting-list-container .channel-card {
   min-height: unset;
   height: auto;
   align-items: flex-start;
 }
 
-/* Waiting list link text: wraps cleanly, never hides on mobile */
 .waiting-link-txt {
   font-family: monospace;
   font-size: 12px;
@@ -537,86 +534,30 @@ footer{
   100% { transform: scale(1); box-shadow: 0 0 10px rgba(236, 72, 153, 0.6); }
 }
 
-/* ── DESKTOP: card-info left-anchored, button pinned right via space-between ── */
 .channel-card .card-info {
   flex: 1;
   min-width: 0;
 }
 
-/* Prevent button column from shrinking and pushing content right */
 .channel-card > div:last-child {
   flex-shrink: 0;
   margin-left: auto;
 }
 
-/* ── MOBILE 480px: spacing & font only — no layout changes ── */
 @media (max-width: 480px) {
-  header {
-    padding: 12px 16px;
-  }
-
-  .container {
-    padding: 16px 12px;
-  }
-
-  h1 {
-    font-size: 20px;
-    margin-bottom: 18px;
-  }
-
-  /* Tighter card padding — same flex row layout as desktop */
-  .channel-card {
-    padding: 10px 12px;
-  }
-
-  .username-txt {
-    font-size: 14px;
-  }
-
-  .metrics-display {
-    gap: 4px;
-  }
-
-  .action-btn {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-
-  /* Bottom nav: tighter spacing */
-  .bottom-nav {
-    padding: 10px 4px;
-  }
-
-  .nav-item {
-    font-size: 10px;
-  }
-
-  .nav-item span:first-child {
-    font-size: 18px;
-    margin-bottom: 2px;
-  }
-
-  .alert-timer-box {
-    font-size: 15px;
-    padding: 8px 14px;
-  }
-
-  .gateway-box {
-    padding: 20px 14px;
-  }
-
-  .gate-btn {
-    font-size: 15px;
-    padding: 13px 20px;
-    width: 100%;
-  }
-
-  /* Modal: tighter padding */
-  .regulations-overlay {
-    padding: 20px 12px;
-  }
-
-  .regulations-card {
-    padding: 20px 16px;
-  }
+  header { padding: 12px 16px; }
+  .container { padding: 16px 12px; }
+  h1 { font-size: 20px; margin-bottom: 18px; }
+  .channel-card { padding: 10px 12px; }
+  .username-txt { font-size: 14px; }
+  .metrics-display { gap: 4px; }
+  .action-btn { padding: 8px 12px; font-size: 12px; }
+  .bottom-nav { padding: 10px 4px; }
+  .nav-item { font-size: 10px; }
+  .nav-item span:first-child { font-size: 18px; margin-bottom: 2px; }
+  .alert-timer-box { font-size: 15px; padding: 8px 14px; }
+  .gateway-box { padding: 20px 14px; }
+  .gate-btn { font-size: 15px; padding: 13px 20px; width: 100%; }
+  .regulations-overlay { padding: 20px 12px; }
+  .regulations-card { padding: 20px 16px; }
 }
