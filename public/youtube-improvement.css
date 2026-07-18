@@ -226,9 +226,18 @@ h1{
 }
 
 .waiting-list-container .channel-card {
+  display: flex;
   min-height: unset;
   height: auto;
   align-items: flex-start;
+}
+/* This only targets phone screens */
+@media screen and (max-width: 768px) {
+  .waiting-list-container .channel-card {
+    flex-direction: column !important;
+    gap: 12px;
+    width: 100%;
+  }
 }
 
 .waiting-link-txt {
