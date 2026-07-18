@@ -102,6 +102,12 @@ h1{
   gap: 20px;
 }
 
+@media(max-width: 768px) {
+  .vip-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* CARD LAYOUTS */
 .channel-card {
   background: #111827;
@@ -125,6 +131,7 @@ h1{
   align-items: center;
   gap: 12px;
   flex: 1;
+  overflow: hidden;
 }
 
 .user-avatar {
@@ -148,6 +155,7 @@ h1{
 .user-details {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -155,16 +163,18 @@ h1{
   font-weight: bold;
   font-size: 15px;
   color: #fff;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .raw-link-txt {
   font-family: monospace;
   font-size: 13px;
   color: #94a3b8;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* METRICS LAYOUT IN THE CARD */
@@ -196,6 +206,12 @@ h1{
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 15px;
+}
+
+@media(max-width: 768px) {
+  .regular-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* WAITING LIST SECTION */
