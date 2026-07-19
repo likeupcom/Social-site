@@ -156,9 +156,9 @@ h1{
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
 }
-
 .username-txt {
   font-weight: bold;
   font-size: 15px;
