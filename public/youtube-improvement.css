@@ -572,56 +572,57 @@ footer{
   .container { padding: 16px 12px; }
   h1 { font-size: 20px; margin-bottom: 18px; }
   
-  /* --- HYPER-TARGETED RESPONSIVE FIXES FOR CARDS --- */
+  /* --- RESPONSIVE CARD STACKING OVERRIDES --- */
   .channel-card,
   .waiting-list-container .channel-card,
   .vip-section .channel-card,
   .regular-section .channel-card { 
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    gap: 14px !important;
+    align-items: stretch !important; /* Stretch inner wrappers to full width */
+    gap: 12px !important;
     height: auto !important;
     min-height: unset !important;
     padding: 14px !important;
-    overflow: hidden !important;
   }
   
+  /* Allow text info wrappers to wrap properly and expand */
   .channel-card .card-info,
   .waiting-list-container .card-info {
     width: 100% !important;
     max-width: 100% !important;
     flex: unset !important;
-    display: flex !important;
-    flex-direction: row !important; /* Keep avatar and text side-by-side */
-    align-items: center !important;
   }
 
+  /* Force text containers to calculate layout boundaries correctly next to the avatar */
   .channel-card .user-details,
   .waiting-list-container .user-details {
-    width: calc(100% - 54px) !important; /* Forces text to fit next to the 42px avatar + 12px gap */
+    width: calc(100% - 54px) !important;
     flex: unset !important;
     overflow: hidden !important;
   }
 
-  /* Force the action buttons container to stack beneath everything cleanly */
-  .channel-card > div:last-child {
+  /* Clear the desktop auto margins pushing buttons right */
+  .channel-card > div:last-child,
+  .waiting-list-container .channel-card > div:last-child,
+  .channel-card > [id^="btn-container-"] {
     width: 100% !important;
     margin-left: 0 !important;
     flex-shrink: unset !important;
   }
   
-  .action-btn { 
+  /* Make all actions and buttons match card width */
+  .action-btn,
+  .channel-card .success-text { 
     width: 100% !important;
     max-width: 100% !important;
     justify-content: center !important;
     padding: 12px 16px !important; 
     font-size: 14px !important; 
-    white-space: normal !important; /* Allows text to wrap inside the button if long */
+    white-space: normal !important;
     text-align: center !important;
   }
-  /* ----------------------------------------------- */
+  /* ------------------------------------------- */
 
   .username-txt { font-size: 14px; }
   .metrics-display { gap: 4px; }
