@@ -234,6 +234,11 @@ h1{
   flex: 1;
   min-width: 0;
 }
+.waiting-list-container .user-details {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
 .waiting-link-txt {
   font-family: monospace;
   font-size: 12px;
