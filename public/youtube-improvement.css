@@ -5,10 +5,19 @@
   font-family: Arial, sans-serif;
 }
 
+html {
+  width: 100%;
+  max-width: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 body {
   background: #0b1220;
   color: #fff;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
   padding-bottom: 120px;
   overflow-x: hidden;
 }
@@ -37,6 +46,7 @@ header {
 }
 
 .container {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px 20px;
@@ -226,20 +236,45 @@ h1 {
 
 .waiting-list-container .channel-card {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
   min-height: unset;
   height: auto;
-  align-items: center;
+  overflow: visible;
+}
+
+/* Top row: profile info + appeal button */
+.waiting-list-container .channel-card > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.waiting-list-container .channel-card > div:first-child > div:last-child {
+  flex-shrink: 0;
 }
 
 .waiting-list-container .card-info {
-  flex: 1;
+  flex: 1 1 180px;
   min-width: 0;
+  overflow: visible;
 }
 
 .waiting-list-container .user-details {
   flex: 1;
   min-width: 0;
   width: auto;
+  overflow: visible;
+}
+
+.waiting-list-container .username-txt {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
 }
 
 .waiting-link-txt {
@@ -407,12 +442,13 @@ footer {
 
 .link-input {
   width: 100%;
+  max-width: 100%;
   background: #0b1220;
   border: 1px solid #38bdf8;
   border-radius: 6px;
   padding: 12px 14px;
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   outline: none;
 }
 
@@ -573,77 +609,164 @@ footer {
 }
 
 /* ==========================================================
-   MOBILE DEVICES MEDIA OVERRIDES (FIXED SELECTOR WEIGHT)
+   TABLET & MOBILE — waiting list stacked layout
+   ========================================================== */
+@media (max-width: 768px) {
+  .waiting-list-container .channel-card > div:first-child {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .waiting-list-container .channel-card > div:first-child > div:last-child {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .waiting-list-container .card-info {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+  }
+
+  .waiting-list-container .user-details {
+    width: auto !important;
+    flex: 1 !important;
+    overflow: visible !important;
+  }
+
+  .waiting-list-container .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .waiting-list-container .accusers-defense-zone > div > div {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+}
+
+/* ==========================================================
+   MOBILE DEVICES MEDIA OVERRIDES
    ========================================================== */
 @media (max-width: 480px) {
   header { padding: 12px 16px; }
   .container { padding: 16px 12px; }
   h1 { font-size: 20px; margin-bottom: 18px; }
-  
-  /* Forces the channel cards to cleanly drop into vertical stacking layout */
-  .channel-card, 
-  .waiting-list-container .channel-card { 
-    display: flex !important;
+
+  .appealing-alert-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .user-identity-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .user-identity-card .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* VIP / regular board cards — vertical stack */
+  .vip-grid .channel-card,
+  .regular-grid .channel-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 14px;
+    height: auto;
+    min-height: unset;
+    padding: 14px 16px;
+  }
+
+  .vip-grid .channel-card .card-info,
+  .regular-grid .channel-card .card-info {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .vip-grid .channel-card .user-details,
+  .regular-grid .channel-card .user-details {
+    flex: 1;
+    min-width: 0;
+    overflow: visible;
+  }
+
+  .vip-grid .channel-card > div:last-child,
+  .regular-grid .channel-card > div:last-child {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  /* Waiting list cards — keep full content visible, stack appeal button */
+  .waiting-list-container .channel-card {
+    padding: 14px 16px;
+    height: auto;
+    min-height: unset;
+    overflow: visible;
+  }
+
+  .waiting-list-container .channel-card > div:first-child {
     flex-direction: column !important;
     align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 14px !important;
-    height: auto !important;
-    min-height: unset !important;
-    padding: 14px 16px !important;
-  }
-  
-  /* Retains the avatar and card details line side-by-side up top */
-  .channel-card .card-info,
-  .waiting-list-container .card-info {
-    width: 100% !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
     gap: 12px !important;
   }
 
-  /* Explicitly calculates space boundaries to completely prevent link overflow text leaks */
-  .channel-card .user-details,
-  .waiting-list-container .user-details {
-    width: calc(100% - 54px) !important;
-    flex: unset !important;
-    overflow: hidden !important;
+  .waiting-list-container .channel-card .card-info {
+    width: 100% !important;
+    overflow: visible !important;
   }
 
-  /* Keeps links behaving cleanly inside layout borders */
+  .waiting-list-container .channel-card .user-details {
+    width: auto !important;
+    flex: 1 !important;
+    overflow: visible !important;
+  }
+
+  .waiting-list-container .channel-card > div:first-child > div:last-child {
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .waiting-list-container .username-txt {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: break-word !important;
+    font-size: 14px;
+  }
+
   .raw-link-txt,
   .waiting-link-txt {
     white-space: normal !important;
-    word-break: break-all !important;
+    word-break: break-word !important;
     overflow-wrap: anywhere !important;
   }
 
-  /* Overrides desktop margin-left pushing controls outward */
-  .channel-card > div:last-child,
-  .waiting-list-container .channel-card > div:last-child {
-    width: 100% !important;
-    margin-left: 0 !important;
-    flex-shrink: unset !important;
-  }
-  
-  /* Makes actions fill up the base widths cleanly */
-  .action-btn { 
-    width: 100% !important;
-    max-width: 100% !important;
-    justify-content: center !important;
-    padding: 12px 16px !important; 
-    font-size: 14px !important; 
-    white-space: nowrap !important;
+  .vip-grid .action-btn,
+  .regular-grid .action-btn,
+  .waiting-list-container .action-btn {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 14px;
+    white-space: nowrap;
   }
 
   .channel-card .success-text {
-    width: 100% !important;
-    justify-content: center !important;
-    padding: 8px 0 !important;
+    width: 100%;
+    justify-content: center;
+    padding: 8px 0;
   }
 
-  .username-txt { font-size: 14px; }
   .metrics-display { gap: 4px; }
   .bottom-nav { padding: 10px 4px; }
   .nav-item { font-size: 10px; }
