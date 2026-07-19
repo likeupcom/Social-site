@@ -1,51 +1,51 @@
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
-body{
-  background:#0b1220;
-  color:#fff;
-  min-height:100vh;
-  padding-bottom:120px;
-  overflow-x:hidden;
+body {
+  background: #0b1220;
+  color: #fff;
+  min-height: 100vh;
+  padding-bottom: 120px;
+  overflow-x: hidden;
 }
 
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:18px 40px;
-  background:#111827;
-  position:sticky;
-  top:0;
-  z-index:1000;
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  background: #111827;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.logo-container{
-  display:flex;
-  align-items:center;
-  gap:15px;
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-.logo{
-  font-size:22px;
-  font-weight:bold;
-  color:#38bdf8;
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #38bdf8;
 }
 
-.container{
+.container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px 20px;
 }
 
-h1{
-  font-size:26px;
-  margin-bottom:25px;
-  color:#38bdf8;
+h1 {
+  font-size: 26px;
+  margin-bottom: 25px;
+  color: #38bdf8;
   text-align: center;
 }
 
@@ -157,6 +157,7 @@ h1{
   overflow: hidden;
   width: 100%;
 }
+
 .username-txt {
   font-weight: bold;
   font-size: 15px;
@@ -229,15 +230,18 @@ h1{
   height: auto;
   align-items: center;
 }
+
 .waiting-list-container .card-info {
   flex: 1;
   min-width: 0;
 }
+
 .waiting-list-container .user-details {
   flex: 1;
   min-width: 0;
   width: auto;
 }
+
 .waiting-link-txt {
   font-family: monospace;
   font-size: 12px;
@@ -310,46 +314,46 @@ h1{
 }
 
 /* BOTTOM FIXED NAVIGATION */
-.bottom-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:#111827;
-  display:flex;
-  justify-content:space-around;
-  padding:12px 0;
-  border-top:1px solid #1f2937;
-  z-index:1500;
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #111827;
+  display: flex;
+  justify-content: space-around;
+  padding: 12px 0;
+  border-top: 1px solid #1f2937;
+  z-index: 1500;
 }
 
-.nav-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-decoration:none;
-  color:#cbd5e1;
-  font-weight:bold;
-  font-size:12px;
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: #cbd5e1;
+  font-weight: bold;
+  font-size: 12px;
   transition: 0.2s;
 }
 
-.nav-item span:first-child{font-size:20px; margin-bottom: 4px;}
-.nav-item:hover{color:#38bdf8;}
-.nav-item.active{color:#38bdf8;}
+.nav-item span:first-child { font-size: 20px; margin-bottom: 4px; }
+.nav-item:hover { color: #38bdf8; }
+.nav-item.active { color: #38bdf8; }
 
-footer{
-  background:#111827;
-  padding:35px 20px;
-  text-align:center;
+footer {
+  background: #111827;
+  padding: 35px 20px;
+  text-align: center;
   margin-top: 20px;
 }
 
-.footer-text{
-  max-width:900px;
-  margin:auto;
-  line-height:1.6;
-  color:#cbd5e1;
+.footer-text {
+  max-width: 900px;
+  margin: auto;
+  line-height: 1.6;
+  color: #cbd5e1;
   font-size: 14px;
 }
 
@@ -557,6 +561,7 @@ footer{
   100% { transform: scale(1); box-shadow: 0 0 10px rgba(236, 72, 153, 0.6); }
 }
 
+/* DESKTOP ALIGNMENTS FOR END ELEMENTS */
 .channel-card .card-info {
   flex: 1;
   min-width: 0;
@@ -567,34 +572,38 @@ footer{
   margin-left: auto;
 }
 
+/* ==========================================================
+   MOBILE DEVICES MEDIA OVERRIDES (FIXED SELECTOR WEIGHT)
+   ========================================================== */
 @media (max-width: 480px) {
   header { padding: 12px 16px; }
   .container { padding: 16px 12px; }
   h1 { font-size: 20px; margin-bottom: 18px; }
   
-  /* --- RESPONSIVE CARD STACKING OVERRIDES --- */
-  .channel-card,
-  .waiting-list-container .channel-card,
-  .vip-section .channel-card,
-  .regular-section .channel-card { 
+  /* Forces the channel cards to cleanly drop into vertical stacking layout */
+  .channel-card, 
+  .waiting-list-container .channel-card { 
     display: flex !important;
     flex-direction: column !important;
-    align-items: stretch !important; /* Stretch inner wrappers to full width */
-    gap: 12px !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
     height: auto !important;
     min-height: unset !important;
-    padding: 14px !important;
+    padding: 14px 16px !important;
   }
   
-  /* Allow text info wrappers to wrap properly and expand */
+  /* Retains the avatar and card details line side-by-side up top */
   .channel-card .card-info,
   .waiting-list-container .card-info {
     width: 100% !important;
-    max-width: 100% !important;
-    flex: unset !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
   }
 
-  /* Force text containers to calculate layout boundaries correctly next to the avatar */
+  /* Explicitly calculates space boundaries to completely prevent link overflow text leaks */
   .channel-card .user-details,
   .waiting-list-container .user-details {
     width: calc(100% - 54px) !important;
@@ -602,27 +611,37 @@ footer{
     overflow: hidden !important;
   }
 
-  /* Clear the desktop auto margins pushing buttons right */
+  /* Keeps links behaving cleanly inside layout borders */
+  .raw-link-txt,
+  .waiting-link-txt {
+    white-space: normal !important;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* Overrides desktop margin-left pushing controls outward */
   .channel-card > div:last-child,
-  .waiting-list-container .channel-card > div:last-child,
-  .channel-card > [id^="btn-container-"] {
+  .waiting-list-container .channel-card > div:last-child {
     width: 100% !important;
     margin-left: 0 !important;
     flex-shrink: unset !important;
   }
   
-  /* Make all actions and buttons match card width */
-  .action-btn,
-  .channel-card .success-text { 
+  /* Makes actions fill up the base widths cleanly */
+  .action-btn { 
     width: 100% !important;
     max-width: 100% !important;
     justify-content: center !important;
     padding: 12px 16px !important; 
     font-size: 14px !important; 
-    white-space: normal !important;
-    text-align: center !important;
+    white-space: nowrap !important;
   }
-  /* ------------------------------------------- */
+
+  .channel-card .success-text {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 8px 0 !important;
+  }
 
   .username-txt { font-size: 14px; }
   .metrics-display { gap: 4px; }
