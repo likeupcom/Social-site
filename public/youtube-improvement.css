@@ -228,7 +228,11 @@ h1{
   display: flex;
   min-height: unset;
   height: auto;
-  align-items: flex-start;
+  align-items: center;
+}
+.waiting-list-container .card-info {
+  flex: 1;
+  min-width: 0;
 }
 .waiting-link-txt {
   font-family: monospace;
