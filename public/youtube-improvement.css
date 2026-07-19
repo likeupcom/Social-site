@@ -572,36 +572,54 @@ footer{
   .container { padding: 16px 12px; }
   h1 { font-size: 20px; margin-bottom: 18px; }
   
-  /* --- CRITICAL RESPONSIVE OVERRIDES FOR CARDS --- */
-  .channel-card { 
-    padding: 14px 14px; 
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-    height: auto;
-    min-height: unset;
+  /* --- HYPER-TARGETED RESPONSIVE FIXES FOR CARDS --- */
+  .channel-card,
+  .waiting-list-container .channel-card,
+  .vip-section .channel-card,
+  .regular-section .channel-card { 
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
+    height: auto !important;
+    min-height: unset !important;
+    padding: 14px !important;
+    overflow: hidden !important;
   }
   
-  .channel-card .card-info {
-    width: 100%;
+  .channel-card .card-info,
+  .waiting-list-container .card-info {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: unset !important;
+    display: flex !important;
+    flex-direction: row !important; /* Keep avatar and text side-by-side */
+    align-items: center !important;
   }
 
-  .channel-card > div:last-child {
-    width: 100%;
-    margin-left: 0;
+  .channel-card .user-details,
+  .waiting-list-container .user-details {
+    width: calc(100% - 54px) !important; /* Forces text to fit next to the 42px avatar + 12px gap */
+    flex: unset !important;
+    overflow: hidden !important;
   }
-  
-  .waiting-list-container .channel-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
+
+  /* Force the action buttons container to stack beneath everything cleanly */
+  .channel-card > div:last-child {
+    width: 100% !important;
+    margin-left: 0 !important;
+    flex-shrink: unset !important;
   }
   
   .action-btn { 
-    width: 100%;
-    justify-content: center;
-    padding: 12px 16px; 
-    font-size: 14px; 
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: center !important;
+    padding: 12px 16px !important; 
+    font-size: 14px !important; 
+    white-space: normal !important; /* Allows text to wrap inside the button if long */
+    text-align: center !important;
   }
   /* ----------------------------------------------- */
 
