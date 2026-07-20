@@ -8,6 +8,7 @@
 html {
   width: 100%;
   max-width: 100%;
+  overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -20,6 +21,7 @@ body {
   max-width: 100%;
   padding-bottom: 120px;
   overflow-x: hidden;
+  position: relative;
 }
 
 header {
@@ -31,18 +33,26 @@ header {
   position: sticky;
   top: 0;
   z-index: 1000;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .logo-container {
   display: flex;
   align-items: center;
   gap: 15px;
+  min-width: 0;
+  flex: 1;
 }
 
 .logo {
   font-size: 22px;
   font-weight: bold;
   color: #38bdf8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .container {
@@ -50,6 +60,7 @@ header {
   max-width: 1200px;
   margin: 0 auto;
   padding: 30px 20px;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -107,8 +118,10 @@ h1 {
 
 .vip-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
+  width: 100%;
+  min-width: 0;
 }
 
 @media(max-width: 768px) {
@@ -128,6 +141,9 @@ h1 {
   justify-content: space-between;
   transition: 0.3s;
   min-height: 95px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .vip-card {
@@ -213,8 +229,10 @@ h1 {
 
 .regular-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 15px;
+  width: 100%;
+  min-width: 0;
 }
 
 @media(max-width: 768px) {
@@ -232,6 +250,9 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .waiting-list-container .channel-card {
@@ -577,6 +598,9 @@ footer {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 25px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .targeted-verification-card {
@@ -609,9 +633,81 @@ footer {
 }
 
 /* ==========================================================
-   TABLET & MOBILE — waiting list stacked layout
+   TABLET & MOBILE — prevent dynamic content overflow
    ========================================================== */
 @media (max-width: 768px) {
+  .vip-grid .channel-card,
+  .regular-grid .channel-card {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 14px;
+    height: auto;
+    min-height: unset;
+  }
+
+  .vip-grid .channel-card .card-info,
+  .regular-grid .channel-card .card-info {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .vip-grid .channel-card > div:last-child,
+  .regular-grid .channel-card > div:last-child {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .vip-grid .channel-card .username-txt,
+  .regular-grid .channel-card .username-txt,
+  .raw-link-txt {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .vip-grid .action-btn,
+  .regular-grid .action-btn {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .user-identity-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .user-identity-card .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .appealing-alert-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  header {
+    padding: 12px 16px;
+  }
+
+  #preUploadedProfileArea,
+  #realVipGrid,
+  #realRegularGrid,
+  #realWaitingContainer {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
   .waiting-list-container .channel-card > div:first-child {
     flex-direction: column !important;
     align-items: stretch !important;
@@ -758,7 +854,7 @@ footer {
     justify-content: center;
     padding: 12px 16px;
     font-size: 14px;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .channel-card .success-text {
