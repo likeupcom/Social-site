@@ -34,12 +34,12 @@ const YTBoardState = mongoose.models.YTBoardState || mongoose.model("YTBoardStat
 const YTActiveSlotSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   username: { type: String, required: true },
-  youtubeChannel: { type: String, required: true },
-  youtubeVideo: { type: String, required: true },
+  Instagram: { type: String, required: true },
+  InstagramVideo: { type: String, required: true },
   isVip: { type: Boolean, default: false },
   sequencePosition: { type: Number, required: true }, // 0-3 (VIP), 4-13 (Regular)
   views: { type: Number, default: 0 },
-  subs: { type: Number, default: 0 },
+  followers: { type: Number, default: 0 },
   likes: { type: Number, default: 0 },
   comments: { type: Number, default: 0 },
   timestamp: { type: Date, default: Date.now }
@@ -50,8 +50,8 @@ const YTActiveSlot = mongoose.models.YTActiveSlot || mongoose.model("YTActiveSlo
 const YTWaitingQueueSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   username: { type: String, required: true },
-  youtubeChannel: { type: String, required: true },
-  youtubeVideo: { type: String, required: true },
+  Instagram: { type: String, required: true },
+  InstagramVideo: { type: String, required: true },
   appealCount: { type: Number, default: 0 },
   appealedBy: { type: [String], default: [] }, // Array of userIds who lodged appeals to avoid duplicate voting
   timestamp: { type: Date, default: Date.now }
@@ -75,7 +75,7 @@ const YTUserProfile = mongoose.models.YTUserProfile || mongoose.model("YTUserPro
 /**
  * Clean URL parameters to eliminate all tracking tags before database entry.
  */
-function sanitizeYoutubeUrl(url) {
+function sanitizeInstagramUrl(url) {
   if (!url) return "";
   try {
     const parsedUrl = new URL(url);
@@ -158,8 +158,8 @@ async function processAppealingPeriodEnd() {
       await YTActiveSlot.create({
         userId: user.userId,
         username: user.username,
-        youtubeChannel: user.youtubeChannel,
-        youtubeVideo: user.youtubeVideo,
+        InstagramChannel: user.InstagramChannel,
+        InstagramVideo: user.InstagramVideo,
         sequencePosition: targetPos,
         isVip: false
       });
@@ -169,7 +169,7 @@ async function processAppealingPeriodEnd() {
 
     await YTActiveSlot.updateMany(
       { sequencePosition: { $gte: 4 } },
-      { $set: { views: 0, subs: 0, likes: 0, comments: 0 } }
+      { $set: { views: 0, followers: 0, likes: 0, comments: 0 } }
     );
     await YTUserProfile.updateMany(
       {}, 
@@ -187,10 +187,10 @@ async function processAppealingPeriodEnd() {
 /* ---------------- ROUTER ROUTE CHANNELS API ---------------- */
 
 /**
- * GET /api/youtube-dashboard/state
+ * GET /api/Instagram-dashboard/state
  * Assembles and structuralizes the precise state array display matrix.
  */
-router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
+router.get("/api/Instagram-dashboard/state", auth, async (req, res) => {
   try {
     await connectToDatabase();
     const User = mongoose.model("User");
@@ -371,7 +371,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
         id: q._id.toString(),
         userId: q.userId,
         username: q.username,
-        youtubeChannel: q.youtubeChannel,
+        InstagramChannel: q.InstagramChannel,
         appealCount: q.appealCount,
         appealedBy: q.appealedBy, 
         canBeAppealedByMe: appealingPeriod.phase === 1 && !q.appealedBy.includes(userId) && q.userId !== userId,
@@ -440,7 +440,7 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
       }
     }
     res.json({
-      userAccount: { username: dbUser.username, channelUrl: dbUser.youtubeChannel || "https://youtube.com/channel_placeholder" },
+      userAccount: { username: dbUser.username, channelUrl: dbUser.InstagramChannel || "https://Instagram.com/channel_placeholder" },
       appealingPeriod,
       vipChannels,
       regularChannels,
@@ -461,9 +461,9 @@ router.get("/api/youtube-dashboard/state", auth, async (req, res) => {
 });
 
 /**
- * POST /api/youtube-dashboard/accept-conditions
+ * POST /api/Instagram-dashboard/accept-conditions
  */
-router.post("/api/youtube-dashboard/accept-conditions", auth, async (req, res) => {
+router.post("/api/Instagram-dashboard/accept-conditions", auth, async (req, res) => {
   try {
     await connectToDatabase();
     const User = mongoose.model("User");
@@ -483,9 +483,9 @@ router.post("/api/youtube-dashboard/accept-conditions", auth, async (req, res) =
 });
 
 /**
- * POST /api/youtube-dashboard/verify-visit
+ * POST /api/Instagram-dashboard/verify-visit
  */
-router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
+router.post("/api/Instagram-dashboard/verify-visit", auth, async (req, res) => {
   try {
     await connectToDatabase();
     const { elementId, sequencePosition } = req.body;
@@ -563,7 +563,7 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     if (!isPhase2Visit && !hasAlreadyVisited) {
       currentSlotData = await YTActiveSlot.findByIdAndUpdate(
         elementId,
-        { $inc: { views: 1, subs: 1, likes: 1, comments: 1 } },
+        { $inc: { views: 1, followers: 1, likes: 1, comments: 1 } },
         { new: true }
       );
     }
@@ -616,7 +616,7 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
     const allUsersReachedTen = activeSlots.length >= 10 &&
       activeSlots.every(slot =>
         slot.views >= 10 &&
-        slot.subs >= 10 &&
+        slot.followers >= 10 &&
         slot.likes >= 10 &&
         slot.comments >= 10
       );
@@ -645,9 +645,9 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
 });
 
 /**
- * POST /api/youtube-dashboard/submit-promotion
+ * POST /api/Instagram-dashboard/submit-promotion
  */
-router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) => {
+router.post("/api/Instagram-dashboard/submit-promotion", auth, async (req, res) => {
   try {
     await connectToDatabase();
     let { rawVideoUrl, rawChannelUrl } = req.body;
@@ -679,16 +679,16 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
     }
 
     // Perform URL filtering sanitization arrays right away inside backend
-    const cleanVideoUrl = sanitizeYoutubeUrl(rawVideoUrl);
-    const cleanChannelUrl = sanitizeYoutubeUrl(rawChannelUrl);
+    const cleanVideoUrl = sanitizeInstagramUrl(rawVideoUrl);
+    const cleanChannelUrl = sanitizeInstagram(rawChannelUrl);
 
     // Enforce basic structured regex parameter filters
-    if (!cleanVideoUrl.includes("youtube.com") && !cleanVideoUrl.includes("youtu.be")) {
+    if (!cleanVideoUrl.includes("instagram.com") && !cleanVideoUrl.includes("instagram")) {
       return res.status(400).json({ errorKey: "validationErrorLink" });
     }
 
     // Verify user is not altering designated tracked accounts documents outside database profile records
-    if (dbUser.youtubeChannel && sanitizeYoutubeUrl(dbUser.youtubeChannel) !== cleanChannelUrl) {
+    if (dbUser.instagramacount && sanitizeinstagramUrl(dbUser.instagramaccount) !== cleanChannelUrl) {
       return res.status(400).json({ errorKey: "securityErrorProfile" });
     }
 
@@ -706,8 +706,8 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
         await YTActiveSlot.create({
           userId,
           username: dbUser.username,
-          youtubeChannel: cleanChannelUrl,
-          youtubeVideo: cleanVideoUrl,
+          instagramaccount: cleanChannelUrl,
+          instagramVideo: cleanVideoUrl,
           sequencePosition: i,
           isVip: false
         });
@@ -723,8 +723,8 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
         const newQueueNode = new YTWaitingQueue({
           userId,
           username: dbUser.username,
-          youtubeChannel: cleanChannelUrl,
-          youtubeVideo: cleanVideoUrl
+          instagramaccount: cleanChannelUrl,
+          instagramVideo: cleanVideoUrl
         });
         await newQueueNode.save();
       }
@@ -749,9 +749,9 @@ router.post("/api/youtube-dashboard/submit-promotion", auth, async (req, res) =>
 });
 
 /**
- * POST /api/youtube-dashboard/appeal-user
+ * POST /api/instagram-dashboard/appeal-user
  */
-router.post("/api/youtube-dashboard/appeal-user", auth, async (req, res) => {
+router.post("/api/instagram-dashboard/appeal-user", auth, async (req, res) => {
   try {
     await connectToDatabase();
     const { queueUserId } = req.body;
