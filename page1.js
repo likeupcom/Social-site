@@ -23,12 +23,12 @@ function auth(req, res, next) {
 /* ---------------- MONGODB SCHEMAS & MODELS ---------------- */
 
 // Schema tracking the global systemic state of the board loops
-const YTBoardStateSchema = new mongoose.Schema({
+const 1YTBoardStateSchema = new mongoose.Schema({
   appealingPeriodActive: { type: Boolean, default: false },
   appealingPeriodEnd: { type: Date, default: null },
   activeSequenceIndex: { type: Number, default: 0 } // Tracks which position needs to be clicked next (0 to 13)
 });
-const YTBoardState = mongoose.models.YTBoardState || mongoose.model("YTBoardState", YTBoardStateSchema);
+const 1YTBoardState = mongoose.models.1YTBoardState || mongoose.model("1YTBoardState", 1YTBoardStateSchema);
 
 // Schema tracking live entries inside the 14 interactive board spaces
 const YTActiveSlotSchema = new mongoose.Schema({
@@ -93,9 +93,9 @@ function sanitizeTiktokUrl(url) {
  * Autonomously fetches or initializes the unified operational core application configurations.
  */ 
 async function getOrCreateSystemState() {
-  let state = await YTBoardState.findOne();
+  let state = await 1YTBoardState.findOne();
   if (!state) {
-    state = new YTBoardState({
+    state = new 1YTBoardState({
       appealingPeriodActive: false,
       activeSequenceIndex: 0
     });
@@ -227,7 +227,7 @@ router.get("/api/Tiktok-dashboard/state", auth, async (req, res) => {
           await sysState.save();
         } else {
           // ATOMIC LOCK: Only executes when the remainingMs is explicitly <= 0
-          const lockedState = await YTBoardState.findOneAndUpdate(
+          const lockedState = await 1YTBoardState.findOneAndUpdate(
             { _id: sysState._id, appealingPeriodActive: true }, 
             { $set: { appealingPeriodActive: false, appealingPeriodEnd: null } },
             { new: false } // Crucial: Returns the state BEFORE the update
