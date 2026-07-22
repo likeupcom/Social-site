@@ -47,7 +47,7 @@ const YTActiveSlotSchema = new mongoose.Schema({
 const YTActiveSlot = mongoose.models.YTActiveSlot || mongoose.model("YTActiveSlot", YTActiveSlotSchema);
 
 // Schema tracking users holding in the queue matrix waiting list
-const YTWaitingQueueSchema = new mongoose.Schema({
+const 1YTWaitingQueueSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   username: { type: String, required: true },
   TiktokChannel: { type: String, required: true },
@@ -56,10 +56,10 @@ const YTWaitingQueueSchema = new mongoose.Schema({
   appealedBy: { type: [String], default: [] }, // Array of userIds who lodged appeals to avoid duplicate voting
   timestamp: { type: Date, default: Date.now }
 });
-const YTWaitingQueue = mongoose.models.YTWaitingQueue || mongoose.model("YTWaitingQueue", YTWaitingQueueSchema);
+const 1YTWaitingQueue = mongoose.models.1YTWaitingQueue || mongoose.model("1YTWaitingQueue", 1YTWaitingQueueSchema);
 
 // Schema tracking personal tracking variables (user metadata progression)
-const YTUserProfileSchema = new mongoose.Schema({
+const 1YTUserProfileSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   acceptedConditions: { type: Boolean, default: false },
   visitedChannels: { type: [String], default: [] }, // Array of ActiveSlot IDs successfully clicked
@@ -67,7 +67,7 @@ const YTUserProfileSchema = new mongoose.Schema({
   cooldownUntil: { type: Date, default: null },
   appealBanUntil: { type: Date, default: null }
 });
-const YTUserProfile = mongoose.models.YTUserProfile || mongoose.model("YTUserProfile", YTUserProfileSchema);
+const YTUserProfile = mongoose.models.YTUserProfile || mongoose.model("YTUserProfile", 1YTUserProfileSchema);
 
 
 /* ---------------- UTILITY HELPER FUNCTIONS ---------------- */
@@ -109,7 +109,7 @@ async function processAppealingPeriodEnd() {
 
   try {
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
-    let waitingUsers = await YTWaitingQueue.find().sort({ timestamp: 1 });
+    let waitingUsers = await 1YTWaitingQueue.find().sort({ timestamp: 1 });
 
     const rejectedUsers = waitingUsers.filter(u => u.appealCount >= 3);
 
@@ -124,10 +124,10 @@ async function processAppealingPeriodEnd() {
         { upsert: true }
       );
 
-      await YTWaitingQueue.deleteOne({ _id: rejected._id });
+      await 1YTWaitingQueue.deleteOne({ _id: rejected._id });
     }
 
-    waitingUsers = await YTWaitingQueue.find().sort({ timestamp: 1 });
+    waitingUsers = await 1YTWaitingQueue.find().sort({ timestamp: 1 });
       
     // First 10 waiting users get priority
     const promotedUsers = waitingUsers.slice(0, 10);
@@ -164,7 +164,7 @@ async function processAppealingPeriodEnd() {
         isVip: false
       });
 
-      await YTWaitingQueue.deleteOne({ _id: user._id });
+      await 1YTWaitingQueue.deleteOne({ _id: user._id });
     }
 
     await YTActiveSlot.updateMany(
@@ -264,7 +264,7 @@ router.get("/api/Tiktok-dashboard/state", auth, async (req, res) => {
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
     
     // Check if the current logged-in user (waiting list user) was appealed by any active slot user
-    const myQueueRecord = await YTWaitingQueue.findOne({ userId });
+    const myQueueRecord = await 1YTWaitingQueue.findOne({ userId });
 
     let vipChannels = [];
     let regularChannels = [];
@@ -320,7 +320,7 @@ router.get("/api/Tiktok-dashboard/state", auth, async (req, res) => {
     }
 
     const isActiveOnBoard = await YTActiveSlot.exists({ userId });
-    const isInWaitingList = await YTWaitingQueue.exists({ userId });
+    const isInWaitingList = await 1YTWaitingQueue.exists({ userId });
 
     // compute base state
     let buttonSystemState = {
@@ -344,7 +344,7 @@ router.get("/api/Tiktok-dashboard/state", auth, async (req, res) => {
     }
 
     // Format Queue List Data with type-safe checks and cross-referenced accuser objects
-    const rawQueue = await YTWaitingQueue.find().sort({ timestamp: 1 });
+    const rawQueue = await 1YTWaitingQueue.find().sort({ timestamp: 1 });
     const waitingListUsers = [];
     let loggedInUserHasVisitsLeft = false;
 
@@ -524,7 +524,7 @@ router.post("/api/Tiktok-dashboard/verify-visit", auth, async (req, res) => {
     }
 
     const isActiveOnBoard = await YTActiveSlot.findOne({ userId });
-    const myQueueRecord = await YTWaitingQueue.findOne({ userId });
+    const myQueueRecord = await 1YTWaitingQueue.findOne({ userId });
 
     // STRICT PHASE 2 GATEWAY
     if (sysState.appealingPeriodActive) {
@@ -718,9 +718,9 @@ router.post("/api/Tiktok-dashboard/submit-promotion", auth, async (req, res) => 
 
     // If board is full, push item into waiting line queue list instead
     if (targetPosition === -1) {
-      const inQueue = await YTWaitingQueue.findOne({ userId });
+      const inQueue = await 1YTWaitingQueue.findOne({ userId });
       if (!inQueue) {
-        const newQueueNode = new YTWaitingQueue({
+        const newQueueNode = new 1YTWaitingQueue({
           userId,
           username: dbUser.username,
           TiktokChannel: cleanChannelUrl,
@@ -769,7 +769,7 @@ router.post("/api/Tiktok-dashboard/appeal-user", auth, async (req, res) => {
       });
     }
 
-    const myAppealsCount = await YTWaitingQueue.countDocuments({
+    const myAppealsCount = await 1YTWaitingQueue.countDocuments({
       appealedBy: currentOperatorId
     });
 
@@ -790,7 +790,7 @@ router.post("/api/Tiktok-dashboard/appeal-user", auth, async (req, res) => {
       return res.status(400).json({ error: "Appealing process is not active." });
     }
 
-    const queueRecord = await YTWaitingQueue.findById(queueUserId);
+    const queueRecord = await 1YTWaitingQueue.findById(queueUserId);
     if (!queueRecord) return res.status(404).json({ error: "Queue element targeted not found." });
 
     if (queueRecord.appealedBy.includes(currentOperatorId)) {
