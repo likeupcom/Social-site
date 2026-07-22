@@ -23,12 +23,12 @@ function auth(req, res, next) {
 /* ---------------- MONGODB SCHEMAS & MODELS ---------------- */
 
 // Schema tracking the global systemic state of the board loops
-const YTBoardStateSchema = new mongoose.Schema({
+const 3YTBoardStateSchema = new mongoose.Schema({
   appealingPeriodActive: { type: Boolean, default: false },
   appealingPeriodEnd: { type: Date, default: null },
   activeSequenceIndex: { type: Number, default: 0 } // Tracks which position needs to be clicked next (0 to 13)
 });
-const YTBoardState = mongoose.models.YTBoardState || mongoose.model("YTBoardState", YTBoardStateSchema);
+const 3YTBoardState = mongoose.models.3YTBoardState || mongoose.model("3YTBoardState", 3YTBoardStateSchema);
 
 // Schema tracking live entries inside the 14 interactive board spaces
 const YTActiveSlotSchema = new mongoose.Schema({
@@ -47,7 +47,7 @@ const YTActiveSlotSchema = new mongoose.Schema({
 const YTActiveSlot = mongoose.models.YTActiveSlot || mongoose.model("YTActiveSlot", YTActiveSlotSchema);
 
 // Schema tracking users holding in the queue matrix waiting list
-const YTWaitingQueueSchema = new mongoose.Schema({
+const 3YTWaitingQueueSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   username: { type: String, required: true },
   facebookaccount: { type: String, required: true },
@@ -56,10 +56,10 @@ const YTWaitingQueueSchema = new mongoose.Schema({
   appealedBy: { type: [String], default: [] }, // Array of userIds who lodged appeals to avoid duplicate voting
   timestamp: { type: Date, default: Date.now }
 });
-const YTWaitingQueue = mongoose.models.YTWaitingQueue || mongoose.model("YTWaitingQueue", YTWaitingQueueSchema);
+const 3YTWaitingQueue = mongoose.models.3YTWaitingQueue || mongoose.model("3YTWaitingQueue", 3YTWaitingQueueSchema);
 
 // Schema tracking personal tracking variables (user metadata progression)
-const YTUserProfileSchema = new mongoose.Schema({
+const 3YTUserProfileSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   acceptedConditions: { type: Boolean, default: false },
   visitedChannels: { type: [String], default: [] }, // Array of ActiveSlot IDs successfully clicked
@@ -67,7 +67,7 @@ const YTUserProfileSchema = new mongoose.Schema({
   cooldownUntil: { type: Date, default: null },
   appealBanUntil: { type: Date, default: null }
 });
-const YTUserProfile = mongoose.models.YTUserProfile || mongoose.model("YTUserProfile", YTUserProfileSchema);
+const 3YTUserProfile = mongoose.models.3YTUserProfile || mongoose.model("3YTUserProfile",3YTUserProfileSchema);
 
 
 /* ---------------- UTILITY HELPER FUNCTIONS ---------------- */
@@ -93,9 +93,9 @@ function sanitizefacebookUrl(url) {
  * Autonomously fetches or initializes the unified operational core application configurations.
  */ 
 async function getOrCreateSystemState() {
-  let state = await YTBoardState.findOne();
+  let state = await 3YTBoardState.findOne();
   if (!state) {
-    state = new YTBoardState({
+    state = new 3YTBoardState({
       appealingPeriodActive: false,
       activeSequenceIndex: 0
     });
@@ -109,12 +109,12 @@ async function processAppealingPeriodEnd() {
 
   try {
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
-    let waitingUsers = await YTWaitingQueue.find().sort({ timestamp: 1 });
+    let waitingUsers = await 3YTWaitingQueue.find().sort({ timestamp: 1 });
 
     const rejectedUsers = waitingUsers.filter(u => u.appealCount >= 3);
 
     for (const rejected of rejectedUsers) {
-      await YTUserProfile.findOneAndUpdate(
+      await 3YTUserProfile.findOneAndUpdate(
         { userId: rejected.userId },
         {
           appealBanUntil: new Date(Date.now() + (4 * 60 * 60 * 1000)),
@@ -124,10 +124,10 @@ async function processAppealingPeriodEnd() {
         { upsert: true }
       );
 
-      await YTWaitingQueue.deleteOne({ _id: rejected._id });
+      await 3YTWaitingQueue.deleteOne({ _id: rejected._id });
     }
 
-    waitingUsers = await YTWaitingQueue.find().sort({ timestamp: 1 });
+    waitingUsers = await 3YTWaitingQueue.find().sort({ timestamp: 1 });
       
     // First 10 waiting users get priority
     const promotedUsers = waitingUsers.slice(0, 10);
@@ -137,7 +137,7 @@ async function processAppealingPeriodEnd() {
 
     // Apply cooldown and clear ALL regular active slots completely from the board
     for (const slot of regularActiveSlots) {
-      await YTUserProfile.findOneAndUpdate(
+      await 3YTUserProfile.findOneAndUpdate(
         { userId: slot.userId },
         {
           cooldownUntil: new Date(Date.now() + (3 * 60 * 60 * 1000)),
@@ -164,14 +164,14 @@ async function processAppealingPeriodEnd() {
         isVip: false
       });
 
-      await YTWaitingQueue.deleteOne({ _id: user._id });
+      await 3YTWaitingQueue.deleteOne({ _id: user._id });
     }
 
     await YTActiveSlot.updateMany(
       { sequencePosition: { $gte: 4 } },
       { $set: { views: 0, followers: 0, likes: 0, comments: 0 } }
     );
-    await YTUserProfile.updateMany(
+    await 3YTUserProfile.updateMany(
       {}, 
       { $set: { visitedChannels: [], activeSequenceIndex: 0 } }
     );
@@ -203,9 +203,9 @@ router.get("/api/facebook-dashboard/state", auth, async (req, res) => {
     const userId = dbUser._id.toString();
     
     // Fetch or create tracking user profile information
-    let userProfile = await YTUserProfile.findOne({ userId });
+    let userProfile = await 3YTUserProfile.findOne({ userId });
     if (!userProfile) {
-      userProfile = new YTUserProfile({ userId });
+      userProfile = new 3YTUserProfile({ userId });
       await userProfile.save();
     }
 
@@ -227,7 +227,7 @@ router.get("/api/facebook-dashboard/state", auth, async (req, res) => {
           await sysState.save();
         } else {
           // ATOMIC LOCK: Only executes when the remainingMs is explicitly <= 0
-          const lockedState = await YTBoardState.findOneAndUpdate(
+          const lockedState = await 3YTBoardState.findOneAndUpdate(
             { _id: sysState._id, appealingPeriodActive: true }, 
             { $set: { appealingPeriodActive: false, appealingPeriodEnd: null } },
             { new: false } // Crucial: Returns the state BEFORE the update
@@ -264,7 +264,7 @@ router.get("/api/facebook-dashboard/state", auth, async (req, res) => {
     const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
     
     // Check if the current logged-in user (waiting list user) was appealed by any active slot user
-    const myQueueRecord = await YTWaitingQueue.findOne({ userId });
+    const myQueueRecord = await 3YTWaitingQueue.findOne({ userId });
 
     let vipChannels = [];
     let regularChannels = [];
@@ -320,7 +320,7 @@ router.get("/api/facebook-dashboard/state", auth, async (req, res) => {
     }
 
     const isActiveOnBoard = await YTActiveSlot.exists({ userId });
-    const isInWaitingList = await YTWaitingQueue.exists({ userId });
+    const isInWaitingList = await 3YTWaitingQueue.exists({ userId });
 
     // compute base state
     let buttonSystemState = {
@@ -344,7 +344,7 @@ router.get("/api/facebook-dashboard/state", auth, async (req, res) => {
     }
 
     // Format Queue List Data with type-safe checks and cross-referenced accuser objects
-    const rawQueue = await YTWaitingQueue.find().sort({ timestamp: 1 });
+    const rawQueue = await 3YTWaitingQueue.find().sort({ timestamp: 1 });
     const waitingListUsers = [];
     let loggedInUserHasVisitsLeft = false;
 
@@ -471,7 +471,7 @@ router.post("/api/facebook-dashboard/accept-conditions", auth, async (req, res) 
     const dbUser = await User.findOne({ username: lookupUsername });
     if (!dbUser) return res.status(404).json({ error: "User identity unverified" });
 
-    await YTUserProfile.findOneAndUpdate(
+    await 3YTUserProfile.findOneAndUpdate(
       { userId: dbUser._id.toString() },
       { acceptedConditions: true },
       { upsert: true }
@@ -495,7 +495,7 @@ router.post("/api/facebook-dashboard/verify-visit", auth, async (req, res) => {
     const userId = dbUser._id.toString();  
 
     // 1. CHECK THE EXISTING SEQUENTIAL TIMELOCK
-    const userProfileCheck = await YTUserProfile.findOne({ userId });
+    const userProfileCheck = await 3YTUserProfile.findOne({ userId });
     const nowTime = new Date();
 
     if (userProfileCheck && userProfileCheck.lastVisitAt) {
@@ -524,7 +524,7 @@ router.post("/api/facebook-dashboard/verify-visit", auth, async (req, res) => {
     }
 
     const isActiveOnBoard = await YTActiveSlot.findOne({ userId });
-    const myQueueRecord = await YTWaitingQueue.findOne({ userId });
+    const myQueueRecord = await 3YTWaitingQueue.findOne({ userId });
 
     // STRICT PHASE 2 GATEWAY
     if (sysState.appealingPeriodActive) {
@@ -579,7 +579,7 @@ router.post("/api/facebook-dashboard/verify-visit", auth, async (req, res) => {
 
     // Phase 2 early return route: Allows infinite clicks by safely resolving without tracking blockers
     if (isPhase2Visit) {
-      await YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
+      await 3YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
       return res.json({ success: true });
     }
     
@@ -633,7 +633,7 @@ router.post("/api/facebook-dashboard/verify-visit", auth, async (req, res) => {
     }
 
     // Commit a single, consolidated atomic database write safely
-    await YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
+    await 3YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
     await sysState.save();
     
     res.json(responsePayload);
@@ -655,7 +655,7 @@ router.post("/api/facebook-dashboard/submit-promotion", auth, async (req, res) =
     const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
     const dbUser = await User.findOne({ username: lookupUsername });
     const userId = dbUser._id.toString();
-    const userProfile = await YTUserProfile.findOne({ userId });
+    const userProfile = await 3YTUserProfile.findOne({ userId });
    const alreadyExists = await YTActiveSlot.findOne({ userId });
     if (alreadyExists) {
       return res.status(400).json({ errorKey: "txtSingleUploadSecurity" });
@@ -718,9 +718,9 @@ router.post("/api/facebook-dashboard/submit-promotion", auth, async (req, res) =
 
     // If board is full, push item into waiting line queue list instead
     if (targetPosition === -1) {
-      const inQueue = await YTWaitingQueue.findOne({ userId });
+      const inQueue = await 3YTWaitingQueue.findOne({ userId });
       if (!inQueue) {
-        const newQueueNode = new YTWaitingQueue({
+        const newQueueNode = new 3YTWaitingQueue({
           userId,
           username: dbUser.username,
           facebookaccount: cleanChannelUrl,
@@ -732,7 +732,7 @@ router.post("/api/facebook-dashboard/submit-promotion", auth, async (req, res) =
     }
     
     // Reset user tracking arrays history values to guarantee complete sequential viewing tracking
-    await YTUserProfile.findOneAndUpdate(
+    await 3YTUserProfile.findOneAndUpdate(
       { userId },
       {
         visitedChannels: [],
@@ -769,7 +769,7 @@ router.post("/api/facebook-dashboard/appeal-user", auth, async (req, res) => {
       });
     }
 
-    const myAppealsCount = await YTWaitingQueue.countDocuments({
+    const myAppealsCount = await 3YTWaitingQueue.countDocuments({
       appealedBy: currentOperatorId
     });
 
@@ -790,7 +790,7 @@ router.post("/api/facebook-dashboard/appeal-user", auth, async (req, res) => {
       return res.status(400).json({ error: "Appealing process is not active." });
     }
 
-    const queueRecord = await YTWaitingQueue.findById(queueUserId);
+    const queueRecord = await 3YTWaitingQueue.findById(queueUserId);
     if (!queueRecord) return res.status(404).json({ error: "Queue element targeted not found." });
 
     if (queueRecord.appealedBy.includes(currentOperatorId)) {
