@@ -263,10 +263,19 @@ app.get("/:page.html", auth, (req, res) => {
     return res.status(404).send("Page not found.");
   }
 
+  // Map short platform names to their actual dashboard file names
+  const fileNameMap = {
+    tiktok: "tiktok-improvement",
+    youtube: "youtube-improvement",
+    instagram: "instagram-improvement",
+    facebook: "facebook-improvement"
+  };
+  const resolvedName = fileNameMap[pageName] || pageName;
+
   const filePaths = [
-    path.join(__dirname, "private", `${pageName}.html`),
-    path.join(__dirname, `${pageName}.html`),
-    path.join(__dirname, "public", `${pageName}.html`)
+    path.join(__dirname, "private", `${resolvedName}.html`),
+    path.join(__dirname, `${resolvedName}.html`),
+    path.join(__dirname, "public", `${resolvedName}.html`)
   ];
 
   let index = 0;
