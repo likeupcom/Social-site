@@ -12,7 +12,7 @@
 
     <!-- FontAwesome Icons Clean CDN Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <link rel="stylesheet" href="/Tiktok-improvement.css" />
+    <link rel="stylesheet" href="/tiktok-improvement.css" />
   </head>
 
   <body>
@@ -1070,6 +1070,7 @@
         try {
           const response = await fetch(`${BACKEND_API_BASE}/appeal-user`, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ queueUserId }),
           });

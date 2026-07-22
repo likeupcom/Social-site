@@ -249,6 +249,9 @@ app.delete("/api/user/profile", async (req, res) => {
 
 /* ---------------- 7. ROUTING & PAGES ---------------- */
 
+const tiktokDashboardRouter = require("./page1");
+app.use(tiktokDashboardRouter);
+
 const otherPagesRouter = require("./page.js");
 app.use("/", otherPagesRouter);
 
