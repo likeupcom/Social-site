@@ -561,6 +561,20 @@
       let userCurrentlyTyping = false;
 
       /**
+       * Extracts the auth token from the URL query string or falls back to cookies.
+       * Used to append ?token= to every backend request so auth works on Vercel.
+       */
+      function getAuthToken() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let token = urlParams.get("auth_token") || urlParams.get("token") || "";
+        if (!token) {
+          const cookieMatch = document.cookie.match(/(^| )token=([^;]+)/);
+          if (cookieMatch) token = cookieMatch[2];
+        }
+        return token;
+      }
+
+      /**
        * 1. Synchronized Dynamic Display Engine
        * Fetches computed architectural state from backend and renders UI.
        */
@@ -977,11 +991,13 @@
 
       async function submitAcceptedConditions() {
         try {
-          const response = await fetch(
-            `${BACKEND_API_BASE}/accept-conditions`,
-            {
+          const token = getAuthToken();
+          const url = token
+            ? `${BACKEND_API_BASE}/accept-conditions?token=${token}`
+            : `${BACKEND_API_BASE}/accept-conditions`;
+          const response = await fetch(url, {
               method: "POST",
-              credentials: "include", // <-- Add this line right here
+              credentials: "include",
               headers: { "Content-Type": "application/json" },
             },
           );
@@ -1035,9 +1051,11 @@
             localStorage.removeItem("activeCountdown");
             (async () => {
               try {
-                const response = await fetch(
-                  `${BACKEND_API_BASE}/verify-visit`,
-                  {
+                const _vtoken = getAuthToken();
+                const _vurl = _vtoken
+                  ? `${BACKEND_API_BASE}/verify-visit?token=${_vtoken}`
+                  : `${BACKEND_API_BASE}/verify-visit`;
+                const response = await fetch(_vurl, {
                     method: "POST",
                     credentials: "include",
                     headers: { "Content-Type": "application/json" },
@@ -1068,7 +1086,11 @@
 
       async function handleDatabaseAppealTrigger(queueUserId) {
         try {
-          const response = await fetch(`${BACKEND_API_BASE}/appeal-user`, {
+          const _atoken = getAuthToken();
+          const _aurl = _atoken
+            ? `${BACKEND_API_BASE}/appeal-user?token=${_atoken}`
+            : `${BACKEND_API_BASE}/appeal-user`;
+          const response = await fetch(_aurl, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -1097,8 +1119,13 @@
         }
 
         try {
-          const response = await fetch(`${BACKEND_API_BASE}/verify-visit`, {
+          const _dtoken = getAuthToken();
+          const _durl = _dtoken
+            ? `${BACKEND_API_BASE}/verify-visit?token=${_dtoken}`
+            : `${BACKEND_API_BASE}/verify-visit`;
+          const response = await fetch(_durl, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               elementId: activeSlotId,
@@ -1137,8 +1164,13 @@
         feedback.innerText = t.txtProcessingParams;
 
         try {
-          const response = await fetch(`${BACKEND_API_BASE}/submit-promotion`, {
+          const _stoken = getAuthToken();
+          const _surl = _stoken
+            ? `${BACKEND_API_BASE}/submit-promotion?token=${_stoken}`
+            : `${BACKEND_API_BASE}/submit-promotion`;
+          const response = await fetch(_surl, {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ rawVideoUrl, rawChannelUrl }),
           });

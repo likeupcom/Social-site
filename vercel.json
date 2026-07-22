@@ -6,7 +6,7 @@
       "destination": "server.js"
     },
     {
-      "source": "/((?!api|.\\.).)",
+      "source": "/(.*)",
       "destination": "server.js"
     }
   ]
