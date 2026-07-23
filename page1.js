@@ -31,7 +31,7 @@ const TKBoardStateSchema = new mongoose.Schema({
 const TKBoardState = mongoose.models.TKBoardState || mongoose.model("TKBoardState", TKBoardStateSchema);
 
 // Schema tracking live entries inside the 14 interactive board spaces
-const YTActiveSlotSchema = new mongoose.Schema({
+const TKActiveSlotSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   username: { type: String, required: true },
   TiktokChannel: { type: String, required: true },
@@ -44,7 +44,7 @@ const YTActiveSlotSchema = new mongoose.Schema({
   comments: { type: Number, default: 0 },
   timestamp: { type: Date, default: Date.now }
 });
-const YTActiveSlot = mongoose.models.YTActiveSlot || mongoose.model("YTActiveSlot", YTActiveSlotSchema);
+const TKActiveSlot = mongoose.models.TKActiveSlot || mongoose.model("TKActiveSlot", TKActiveSlotSchema);
 
 // Schema tracking users holding in the queue matrix waiting list
 const TKWaitingQueueSchema = new mongoose.Schema({
@@ -67,7 +67,7 @@ const TKUserProfileSchema = new mongoose.Schema({
   cooldownUntil: { type: Date, default: null },
   appealBanUntil: { type: Date, default: null }
 });
-const YTUserProfile = mongoose.models.YTUserProfile || mongoose.model("YTUserProfile", TKUserProfileSchema);
+const TKUserProfile = mongoose.models.TKUserProfile || mongoose.model("TKUserProfile", TKUserProfileSchema);
 
 
 /* ---------------- UTILITY HELPER FUNCTIONS ---------------- */
@@ -108,13 +108,13 @@ async function processAppealingPeriodEnd() {
   console.log("=== processAppealingPeriodEnd STARTED ===");
 
   try {
-    const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
+    const activeSlots = await TKActiveSlot.find().sort({ sequencePosition: 1 });
     let waitingUsers = await TKWaitingQueue.find().sort({ timestamp: 1 });
 
     const rejectedUsers = waitingUsers.filter(u => u.appealCount >= 3);
 
     for (const rejected of rejectedUsers) {
-      await YTUserProfile.findOneAndUpdate(
+      await TKUserProfile.findOneAndUpdate(
         { userId: rejected.userId },
         {
           appealBanUntil: new Date(Date.now() + (4 * 60 * 60 * 1000)),
@@ -137,7 +137,7 @@ async function processAppealingPeriodEnd() {
 
     // Apply cooldown and clear ALL regular active slots completely from the board
     for (const slot of regularActiveSlots) {
-      await YTUserProfile.findOneAndUpdate(
+      await TKUserProfile.findOneAndUpdate(
         { userId: slot.userId },
         {
           cooldownUntil: new Date(Date.now() + (3 * 60 * 60 * 1000)),
@@ -147,7 +147,7 @@ async function processAppealingPeriodEnd() {
         { upsert: true }
       );
 
-      await YTActiveSlot.deleteOne({ _id: slot._id });
+      await TKActiveSlot.deleteOne({ _id: slot._id });
     }
 
     // Sequentially insert promoted users into clear incremental positions (4 to 13)
@@ -155,7 +155,7 @@ async function processAppealingPeriodEnd() {
       const user = promotedUsers[i];
       const targetPos = 4 + i;
 
-      await YTActiveSlot.create({
+      await TKActiveSlot.create({
         userId: user.userId,
         username: user.username,
         TiktokChannel: user.TiktokChannel,
@@ -167,11 +167,11 @@ async function processAppealingPeriodEnd() {
       await TKWaitingQueue.deleteOne({ _id: user._id });
     }
 
-    await YTActiveSlot.updateMany(
+    await TKActiveSlot.updateMany(
       { sequencePosition: { $gte: 4 } },
       { $set: { views: 0, subs: 0, likes: 0, comments: 0 } }
     );
-    await YTUserProfile.updateMany(
+    await TKUserProfile.updateMany(
       {}, 
       { $set: { visitedChannels: [], activeSequenceIndex: 0 } }
     );
@@ -203,9 +203,9 @@ router.get("/api/Tiktok-dashboard/state", auth, async (req, res) => {
     const userId = dbUser._id.toString();
     
     // Fetch or create tracking user profile information
-    let userProfile = await YTUserProfile.findOne({ userId });
+    let userProfile = await TKUserProfile.findOne({ userId });
     if (!userProfile) {
-      userProfile = new YTUserProfile({ userId });
+      userProfile = new TKUserProfile({ userId });
       await userProfile.save();
     }
 
@@ -261,7 +261,7 @@ router.get("/api/Tiktok-dashboard/state", auth, async (req, res) => {
     }
 
     // Process board layouts (First 10 users rules apply dynamically)
-    const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
+    const activeSlots = await TKActiveSlot.find().sort({ sequencePosition: 1 });
     
     // Check if the current logged-in user (waiting list user) was appealed by any active slot user
     const myQueueRecord = await TKWaitingQueue.findOne({ userId });
@@ -319,7 +319,7 @@ router.get("/api/Tiktok-dashboard/state", auth, async (req, res) => {
       startIndex = regularSlots.sort((a, b) => a.sequencePosition - b.sequencePosition)[0].sequencePosition;
     }
 
-    const isActiveOnBoard = await YTActiveSlot.exists({ userId });
+    const isActiveOnBoard = await TKActiveSlot.exists({ userId });
     const isInWaitingList = await TKWaitingQueue.exists({ userId });
 
     // compute base state
@@ -471,7 +471,7 @@ router.post("/api/Tiktok-dashboard/accept-conditions", auth, async (req, res) =>
     const dbUser = await User.findOne({ username: lookupUsername });
     if (!dbUser) return res.status(404).json({ error: "User identity unverified" });
 
-    await YTUserProfile.findOneAndUpdate(
+    await TKUserProfile.findOneAndUpdate(
       { userId: dbUser._id.toString() },
       { acceptedConditions: true },
       { upsert: true }
@@ -495,7 +495,7 @@ router.post("/api/Tiktok-dashboard/verify-visit", auth, async (req, res) => {
     const userId = dbUser._id.toString();  
 
     // 1. CHECK THE EXISTING SEQUENTIAL TIMELOCK
-    const userProfileCheck = await YTUserProfile.findOne({ userId });
+    const userProfileCheck = await TKUserProfile.findOne({ userId });
     const nowTime = new Date();
 
     if (userProfileCheck && userProfileCheck.lastVisitAt) {
@@ -510,7 +510,7 @@ router.post("/api/Tiktok-dashboard/verify-visit", auth, async (req, res) => {
     }
 
     const sysState = await getOrCreateSystemState();
-    const slot = await YTActiveSlot.findById(elementId);
+    const slot = await TKActiveSlot.findById(elementId);
     if (!slot) return res.status(404).json({ error: "Target node profile shifted or expired." });
 
     // Calculate exactly if we are in Phase 2
@@ -523,7 +523,7 @@ router.post("/api/Tiktok-dashboard/verify-visit", auth, async (req, res) => {
       }
     }
 
-    const isActiveOnBoard = await YTActiveSlot.findOne({ userId });
+    const isActiveOnBoard = await TKActiveSlot.findOne({ userId });
     const myQueueRecord = await TKWaitingQueue.findOne({ userId });
 
     // STRICT PHASE 2 GATEWAY
@@ -561,7 +561,7 @@ router.post("/api/Tiktok-dashboard/verify-visit", auth, async (req, res) => {
 
     // ONLY increment counter increments if it's a normal operation visit loop
     if (!isPhase2Visit && !hasAlreadyVisited) {
-      currentSlotData = await YTActiveSlot.findByIdAndUpdate(
+      currentSlotData = await TKActiveSlot.findByIdAndUpdate(
         elementId,
         { $inc: { views: 1, subs: 1, likes: 1, comments: 1 } },
         { new: true }
@@ -579,12 +579,12 @@ router.post("/api/Tiktok-dashboard/verify-visit", auth, async (req, res) => {
 
     // Phase 2 early return route: Allows infinite clicks by safely resolving without tracking blockers
     if (isPhase2Visit) {
-      await YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
+      await TKUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
       return res.json({ success: true });
     }
     
     // Fetch all slots to update user sequencing and run the threshold calculation
-    const activeSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
+    const activeSlots = await TKActiveSlot.find().sort({ sequencePosition: 1 });
 
     // Sync array data references for threshold checks
     const slotIndex = activeSlots.findIndex(s => s._id.toString() === elementId);
@@ -633,7 +633,7 @@ router.post("/api/Tiktok-dashboard/verify-visit", auth, async (req, res) => {
     }
 
     // Commit a single, consolidated atomic database write safely
-    await YTUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
+    await TKUserProfile.findOneAndUpdate({ userId }, profileUpdates, { upsert: true });
     await sysState.save();
     
     res.json(responsePayload);
@@ -655,8 +655,8 @@ router.post("/api/Tiktok-dashboard/submit-promotion", auth, async (req, res) => 
     const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
     const dbUser = await User.findOne({ username: lookupUsername });
     const userId = dbUser._id.toString();
-    const userProfile = await YTUserProfile.findOne({ userId });
-   const alreadyExists = await YTActiveSlot.findOne({ userId });
+    const userProfile = await TKUserProfile.findOne({ userId });
+   const alreadyExists = await TKActiveSlot.findOne({ userId });
     if (alreadyExists) {
       return res.status(400).json({ errorKey: "txtSingleUploadSecurity" });
     }
@@ -693,17 +693,17 @@ router.post("/api/Tiktok-dashboard/submit-promotion", auth, async (req, res) => 
     }
 
     // Determine board sequence assignment patterns using First Ten Rules
-    const currentActiveSlots = await YTActiveSlot.find().sort({ sequencePosition: 1 });
+    const currentActiveSlots = await TKActiveSlot.find().sort({ sequencePosition: 1 });
     
     let targetPosition = -1;
 
     for (let i = 4; i < 14; i++) {
-      const exists = await YTActiveSlot.findOne({ sequencePosition: i });
+      const exists = await TKActiveSlot.findOne({ sequencePosition: i });
 
       if (!exists) {
         targetPosition = i;
 
-        await YTActiveSlot.create({
+        await TKActiveSlot.create({
           userId,
           username: dbUser.username,
           TiktokChannel: cleanChannelUrl,
@@ -732,7 +732,7 @@ router.post("/api/Tiktok-dashboard/submit-promotion", auth, async (req, res) => 
     }
     
     // Reset user tracking arrays history values to guarantee complete sequential viewing tracking
-    await YTUserProfile.findOneAndUpdate(
+    await TKUserProfile.findOneAndUpdate(
       { userId },
       {
         visitedChannels: [],
@@ -759,7 +759,7 @@ router.post("/api/Tiktok-dashboard/appeal-user", auth, async (req, res) => {
     const lookupUsername = typeof req.user === "object" ? req.user.username : req.user;
     const dbUser = await User.findOne({ username: lookupUsername });
     const currentOperatorId = dbUser._id.toString();
-    const isActiveUser = await YTActiveSlot.findOne({
+    const isActiveUser = await TKActiveSlot.findOne({
       userId: currentOperatorId
     });
 
