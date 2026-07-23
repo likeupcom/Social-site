@@ -258,6 +258,9 @@ app.use("/", otherPagesRouter);
 const instagramDashboardRouter = require("./page2.js");
 app.use(instagramDashboardRouter);
 
+const facebookDashboardRouter = require("./page3.js");
+app.use(facebookDashboardRouter);
+
 app.get("/:page.html", auth, (req, res) => {
   const allowedPages = ["youtube", "tiktok", "instagram", "facebook"];
   const pageName = req.params.page;
