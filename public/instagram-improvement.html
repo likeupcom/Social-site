@@ -557,7 +557,7 @@
 
       // PRODUCTION CONFIGURATION: Target base route path of your secure Node.js instance
       // PRODUCTION CONFIGURATION: Tailored for Hugging Face Spaces environment
-      const BACKEND_API_BASE = "/api/-dashboard";
+      const BACKEND_API_BASE = "/api/instagram-dashboard";
       let userCurrentlyTyping = false;
 
       /**
@@ -741,7 +741,7 @@
           <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
           <div class="user-details">
             <span class="username-txt">${item.username}</span>
-            <span class="raw-link-txt">${item.Channel.replace("https://", "")}</span>
+            <span class="raw-link-txt">${(item.instagramChannel || "").replace("https://", "")}</span>
             <div class="metrics-display">
               <span class="metric-item"><i class="fa-solid fa-eye"></i> Views: ${item.views || 0}</span>
               <span class="metric-item"><i class="fa-solid fa-bell"></i> followers: ${item.followers || 0}</span>
@@ -773,7 +773,7 @@
         <div class="user-avatar"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
           <span class="username-txt">${item.username}</span>
-          <span class="raw-link-txt">${item.Channel.replace("https://", "")}</span>
+          <span class="raw-link-txt">${(item.instagramChannel || "").replace("https://", "")}</span>
           <div class="metrics-display">
             <span class="metric-item"><i class="fa-solid fa-eye"></i> Views: ${item.views || 0}</span>
             <span class="metric-item"><i class="fa-solid fa-bell"></i> followers: ${item.followers || 0}</span>
@@ -783,7 +783,7 @@
         </div>
       </div>
       <div id="btn-container-${sequencePosition}">
-        <button class="${activeBtnClass}" ${isBtnDisabled ? "disabled" : ""} onclick="handleSequentialVisit('${item.Video}', ${sequencePosition}, '${item._id}')">
+        <button class="${activeBtnClass}" ${isBtnDisabled ? "disabled" : ""} onclick="handleSequentialVisit('${item.instagramVideo}', ${sequencePosition}, '${item._id}')">
           <span>
             ${targetedVisitAllowed ? '<i class="fa-solid fa-shield-check"></i> Counter-Verify Visit' : t.txtVisitBtn}
           </span>
@@ -820,7 +820,7 @@
                   <div class="user-details" style="min-width: 0; flex: 1;">
                     <span class="username-txt">${user.username}</span>
                     <span class="waiting-link-txt">
-                      <i class="fa-solid fa-link" style="font-size:11px; color:#38bdf8; margin-right:4px;"></i>${user.Channel}
+                      <i class="fa-solid fa-link" style="font-size:11px; color:#38bdf8; margin-right:4px;"></i>${user.instagramChannel}
                     </span>
                     <span style="font-size:11px; color:#ef4444; margin-top:4px; font-weight:bold; display: block;"><i class="fa-solid fa-gavel"></i> ${t.txtAppealsRegistered}: ${user.appealCount || 0} / 3</span>
                   </div>
@@ -851,7 +851,7 @@
             <div id="btn-container-defense-${accuser.activeSlotId}">
               ${
                 accuser.canVisitTargeted
-                  ? `<button class="action-btn visit-style" style="padding: 4px 10px; font-size: 11px; background: #ec4899;" onclick="handleTargetedDefenseVisit('${accuser.activeSlotId}', '${accuser.Video || "#"}')">Visit to Clear</button>`
+                  ? `<button class="action-btn visit-style" style="padding: 4px 10px; font-size: 11px; background: #ec4899;" onclick="handleTargetedDefenseVisit('${accuser.activeSlotId}', '${accuser.instagramVideo || "#"}')">Visit to Clear</button>`
                   : `<span style="font-size: 11px; color: #22c55e; font-weight: bold;"><i class="fa-solid fa-circle-check"></i> Cleared</span>`
               }
             </div>
