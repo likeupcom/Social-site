@@ -272,7 +272,7 @@ app.get("/:page.html", auth, (req, res) => {
   // Map short platform names to their actual dashboard file names
   const fileNameMap = {
     tiktok: "tiktok-improvement",
-    youtube: "youtube-improvement",
+    youtube: "youtube",
     instagram: "instagram-improvement",
     facebook: "facebook-improvement"
   };
