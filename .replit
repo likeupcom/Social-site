@@ -55,3 +55,4 @@ run = ["node", "server.js"]
 
 [userenv.shared]
 PORT = "5000"
+MONGODB_URI = "mongodb+srv://likeupcom_db_user:Q9ittDSMcFogjmFS@cluster0.bu3gwsa.mongodb.net/?appName=Cluster0"
