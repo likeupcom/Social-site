@@ -184,6 +184,61 @@
             50% { opacity: 1; }
             100% { opacity: 0.7; }
         }
+        /* Always-Visible Payment Guide Block */
+        .payment-guide-block {
+            background: rgba(255, 0, 127, 0.04);
+            border: 1px solid #ff007f;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.15);
+        }
+        .payment-guide-block h3 {
+            color: #ff007f;
+            font-size: 15px;
+            margin-bottom: 12px;
+            text-align: left;
+            text-shadow: none;
+        }
+        .payment-guide-block p {
+            font-size: 13px;
+            color: #ddd;
+            margin-bottom: 10px;
+        }
+        /* File Input Styling */
+        .file-input {
+            padding: 10px 14px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .file-input::-webkit-file-upload-button {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+        .file-input::-webkit-file-upload-button:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+        .file-input::file-selector-button {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-right: 10px;
+            transition: background 0.2s;
+        }
+        .file-input::file-selector-button:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -215,6 +270,25 @@
                 <div class="form-group">
                     <label id="lblAmount" for="inputAmount">Amount to Deposit (FRW)</label>
                     <input type="text" id="inputAmount" class="terminal-input" required autocomplete="off" placeholder="Enter amount in numeric value">
+                </div>
+
+                <!-- Always-Visible Payment Instructions -->
+                <div class="payment-guide-block">
+                    <h3>⚠️ PAYMENT INSTRUCTIONS</h3>
+                    <p>Dial the USSD code below on your phone to send the payment:</p>
+                    <div class="ussd-container">
+                        <span id="ussdStaticDisplay" class="ussd-string">*182*8*1*2072458#</span>
+                        <button type="button" id="btnCopyStatic" class="copy-btn">Copy</button>
+                    </div>
+                    <div class="receiver-row">
+                        Receiver Name: <span class="receiver-name">Simeon</span>
+                    </div>
+                </div>
+
+                <!-- Screenshot Upload -->
+                <div class="form-group">
+                    <label id="lblScreenshot" for="inputScreenshot">Payment Screenshot (Image Proof Required)</label>
+                    <input type="file" id="inputScreenshot" class="terminal-input file-input" accept="image/*" required>
                 </div>
 
                 <button type="submit" id="btnSubmitDeposit" class="action-btn">Initiate Secure Deposit</button>
@@ -266,6 +340,7 @@
                 lblFullName: "Depositor Full Name (Characters Only)",
                 lblTelephone: "Telephone Number (Exactly 10 Digits)",
                 lblAmount: "Amount to Deposit (FRW)",
+                lblScreenshot: "Payment Screenshot (Image Proof Required)",
                 phName: "Enter sender name",
                 phPhone: "e.g. 078XXXXXXX",
                 phAmount: "Enter amount in numeric value",
@@ -281,6 +356,7 @@
                 errName: "Validation Error: Full Name must contain text characters only.",
                 errPhone: "Validation Error: Telephone must consist of exactly 10 digits.",
                 errAmount: "Validation Error: Amount field must be a valid numeric entry.",
+                errScreenshot: "Validation Error: Please upload your payment screenshot.",
                 successSubmit: "Deposit request committed safely to server storage layers."
             },
             fr: {
@@ -290,6 +366,7 @@
                 lblFullName: "Nom Complet du Déposant (Lettres Uniquement)",
                 lblTelephone: "Numéro de Téléphone (Exactement 10 Chiffres)",
                 lblAmount: "Montant à Déposer (FRW)",
+                lblScreenshot: "Capture d'écran du paiement (Preuve requise)",
                 phName: "Entrez le nom de l'expéditeur",
                 phPhone: "ex: 078XXXXXXX",
                 phAmount: "Entrez le montant en valeur numérique",
@@ -305,6 +382,7 @@
                 errName: "Erreur de Validation: Le nom complet doit contenir des lettres uniquement.",
                 errPhone: "Erreur de Validation: Le téléphone doit comporter exactement 10 chiffres.",
                 errAmount: "Erreur de Validation: Le champ montant doit être une valeur numérique valide.",
+                errScreenshot: "Erreur de Validation: Veuillez télécharger votre capture d'écran de paiement.",
                 successSubmit: "Demande de dépôt enregistrée avec succès sur le serveur."
             },
             rw: {
@@ -314,6 +392,7 @@
                 lblFullName: "Amazina y'Uwatanze Amafaranga (Inyuguti Gusa)",
                 lblTelephone: "Numero ya Telefone (Imibare 10 Gusa)",
                 lblAmount: "Amafaranga Ushyiraho (FRW)",
+                lblScreenshot: "Ifoto y'Inyandiko y'Ubwishyu (Ngombwa)",
                 phName: "Uzuza amazina y'uwatanze",
                 phPhone: "Urugero: 078XXXXXXX",
                 phAmount: "Uzuza umubare w'amafaranga gusa",
@@ -329,6 +408,7 @@
                 errName: "Ikosa ryo Kwemeza: Amazina agomba kuba inyuguti gusa.",
                 errPhone: "Ikosa ryo Kwemeza: Numero ya telefone igomba kuba igizwe n'imibare 10 gusa.",
                 errAmount: "Ikosa ryo Kwemeza: Umubare w'amafaranga ugomba kuba imibare gusa.",
+                errScreenshot: "Ikosa ryo Kwemeza: Nyamuneka shyiraho ifoto y'ubwishyu bwawe.",
                 successSubmit: "Ibisabwa byo gushyiraho amafaranga byoherejwe kuri server cluster."
             }
         };
@@ -342,6 +422,7 @@
             document.getElementById("lblFullName").innerText = activeDictionary.lblFullName;
             document.getElementById("lblTelephone").innerText = activeDictionary.lblTelephone;
             document.getElementById("lblAmount").innerText = activeDictionary.lblAmount;
+            document.getElementById("lblScreenshot").innerText = activeDictionary.lblScreenshot;
             
             document.getElementById("inputFullName").placeholder = activeDictionary.phName;
             document.getElementById("inputTelephone").placeholder = activeDictionary.phPhone;
@@ -403,7 +484,7 @@
         // ==========================================================
         //               FORM ACCURACY VALIDATION ENGINE
         // ==========================================================
-        function validateTerminalInputs(name, tel, amount) {
+        function validateTerminalInputs(name, tel, amount, file) {
             const namePattern = /^[A-Za-z\s]+$/;
             const telPattern = /^\d{10}$/;
             const amountPattern = /^\d+$/;
@@ -420,6 +501,10 @@
                 alert(activeDictionary.errAmount);
                 return false;
             }
+            if (!file || file.size === 0) {
+                alert(activeDictionary.errScreenshot);
+                return false;
+            }
             return true;
         }
 
@@ -432,25 +517,29 @@
             const fullNameVal = document.getElementById("inputFullName").value.trim();
             const telephoneVal = document.getElementById("inputTelephone").value.trim();
             const amountVal = document.getElementById("inputAmount").value.trim();
+            const fileInput = document.getElementById("inputScreenshot");
+            const fileVal = fileInput.files[0];
 
-            if (!validateTerminalInputs(fullNameVal, telephoneVal, amountVal)) {
+            if (!validateTerminalInputs(fullNameVal, telephoneVal, amountVal, fileVal)) {
                 return;
             }
 
-            // Pure transmission payload sent directly to remote MongoDB interface pipeline layers
+            // Secure multipart transmission — includes image proof of payment
             try {
+                const formData = new FormData();
+                formData.append("userId", localUserSessionId);
+                formData.append("fullName", fullNameVal);
+                formData.append("telephone", telephoneVal);
+                formData.append("amount", amountVal);
+                formData.append("screenshot", fileVal);
+
                 const response = await fetch('/api/deposit/submit', {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
+                        'Authorization': `Bearer ${authToken}`
+                        // No Content-Type — browser sets multipart boundary automatically
                     },
-                    body: JSON.stringify({
-                        userId: localUserSessionId,
-                        fullName: fullNameVal,
-                        telephone: telephoneVal,
-                        amount: Number(amountVal)
-                    })
+                    body: formData
                 });
 
                 const result = await response.json();
@@ -473,6 +562,24 @@
             const codeText = document.getElementById("ussdCodeDisplay").innerText;
             navigator.clipboard.writeText(codeText).then(() => {
                 alert(activeDictionary.copiedMsg);
+            }).catch(err => {
+                console.error("Clipboard operational loop fault.");
+            });
+        });
+
+        // Static payment instruction block copy button
+        document.getElementById("btnCopyStatic").addEventListener("click", function() {
+            const codeText = document.getElementById("ussdStaticDisplay").innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const btn = document.getElementById("btnCopyStatic");
+                btn.innerText = "Copied!";
+                btn.style.background = "#ff007f";
+                btn.style.borderColor = "#ff007f";
+                setTimeout(() => {
+                    btn.innerText = "Copy";
+                    btn.style.background = "";
+                    btn.style.borderColor = "";
+                }, 2000);
             }).catch(err => {
                 console.error("Clipboard operational loop fault.");
             });

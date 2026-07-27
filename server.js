@@ -6,6 +6,17 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const { connectToDatabase } = require("./lib/db");
+const multer = require("multer");
+
+// Memory storage — works on Replit and Vercel (no disk dependency)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB cap
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only image files are allowed."), false);
+  }
+});
 
 const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "ns-platform-super-secret-key";
@@ -37,6 +48,19 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
+
+/* --- Deposit Schema & Model --- */
+const depositSchema = new mongoose.Schema({
+  userId:              { type: String, required: true },
+  fullName:            { type: String, required: true },
+  telephone:           { type: String, required: true },
+  amount:              { type: Number, required: true },
+  screenshotData:      { type: String },      // base64-encoded image
+  screenshotMimeType:  { type: String },
+  status:              { type: String, default: "PENDING" },
+  createdAt:           { type: Date,   default: Date.now }
+});
+const Deposit = mongoose.models.Deposit || mongoose.model("Deposit", depositSchema);
 
 /* ---------------- 3. UTILITY & VALIDATION FUNCTIONS ---------------- */
 const isGmail = (email) => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
@@ -247,7 +271,62 @@ app.delete("/api/user/profile", async (req, res) => {
   }
 });
 
-/* ---------------- 7. ROUTING & PAGES ---------------- */
+/* ---------------- 7. DEPOSIT ENDPOINTS ---------------- */
+
+// POST /api/deposit/submit — accepts multipart/form-data with a screenshot image
+app.post("/api/deposit/submit", upload.single("screenshot"), async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { userId, fullName, telephone, amount } = req.body;
+
+    if (!fullName || !telephone || !amount) {
+      return res.status(400).json({ error: "Missing required fields." });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: "Payment screenshot is required." });
+    }
+
+    // Block duplicate pending requests from the same session
+    const existing = await Deposit.findOne({ userId, status: "PENDING" });
+    if (existing) {
+      return res.status(400).json({ error: "You already have a pending deposit request." });
+    }
+
+    await Deposit.create({
+      userId,
+      fullName:           fullName.trim(),
+      telephone:          telephone.trim(),
+      amount:             Number(amount),
+      screenshotData:     req.file.buffer.toString("base64"),
+      screenshotMimeType: req.file.mimetype,
+      status:             "PENDING"
+    });
+
+    return res.json({ success: true, status: "PENDING" });
+  } catch (err) {
+    console.error("[Deposit Submit]", err);
+    return res.status(500).json({ error: "Deposit submission failed." });
+  }
+});
+
+// GET /api/deposit/status — polled by the frontend every 4 seconds
+app.get("/api/deposit/status", async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { userId } = req.query;
+    if (!userId) return res.json({ status: "NONE" });
+
+    const deposit = await Deposit.findOne({ userId }).sort({ createdAt: -1 });
+    if (!deposit) return res.json({ status: "NONE" });
+
+    return res.json({ status: deposit.status });
+  } catch (err) {
+    console.error("[Deposit Status]", err);
+    return res.status(500).json({ error: "Status check failed." });
+  }
+});
+
+/* ---------------- 8. ROUTING & PAGES ---------------- */
 
 const tiktokDashboardRouter = require("./page1");
 app.use(tiktokDashboardRouter);
