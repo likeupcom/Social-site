@@ -76,7 +76,11 @@ const VIPQueue = mongoose.models.VIPQueue || mongoose.model("VIPQueue", VIPQueue
 const VIP_PACKAGES = {
   "yt-200":   { price: 5000,  target: 200,  platform: "youtube" },
   "yt-500":   { price: 10000, target: 500,  platform: "youtube" },
-  "yt-1000":  { price: 15000, target: 1000, platform: "youtube" }
+  "yt-1000":  { price: 15000, target: 1000, platform: "youtube" },
+  "tt-1000":  { price: 5000,  target: 1000,  platform: "tiktok" },
+  "tt-2000":  { price: 7000,  target: 2000,  platform: "tiktok" },
+  "tt-5000":  { price: 10000, target: 5000,  platform: "tiktok" },
+  "tt-10000": { price: 20000, target: 10000, platform: "tiktok" }
 };
 
 
@@ -238,15 +242,25 @@ router.post("/api/vip/purchase", auth, async (req, res) => {
 
     // Validate package
     const pkg = VIP_PACKAGES[packageId];
-    if (!pkg || pkg.platform !== "youtube" || platform !== "youtube") {
+    if (!pkg || pkg.platform !== platform) {
       return res.status(400).json({ error: "Invalid package or platform." });
     }
 
-    // Validate link
-    if (!targetLink || (!targetLink.includes("youtube.com") && !targetLink.includes("youtu.be"))) {
-      return res.status(400).json({ error: "Please enter a valid YouTube link." });
+    // Validate link per platform
+    let cleanLink;
+    if (platform === "youtube") {
+      if (!targetLink || (!targetLink.includes("youtube.com") && !targetLink.includes("youtu.be"))) {
+        return res.status(400).json({ error: "Please enter a valid YouTube link." });
+      }
+      cleanLink = sanitizeYoutubeUrl(targetLink);
+    } else if (platform === "tiktok") {
+      if (!targetLink || !targetLink.includes("tiktok.com")) {
+        return res.status(400).json({ error: "Please enter a valid TikTok link." });
+      }
+      cleanLink = targetLink.split("?")[0]; // strip tracking params
+    } else {
+      return res.status(400).json({ error: "Platform not supported yet." });
     }
-    const cleanLink = sanitizeYoutubeUrl(targetLink);
 
     // Resolve user
     const User = mongoose.model("User");
@@ -254,16 +268,6 @@ router.post("/api/vip/purchase", auth, async (req, res) => {
     const dbUser = await User.findOne({ username: lookup });
     if (!dbUser) return res.status(404).json({ error: "User not found." });
     const userId = dbUser._id.toString();
-
-    // Check user doesn't already have an active VIP slot or a queued VIP order
-    const existingVipSlot = await YTActiveSlot.findOne({ userId, isVip: true });
-    if (existingVipSlot) {
-      return res.status(409).json({ error: "You already have an active VIP slot. Wait for it to complete before purchasing again." });
-    }
-    const existingVipQueue = await VIPQueue.findOne({ userId });
-    if (existingVipQueue) {
-      return res.status(409).json({ error: "You already have a VIP order in the queue." });
-    }
 
     // Atomic balance deduction — fails if balance is insufficient
     const updatedUser = await User.findOneAndUpdate(
@@ -277,19 +281,35 @@ router.post("/api/vip/purchase", auth, async (req, res) => {
       });
     }
 
-    // Find next free VIP position (0–3)
+    // Resolve the correct model and channel field per platform
+    const TKActiveSlot = platform === "tiktok" ? mongoose.model("TKActiveSlot") : null;
+    const TKVIPQueue   = platform === "tiktok" ? mongoose.model("TKVIPQueue")   : null;
+    const SlotModel    = platform === "tiktok" ? TKActiveSlot : YTActiveSlot;
+    const QueueModel   = platform === "tiktok" ? TKVIPQueue   : VIPQueue;
+
+    // Check user doesn't already have an active VIP slot on this platform
+    const existingPlatformVip = await SlotModel.findOne({ userId, isVip: true });
+    if (existingPlatformVip) {
+      return res.status(409).json({ error: "You already have an active VIP slot on this platform. Wait for it to complete before purchasing again." });
+    }
+    const existingPlatformQueue = await QueueModel.findOne({ userId });
+    if (existingPlatformQueue) {
+      return res.status(409).json({ error: "You already have a VIP order in the queue for this platform." });
+    }
+
+    // Find next free VIP position (0–3) on this platform
     let vipPosition = -1;
     for (let i = 0; i < 4; i++) {
-      const occupied = await YTActiveSlot.findOne({ sequencePosition: i });
+      const occupied = await SlotModel.findOne({ sequencePosition: i });
       if (!occupied) { vipPosition = i; break; }
     }
 
     if (vipPosition === -1) {
       // All 4 slots occupied — queue the order
-      await VIPQueue.create({
+      await QueueModel.create({
         userId,
         username: dbUser.username,
-        platform: "youtube",
+        platform,
         packageId,
         targetLink: cleanLink,
         engagementTarget: pkg.target
@@ -303,17 +323,31 @@ router.post("/api/vip/purchase", auth, async (req, res) => {
     }
 
     // Activate the VIP slot immediately
-    await YTActiveSlot.create({
-      userId,
-      username: dbUser.username,
-      youtubeChannel: dbUser.youtubeChannel || cleanLink,
-      youtubeVideo: cleanLink,
-      isVip: true,
-      sequencePosition: vipPosition,
-      packageId,
-      engagementTarget: pkg.target,
-      views: 0, subs: 0, likes: 0, comments: 0
-    });
+    if (platform === "tiktok") {
+      await TKActiveSlot.create({
+        userId,
+        username: dbUser.username,
+        TiktokChannel: dbUser.tiktok_link || cleanLink,
+        TiktokVideo: cleanLink,
+        isVip: true,
+        sequencePosition: vipPosition,
+        packageId,
+        engagementTarget: pkg.target,
+        views: 0, subs: 0, likes: 0, comments: 0
+      });
+    } else {
+      await YTActiveSlot.create({
+        userId,
+        username: dbUser.username,
+        youtubeChannel: dbUser.youtubeChannel || cleanLink,
+        youtubeVideo: cleanLink,
+        isVip: true,
+        sequencePosition: vipPosition,
+        packageId,
+        engagementTarget: pkg.target,
+        views: 0, subs: 0, likes: 0, comments: 0
+      });
+    }
 
     return res.json({
       success: true,

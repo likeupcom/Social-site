@@ -42,6 +42,9 @@ const TKActiveSlotSchema = new mongoose.Schema({
   subs: { type: Number, default: 0 },
   likes: { type: Number, default: 0 },
   comments: { type: Number, default: 0 },
+  // VIP purchase fields
+  packageId: { type: String, default: "" },
+  engagementTarget: { type: Number, default: 0 },
   timestamp: { type: Date, default: Date.now }
 });
 const TKActiveSlot = mongoose.models.TKActiveSlot || mongoose.model("TKActiveSlot", TKActiveSlotSchema);
@@ -57,6 +60,27 @@ const TKWaitingQueueSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 const TKWaitingQueue = mongoose.models.TKWaitingQueue || mongoose.model("TKWaitingQueue", TKWaitingQueueSchema);
+
+// Schema tracking VIP orders queued when all 4 TikTok VIP slots are occupied
+const TKVIPQueueSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  username: { type: String, required: true },
+  platform: { type: String, default: "tiktok" },
+  packageId: { type: String, required: true },
+  targetLink: { type: String, required: true },
+  engagementTarget: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+const TKVIPQueue = mongoose.models.TKVIPQueue || mongoose.model("TKVIPQueue", TKVIPQueueSchema);
+
+// --------- TikTok VIP Package Catalogue ---------
+const TK_VIP_PACKAGES = {
+  "tt-1000":  { price: 5000,  target: 1000  },
+  "tt-2000":  { price: 7000,  target: 2000  },
+  "tt-5000":  { price: 10000, target: 5000  },
+  "tt-10000": { price: 20000, target: 10000 }
+};
+
 
 // Schema tracking personal tracking variables (user metadata progression)
 const TKUserProfileSchema = new mongoose.Schema({
@@ -566,6 +590,33 @@ router.post("/api/Tiktok-dashboard/verify-visit", auth, async (req, res) => {
         { $inc: { views: 1, subs: 1, likes: 1, comments: 1 } },
         { new: true }
       );
+
+      // Auto-clear VIP slot when purchased target + 100 bonus engagements are reached
+      if (currentSlotData && currentSlotData.isVip && currentSlotData.engagementTarget > 0) {
+        const completionThreshold = currentSlotData.engagementTarget + 100;
+        if ((currentSlotData.views || 0) >= completionThreshold) {
+          await TKActiveSlot.deleteOne({ _id: elementId });
+          responsePayload.vipSlotCompleted = true;
+          // Promote next queued VIP order into this freed slot
+          const nextQueued = await TKVIPQueue.findOne().sort({ createdAt: 1 });
+          if (nextQueued) {
+            const User = mongoose.model("User");
+            const qUser = await User.findById(nextQueued.userId).catch(() => null);
+            await TKActiveSlot.create({
+              userId: nextQueued.userId,
+              username: nextQueued.username,
+              TiktokChannel: qUser?.tiktok_link || nextQueued.targetLink,
+              TiktokVideo: nextQueued.targetLink,
+              isVip: true,
+              sequencePosition: currentSlotData.sequencePosition,
+              packageId: nextQueued.packageId,
+              engagementTarget: nextQueued.engagementTarget,
+              views: 0, subs: 0, likes: 0, comments: 0
+            });
+            await TKVIPQueue.deleteOne({ _id: nextQueued._id });
+          }
+        }
+      }
     }
 
     // Setup atomic object to store changes locally in server memory
