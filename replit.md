@@ -1,28 +1,46 @@
-# NS Platform — Social Media Engagement Platform
+# NS Platform
 
-## Overview
-A Node.js/Express web app for social media engagement. Users can sign up, log in, link their YouTube, TikTok, Instagram, and Facebook profiles, and access platform services.
+A social media engagement platform where users can register, link their YouTube, TikTok, Instagram, and Facebook accounts, and manage deposits.
 
 ## Stack
+
 - **Runtime:** Node.js 20
-- **Framework:** Express
-- **Database:** MongoDB (via Mongoose)
-- **Auth:** JWT (cookie-based) + bcrypt
-- **Frontend:** Static HTML/CSS/JS in `public/`
+- **Framework:** Express 5
+- **Database:** MongoDB via Mongoose
+- **Auth:** JWT (cookies + query param fallback)
+- **File uploads:** Multer (memory storage)
 
 ## Running the app
-The workflow `Start application` runs `npm start` (i.e. `node server.js`) on port 5000.
 
-## Environment variables / secrets
-- `MONGODB_URI` — MongoDB connection string (required, stored as a Replit Secret)
-- `JWT_SECRET` — JWT signing secret (optional; falls back to a hardcoded default — set this in production)
-- `PORT` — defaults to `5000`
+```
+npm start
+```
+
+The server listens on `PORT` (defaults to 3000; Replit sets it to `5000`).
+
+## Required environment variables
+
+| Variable | Description |
+|---|---|
+| `MONGODB_URI` | MongoDB connection string (e.g. from MongoDB Atlas) |
+| `JWT_SECRET` | Optional — defaults to a hardcoded fallback if not set |
+
+Set these as Replit Secrets (Tools → Secrets).
 
 ## Project structure
-- `server.js` — main Express server (routes, auth middleware, DB schema)
-- `lib/db.js` — Mongoose connection helper
-- `public/` — static frontend files (HTML, CSS, JS)
-- `private/` — protected page HTML served behind auth
-- `admin.html` / `page.js` / `page1-3.js` — admin/page assets
+
+```
+server.js          # Main Express app — auth, profile, deposit routes
+lib/db.js          # Mongoose connection helper
+page.js            # General page router
+page1.js           # TikTok dashboard router
+page2.js           # Instagram dashboard router
+page3.js           # Facebook dashboard router
+public/            # Static HTML pages (login, signup, home, etc.)
+private/           # Auth-gated platform dashboards
+admin.html         # Admin panel
+```
 
 ## User preferences
+
+<!-- Agent: record user preferences here -->
