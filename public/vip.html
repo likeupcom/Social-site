@@ -487,12 +487,10 @@
         // ==========================================================
         async function fetchUserWalletMetrics() {
             try {
-                const response = await fetch(`/api/vip/user-status?userId=${localUserSessionId}`, {
+                const response = await fetch(`/api/vip/user-status`, {
                     method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    }
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
                 });
                 if (response.ok) {
                     const data = await response.json();
@@ -511,12 +509,9 @@
             try {
                 const response = await fetch('/api/vip/purchase', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        userId: localUserSessionId,
                         platform: platform,
                         packageId: packageId,
                         targetLink: targetLink

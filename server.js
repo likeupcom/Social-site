@@ -44,7 +44,8 @@ const userSchema = new mongoose.Schema({
   youtubeChannel: { type: String, default: "" },
   tiktok_link: { type: String, default: "" },
   instagram_link: { type: String, default: "" },
-  facebook_link: { type: String, default: "" }
+  facebook_link: { type: String, default: "" },
+  walletBalance: { type: Number, default: 0 }
 });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);

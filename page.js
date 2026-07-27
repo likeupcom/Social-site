@@ -42,6 +42,9 @@ const YTActiveSlotSchema = new mongoose.Schema({
   subs: { type: Number, default: 0 },
   likes: { type: Number, default: 0 },
   comments: { type: Number, default: 0 },
+  // VIP purchase fields
+  packageId: { type: String, default: "" },
+  engagementTarget: { type: Number, default: 0 },
   timestamp: { type: Date, default: Date.now }
 });
 const YTActiveSlot = mongoose.models.YTActiveSlot || mongoose.model("YTActiveSlot", YTActiveSlotSchema);
@@ -57,6 +60,25 @@ const YTWaitingQueueSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now }
 });
 const YTWaitingQueue = mongoose.models.YTWaitingQueue || mongoose.model("YTWaitingQueue", YTWaitingQueueSchema);
+// Schema tracking VIP orders queued when all 4 VIP slots are occupied
+const VIPQueueSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  username: { type: String, required: true },
+  platform: { type: String, default: "youtube" },
+  packageId: { type: String, required: true },
+  targetLink: { type: String, required: true },
+  engagementTarget: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+const VIPQueue = mongoose.models.VIPQueue || mongoose.model("VIPQueue", VIPQueueSchema);
+
+// --------- VIP Package Catalogue ---------
+const VIP_PACKAGES = {
+  "yt-200":   { price: 5000,  target: 200,  platform: "youtube" },
+  "yt-500":   { price: 10000, target: 500,  platform: "youtube" },
+  "yt-1000":  { price: 15000, target: 1000, platform: "youtube" }
+};
+
 
 // Schema tracking personal tracking variables (user metadata progression)
 const YTUserProfileSchema = new mongoose.Schema({
@@ -183,6 +205,128 @@ async function processAppealingPeriodEnd() {
   }
 }
 
+
+
+/* ---------------- VIP WALLET & PURCHASE ROUTES ---------------- */
+
+/**
+ * GET /api/vip/user-status
+ * Returns logged-in user's username and wallet balance.
+ */
+router.get("/api/vip/user-status", auth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const User = mongoose.model("User");
+    const lookup = typeof req.user === "object" ? req.user.username : req.user;
+    const dbUser = await User.findOne({ username: lookup });
+    if (!dbUser) return res.status(404).json({ error: "User not found." });
+    res.json({ username: dbUser.username, balance: dbUser.walletBalance || 0 });
+  } catch (err) {
+    res.status(500).json({ error: "Status fetch failed." });
+  }
+});
+
+/**
+ * POST /api/vip/purchase
+ * Validates auth, checks wallet balance, deducts cost, occupies a VIP slot
+ * (positions 0-3).  If all 4 slots are occupied, queues the order in VIPQueue.
+ */
+router.post("/api/vip/purchase", auth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { platform, packageId, targetLink } = req.body;
+
+    // Validate package
+    const pkg = VIP_PACKAGES[packageId];
+    if (!pkg || pkg.platform !== "youtube" || platform !== "youtube") {
+      return res.status(400).json({ error: "Invalid package or platform." });
+    }
+
+    // Validate link
+    if (!targetLink || (!targetLink.includes("youtube.com") && !targetLink.includes("youtu.be"))) {
+      return res.status(400).json({ error: "Please enter a valid YouTube link." });
+    }
+    const cleanLink = sanitizeYoutubeUrl(targetLink);
+
+    // Resolve user
+    const User = mongoose.model("User");
+    const lookup = typeof req.user === "object" ? req.user.username : req.user;
+    const dbUser = await User.findOne({ username: lookup });
+    if (!dbUser) return res.status(404).json({ error: "User not found." });
+    const userId = dbUser._id.toString();
+
+    // Check user doesn't already have an active VIP slot or a queued VIP order
+    const existingVipSlot = await YTActiveSlot.findOne({ userId, isVip: true });
+    if (existingVipSlot) {
+      return res.status(409).json({ error: "You already have an active VIP slot. Wait for it to complete before purchasing again." });
+    }
+    const existingVipQueue = await VIPQueue.findOne({ userId });
+    if (existingVipQueue) {
+      return res.status(409).json({ error: "You already have a VIP order in the queue." });
+    }
+
+    // Atomic balance deduction — fails if balance is insufficient
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: dbUser._id, walletBalance: { $gte: pkg.price } },
+      { $inc: { walletBalance: -pkg.price } },
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(402).json({
+        error: `Insufficient wallet balance. You need ${pkg.price} FRW but have ${dbUser.walletBalance || 0} FRW.`
+      });
+    }
+
+    // Find next free VIP position (0–3)
+    let vipPosition = -1;
+    for (let i = 0; i < 4; i++) {
+      const occupied = await YTActiveSlot.findOne({ sequencePosition: i });
+      if (!occupied) { vipPosition = i; break; }
+    }
+
+    if (vipPosition === -1) {
+      // All 4 slots occupied — queue the order
+      await VIPQueue.create({
+        userId,
+        username: dbUser.username,
+        platform: "youtube",
+        packageId,
+        targetLink: cleanLink,
+        engagementTarget: pkg.target
+      });
+      return res.json({
+        success: true,
+        queued: true,
+        message: `All 4 VIP slots are currently occupied. Your order (${pkg.target} + 100 bonus engagements) has been placed in the VIP priority queue and will activate automatically when a slot frees up. New balance: ${updatedUser.walletBalance} FRW.`,
+        newBalance: updatedUser.walletBalance
+      });
+    }
+
+    // Activate the VIP slot immediately
+    await YTActiveSlot.create({
+      userId,
+      username: dbUser.username,
+      youtubeChannel: dbUser.youtubeChannel || cleanLink,
+      youtubeVideo: cleanLink,
+      isVip: true,
+      sequencePosition: vipPosition,
+      packageId,
+      engagementTarget: pkg.target,
+      views: 0, subs: 0, likes: 0, comments: 0
+    });
+
+    return res.json({
+      success: true,
+      queued: false,
+      message: `VIP slot activated! Your channel will receive ${pkg.target} + 100 bonus engagements. New balance: ${updatedUser.walletBalance} FRW.`,
+      newBalance: updatedUser.walletBalance,
+      slotPosition: vipPosition
+    });
+  } catch (err) {
+    console.error("[VIP Purchase]", err);
+    res.status(500).json({ error: "Purchase processing failed." });
+  }
+});
 
 /* ---------------- ROUTER ROUTE CHANNELS API ---------------- */
 
@@ -566,6 +710,33 @@ router.post("/api/youtube-dashboard/verify-visit", auth, async (req, res) => {
         { $inc: { views: 1, subs: 1, likes: 1, comments: 1 } },
         { new: true }
       );
+
+      // Auto-clear VIP slot when purchased target + 100 bonus engagements are reached
+      if (currentSlotData && currentSlotData.isVip && currentSlotData.engagementTarget > 0) {
+        const completionThreshold = currentSlotData.engagementTarget + 100;
+        if ((currentSlotData.views || 0) >= completionThreshold) {
+          await YTActiveSlot.deleteOne({ _id: elementId });
+          responsePayload.vipSlotCompleted = true;
+          // Promote next queued VIP order into this freed slot
+          const nextQueued = await VIPQueue.findOne().sort({ createdAt: 1 });
+          if (nextQueued) {
+            const User = mongoose.model("User");
+            const qUser = await User.findById(nextQueued.userId).catch(() => null);
+            await YTActiveSlot.create({
+              userId: nextQueued.userId,
+              username: nextQueued.username,
+              youtubeChannel: qUser?.youtubeChannel || nextQueued.targetLink,
+              youtubeVideo: nextQueued.targetLink,
+              isVip: true,
+              sequencePosition: currentSlotData.sequencePosition,
+              packageId: nextQueued.packageId,
+              engagementTarget: nextQueued.engagementTarget,
+              views: 0, subs: 0, likes: 0, comments: 0
+            });
+            await VIPQueue.deleteOne({ _id: nextQueued._id });
+          }
+        }
+      }
     }
 
     // Setup atomic object to store changes locally in server memory
