@@ -1,1 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NS Platform — Admin Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+body{background:#0a0a12;color:#fff;min-height:100vh}
 
+/* ── Login page ── */
+#loginPage{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-card{background:rgba(255,255,255,.04);border:1px solid rgba(0,255,255,.15);border-radius:16px;padding:40px 36px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.login-card h1{color:#00ffff;text-align:center;margin-bottom:6px;font-size:22px;letter-spacing:1px}
+.login-card p{color:#888;text-align:center;font-size:13px;margin-bottom:30px}
+.login-card .lock-icon{font-size:48px;text-align:center;display:block;margin-bottom:16px}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.form-group input{width:100%;padding:13px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:15px;outline:none;transition:border-color .3s}
+.form-group input:focus{border-color:#00ffff;box-shadow:0 0 8px rgba(0,255,255,.2)}
+.btn-primary{width:100%;padding:14px;background:linear-gradient(45deg,#00ffff,#0080ff);color:#000;font-weight:700;font-size:15px;border:none;border-radius:8px;cursor:pointer;transition:all .3s}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-primary:disabled{background:#333;color:#666;cursor:not-allowed;transform:none}
+.error-msg{color:#ff4d6d;font-size:13px;text-align:center;margin-top:12px;min-height:20px}
+
+/* ── Top nav ── */
+#dashboard{display:none}
+.topbar{background:rgba(0,0,0,.7);border-bottom:1px solid rgba(0,255,255,.1);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.topbar-brand{color:#00ffff;font-weight:700;font-size:17px;letter-spacing:1px}
+.topbar-brand span{color:#fff;font-weight:400;font-size:13px;margin-left:10px;opacity:.6}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.admin-badge{background:rgba(0,255,255,.1);border:1px solid rgba(0,255,255,.25);color:#00ffff;padding:4px 12px;border-radius:20px;font-size:12px}
+.btn-logout{background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);color:#ff4d6d;padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .3s}
+.btn-logout:hover{background:rgba(255,77,109,.2)}
+
+/* ── Main layout ── */
+.main{padding:28px 24px;max-width:1400px;margin:0 auto}
+.page-header{margin-bottom:28px}
+.page-header h2{color:#fff;font-size:22px;font-weight:700}
+.page-header p{color:#666;font-size:14px;margin-top:4px}
+
+/* ── Stat cards ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px;text-align:center}
+.stat-card .label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700}
+.cyan{color:#00ffff}.green{color:#00e676}.pink{color:#ff007f}.amber{color:#ffab00}
+
+/* ── Section tabs ── */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:0}
+.tab-btn{padding:10px 20px;background:none;border:none;color:#666;font-size:14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.tab-btn.active{color:#00ffff;border-bottom-color:#00ffff}
+.tab-btn:hover:not(.active){color:#aaa}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;border-radius:12px;border:1px solid rgba(255,255,255,.07)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+thead th{background:rgba(0,255,255,.05);color:#00ffff;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:14px 16px;text-align:left;white-space:nowrap}
+tbody tr{border-top:1px solid rgba(255,255,255,.04);transition:background .2s}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase}
+.status-active{background:rgba(0,230,118,.12);color:#00e676;border:1px solid rgba(0,230,118,.25)}
+.status-banned{background:rgba(255,77,109,.12);color:#ff4d6d;border:1px solid rgba(255,77,109,.25)}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn-sm{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
+.btn-edit{background:rgba(79,172,254,.15);color:#4facfe;border:1px solid rgba(79,172,254,.3)}
+.btn-edit:hover{background:rgba(79,172,254,.25)}
+.btn-ban{background:rgba(255,171,0,.12);color:#ffab00;border:1px solid rgba(255,171,0,.25)}
+.btn-ban:hover{background:rgba(255,171,0,.2)}
+.btn-activate{background:rgba(0,230,118,.12);color:#00e676;border:1px solid rgba(0,230,118,.25)}
+.btn-activate:hover{background:rgba(0,230,118,.2)}
+.btn-delete{background:rgba(255,77,109,.12);color:#ff4d6d;border:1px solid rgba(255,77,109,.25)}
+.btn-delete:hover{background:rgba(255,77,109,.2)}
+.search-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.search-input{flex:1;min-width:200px;padding:10px 14px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:14px;outline:none;transition:border-color .3s}
+.search-input:focus{border-color:#00ffff}
+.refresh-btn{padding:10px 18px;background:rgba(0,255,255,.08);border:1px solid rgba(0,255,255,.2);color:#00ffff;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s}
+.refresh-btn:hover{background:rgba(0,255,255,.15)}
+.empty-state{text-align:center;padding:48px;color:#555;font-size:15px}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:#0f0f1a;border:1px solid rgba(0,255,255,.15);border-radius:14px;padding:32px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.modal h3{color:#00ffff;margin-bottom:22px;font-size:17px}
+.modal .form-group{margin-bottom:18px}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+.btn-cancel{padding:10px 20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#aaa;border-radius:8px;cursor:pointer;font-size:14px;transition:all .2s}
+.btn-cancel:hover{background:rgba(255,255,255,.1)}
+.btn-save{padding:10px 24px;background:linear-gradient(45deg,#00ffff,#0080ff);color:#000;font-weight:700;border:none;border-radius:8px;cursor:pointer;font-size:14px;transition:all .2s}
+.btn-save:hover{opacity:.9}
+.btn-save:disabled{background:#333;color:#555;cursor:not-allowed}
+
+/* ── Settings section ── */
+.settings-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:28px;max-width:480px}
+.settings-card h3{color:#00ffff;margin-bottom:20px;font-size:16px}
+.settings-note{font-size:12px;color:#666;margin-top:6px}
+.toast{position:fixed;bottom:24px;right:24px;background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.3);color:#00e676;padding:12px 20px;border-radius:10px;font-size:14px;z-index:300;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.error{background:rgba(255,77,109,.15);border-color:rgba(255,77,109,.3);color:#ff4d6d}
+
+@media(max-width:600px){
+  .topbar{padding:0 16px}.main{padding:20px 14px}
+  .actions{flex-direction:column}.modal{padding:22px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN PAGE ══════════════════ -->
+<div id="loginPage">
+  <div class="login-card">
+    <span class="lock-icon">🔐</span>
+    <h1>Admin Access</h1>
+    <p>NS Platform Control Panel</p>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Admin username" autocomplete="username" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In</button>
+    <div class="error-msg" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ══════════════════ DASHBOARD ══════════════════ -->
+<div id="dashboard">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-brand">NS Admin <span>Control Panel</span></div>
+    <div class="topbar-right">
+      <span class="admin-badge" id="adminName">Admin</span>
+      <button class="btn-logout" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <h2>Bonus Programme Dashboard</h2>
+      <p>Manage referral members, balances, and account status</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="label">Total Members</div><div class="value cyan" id="statTotal">—</div></div>
+      <div class="stat-card"><div class="label">Active</div><div class="value green" id="statActive">—</div></div>
+      <div class="stat-card"><div class="label">Banned</div><div class="value pink" id="statBanned">—</div></div>
+      <div class="stat-card"><div class="label">Total Referrals</div><div class="value amber" id="statReferrals">—</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('members',this)">👥 Members</button>
+      <button class="tab-btn" onclick="switchTab('settings',this)">⚙️ Settings</button>
+    </div>
+
+    <!-- Members tab -->
+    <div id="tab-members" class="tab-content active">
+      <div class="search-row">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by name, phone, or referral code…" oninput="renderTable()" />
+        <button class="refresh-btn" onclick="loadMembers()">↻ Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Full Name</th>
+              <th>Username</th>
+              <th>Phone Number</th>
+              <th>Referral Balance (FRW)</th>
+              <th>Total Referrals</th>
+              <th>Referral Code</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="membersBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="emptyState" style="display:none">No members found.</div>
+    </div>
+
+    <!-- Settings tab -->
+    <div id="tab-settings" class="tab-content">
+      <div class="settings-card">
+        <h3>Change Admin Credentials</h3>
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" id="sCurPass" class="form-group" placeholder="Enter current password"
+            style="width:100%;padding:13px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:15px;outline:none" />
+        </div>
+        <div class="form-group">
+          <label>New Username <span class="settings-note">(leave blank to keep current)</span></label>
+          <input type="text" id="sNewUser" placeholder="New username"
+            style="width:100%;padding:13px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:15px;outline:none" />
+        </div>
+        <div class="form-group">
+          <label>New Password <span class="settings-note">(leave blank to keep current, min 6 chars)</span></label>
+          <input type="password" id="sNewPass" placeholder="New password"
+            style="width:100%;padding:13px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:15px;outline:none" />
+        </div>
+        <button class="btn-save" style="width:100%" onclick="saveCredentials()">Save Changes</button>
+        <div class="error-msg" id="settingsErr" style="text-align:left;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ EDIT MODAL ══════════════════ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3>✏️ Edit Member</h3>
+    <input type="hidden" id="editId" />
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="editName" placeholder="Full name"
+        style="width:100%;padding:12px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none" />
+    </div>
+    <div class="form-group">
+      <label>Phone Number (10 digits)</label>
+      <input type="text" id="editPhone" placeholder="0712345678" maxlength="10"
+        style="width:100%;padding:12px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none" />
+    </div>
+    <div class="form-group">
+      <label>Referral Balance (FRW)</label>
+      <input type="number" id="editBalance" placeholder="0" min="0" step="1"
+        style="width:100%;padding:12px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none" />
+    </div>
+    <div class="error-msg" id="editErr"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="editSaveBtn" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ CONFIRM MODAL ══════════════════ -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmMsg" style="color:#aaa;font-size:14px;line-height:1.6;margin-bottom:8px"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-save" id="confirmOkBtn" style="background:linear-gradient(45deg,#ff4d6d,#ff007f);color:#fff">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── state ─── */
+let allMembers = [];
+
+/* ─── bootstrap ─── */
+async function init() {
+  try {
+    const r = await fetch('/api/admin/check', { credentials: 'include' });
+    if (r.ok) {
+      const d = await r.json();
+      showDashboard(d.username);
+      await loadMembers();
+    }
+  } catch {}
+}
+init();
+
+/* ─── login ─── */
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+async function doLogin() {
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginErr');
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  err.textContent = '';
+  if (!u || !p) { err.textContent = 'Please enter username and password.'; return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const r = await fetch('/api/admin/login', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, password: p })
+    });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      showDashboard(u);
+      await loadMembers();
+    } else {
+      err.textContent = d.error || 'Login failed.';
+    }
+  } catch { err.textContent = 'Network error. Please try again.'; }
+  btn.disabled = false; btn.textContent = 'Sign In';
+}
+
+async function doLogout() {
+  await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+  location.reload();
+}
+
+function showDashboard(username) {
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('adminName').textContent = '👤 ' + username;
+}
+
+/* ─── tabs ─── */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+/* ─── members ─── */
+async function loadMembers() {
+  try {
+    const r = await fetch('/api/admin/members', { credentials: 'include' });
+    if (r.status === 401) { location.reload(); return; }
+    const d = await r.json();
+    allMembers = d.members || [];
+    updateStats();
+    renderTable();
+  } catch { showToast('Failed to load members.', true); }
+}
+
+function updateStats() {
+  const active  = allMembers.filter(m => m.status !== 'banned').length;
+  const banned  = allMembers.filter(m => m.status === 'banned').length;
+  const refs    = allMembers.reduce((s, m) => s + (m.totalReferredUsers || 0), 0);
+  document.getElementById('statTotal').textContent     = allMembers.length;
+  document.getElementById('statActive').textContent    = active;
+  document.getElementById('statBanned').textContent    = banned;
+  document.getElementById('statReferrals').textContent = refs;
+}
+
+function renderTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allMembers.filter(m =>
+    (m.fullName   || '').toLowerCase().includes(q) ||
+    (m.phoneNumber|| '').toLowerCase().includes(q) ||
+    (m.referralCode||'').toLowerCase().includes(q) ||
+    (m.username   || '').toLowerCase().includes(q)
+  );
+  const tbody = document.getElementById('membersBody');
+  const empty = document.getElementById('emptyState');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map((m, i) => {
+    const isBanned = m.status === 'banned';
+    return `
+    <tr>
+      <td style="color:#555">${i + 1}</td>
+      <td style="font-weight:600">${esc(m.fullName)}</td>
+      <td style="color:#aaa">${esc(m.username)}</td>
+      <td>${esc(m.phoneNumber)}</td>
+      <td style="color:#00e676;font-weight:600">${(m.walletBalance || 0).toLocaleString()} FRW</td>
+      <td style="color:#4facfe">${m.totalReferredUsers || 0}</td>
+      <td><code style="color:#ffab00;font-size:12px">${esc(m.referralCode)}</code></td>
+      <td><span class="status-badge ${isBanned ? 'status-banned' : 'status-active'}">${isBanned ? 'Banned' : 'Active'}</span></td>
+      <td>
+        <div class="actions">
+          <button class="btn-sm btn-edit"     onclick="openEdit('${m._id}')">Edit</button>
+          ${isBanned
+            ? `<button class="btn-sm btn-activate" onclick="setStatus('${m._id}','active','${esc(m.fullName)}')">Activate</button>`
+            : `<button class="btn-sm btn-ban"      onclick="setStatus('${m._id}','banned','${esc(m.fullName)}')">Ban</button>`}
+          <button class="btn-sm btn-delete"   onclick="confirmDelete('${m._id}','${esc(m.fullName)}')">Delete</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ─── edit modal ─── */
+function openEdit(id) {
+  const m = allMembers.find(x => x._id === id);
+  if (!m) return;
+  document.getElementById('editId').value       = id;
+  document.getElementById('editName').value     = m.fullName;
+  document.getElementById('editPhone').value    = m.phoneNumber;
+  document.getElementById('editBalance').value  = m.walletBalance;
+  document.getElementById('editErr').textContent = '';
+  document.getElementById('editModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('open');
+}
+
+async function saveEdit() {
+  const id      = document.getElementById('editId').value;
+  const name    = document.getElementById('editName').value.trim();
+  const phone   = document.getElementById('editPhone').value.trim();
+  const balance = document.getElementById('editBalance').value;
+  const errEl   = document.getElementById('editErr');
+  const btn     = document.getElementById('editSaveBtn');
+  errEl.textContent = '';
+
+  if (!name || !phone) { errEl.textContent = 'Name and phone are required.'; return; }
+  if (!/^\d{10}$/.test(phone)) { errEl.textContent = 'Phone must be exactly 10 digits.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    const r = await fetch(`/api/admin/members/${id}`, {
+      method: 'PATCH', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fullName: name, phoneNumber: phone, walletBalance: balance })
+    });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      const idx = allMembers.findIndex(m => m._id === id);
+      if (idx >= 0) allMembers[idx] = { ...allMembers[idx], ...d.member };
+      closeModal();
+      renderTable();
+      updateStats();
+      showToast('Member updated successfully.');
+    } else {
+      errEl.textContent = d.error || 'Update failed.';
+    }
+  } catch { errEl.textContent = 'Network error.'; }
+  btn.disabled = false; btn.textContent = 'Save Changes';
+}
+
+/* ─── ban / activate ─── */
+function setStatus(id, status, name) {
+  const label = status === 'banned' ? 'ban' : 'activate';
+  openConfirm(
+    `${status === 'banned' ? '🚫 Ban' : '✅ Activate'} Member`,
+    `Are you sure you want to ${label} "${name}"?`,
+    async () => {
+      try {
+        const r = await fetch(`/api/admin/members/${id}/status`, {
+          method: 'PATCH', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        const d = await r.json();
+        if (r.ok && d.success) {
+          const idx = allMembers.findIndex(m => m._id === id);
+          if (idx >= 0) allMembers[idx].status = status;
+          renderTable(); updateStats();
+          showToast(`Member ${status === 'banned' ? 'banned' : 'activated'}.`);
+        } else { showToast(d.error || 'Failed.', true); }
+      } catch { showToast('Network error.', true); }
+    }
+  );
+}
+
+/* ─── delete ─── */
+function confirmDelete(id, name) {
+  openConfirm(
+    '🗑️ Delete Member',
+    `This will permanently delete "${name}" and all their referral data. This cannot be undone.`,
+    async () => {
+      try {
+        const r = await fetch(`/api/admin/members/${id}`, { method: 'DELETE', credentials: 'include' });
+        const d = await r.json();
+        if (r.ok && d.success) {
+          allMembers = allMembers.filter(m => m._id !== id);
+          renderTable(); updateStats();
+          showToast('Member deleted.');
+        } else { showToast(d.error || 'Delete failed.', true); }
+      } catch { showToast('Network error.', true); }
+    }
+  );
+}
+
+/* ─── confirm modal ─── */
+let confirmCallback = null;
+function openConfirm(title, msg, cb) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent   = msg;
+  confirmCallback = cb;
+  document.getElementById('confirmModal').classList.add('open');
+  document.getElementById('confirmOkBtn').onclick = async () => {
+    closeConfirm();
+    if (confirmCallback) await confirmCallback();
+  };
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('open');
+  confirmCallback = null;
+}
+
+/* ─── settings / change credentials ─── */
+async function saveCredentials() {
+  const cur  = document.getElementById('sCurPass').value;
+  const newU = document.getElementById('sNewUser').value.trim();
+  const newP = document.getElementById('sNewPass').value;
+  const err  = document.getElementById('settingsErr');
+  err.textContent = '';
+
+  if (!cur) { err.textContent = 'Current password is required.'; return; }
+  if (!newU && !newP) { err.textContent = 'Enter a new username and/or new password.'; return; }
+
+  try {
+    const r = await fetch('/api/admin/change-credentials', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword: cur, newUsername: newU || undefined, newPassword: newP || undefined })
+    });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      document.getElementById('sCurPass').value = '';
+      document.getElementById('sNewUser').value = '';
+      document.getElementById('sNewPass').value = '';
+      document.getElementById('adminName').textContent = '👤 ' + d.username;
+      showToast('Credentials updated successfully.');
+    } else {
+      err.textContent = d.error || 'Update failed.';
+    }
+  } catch { err.textContent = 'Network error.'; }
+}
+
+/* ─── toast ─── */
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ─── close modals on overlay click ─── */
+document.getElementById('editModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirm(); });
+</script>
+</body>
+</html>

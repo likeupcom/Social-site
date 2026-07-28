@@ -34,6 +34,7 @@ const MemberSchema = new mongoose.Schema({
   walletBalance:     { type: Number, default: 0 },                   // referral-commission earnings (FRW)
   totalReferredUsers:{ type: Number, default: 0 },                   // how many referrals converted
   referralCode:      { type: String, required: true, unique: true }, // auto-generated token
+  status:            { type: String, default: "active" },            // active | banned
   createdAt:         { type: Date,   default: Date.now }
 });
 const Member = mongoose.models.Member || mongoose.model("Member", MemberSchema);

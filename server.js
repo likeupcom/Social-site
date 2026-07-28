@@ -332,6 +332,17 @@ app.get("/api/deposit/status", async (req, res) => {
 const bonusRouter = require("./bonusRouter");
 app.use(bonusRouter);
 
+const adminRouter = require("./adminRouter");
+app.use(adminRouter);
+
+// Serve the admin dashboard — no user-auth required here; the page handles admin session itself
+app.get("/admin.html", (req, res) => {
+  res.sendFile(path.join(__dirname, "admin.html"));
+});
+app.get("/admin", (req, res) => {
+  res.redirect("/admin.html");
+});
+
 const tiktokDashboardRouter = require("./page1");
 app.use(tiktokDashboardRouter);
 
