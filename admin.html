@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Social Site</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --text-heading: #ffffff;
+            --text-muted: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #2ea043;
+            --accent-red: #da3633;
+            --accent-yellow: #d29922;
+            --hover-bg: #21262d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--text-heading);
+            font-weight: 600;
+        }
+
+        .badge-admin {
+            background-color: rgba(88, 166, 255, 0.15);
+            color: var(--accent-blue);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(88, 166, 255, 0.3);
+        }
+
+        /* 1. Dashboard Overview Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .card-subtext {
+            font-size: 0.8rem;
+            margin-top: 6px;
+        }
+        .text-green { color: var(--accent-green); }
+        .text-yellow { color: var(--accent-yellow); }
+
+        /* General Section Styling */
+        .section-block {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: var(--text-heading);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: var(--bg-color);
+            color: var(--text-muted);
+            padding: 12px 16px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: var(--hover-bg);
+        }
+
+        /* Badges & Status */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-occupied { background: rgba(218, 54, 51, 0.2); color: #f85149; }
+        .status-available { background: rgba(46, 160, 67, 0.2); color: #3fb950; }
+        .status-pending { background: rgba(210, 153, 34, 0.2); color: #d29922; }
+
+        /* Buttons */
+        .btn {
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.825rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .btn-approve, .btn-green {
+            background-color: var(--accent-green);
+            color: #ffffff;
+        }
+
+        .btn-reject, .btn-red {
+            background-color: var(--accent-red);
+            color: #ffffff;
+        }
+
+        .btn-action {
+            background-color: var(--hover-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-link {
+            color: var(--accent-blue);
+            background: none;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        /* 3. Social Tabs Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Platform Administration</h1>
+            <span class="badge-admin">Master Control</span>
+        </header>
+
+        <!-- 1. Dashboard Overview -->
+        <div class="stats-grid">
+            <div class="card">
+                <div class="card-title">Total Revenue</div>
+                <div class="card-value" id="stat-revenue">1,250,000 FRW</div>
+                <div class="card-subtext text-green">↑ Lifetime earnings</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Pending Deposits</div>
+                <div class="card-value" id="stat-pending">3</div>
+                <div class="card-subtext text-yellow">Requires verification</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Active VIP Packages</div>
+                <div class="card-value" id="stat-vip">14</div>
+                <div class="card-subtext">Across platforms</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Active Slots</div>
+                <div class="card-value" id="stat-slots">18 / 40</div>
+                <div class="card-subtext">Currently occupied</div>
+            </div>
+        </div>
+
+        <!-- 2. Deposit Approvals -->
+        <div class="section-block">
+            <h2 class="section-title">Deposit Approvals</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Depositor Name</th>
+                            <th>Phone Number</th>
+                            <th>Amount (FRW)</th>
+                            <th>Payment Proof</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deposit-table-body">
+                        <tr>
+                            <td>Jean Paul N.</td>
+                            <td>+250 788 123 456</td>
+                            <td>15,000 FRW</td>
+                            <td><a href="#" class="btn-link">View Proof.jpg</a></td>
+                            <td>
+                                <button class="btn btn-approve" onclick="handleDeposit(this, 'approve')">Approve</button>
+                                <button class="btn btn-reject" onclick="handleDeposit(this, 'reject')">Reject</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Aline M.</td>
+                            <td>+250 783 987 654</td>
+                            <td>5,000 FRW</td>
+                            <td><a href="#" class="btn-link">View Receipt.png</a></td>
+                            <td>
+                                <button class="btn btn-approve" onclick="handleDeposit(this, 'approve')">Approve</button>
+                                <button class="btn btn-reject" onclick="handleDeposit(this, 'reject')">Reject</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Eric K.</td>
+                            <td>+250 790 112 233</td>
+                            <td>50,000 FRW</td>
+                            <td><a href="#" class="btn-link">View Screenshot.png</a></td>
+                            <td>
+                                <button class="btn btn-approve" onclick="handleDeposit(this, 'approve')">Approve</button>
+                                <button class="btn btn-reject" onclick="handleDeposit(this, 'reject')">Reject</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. Social Slots Management -->
+        <div class="section-block">
+            <h2 class="section-title">Social Slots Management</h2>
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('youtube')">YouTube</button>
+                <button class="tab-btn" onclick="switchTab('instagram')">Instagram</button>
+                <button class="tab-btn" onclick="switchTab('facebook')">Facebook</button>
+                <button class="tab-btn" onclick="switchTab('tiktok')">TikTok</button>
+            </div>
+
+            <!-- YouTube Tab -->
+            <div id="tab-youtube" class="tab-content active">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Slot Number</th>
+                                <th>Status</th>
+                                <th>Occupant Username</th>
+                                <th>Target Social Link</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Slot #1</td>
+                                <td><span class="status-badge status-occupied">Occupied</span></td>
+                                <td>@creator_yt</td>
+                                <td><a href="#" class="btn-link" target="_blank">youtube.com/watch?v=demo1</a></td>
+                                <td><button class="btn btn-action" onclick="clearSlot(this)">Clear / Reset Slot</button></td>
+                            </tr>
+                            <tr>
+                                <td>Slot #2</td>
+                                <td><span class="status-badge status-available">Available</span></td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td><button class="btn btn-action" disabled style="opacity: 0.5;">Clear / Reset Slot</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Instagram Tab -->
+            <div id="tab-instagram" class="tab-content">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Slot Number</th>
+                                <th>Status</th>
+                                <th>Occupant Username</th>
+                                <th>Target Social Link</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Slot #1</td>
+                                <td><span class="status-badge status-occupied">Occupied</span></td>
+                                <td>@insta_influencer</td>
+                                <td><a href="#" class="btn-link" target="_blank">instagram.com/p/demo1</a></td>
+                                <td><button class="btn btn-action" onclick="clearSlot(this)">Clear / Reset Slot</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Facebook Tab -->
+            <div id="tab-facebook" class="tab-content">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Slot Number</th>
+                                <th>Status</th>
+                                <th>Occupant Username</th>
+                                <th>Target Social Link</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Slot #1</td>
+                                <td><span class="status-badge status-available">Available</span></td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td><button class="btn btn-action" disabled style="opacity: 0.5;">Clear / Reset Slot</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TikTok Tab -->
+            <div id="tab-tiktok" class="tab-content">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Slot Number</th>
+                                <th>Status</th>
+                                <th>Occupant Username</th>
+                                <th>Target Social Link</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Slot #1</td>
+                                <td><span class="status-badge status-occupied">Occupied</span></td>
+                                <td>@tok_famous</td>
+                                <td><a href="#" class="btn-link" target="_blank">tiktok.com/@user/video/1</a></td>
+                                <td><button class="btn btn-action" onclick="clearSlot(this)">Clear / Reset Slot</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Package Orders -->
+        <div class="section-block">
+            <h2 class="section-title">VIP Growth Package Orders</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Platform</th>
+                            <th>Package Type</th>
+                            <th>Target URL</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <tr>
+                            <td>YouTube</td>
+                            <td>1,000 Views</td>
+                            <td><a href="#" class="btn-link" target="_blank">youtube.com/watch?v=xyz</a></td>
+                            <td><span class="status-badge status-pending">In Progress</span></td>
+                            <td><button class="btn btn-green" onclick="markComplete(this)">Mark Complete</button></td>
+                        </tr>
+                        <tr>
+                            <td>Instagram</td>
+                            <td>500 Likes</td>
+                            <td><a href="#" class="btn-link" target="_blank">instagram.com/p/abc</a></td>
+                            <td><span class="status-badge status-pending">In Progress</span></td>
+                            <td><button class="btn btn-green" onclick="markComplete(this)">Mark Complete</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Tab Switcher for Social Platforms
+        function switchTab(platform) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`tab-${platform}`).classList.add('active');
+        }
+
+        // Deposit Action Handler
+        function handleDeposit(btn, action) {
+            const row = btn.closest('tr');
+            if (action === 'approve') {
+                row.style.opacity = '0.5';
+                btn.parentElement.innerHTML = '<span class="status-badge status-available">Approved</span>';
+            } else {
+                row.style.opacity = '0.5';
+                btn.parentElement.innerHTML = '<span class="status-badge status-occupied">Rejected</span>';
+            }
+        }
+
+        // Social Slot Reset Handler
+        function clearSlot(btn) {
+            if (confirm("Are you sure you want to clear and reset this slot?")) {
+                const row = btn.closest('tr');
+                row.cells[1].innerHTML = '<span class="status-badge status-available">Available</span>';
+                row.cells[2].textContent = '—';
+                row.cells[3].textContent = '—';
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+            }
+        }
+
+        // Mark Package Order Complete Handler
+        function markComplete(btn) {
+            const row = btn.closest('tr');
+            row.cells[3].innerHTML = '<span class="status-badge status-available">Completed</span>';
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.textContent = 'Done';
+        }
+    </script>
+</body>
+</html>
