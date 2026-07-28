@@ -271,11 +271,19 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
       <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:24px;margin-bottom:28px;max-width:700px">
         <h3 style="color:#00ffff;margin-bottom:18px;font-size:16px">📌 Assign User to TikTok Board</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div>
+          <div style="position:relative">
             <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Select User</label>
-            <select id="tkUserSelect" style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none">
-              <option value="">— choose a user —</option>
-            </select>
+            <input id="tkUserSearch" type="text" placeholder="🔍 Search by username…" autocomplete="off"
+              style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none;box-sizing:border-box"
+              oninput="filterTKUsers()" onfocus="showTKDropdown()" />
+            <input type="hidden" id="tkUserSelect" value="" />
+            <div id="tkUserDropdown"
+              style="display:none;position:absolute;z-index:999;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow-y:auto;background:#1a1a2e;border:1px solid rgba(255,255,255,.18);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.6)">
+            </div>
+            <div id="tkUserSelected" style="display:none;margin-top:7px;padding:7px 12px;background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.25);border-radius:6px;font-size:13px;color:#00ffc8;display:flex;align-items:center;justify-content:space-between">
+              <span id="tkUserSelectedLabel"></span>
+              <button onclick="clearTKUserSelection()" style="background:none;border:none;color:#ff4d6d;cursor:pointer;font-size:16px;line-height:1;padding:0 2px">×</button>
+            </div>
           </div>
           <div>
             <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Assign To</label>
@@ -861,17 +869,66 @@ async function loadTKBoard() {
 }
 
 function renderTKUserDropdown() {
-  const sel = document.getElementById('tkUserSelect');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— choose a user —</option>';
-  tkBoardData.users.forEach(u => {
-    const opt = document.createElement('option');
-    opt.value = u._id;
-    opt.textContent = `${u.username} — ${(u.tiktok_link || '').replace('https://', '')}`;
-    sel.appendChild(opt);
-  });
-  if (cur) sel.value = cur;
+  // data is ready; if dropdown is open, re-filter; otherwise just keep state
+  filterTKUsers();
 }
+
+function showTKDropdown() {
+  filterTKUsers();
+  document.getElementById('tkUserDropdown').style.display = 'block';
+}
+
+function filterTKUsers() {
+  const query = (document.getElementById('tkUserSearch').value || '').toLowerCase();
+  const dd = document.getElementById('tkUserDropdown');
+  const users = tkBoardData.users || [];
+  const filtered = query
+    ? users.filter(u => u.username.toLowerCase().includes(query) ||
+        (u.tiktok_link || '').toLowerCase().includes(query))
+    : users;
+
+  if (!filtered.length) {
+    dd.innerHTML = '<div style="padding:12px 16px;color:#555;font-size:13px">No users found</div>';
+  } else {
+    dd.innerHTML = filtered.map(u => {
+      const tiktok = (u.tiktok_link || '').replace('https://', '') || '<span style="color:#555;font-style:italic">no TikTok linked</span>';
+      return `<div data-id="${u._id}" data-label="${esc(u.username)}"
+        onclick="selectTKUser('${u._id}','${esc(u.username)}')"
+        style="padding:10px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:2px"
+        onmouseenter="this.style.background='rgba(255,255,255,.07)'"
+        onmouseleave="this.style.background=''">
+        <span style="font-weight:600;color:#fff;font-size:14px">${esc(u.username)}</span>
+        <span style="font-size:11px;color:#888">${tiktok}</span>
+      </div>`;
+    }).join('');
+  }
+  dd.style.display = 'block';
+}
+
+function selectTKUser(id, label) {
+  document.getElementById('tkUserSelect').value = id;
+  document.getElementById('tkUserSearch').value = '';
+  document.getElementById('tkUserDropdown').style.display = 'none';
+  document.getElementById('tkAssignMsg').textContent = '';
+  const sel = document.getElementById('tkUserSelected');
+  document.getElementById('tkUserSelectedLabel').textContent = '✓ ' + label;
+  sel.style.display = 'flex';
+}
+
+function clearTKUserSelection() {
+  document.getElementById('tkUserSelect').value = '';
+  document.getElementById('tkUserSearch').value = '';
+  document.getElementById('tkUserSelected').style.display = 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('tkUserSearch');
+  const dd   = document.getElementById('tkUserDropdown');
+  if (dd && wrap && !wrap.contains(e.target) && !dd.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
 
 function tkSlotRow(slot, type) {
   if (!slot.occupied) {
@@ -947,7 +1004,7 @@ async function assignTKUser() {
     if (r.ok && d.success) {
       msgEl.style.color = '#00e676';
       msgEl.textContent = '✓ ' + d.message;
-      document.getElementById('tkUserSelect').value = '';
+      clearTKUserSelection();
       await loadTKBoard();
     } else {
       msgEl.style.color = '#ff4d6d';

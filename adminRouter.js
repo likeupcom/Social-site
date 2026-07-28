@@ -392,8 +392,8 @@ router.get("/api/admin/tiktok/board", adminAuth, async (req, res) => {
     const { TKActiveSlot, TKWaitingQueue } = getTKModels();
     if (!TKActiveSlot) return res.status(500).json({ error: "TK models not loaded yet — restart the server." });
 
-    // All users who have linked a TikTok account
-    const users = await User.find({ tiktok_link: { $exists: true, $ne: "" } })
+    // All registered users
+    const users = await User.find({})
       .select("_id username tiktok_link").lean();
 
     const activeSlots = await TKActiveSlot.find().sort({ sequencePosition: 1 }).lean();
