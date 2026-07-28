@@ -196,11 +196,19 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
       <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:24px;margin-bottom:28px;max-width:700px">
         <h3 style="color:#00ffff;margin-bottom:18px;font-size:16px">📌 Assign User to YouTube Board</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-          <div>
+          <div style="position:relative">
             <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Select User</label>
-            <select id="ytUserSelect" style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none">
-              <option value="">— choose a user —</option>
-            </select>
+            <input id="ytUserSearch" type="text" placeholder="🔍 Search by username…" autocomplete="off"
+              style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none;box-sizing:border-box"
+              oninput="filterYTUsers()" onfocus="showYTDropdown()" />
+            <input type="hidden" id="ytUserSelect" value="" />
+            <div id="ytUserDropdown"
+              style="display:none;position:absolute;z-index:999;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow-y:auto;background:#1a1a2e;border:1px solid rgba(255,255,255,.18);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.6)">
+            </div>
+            <div id="ytUserSelected" style="display:none;margin-top:7px;padding:7px 12px;background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.25);border-radius:6px;font-size:13px;color:#00ffc8;align-items:center;justify-content:space-between">
+              <span id="ytUserSelectedLabel"></span>
+              <button onclick="clearYTUserSelection()" style="background:none;border:none;color:#ff4d6d;cursor:pointer;font-size:16px;line-height:1;padding:0 2px">×</button>
+            </div>
           </div>
           <div>
             <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Assign To</label>
@@ -724,17 +732,66 @@ async function loadYTBoard() {
 }
 
 function renderYTUserDropdown() {
-  const sel = document.getElementById('ytUserSelect');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— choose a user —</option>';
-  ytBoardData.users.forEach(u => {
-    const opt = document.createElement('option');
-    opt.value = u._id;
-    opt.textContent = `${u.username} — ${(u.youtubeChannel || '').replace('https://', '')}`;
-    sel.appendChild(opt);
-  });
-  if (cur) sel.value = cur;
+  // data is ready; if dropdown is open, re-filter; otherwise just keep state
+  filterYTUsers();
 }
+
+function showYTDropdown() {
+  filterYTUsers();
+  document.getElementById('ytUserDropdown').style.display = 'block';
+}
+
+function filterYTUsers() {
+  const query = (document.getElementById('ytUserSearch').value || '').toLowerCase();
+  const dd = document.getElementById('ytUserDropdown');
+  const users = ytBoardData.users || [];
+  const filtered = query
+    ? users.filter(u => u.username.toLowerCase().includes(query) ||
+        (u.youtubeChannel || '').toLowerCase().includes(query))
+    : users;
+
+  if (!filtered.length) {
+    dd.innerHTML = '<div style="padding:12px 16px;color:#555;font-size:13px">No users found</div>';
+  } else {
+    dd.innerHTML = filtered.map(u => {
+      const yt = (u.youtubeChannel || '').replace('https://', '') || '<span style="color:#555;font-style:italic">no YouTube linked</span>';
+      return `<div data-id="${u._id}"
+        onclick="selectYTUser('${u._id}','${esc(u.username)}')"
+        style="padding:10px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:2px"
+        onmouseenter="this.style.background='rgba(255,255,255,.07)'"
+        onmouseleave="this.style.background=''">
+        <span style="font-weight:600;color:#fff;font-size:14px">${esc(u.username)}</span>
+        <span style="font-size:11px;color:#888">${yt}</span>
+      </div>`;
+    }).join('');
+  }
+  dd.style.display = 'block';
+}
+
+function selectYTUser(id, label) {
+  document.getElementById('ytUserSelect').value = id;
+  document.getElementById('ytUserSearch').value = '';
+  document.getElementById('ytUserDropdown').style.display = 'none';
+  document.getElementById('ytAssignMsg').textContent = '';
+  const sel = document.getElementById('ytUserSelected');
+  document.getElementById('ytUserSelectedLabel').textContent = '✓ ' + label;
+  sel.style.display = 'flex';
+}
+
+function clearYTUserSelection() {
+  document.getElementById('ytUserSelect').value = '';
+  document.getElementById('ytUserSearch').value = '';
+  document.getElementById('ytUserSelected').style.display = 'none';
+}
+
+// Close YT dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('ytUserSearch');
+  const dd   = document.getElementById('ytUserDropdown');
+  if (dd && wrap && !wrap.contains(e.target) && !dd.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
 
 function ytSlotRow(slot, type) {
   if (!slot.occupied) {
@@ -811,7 +868,7 @@ async function assignYTUser() {
     if (r.ok && d.success) {
       msgEl.style.color = '#00e676';
       msgEl.textContent = '✓ ' + d.message;
-      document.getElementById('ytUserSelect').value = '';
+      clearYTUserSelection();
       await loadYTBoard();
     } else {
       msgEl.style.color = '#ff4d6d';

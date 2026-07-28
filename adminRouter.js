@@ -250,7 +250,7 @@ router.get("/api/admin/youtube/board", adminAuth, async (req, res) => {
     if (!YTActiveSlot) return res.status(500).json({ error: "YT models not loaded yet — restart the server." });
 
     // All users who have linked a YouTube channel
-    const users = await User.find({ youtubeChannel: { $exists: true, $ne: "" } })
+    const users = await User.find({})
       .select("_id username youtubeChannel").lean();
 
     const activeSlots  = await YTActiveSlot.find().sort({ sequencePosition: 1 }).lean();
