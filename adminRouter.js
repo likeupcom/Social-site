@@ -372,4 +372,144 @@ router.delete("/api/admin/youtube/queue/:queueId", adminAuth, async (req, res) =
   }
 });
 
+/* ================================================================
+   TikTok Board Admin Routes
+   Models TKActiveSlot / TKWaitingQueue registered by page1.js at startup.
+================================================================= */
+
+function getTKModels() {
+  return {
+    TKActiveSlot:   mongoose.models.TKActiveSlot,
+    TKWaitingQueue: mongoose.models.TKWaitingQueue
+  };
+}
+
+/* ── GET /api/admin/tiktok/board ── */
+router.get("/api/admin/tiktok/board", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const User = mongoose.models.User;
+    const { TKActiveSlot, TKWaitingQueue } = getTKModels();
+    if (!TKActiveSlot) return res.status(500).json({ error: "TK models not loaded yet — restart the server." });
+
+    // All users who have linked a TikTok account
+    const users = await User.find({ tiktok_link: { $exists: true, $ne: "" } })
+      .select("_id username tiktok_link").lean();
+
+    const activeSlots = await TKActiveSlot.find().sort({ sequencePosition: 1 }).lean();
+    const waitingList = await TKWaitingQueue.find().sort({ timestamp: 1 }).lean();
+
+    const vipSlots = [];
+    for (let i = 0; i < 4; i++) {
+      const slot = activeSlots.find(s => s.sequencePosition === i);
+      vipSlots.push(slot ? { ...slot, position: i, occupied: true } : { position: i, occupied: false });
+    }
+    const standardSlots = [];
+    for (let i = 4; i < 14; i++) {
+      const slot = activeSlots.find(s => s.sequencePosition === i);
+      standardSlots.push(slot ? { ...slot, position: i, occupied: true } : { position: i, occupied: false });
+    }
+
+    return res.json({ users, vipSlots, standardSlots, waitingList });
+  } catch (err) {
+    console.error("[Admin TK board]", err);
+    return res.status(500).json({ error: "Failed to load TikTok board." });
+  }
+});
+
+/* ── POST /api/admin/tiktok/assign ── */
+router.post("/api/admin/tiktok/assign", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { userId, section } = req.body;
+    if (!userId || !section) return res.status(400).json({ error: "userId and section are required." });
+    if (!["vip", "standard", "queue"].includes(section))
+      return res.status(400).json({ error: "section must be vip, standard, or queue." });
+
+    const User = mongoose.models.User;
+    const { TKActiveSlot, TKWaitingQueue } = getTKModels();
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found." });
+    if (!user.tiktok_link)
+      return res.status(400).json({ error: `${user.username} has no TikTok account linked on their profile.` });
+
+    const uid = user._id.toString();
+
+    const alreadyActive = await TKActiveSlot.findOne({ userId: uid });
+    if (alreadyActive)
+      return res.status(409).json({ error: `${user.username} is already in an active slot (position ${alreadyActive.sequencePosition}).` });
+    const alreadyQueued = await TKWaitingQueue.findOne({ userId: uid });
+    if (alreadyQueued)
+      return res.status(409).json({ error: `${user.username} is already in the waiting list.` });
+
+    if (section === "queue") {
+      await TKWaitingQueue.create({
+        userId: uid,
+        username:      user.username,
+        TiktokChannel: user.tiktok_link,
+        TiktokVideo:   user.tiktok_link,
+        appealCount: 0,
+        appealedBy:  []
+      });
+      return res.json({ success: true, message: `${user.username} added to the Waiting List.` });
+    }
+
+    const range = section === "vip" ? [0,1,2,3] : [4,5,6,7,8,9,10,11,12,13];
+    let freePos = -1;
+    for (const pos of range) {
+      const taken = await TKActiveSlot.findOne({ sequencePosition: pos });
+      if (!taken) { freePos = pos; break; }
+    }
+    if (freePos === -1) {
+      const label = section === "vip" ? "VIP (all 4 slots are full)" : "Standard (all 10 slots are full)";
+      return res.status(409).json({ error: `No free slot in ${label}. Remove a user first or assign to Queue.` });
+    }
+
+    await TKActiveSlot.create({
+      userId: uid,
+      username:      user.username,
+      TiktokChannel: user.tiktok_link,
+      TiktokVideo:   user.tiktok_link,
+      isVip:  section === "vip",
+      sequencePosition: freePos,
+      views: 0, subs: 0, likes: 0, comments: 0
+    });
+
+    const label = section === "vip" ? `VIP slot #${freePos}` : `Standard slot #${freePos}`;
+    return res.json({ success: true, message: `${user.username} assigned to ${label}.` });
+  } catch (err) {
+    console.error("[Admin TK assign]", err);
+    return res.status(500).json({ error: "Assignment failed." });
+  }
+});
+
+/* ── DELETE /api/admin/tiktok/slot/:slotId ── */
+router.delete("/api/admin/tiktok/slot/:slotId", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { TKActiveSlot } = getTKModels();
+    const slot = await TKActiveSlot.findByIdAndDelete(req.params.slotId);
+    if (!slot) return res.status(404).json({ error: "Slot not found." });
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("[Admin TK remove slot]", err);
+    return res.status(500).json({ error: "Remove failed." });
+  }
+});
+
+/* ── DELETE /api/admin/tiktok/queue/:queueId ── */
+router.delete("/api/admin/tiktok/queue/:queueId", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { TKWaitingQueue } = getTKModels();
+    const entry = await TKWaitingQueue.findByIdAndDelete(req.params.queueId);
+    if (!entry) return res.status(404).json({ error: "Queue entry not found." });
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("[Admin TK remove queue]", err);
+    return res.status(500).json({ error: "Remove failed." });
+  }
+});
+
 module.exports = router;
