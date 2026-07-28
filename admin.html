@@ -157,6 +157,7 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
     <!-- Tabs -->
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('members',this)">👥 Members</button>
+      <button class="tab-btn" onclick="switchTab('youtube',this)">📺 YouTube Slots</button>
       <button class="tab-btn" onclick="switchTab('settings',this)">⚙️ Settings</button>
     </div>
 
@@ -185,6 +186,81 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
         </table>
       </div>
       <div class="empty-state" id="emptyState" style="display:none">No members found.</div>
+    </div>
+
+    <!-- YouTube Slots tab -->
+    <div id="tab-youtube" class="tab-content">
+
+      <!-- Assign panel -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:24px;margin-bottom:28px;max-width:700px">
+        <h3 style="color:#00ffff;margin-bottom:18px;font-size:16px">📌 Assign User to YouTube Board</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div>
+            <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Select User</label>
+            <select id="ytUserSelect" style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none">
+              <option value="">— choose a user —</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Assign To</label>
+            <select id="ytSectionSelect" style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none">
+              <option value="vip">VIP Premium Channels (4 slots)</option>
+              <option value="standard">Standard Exchange Slots (10 slots)</option>
+              <option value="queue">Queue Line Waiting List</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-save" id="ytAssignBtn" onclick="assignYTUser()" style="padding:11px 28px">Assign User</button>
+        <div id="ytAssignMsg" style="font-size:13px;margin-top:12px;min-height:18px"></div>
+      </div>
+
+      <!-- Refresh button -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+        <button class="refresh-btn" onclick="loadYTBoard()">↻ Refresh Board</button>
+      </div>
+
+      <!-- VIP Slots -->
+      <div style="margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="color:#ff007f;font-size:18px">💎</span>
+          <h3 style="color:#fff;font-size:15px">VIP Premium Channels <span style="color:#666;font-weight:400;font-size:13px">(4 slots)</span></h3>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Slot</th><th>Username</th><th>YouTube Channel</th><th>Views</th><th>Subs</th><th>Action</th></tr></thead>
+            <tbody id="ytVipBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Standard Slots -->
+      <div style="margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="font-size:18px">📋</span>
+          <h3 style="color:#fff;font-size:15px">Standard Exchange Slots <span style="color:#666;font-weight:400;font-size:13px">(10 slots)</span></h3>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Slot</th><th>Username</th><th>YouTube Channel</th><th>Views</th><th>Subs</th><th>Action</th></tr></thead>
+            <tbody id="ytStandardBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Waiting List -->
+      <div style="margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="font-size:18px">⏳</span>
+          <h3 style="color:#fff;font-size:15px">Queue Line Waiting List</h3>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Username</th><th>YouTube Channel</th><th>Appeals</th><th>Action</th></tr></thead>
+            <tbody id="ytQueueBody"></tbody>
+          </table>
+        </div>
+        <div id="ytQueueEmpty" class="empty-state" style="display:none">No users in the waiting list.</div>
+      </div>
     </div>
 
     <!-- Settings tab -->
@@ -319,6 +395,7 @@ function switchTab(name, btn) {
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'youtube') loadYTBoard();
 }
 
 /* ─── members ─── */
@@ -543,6 +620,151 @@ function showToast(msg, isError = false) {
 /* ─── close modals on overlay click ─── */
 document.getElementById('editModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 document.getElementById('confirmModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeConfirm(); });
+
+/* ══════════════ YOUTUBE BOARD ══════════════ */
+let ytBoardData = { users: [], vipSlots: [], standardSlots: [], waitingList: [] };
+
+async function loadYTBoard() {
+  try {
+    const r = await fetch('/api/admin/youtube/board', { credentials: 'include' });
+    if (r.status === 401) { location.reload(); return; }
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Failed to load YouTube board.', true); return; }
+    ytBoardData = d;
+    renderYTUserDropdown();
+    renderYTVipSlots();
+    renderYTStandardSlots();
+    renderYTWaitingList();
+  } catch { showToast('Network error loading YouTube board.', true); }
+}
+
+function renderYTUserDropdown() {
+  const sel = document.getElementById('ytUserSelect');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— choose a user —</option>';
+  ytBoardData.users.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u._id;
+    opt.textContent = `${u.username} — ${(u.youtubeChannel || '').replace('https://', '')}`;
+    sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
+}
+
+function ytSlotRow(slot, type) {
+  if (!slot.occupied) {
+    const pos = type === 'vip' ? slot.position : slot.position;
+    const label = type === 'vip' ? `VIP #${slot.position}` : `Slot #${slot.position}`;
+    return `<tr>
+      <td style="color:#555">${label}</td>
+      <td colspan="4" style="color:#334155;font-style:italic">Available Slot</td>
+      <td>—</td>
+    </tr>`;
+  }
+  const label = type === 'vip' ? `VIP #${slot.position}` : `Slot #${slot.position}`;
+  return `<tr>
+    <td><span style="color:${type==='vip'?'#ff007f':'#4facfe'};font-weight:700">${label}</span></td>
+    <td style="font-weight:600">${esc(slot.username)}</td>
+    <td style="color:#aaa;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((slot.youtubeChannel||'').replace('https://',''))}</td>
+    <td style="color:#00e676">${slot.views||0}</td>
+    <td style="color:#4facfe">${slot.subs||0}</td>
+    <td>
+      <button class="btn-sm btn-delete" onclick="removeYTSlot('${slot._id}','${esc(slot.username)}')">Remove</button>
+    </td>
+  </tr>`;
+}
+
+function renderYTVipSlots() {
+  document.getElementById('ytVipBody').innerHTML =
+    ytBoardData.vipSlots.map(s => ytSlotRow(s, 'vip')).join('');
+}
+
+function renderYTStandardSlots() {
+  document.getElementById('ytStandardBody').innerHTML =
+    ytBoardData.standardSlots.map(s => ytSlotRow(s, 'standard')).join('');
+}
+
+function renderYTWaitingList() {
+  const tbody = document.getElementById('ytQueueBody');
+  const empty = document.getElementById('ytQueueEmpty');
+  if (!ytBoardData.waitingList.length) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = ytBoardData.waitingList.map((q, i) => `
+    <tr>
+      <td style="color:#555">${i+1}</td>
+      <td style="font-weight:600">${esc(q.username)}</td>
+      <td style="color:#aaa;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((q.youtubeChannel||'').replace('https://',''))}</td>
+      <td><span style="color:${q.appealCount>=2?'#ff4d6d':'#ffab00'};font-weight:600">${q.appealCount||0} / 3</span></td>
+      <td>
+        <button class="btn-sm btn-delete" onclick="removeYTQueue('${q._id}','${esc(q.username)}')">Remove</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function assignYTUser() {
+  const userId  = document.getElementById('ytUserSelect').value;
+  const section = document.getElementById('ytSectionSelect').value;
+  const msgEl   = document.getElementById('ytAssignMsg');
+  const btn     = document.getElementById('ytAssignBtn');
+  msgEl.textContent = '';
+  msgEl.style.color = '';
+
+  if (!userId) { msgEl.style.color='#ff4d6d'; msgEl.textContent='Please select a user.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Assigning…';
+  try {
+    const r = await fetch('/api/admin/youtube/assign', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, section })
+    });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      msgEl.style.color = '#00e676';
+      msgEl.textContent = '✓ ' + d.message;
+      document.getElementById('ytUserSelect').value = '';
+      await loadYTBoard();
+    } else {
+      msgEl.style.color = '#ff4d6d';
+      msgEl.textContent = d.error || 'Assignment failed.';
+    }
+  } catch { msgEl.style.color='#ff4d6d'; msgEl.textContent='Network error.'; }
+  btn.disabled = false; btn.textContent = 'Assign User';
+}
+
+function removeYTSlot(slotId, username) {
+  openConfirm(
+    '🗑️ Remove from Slot',
+    `Remove "${username}" from their active YouTube slot? They will no longer appear on the live board.`,
+    async () => {
+      try {
+        const r = await fetch(`/api/admin/youtube/slot/${slotId}`, { method: 'DELETE', credentials: 'include' });
+        const d = await r.json();
+        if (r.ok && d.success) { await loadYTBoard(); showToast(`${username} removed from slot.`); }
+        else showToast(d.error || 'Remove failed.', true);
+      } catch { showToast('Network error.', true); }
+    }
+  );
+}
+
+function removeYTQueue(queueId, username) {
+  openConfirm(
+    '🗑️ Remove from Queue',
+    `Remove "${username}" from the YouTube waiting list?`,
+    async () => {
+      try {
+        const r = await fetch(`/api/admin/youtube/queue/${queueId}`, { method: 'DELETE', credentials: 'include' });
+        const d = await r.json();
+        if (r.ok && d.success) { await loadYTBoard(); showToast(`${username} removed from queue.`); }
+        else showToast(d.error || 'Remove failed.', true);
+      } catch { showToast('Network error.', true); }
+    }
+  );
+}
 </script>
 </body>
 </html>
