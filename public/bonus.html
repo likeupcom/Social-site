@@ -5,470 +5,473 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NS Platform - Referral & Bonus Suite</title>
     <style>
-        /* Modern Glassmorphic Dark-Mode Core Styling Styles */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: #0a0a12;
-            color: #ffffff;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-        .container {
-            max-width: 800px;
-            margin: 30px auto;
-        }
-        h1, h2, h3 {
-            color: #00ffff;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-            margin-bottom: 20px;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0a0a12; color: #ffffff; padding: 20px; overflow-x: hidden; }
+        .container { max-width: 800px; margin: 30px auto; }
+        h1, h2, h3 { color: #00ffff; text-shadow: 0 0 10px rgba(0,255,255,0.3); margin-bottom: 20px; }
         .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255,255,255,0.03);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
         }
-        .intro-text {
-            font-size: 15px;
-            line-height: 1.8;
-            color: #e0e0e0;
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-        /* Form Element Configurations */
-        .form-group {
-            margin-bottom: 22px;
-        }
-        label {
-            display: block;
-            font-size: 13px;
-            color: #aaa;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+        .intro-text { font-size: 15px; line-height: 1.8; color: #e0e0e0; margin-bottom: 15px; text-align: justify; }
+        .form-group { margin-bottom: 22px; }
+        label { display: block; font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .terminal-input {
-            width: 100%;
-            padding: 14px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 6px;
-            color: #fff;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
+            width: 100%; padding: 14px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px; color: #fff; font-size: 15px; outline: none; transition: all 0.3s ease;
         }
-        .terminal-input:focus {
-            border-color: #00ffff;
-            box-shadow: 0 0 8px rgba(0, 255, 255, 0.25);
-        }
-        /* Buttons Configurations */
+        .terminal-input:focus { border-color: #00ffff; box-shadow: 0 0 8px rgba(0,255,255,0.25); }
         .action-btn {
-            width: 100%;
-            background: linear-gradient(45deg, #00ffff, #ff007f);
-            color: #fff;
-            border: none;
-            padding: 14px;
-            font-size: 15px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            width: 100%; background: linear-gradient(45deg, #00ffff, #ff007f);
+            color: #fff; border: none; padding: 14px; font-size: 15px; font-weight: bold;
+            border-radius: 6px; cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0,255,255,0.3);
         }
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.5);
-        }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(255,0,127,0.5); }
         .action-btn:disabled {
-            background: #202028 !important;
-            color: #555560 !important;
-            box-shadow: none !important;
-            cursor: not-allowed;
-            transform: none !important;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #202028 !important; color: #555560 !important;
+            box-shadow: none !important; cursor: not-allowed; transform: none !important;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        /* Referral Generation Board Display */
+
+        /* ── Dashboard stats grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+        .stat-card {
+            background: rgba(0,0,0,0.35);
+            border-radius: 10px;
+            padding: 16px 18px;
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+        .stat-label {
+            font-size: 11px; color: #888; text-transform: uppercase;
+            letter-spacing: 0.6px; margin-bottom: 6px;
+        }
+        .stat-value { font-size: 20px; font-weight: 700; }
+        .stat-cyan  { color: #00ffff; border-top: 2px solid rgba(0,255,255,0.25); }
+        .stat-pink  { color: #ff007f; border-top: 2px solid rgba(255,0,127,0.25); }
+        .stat-blue  { color: #4facfe; border-top: 2px solid rgba(79,172,254,0.25); }
+        .stat-green { color: #00e676; border-top: 2px solid rgba(0,230,118,0.25); }
+
+        /* ── Referral code display ── */
         .referral-output-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px dashed rgba(0, 255, 255, 0.3);
-            padding: 12px;
-            border-radius: 6px;
+            display: flex; align-items: center; gap: 15px; margin-top: 12px;
+            background: rgba(0,0,0,0.4);
+            border: 1px dashed rgba(0,255,255,0.3);
+            padding: 12px; border-radius: 6px;
         }
         .referral-box {
-            flex-grow: 1;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 18px;
-            font-weight: bold;
-            color: #00ffff;
-            letter-spacing: 1px;
-            padding-left: 5px;
+            flex-grow: 1; font-family: 'Courier New', Courier, monospace;
+            font-size: 20px; font-weight: bold; color: #00ffff; letter-spacing: 2px; padding-left: 5px;
         }
         .copy-btn {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #fff;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
+            color: #fff; padding: 8px 16px; border-radius: 4px; font-size: 13px;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap;
         }
-        .copy-btn:hover:not(:disabled) {
-            background: #ff007f;
-            border-color: #ff007f;
-        }
-        /* Social Media Icons Matrix Layout */
+        .copy-btn:hover:not(:disabled) { background: #ff007f; border-color: #ff007f; }
+
+        /* ── Social share icons ── */
         .social-share-matrix {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex; justify-content: center; gap: 25px;
+            margin-top: 25px; padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.08);
         }
         .social-icon-link {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            color: #fff;
-            text-decoration: none;
+            display: flex; align-items: center; justify-content: center;
+            width: 50px; height: 50px; border-radius: 50%;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease; color: #fff; text-decoration: none;
         }
         .social-icon-link:hover {
-            transform: scale(1.15);
-            box-shadow: 0 0 15px var(--hover-glow);
-            border-color: var(--hover-glow);
-            background: rgba(0, 0, 0, 0.6);
+            transform: scale(1.15); box-shadow: 0 0 15px var(--hover-glow);
+            border-color: var(--hover-glow); background: rgba(0,0,0,0.6);
         }
-        .social-icon-link svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
+        .social-icon-link svg { width: 24px; height: 24px; fill: currentColor; }
+
+        /* ── Success badge ── */
+        .success-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3);
+            color: #00e676; border-radius: 20px; padding: 6px 14px;
+            font-size: 13px; font-weight: 600; margin-bottom: 20px;
         }
+
+        /* ── Status message ── */
+        .status-msg {
+            padding: 10px 14px; border-radius: 6px; font-size: 14px;
+            margin-top: 12px; display: none;
+        }
+        .status-msg.error   { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+        .status-msg.success { background: rgba(0,230,118,0.1);  border: 1px solid rgba(0,230,118,0.3); color: #00e676; }
+        .status-msg.info    { background: rgba(0,255,255,0.07); border: 1px solid rgba(0,255,255,0.2); color: #67e8f9; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <div class="glass-panel">
-            <h1 id="txtMainHeading" style="text-align: center; margin-bottom: 25px;">👥 NS PLATFORM PARTNERSHIP HUB</h1>
-            <p id="txtParagraph1" class="intro-text">
-                You now have the opportunity to become part of our growing community by referring new members to our platform. Every user who registers using your unique referral code is automatically tracked through our referral system.
-            </p>
-            <p id="txtParagraph2" class="intro-text">
-                As a referral partner, you will earn a 20% commission whenever a referred member upgrades and joins one of our VIP plans. The more active members you refer, the greater your earning potential becomes.
-            </p>
-            <p id="txtParagraph3" class="intro-text" style="color: #ff007f; font-weight: bold;">
-                Start sharing your referral code today and grow with NS Platform while earning rewards from your network.
-            </p>
-        </div>
-
-        <div class="glass-panel">
-            <h2 id="titleBecomeMember" style="font-size: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 10px; margin-bottom: 20px;">Become a Member</h2>
-            <form id="partnershipForm" onsubmit="return false;">
-                <div class="form-group">
-                    <label id="lblRealNames" for="inputRealNames">Real Names of Receiver (Characters Only)</label>
-                    <input type="text" id="inputRealNames" class="terminal-input" required autocomplete="off" placeholder="Enter full legal names">
-                </div>
-
-                <div class="form-group">
-                    <label id="lblTelephone" for="inputTelephone">Telephone Number (Exactly 10 Digits)</label>
-                    <input type="text" id="inputTelephone" class="terminal-input" maxlength="10" required autocomplete="off" placeholder="e.g. 078XXXXXXX">
-                </div>
-
-                <button type="submit" id="btnSubmitPartnership" class="action-btn">Submit Partnership Application</button>
-            </form>
-        </div>
-
-        <div class="glass-panel">
-            <h2 id="titleGetBonus" style="font-size: 20px; margin-bottom: 5px;">Get 20% by Referring Member</h2>
-            <p id="subGetBonus" style="font-size: 13px; color: #666; margin-bottom: 20px;">Generate tracking link parameters linked directly to your backend profile node.</p>
-            
-            <button type="button" id="btnGenerateCode" class="action-btn" style="background: linear-gradient(45deg, #00f2fe, #4facfe);">Generate Referral Code</button>
-
-            <div class="referral-output-container">
-                <div id="displayReferralCode" class="referral-box">-----------</div>
-                <button type="button" id="btnCopyCode" class="copy-btn" disabled>Copy</button>
-            </div>
-
-            <div class="social-share-matrix">
-                <a href="https://api.whatsapp.com/" target="_blank" class="social-icon-link" id="linkWhatsApp" style="--hover-glow: #25D366; color: #25D366;">
-                    <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.428 1.936 13.948.91 11.32.91c-5.443 0-9.87 4.372-9.874 9.802-.001 1.716.463 3.393 1.34 4.877L1.751 21.2l5.896-1.546zm12.182-5.465c-.29-.145-1.711-.845-1.975-.94-.264-.096-.456-.145-.647.145-.192.29-.744.94-.91 1.13-.167.193-.334.215-.624.07-2.9-.145-4.83-1.085-6.7-4.31-.264-.455.264-.423.755-1.4.08-.165.04-.31-.02-.455-.06-.145-.54-1.3-.74-1.785-.195-.47-.395-.407-.54-.415-.143-.007-.307-.01-.472-.01-.165 0-.435.063-.663.312-.228.248-.87.852-.87 2.078 0 1.226.892 2.41 1.016 2.575.125.165 1.756 2.68 4.256 3.757.595.256 1.06.41 1.423.525.6.19 1.145.163 1.577.098.48-.072 1.712-.699 1.95-.1.372-.24.745-.623.745-1.03 0-.114-.007-.212-.022-.294z"/></svg>
-                </a>
-                <a href="https://www.instagram.com/" target="_blank" class="social-icon-link" id="linkInstagram" style="--hover-glow: #e1306c; color: #e1306c;">
-                    <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                </a>
-                <a href="https://www.facebook.com/" target="_blank" class="social-icon-link" id="linkFacebook" style="--hover-glow: #1877f2; color: #1877f2;">
-                    <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                </a>
-                <a href="https://www.tiktok.com/" target="_blank" class="social-icon-link" id="linkTikTok" style="--hover-glow: #00f2fe; color: #00f2fe;">
-                    <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.03 1.6 4.17 1.22 1.42 2.97 2.26 4.8 2.41v3.83c-1.39-.07-2.74-.55-3.87-1.39-.75-.56-1.37-1.27-1.83-2.09-.01 2.94.01 5.88-.01 8.81-.03 2.15-.65 4.3-1.89 6.03-1.63 2.33-4.22 3.8-7.1 3.86-2.37.07-4.75-.63-6.64-2.06-2.3-1.68-3.72-4.32-3.82-7.16-.16-3.4 1.74-6.74 4.81-8.23 1.5-.75 3.18-.99 4.83-.73V9.32c-1.02-.27-2.13-.08-2.99.53-.98.67-1.55 1.79-1.56 2.97-.02 1.52 1.01 2.92 2.48 3.29 1.15.31 2.41-.12 3.11-1.05.39-.51.6-1.13.59-1.77-.02-4.43 0-8.85-.01-13.28z"/></svg>
-                </a>
-            </div>
-        </div>
-
+    <!-- ── Panel 1: Info ── -->
+    <div class="glass-panel">
+        <h1 id="txtMainHeading" style="text-align:center; margin-bottom:25px;">👥 NS PLATFORM PARTNERSHIP HUB</h1>
+        <p id="txtParagraph1" class="intro-text">
+            You now have the opportunity to become part of our growing community by referring new members to our platform. Every user who registers using your unique referral code is automatically tracked through our referral system.
+        </p>
+        <p id="txtParagraph2" class="intro-text">
+            As a referral partner, you will earn a 20% commission whenever a referred member upgrades and joins one of our VIP plans. The more active members you refer, the greater your earning potential becomes.
+        </p>
+        <p id="txtParagraph3" class="intro-text" style="color:#ff007f; font-weight:bold;">
+            Start sharing your referral code today and grow with NS Platform while earning rewards from your network.
+        </p>
     </div>
 
-    <script>
-        // Retrieve global login verification session parameters
-        const authToken = localStorage.getItem("ns_user_token") || "";
+    <!-- ── Panel 2A: Registration Form (hidden once registered) ── -->
+    <div class="glass-panel" id="registrationPanel">
+        <h2 id="titleBecomeMember" style="font-size:20px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px; margin-bottom:20px;">Become a Member</h2>
+        <form id="partnershipForm" onsubmit="return false;">
+            <div class="form-group">
+                <label id="lblRealNames" for="inputRealNames">Real Names of Receiver (Characters Only)</label>
+                <input type="text" id="inputRealNames" class="terminal-input" required autocomplete="off" placeholder="Enter full legal names">
+            </div>
+            <div class="form-group">
+                <label id="lblTelephone" for="inputTelephone">Telephone Number (Exactly 10 Digits)</label>
+                <input type="text" id="inputTelephone" class="terminal-input" maxlength="10" required autocomplete="off" placeholder="e.g. 078XXXXXXX">
+            </div>
+            <button type="submit" id="btnSubmitPartnership" class="action-btn">Submit Partnership Application</button>
+        </form>
+        <div id="formStatusMsg" class="status-msg"></div>
+    </div>
 
-        // ==========================================================
-        //                MULTILINGUAL ENGINE DICTIONARY
-        // ==========================================================
-        const urlParamsParser = new URLSearchParams(window.location.search);
-        const targetLanguageSystem = urlParamsParser.get('lang') || localStorage.getItem("ns_selected_lang") || "en";
-        localStorage.setItem("ns_selected_lang", targetLanguageSystem);
+    <!-- ── Panel 2B: Member Dashboard (shown once registered) ── -->
+    <div class="glass-panel" id="memberDashboardPanel" style="display:none;">
+        <div class="success-badge" id="dashSuccessBadge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span id="dashBadgeText">Active Member</span>
+        </div>
+        <h2 id="titleMemberDashboard" style="font-size:20px; margin-bottom:20px;">Your Member Dashboard</h2>
 
-        const languageDictionary = {
-            en: {
-                mainHeading: "👥 NS PLATFORM PARTNERSHIP HUB",
-                paragraph1: "You now have the opportunity to become part of our growing community by referring new members to our platform. Every user who registers using your unique referral code is automatically tracked through our referral system.",
-                paragraph2: "As a referral partner, you will earn a 20% commission whenever a referred member upgrades and joins one of our VIP plans. The more active members you refer, the greater your earning potential becomes.",
-                paragraph3: "Start sharing your referral code today and grow with NS Platform while earning rewards from your network.",
-                titleBecomeMember: "Become a Member",
-                lblRealNames: "Real Names of Receiver (Characters Only)",
-                lblTelephone: "Telephone Number (Exactly 10 Digits)",
-                btnSubmitPartnership: "Submit Partnership Application",
-                titleGetBonus: "Get 20% by Referring Member",
-                subGetBonus: "Generate tracking link parameters linked directly to your backend profile node.",
-                btnGenerateCode: "Generate Referral Code",
-                btnCopy: "Copy",
-                msgLoginFirst: "Please login first",
-                msgSuccessReg: "Congratulations! You are now officially part of NS Platform.",
-                msgCopied: "Referral code copied successfully!",
-                errName: "Validation Error: Names must contain text characters only.",
-                errPhone: "Validation Error: Telephone must consist of exactly 10 digits.",
-                processing: "Syncing..."
-            },
-            fr: {
-                mainHeading: "👥 ESPACE DE PARTENARIAT NS PLATFORM",
-                paragraph1: "Vous avez maintenant l'opportunité de faire partie de notre communauté en pleine croissance en parrainant de nouveaux membres. Chaque utilisateur qui s'inscrit via votre code est suivi automatiquement.",
-                paragraph2: "En tant que partenaire, vous gagnerez une commission de 20% chaque fois qu'un membre parrainé passe à un plan VIP. Plus vous parrainez de membres actifs, plus vos gains augmentent.",
-                paragraph3: "Commencez à partager votre code dès aujourd'hui et grandissez avec NS Platform tout en gagnant des récompenses.",
-                titleBecomeMember: "Devenir Membre",
-                lblRealNames: "Noms Réels du Bénéficiaire (Lettres Uniquement)",
-                lblTelephone: "Numéro de Téléphone (Exactement 10 Chiffres)",
-                btnSubmitPartnership: "Soumettre la Demande de Partenariat",
-                titleGetBonus: "Obtenez 20% par Membre Parrainé",
-                subGetBonus: "Générez des paramètres de lien liés directement à votre nœud de profil.",
-                btnGenerateCode: "Générer le Code de Parrainage",
-                btnCopy: "Copier",
-                msgLoginFirst: "S'il vous plaît, connectez-vous d'abord",
-                msgSuccessReg: "Félicitations! Vous faites officiellement partie de NS Platform.",
-                msgCopied: "Code de parrainage copié avec succès!",
-                errName: "Erreur: Le nom doit contenir des lettres uniquement.",
-                errPhone: "Erreur: Le téléphone doit comporter exactement 10 chiffres.",
-                processing: "Synchronisation..."
-            },
-            rw: {
-                mainHeading: "👥 AB FATANYABIKORWA BA NS PLATFORM",
-                paragraph1: "Ubu ufite amahirwe yo kuba umwe mu bagize umuryango wacu mugari uhamagarira abanyamuryango bashya kuza kuri platform yacu. Buri mukoresha wiyandikishije akoresheje kode yawe akurikiranwa mu buryo bwikora.",
-                paragraph2: "Nkumufatanyabikorwa, uzajya uhabwa inyongera (commission) ya 20% igihe cyose umuntu watumiye aguze imwe muri gahunda z'ikirenga (VIP). Iyo utumiye abantu benshi, niko inyungu zawe ziyongera.",
-                paragraph3: "Tangira gusangiza abandi kode yawe uyumunsi, ukure hamwe na NS Platform mu gihe ubona ibihembo biturutse ku bantu batumiye.",
-                titleBecomeMember: "Ba Umunyamuryango",
-                lblRealNames: "Amazina Nyamakuru y'Uwakira (Inyuguti Gusa)",
-                lblTelephone: "Numero ya Telefone (Imibare 10 Gusa)",
-                btnSubmitPartnership: "Kohereza Ibisabwa",
-                titleGetBonus: "Habwa 20% ku wo Watumiye",
-                subGetBonus: "Kora kode idasanzwe ihuje na konti yawe kuri server cluster.",
-                btnGenerateCode: "Kora Kode yo Gutumira",
-                btnCopy: "Kopera",
-                msgLoginFirst: "Nyamuneka banza winjire (Login) mbanza",
-                msgSuccessReg: "Urakoze cyane! Ubu uri umunyamuryango yemewe wa NS Platform.",
-                msgCopied: "Kode yo gutumira yakopewe neza!",
-                errName: "Ikosa: Amazina agomba kuba inyuguti gusa.",
-                errPhone: "Ikosa: Numero ya telefone igomba kuba igizwe n'imibare 10 gusa.",
-                processing: "Tegereza..."
-            }
-        };
+        <div class="stats-grid">
+            <div class="stat-card stat-cyan">
+                <div class="stat-label" id="lblDashName">Full Name</div>
+                <div class="stat-value" id="dashFullName">—</div>
+            </div>
+            <div class="stat-card stat-blue">
+                <div class="stat-label" id="lblDashPhone">Phone Number</div>
+                <div class="stat-value" id="dashPhone" style="font-size:16px; letter-spacing:1px;">—</div>
+            </div>
+            <div class="stat-card stat-pink">
+                <div class="stat-label" id="lblDashWallet">Referral Wallet</div>
+                <div class="stat-value" id="dashWallet">0 FRW</div>
+            </div>
+            <div class="stat-card stat-green">
+                <div class="stat-label" id="lblDashReferred">Total Referred</div>
+                <div class="stat-value" id="dashReferred">0</div>
+            </div>
+        </div>
 
-        const activeDictionary = languageDictionary[targetLanguageSystem] || languageDictionary.en;
+        <div style="font-size:13px; color:#aaa; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;" id="lblYourCode">Your Referral Code</div>
+        <div class="referral-output-container">
+            <div id="dashReferralCode" class="referral-box">—————</div>
+            <button type="button" id="btnDashCopy" class="copy-btn">Copy</button>
+        </div>
 
-        function applyDynamicLocalization() {
-            document.getElementById("txtMainHeading").innerText = activeDictionary.mainHeading;
-            document.getElementById("txtParagraph1").innerText = activeDictionary.paragraph1;
-            document.getElementById("txtParagraph2").innerText = activeDictionary.paragraph2;
-            document.getElementById("txtParagraph3").innerText = activeDictionary.paragraph3;
-            document.getElementById("titleBecomeMember").innerText = activeDictionary.titleBecomeMember;
-            document.getElementById("lblRealNames").innerText = activeDictionary.lblRealNames;
-            document.getElementById("lblTelephone").innerText = activeDictionary.lblTelephone;
-            document.getElementById("btnSubmitPartnership").innerText = activeDictionary.btnSubmitPartnership;
-            document.getElementById("titleGetBonus").innerText = activeDictionary.titleGetBonus;
-            document.getElementById("subGetBonus").innerText = activeDictionary.subGetBonus;
-            document.getElementById("btnGenerateCode").innerText = activeDictionary.btnGenerateCode;
-            document.getElementById("btnCopyCode").innerText = activeDictionary.btnCopy;
+        <div class="social-share-matrix">
+            <a href="https://api.whatsapp.com/" target="_blank" class="social-icon-link" id="shareWhatsApp" style="--hover-glow:#25D366; color:#25D366;">
+                <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.428 1.936 13.948.91 11.32.91c-5.443 0-9.87 4.372-9.874 9.802-.001 1.716.463 3.393 1.34 4.877L1.751 21.2l5.896-1.546zm12.182-5.465c-.29-.145-1.711-.845-1.975-.94-.264-.096-.456-.145-.647.145-.192.29-.744.94-.91 1.13-.167.193-.334.215-.624.07-2.9-.145-4.83-1.085-6.7-4.31-.264-.455.264-.423.755-1.4.08-.165.04-.31-.02-.455-.06-.145-.54-1.3-.74-1.785-.195-.47-.395-.407-.54-.415-.143-.007-.307-.01-.472-.01-.165 0-.435.063-.663.312-.228.248-.87.852-.87 2.078 0 1.226.892 2.41 1.016 2.575.125.165 1.756 2.68 4.256 3.757.595.256 1.06.41 1.423.525.6.19 1.145.163 1.577.098.48-.072 1.712-.699 1.95-.1.372-.24.745-.623.745-1.03 0-.114-.007-.212-.022-.294z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/" target="_blank" class="social-icon-link" id="shareInstagram" style="--hover-glow:#e1306c; color:#e1306c;">
+                <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </a>
+            <a href="https://www.facebook.com/" target="_blank" class="social-icon-link" id="shareFacebook" style="--hover-glow:#1877f2; color:#1877f2;">
+                <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="https://www.tiktok.com/" target="_blank" class="social-icon-link" id="shareTikTok" style="--hover-glow:#00f2fe; color:#00f2fe;">
+                <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.03 1.6 4.17 1.22 1.42 2.97 2.26 4.8 2.41v3.83c-1.39-.07-2.74-.55-3.87-1.39-.75-.56-1.37-1.27-1.83-2.09-.01 2.94.01 5.88-.01 8.81-.03 2.15-.65 4.3-1.89 6.03-1.63 2.33-4.22 3.8-7.1 3.86-2.37.07-4.75-.63-6.64-2.06-2.3-1.68-3.72-4.32-3.82-7.16-.16-3.4 1.74-6.74 4.81-8.23 1.5-.75 3.18-.99 4.83-.73V9.32c-1.02-.27-2.13-.08-2.99.53-.98.67-1.55 1.79-1.56 2.97-.02 1.52 1.01 2.92 2.48 3.29 1.15.31 2.41-.12 3.11-1.05.39-.51.6-1.13.59-1.77-.02-4.43 0-8.85-.01-13.28z"/></svg>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ==========================================================
+//              MULTILINGUAL ENGINE DICTIONARY
+// ==========================================================
+const urlParamsParser   = new URLSearchParams(window.location.search);
+const targetLang        = urlParamsParser.get('lang') || localStorage.getItem("ns_selected_lang") || "en";
+localStorage.setItem("ns_selected_lang", targetLang);
+
+const languageDictionary = {
+    en: {
+        mainHeading:        "👥 NS PLATFORM PARTNERSHIP HUB",
+        paragraph1:         "You now have the opportunity to become part of our growing community by referring new members to our platform. Every user who registers using your unique referral code is automatically tracked through our referral system.",
+        paragraph2:         "As a referral partner, you will earn a 20% commission whenever a referred member upgrades and joins one of our VIP plans. The more active members you refer, the greater your earning potential becomes.",
+        paragraph3:         "Start sharing your referral code today and grow with NS Platform while earning rewards from your network.",
+        titleBecomeMember:  "Become a Member",
+        lblRealNames:       "Real Names of Receiver (Characters Only)",
+        lblTelephone:       "Telephone Number (Exactly 10 Digits)",
+        btnSubmit:          "Submit Partnership Application",
+        titleDashboard:     "Your Member Dashboard",
+        dashBadge:          "✅ Active Member",
+        lblDashName:        "Full Name",
+        lblDashPhone:       "Phone Number",
+        lblDashWallet:      "Referral Wallet",
+        lblDashReferred:    "Total Referred",
+        lblYourCode:        "Your Referral Code",
+        btnCopy:            "Copy",
+        msgLoginFirst:      "Please log in first to access the referral programme.",
+        msgSuccessReg:      "Congratulations! You are now officially part of NS Platform.",
+        msgAlreadyMember:   "You are already a registered member.",
+        msgCopied:          "Referral code copied to clipboard!",
+        errName:            "Validation Error: Names must contain text characters only.",
+        errPhone:           "Validation Error: Telephone must consist of exactly 10 digits.",
+        processing:         "Syncing…",
+        loading:            "Loading your profile…"
+    },
+    fr: {
+        mainHeading:        "👥 ESPACE DE PARTENARIAT NS PLATFORM",
+        paragraph1:         "Vous avez maintenant l'opportunité de faire partie de notre communauté en pleine croissance en parrainant de nouveaux membres. Chaque utilisateur qui s'inscrit via votre code est suivi automatiquement.",
+        paragraph2:         "En tant que partenaire, vous gagnerez une commission de 20% chaque fois qu'un membre parrainé passe à un plan VIP. Plus vous parrainez de membres actifs, plus vos gains augmentent.",
+        paragraph3:         "Commencez à partager votre code dès aujourd'hui et grandissez avec NS Platform tout en gagnant des récompenses.",
+        titleBecomeMember:  "Devenir Membre",
+        lblRealNames:       "Noms Réels du Bénéficiaire (Lettres Uniquement)",
+        lblTelephone:       "Numéro de Téléphone (Exactement 10 Chiffres)",
+        btnSubmit:          "Soumettre la Demande de Partenariat",
+        titleDashboard:     "Votre Tableau de Bord Membre",
+        dashBadge:          "✅ Membre Actif",
+        lblDashName:        "Nom Complet",
+        lblDashPhone:       "Numéro de Téléphone",
+        lblDashWallet:      "Portefeuille de Parrainage",
+        lblDashReferred:    "Total Parrainés",
+        lblYourCode:        "Votre Code de Parrainage",
+        btnCopy:            "Copier",
+        msgLoginFirst:      "Veuillez vous connecter d'abord pour accéder au programme de parrainage.",
+        msgSuccessReg:      "Félicitations! Vous faites officiellement partie de NS Platform.",
+        msgAlreadyMember:   "Vous êtes déjà un membre enregistré.",
+        msgCopied:          "Code de parrainage copié avec succès!",
+        errName:            "Erreur: Le nom doit contenir des lettres uniquement.",
+        errPhone:           "Erreur: Le téléphone doit comporter exactement 10 chiffres.",
+        processing:         "Synchronisation…",
+        loading:            "Chargement de votre profil…"
+    },
+    rw: {
+        mainHeading:        "👥 AB FATANYABIKORWA BA NS PLATFORM",
+        paragraph1:         "Ubu ufite amahirwe yo kuba umwe mu bagize umuryango wacu mugari uhamagarira abanyamuryango bashya kuza kuri platform yacu.",
+        paragraph2:         "Nkumufatanyabikorwa, uzajya uhabwa inyongera (commission) ya 20% igihe cyose umuntu watumiye aguze imwe muri gahunda z'ikirenga (VIP).",
+        paragraph3:         "Tangira gusangiza abandi kode yawe uyumunsi, ukure hamwe na NS Platform mu gihe ubona ibihembo.",
+        titleBecomeMember:  "Ba Umunyamuryango",
+        lblRealNames:       "Amazina Nyamakuru y'Uwakira (Inyuguti Gusa)",
+        lblTelephone:       "Numero ya Telefone (Imibare 10 Gusa)",
+        btnSubmit:          "Kohereza Ibisabwa",
+        titleDashboard:     "Ikibaho cy'Umunyamuryango Wawe",
+        dashBadge:          "✅ Umunyamuryango Mukora",
+        lblDashName:        "Amazina Yuzuye",
+        lblDashPhone:       "Numero ya Telefone",
+        lblDashWallet:      "Amafaranga y'Utumire",
+        lblDashReferred:    "Abantu Batumirwa Bose",
+        lblYourCode:        "Kode Yawe yo Gutumira",
+        btnCopy:            "Kopera",
+        msgLoginFirst:      "Nyamuneka banza winjire (Login) mbere yo gukoresha porogaramu yo gutumira.",
+        msgSuccessReg:      "Urakoze cyane! Ubu uri umunyamuryango yemewe wa NS Platform.",
+        msgAlreadyMember:   "Urasanzwe ari umunyamuryango wanditse.",
+        msgCopied:          "Kode yo gutumira yakopewe neza!",
+        errName:            "Ikosa: Amazina agomba kuba inyuguti gusa.",
+        errPhone:           "Ikosa: Numero ya telefone igomba kuba igizwe n'imibare 10 gusa.",
+        processing:         "Tegereza…",
+        loading:            "Turimo gushaka amakuru yawe…"
+    }
+};
+
+const D = languageDictionary[targetLang] || languageDictionary.en;
+
+// ==========================================================
+//                    LOCALISATION
+// ==========================================================
+function applyLocalization() {
+    document.getElementById("txtMainHeading").innerText       = D.mainHeading;
+    document.getElementById("txtParagraph1").innerText        = D.paragraph1;
+    document.getElementById("txtParagraph2").innerText        = D.paragraph2;
+    document.getElementById("txtParagraph3").innerText        = D.paragraph3;
+    document.getElementById("titleBecomeMember").innerText    = D.titleBecomeMember;
+    document.getElementById("lblRealNames").innerText         = D.lblRealNames;
+    document.getElementById("lblTelephone").innerText         = D.lblTelephone;
+    document.getElementById("btnSubmitPartnership").innerText = D.btnSubmit;
+    document.getElementById("titleMemberDashboard").innerText = D.titleDashboard;
+    document.getElementById("dashBadgeText").innerText        = D.dashBadge;
+    document.getElementById("lblDashName").innerText          = D.lblDashName;
+    document.getElementById("lblDashPhone").innerText         = D.lblDashPhone;
+    document.getElementById("lblDashWallet").innerText        = D.lblDashWallet;
+    document.getElementById("lblDashReferred").innerText      = D.lblDashReferred;
+    document.getElementById("lblYourCode").innerText          = D.lblYourCode;
+    document.getElementById("btnDashCopy").innerText          = D.btnCopy;
+}
+
+// ==========================================================
+//              VALIDATION
+// ==========================================================
+function validateInputs(names, tel) {
+    if (!/^[A-Za-z\s]+$/.test(names)) { showFormMsg(D.errName, "error"); return false; }
+    if (!/^\d{10}$/.test(tel))         { showFormMsg(D.errPhone, "error"); return false; }
+    return true;
+}
+
+// ==========================================================
+//         DASHBOARD RENDERING (shared for load + submit)
+// ==========================================================
+function renderDashboard(data) {
+    document.getElementById("dashFullName").innerText  = data.fullName  || data.username || "—";
+    document.getElementById("dashPhone").innerText     = data.phoneNumber || "—";
+    document.getElementById("dashWallet").innerText    = (data.walletBalance  || 0).toLocaleString() + " FRW";
+    document.getElementById("dashReferred").innerText  = (data.totalReferredUsers || 0).toLocaleString();
+    document.getElementById("dashReferralCode").innerText = data.referralCode || "—";
+
+    if (data.referralCode) {
+        updateShareLinks(data.referralCode);
+    }
+
+    // Swap panels
+    document.getElementById("registrationPanel").style.display    = "none";
+    document.getElementById("memberDashboardPanel").style.display = "";
+}
+
+function updateShareLinks(code) {
+    const base    = window.location.origin;
+    const message = encodeURIComponent(`Join NS Platform using my referral code ${code} and start earning: ${base}?ref=${code}`);
+    document.getElementById("shareWhatsApp").href   = `https://api.whatsapp.com/send?text=${message}`;
+    document.getElementById("shareFacebook").href   = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(base + '?ref=' + code)}`;
+    document.getElementById("shareInstagram").href  = "https://www.instagram.com/";
+    document.getElementById("shareTikTok").href     = "https://www.tiktok.com/";
+}
+
+// ==========================================================
+//         STATUS MESSAGE HELPERS
+// ==========================================================
+function showFormMsg(text, type) {
+    const el = document.getElementById("formStatusMsg");
+    el.innerText  = text;
+    el.className  = `status-msg ${type}`;
+    el.style.display = "block";
+}
+function hideFormMsg() {
+    document.getElementById("formStatusMsg").style.display = "none";
+}
+
+// ==========================================================
+//         SESSION RESTORE  (called on DOMContentLoaded)
+// ==========================================================
+async function loadMemberProfile() {
+    try {
+        const res  = await fetch("/api/bonus/my-profile", { credentials: "include" });
+
+        if (res.status === 401) {
+            // Not logged in — keep form visible but disable submit
+            document.getElementById("btnSubmitPartnership").disabled = true;
+            showFormMsg(D.msgLoginFirst, "info");
+            return;
         }
 
-        // ==========================================================
-        //               FORM ACCURACY INPUT FILTERS
-        // ==========================================================
-        function validatePartnershipInputs(names, tel) {
-            const namePattern = /^[A-Za-z\s]+$/;
-            const telPattern = /^\d{10}$/;
-
-            if (!namePattern.test(names)) {
-                alert(activeDictionary.errName);
-                return false;
-            }
-            if (!telPattern.test(tel)) {
-                alert(activeDictionary.errPhone);
-                return false;
-            }
-            return true;
+        const data = await res.json();
+        if (data.registered) {
+            renderDashboard(data);   // ← restores saved state
         }
+        // else: not registered yet — form stays visible
+    } catch (err) {
+        console.error("[Bonus] profile load error:", err);
+    }
+}
 
-        // ==========================================================
-        //         BACKEND ROUTING OPERATIONS BINDING SUITE
-        // ==========================================================
-        
-        // Form Submission Execution Block (Identified solely by JWT Header)
-        document.getElementById("partnershipForm").addEventListener("submit", async function(e) {
-            e.preventDefault();
+// ==========================================================
+//         FORM SUBMISSION
+// ==========================================================
+document.getElementById("partnershipForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    hideFormMsg();
 
-            if (!authToken) {
-                alert(activeDictionary.msgLoginFirst);
-                return;
-            }
+    const namesVal = document.getElementById("inputRealNames").value.trim();
+    const telVal   = document.getElementById("inputTelephone").value.trim();
 
-            const namesVal = document.getElementById("inputRealNames").value.trim();
-            const telVal = document.getElementById("inputTelephone").value.trim();
+    if (!validateInputs(namesVal, telVal)) return;
 
-            if (!validatePartnershipInputs(namesVal, telVal)) {
-                return;
-            }
+    const btn = document.getElementById("btnSubmitPartnership");
+    btn.disabled  = true;
+    btn.innerText = D.processing;
 
-            const submitBtn = document.getElementById("btnSubmitPartnership");
-            submitBtn.disabled = true;
-            submitBtn.innerText = activeDictionary.processing;
-
-            try {
-                const response = await fetch('/api/bonus/register-partner', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        realNames: namesVal,
-                        telephone: telVal
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert(activeDictionary.msgSuccessReg);
-                    document.getElementById("partnershipForm").reset();
-                } else {
-                    if (response.status === 401 || response.status === 403) {
-                        alert(activeDictionary.msgLoginFirst);
-                    } else {
-                        alert(data.error || "Application submission error.");
-                    }
-                }
-            } catch (err) {
-                console.error("Transmission error encountered on server synchronization pipeline.", err);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = activeDictionary.btnSubmitPartnership;
-            }
+    try {
+        const res  = await fetch("/api/bonus/register-partner", {
+            method:      "POST",
+            credentials: "include",
+            headers:     { "Content-Type": "application/json" },
+            body:        JSON.stringify({ realNames: namesVal, telephone: telVal })
         });
 
-        // Referral Code Engine Generation Button Handler Block (Identified solely by JWT Header)
-        document.getElementById("btnGenerateCode").addEventListener("click", async function() {
-            if (!authToken) {
-                alert(activeDictionary.msgLoginFirst);
-                return;
+        const data = await res.json();
+
+        if (res.ok) {
+            if (data.alreadyExists) {
+                showFormMsg(D.msgAlreadyMember, "info");
+                setTimeout(() => renderDashboard(data), 800);
+            } else {
+                renderDashboard(data);
             }
-
-            const genBtn = this;
-            genBtn.disabled = true;
-            genBtn.innerText = activeDictionary.processing;
-
-            try {
-                const response = await fetch('/api/bonus/generate-code', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({})
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.referralCode) {
-                    document.getElementById("displayReferralCode").innerText = data.referralCode;
-                    document.getElementById("btnCopyCode").disabled = false;
-                    
-                    updateSocialSharingDestinations(data.referralCode);
-                } else {
-                    if (response.status === 401 || response.status === 403) {
-                        alert(activeDictionary.msgLoginFirst);
-                    } else {
-                        alert(data.error || "Generation error.");
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to compile referral matrix stream from server node.", err);
-            } finally {
-                genBtn.disabled = false;
-                genBtn.innerText = activeDictionary.btnGenerateCode;
-            }
-        });
-
-        // Copy Clipboard Module Handler Logic
-        document.getElementById("btnCopyCode").addEventListener("click", function() {
-            const currentCodeText = document.getElementById("displayReferralCode").innerText;
-            if (currentCodeText && currentCodeText !== "-----------") {
-                navigator.clipboard.writeText(currentCodeText).then(() => {
-                    alert(activeDictionary.msgCopied);
-                }).catch(err => {
-                    console.error("Clipboard failure pattern identified.");
-                });
-            }
-        });
-
-        // Set baseline social media redirection targets until dynamic token parameters generate code strings
-        function updateSocialSharingDestinations(code) {
-            const basePlatformUrl = window.location.origin;
-            const absoluteSharePayload = encodeURIComponent(`Join NS Platform using my code ${code} to accelerate growth pipelines: ${basePlatformUrl}?ref=${code}`);
-            
-            document.getElementById("linkWhatsApp").href = `https://api.whatsapp.com/send?text=${absoluteSharePayload}`;
-            document.getElementById("linkFacebook").href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(basePlatformUrl + '?ref=' + code)}`;
-            document.getElementById("linkInstagram").href = `https://www.instagram.com/`;
-            document.getElementById("linkTikTok").href = `https://www.tiktok.com/`;
+        } else if (res.status === 401) {
+            showFormMsg(D.msgLoginFirst, "error");
+        } else {
+            showFormMsg(data.error || "Submission error.", "error");
         }
+    } catch (err) {
+        console.error("[Bonus] registration error:", err);
+        showFormMsg("Network error. Please try again.", "error");
+    } finally {
+        btn.disabled  = false;
+        btn.innerText = D.btnSubmit;
+    }
+});
 
-        // Synchronize on load
-        document.addEventListener("DOMContentLoaded", () => {
-            applyDynamicLocalization();
-            
-            if (!authToken) {
-                document.getElementById("btnGenerateCode").disabled = true;
-            }
-        });
-    </script>
+// ==========================================================
+//         COPY BUTTON
+// ==========================================================
+document.getElementById("btnDashCopy").addEventListener("click", function() {
+    const code = document.getElementById("dashReferralCode").innerText;
+    if (!code || code === "—" || code === "—————") return;
+
+    navigator.clipboard.writeText(code).then(() => {
+        const btn = this;
+        const original = btn.innerText;
+        btn.innerText = "✓ Copied!";
+        btn.style.background = "#00e676";
+        btn.style.color = "#000";
+        btn.style.borderColor = "#00e676";
+        setTimeout(() => {
+            btn.innerText = original;
+            btn.style.background = "";
+            btn.style.color = "";
+            btn.style.borderColor = "";
+        }, 2000);
+    }).catch(() => {
+        alert(D.msgCopied);
+    });
+});
+
+// ==========================================================
+//         INIT
+// ==========================================================
+document.addEventListener("DOMContentLoaded", () => {
+    applyLocalization();
+    loadMemberProfile();
+});
+</script>
 </body>
 </html>

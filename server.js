@@ -329,6 +329,9 @@ app.get("/api/deposit/status", async (req, res) => {
 
 /* ---------------- 8. ROUTING & PAGES ---------------- */
 
+const bonusRouter = require("./bonusRouter");
+app.use(bonusRouter);
+
 const tiktokDashboardRouter = require("./page1");
 app.use(tiktokDashboardRouter);
 
