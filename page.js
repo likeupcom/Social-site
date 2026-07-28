@@ -80,7 +80,11 @@ const VIP_PACKAGES = {
   "tt-1000":  { price: 5000,  target: 1000,  platform: "tiktok" },
   "tt-2000":  { price: 7000,  target: 2000,  platform: "tiktok" },
   "tt-5000":  { price: 10000, target: 5000,  platform: "tiktok" },
-  "tt-10000": { price: 20000, target: 10000, platform: "tiktok" }
+  "tt-10000": { price: 20000, target: 10000, platform: "tiktok" },
+  "ig-1000":  { price: 5000,  target: 1000,  platform: "instagram" },
+  "ig-2000":  { price: 7000,  target: 2000,  platform: "instagram" },
+  "ig-5000":  { price: 10000, target: 5000,  platform: "instagram" },
+  "ig-10000": { price: 20000, target: 10000, platform: "instagram" }
 };
 
 
@@ -258,6 +262,11 @@ router.post("/api/vip/purchase", auth, async (req, res) => {
         return res.status(400).json({ error: "Please enter a valid TikTok link." });
       }
       cleanLink = targetLink.split("?")[0]; // strip tracking params
+    } else if (platform === "instagram") {
+      if (!targetLink || !targetLink.includes("instagram.com")) {
+        return res.status(400).json({ error: "Please enter a valid Instagram link." });
+      }
+      cleanLink = targetLink.split("?")[0]; // strip tracking params
     } else {
       return res.status(400).json({ error: "Platform not supported yet." });
     }
@@ -282,10 +291,12 @@ router.post("/api/vip/purchase", auth, async (req, res) => {
     }
 
     // Resolve the correct model and channel field per platform
-    const TKActiveSlot = platform === "tiktok" ? mongoose.model("TKActiveSlot") : null;
-    const TKVIPQueue   = platform === "tiktok" ? mongoose.model("TKVIPQueue")   : null;
-    const SlotModel    = platform === "tiktok" ? TKActiveSlot : YTActiveSlot;
-    const QueueModel   = platform === "tiktok" ? TKVIPQueue   : VIPQueue;
+    const TKActiveSlot = platform === "tiktok"    ? mongoose.model("TKActiveSlot") : null;
+    const TKVIPQueue   = platform === "tiktok"    ? mongoose.model("TKVIPQueue")   : null;
+    const IGActiveSlot = platform === "instagram" ? mongoose.model("IGActiveSlot") : null;
+    const IGVIPQueue   = platform === "instagram" ? mongoose.model("IGVIPQueue")   : null;
+    const SlotModel    = platform === "tiktok" ? TKActiveSlot : platform === "instagram" ? IGActiveSlot : YTActiveSlot;
+    const QueueModel   = platform === "tiktok" ? TKVIPQueue   : platform === "instagram" ? IGVIPQueue   : VIPQueue;
 
     // Check user doesn't already have an active VIP slot on this platform
     const existingPlatformVip = await SlotModel.findOne({ userId, isVip: true });
@@ -334,6 +345,18 @@ router.post("/api/vip/purchase", auth, async (req, res) => {
         packageId,
         engagementTarget: pkg.target,
         views: 0, subs: 0, likes: 0, comments: 0
+      });
+    } else if (platform === "instagram") {
+      await IGActiveSlot.create({
+        userId,
+        username: dbUser.username,
+        instagramChannel: dbUser.instagram_link || cleanLink,
+        instagramVideo: cleanLink,
+        isVip: true,
+        sequencePosition: vipPosition,
+        packageId,
+        engagementTarget: pkg.target,
+        views: 0, followers: 0, likes: 0, comments: 0
       });
     } else {
       await YTActiveSlot.create({
