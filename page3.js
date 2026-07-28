@@ -42,6 +42,8 @@ const FBActiveSlotSchema = new mongoose.Schema({
   followers: { type: Number, default: 0 },
   likes: { type: Number, default: 0 },
   comments: { type: Number, default: 0 },
+  packageId: { type: String, default: null },
+  engagementTarget: { type: Number, default: 0 },
   timestamp: { type: Date, default: Date.now }
 });
 const FBActiveSlot = mongoose.models.FBActiveSlot || mongoose.model("FBActiveSlot", FBActiveSlotSchema);
@@ -68,6 +70,17 @@ const FBUserProfileSchema = new mongoose.Schema({
   appealBanUntil: { type: Date, default: null }
 });
 const FBUserProfile = mongoose.models.FBUserProfile || mongoose.model("FBUserProfile", FBUserProfileSchema);
+
+// Schema tracking VIP orders queued when all 4 Facebook VIP slots are occupied
+const FBVIPQueueSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  username: { type: String, required: true },
+  packageId: { type: String, required: true },
+  targetLink: { type: String, required: true },
+  engagementTarget: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+const FBVIPQueue = mongoose.models.FBVIPQueue || mongoose.model("FBVIPQueue", FBVIPQueueSchema);
 
 
 /* ---------------- UTILITY HELPER FUNCTIONS ---------------- */
@@ -525,6 +538,31 @@ router.post("/api/facebook-dashboard/verify-visit", auth, async (req, res) => {
         { $inc: { views: 1, followers: 1, likes: 1, comments: 1 } },
         { new: true }
       );
+    }
+
+    // VIP auto-clear: slot reached its purchased engagement target + 100 bonus
+    if (!isPhase2Visit && !hasAlreadyVisited && currentSlotData && currentSlotData.isVip && currentSlotData.engagementTarget > 0) {
+      if (currentSlotData.views >= currentSlotData.engagementTarget + 100) {
+        const freedPosition = currentSlotData.sequencePosition;
+        await FBActiveSlot.deleteOne({ _id: currentSlotData._id });
+        // Promote next queued VIP order into the freed position
+        const nextVip = await FBVIPQueue.findOne().sort({ createdAt: 1 });
+        if (nextVip) {
+          await FBActiveSlot.create({
+            userId: nextVip.userId,
+            username: nextVip.username,
+            facebookChannel: nextVip.targetLink,
+            facebookVideo: nextVip.targetLink,
+            isVip: true,
+            sequencePosition: freedPosition,
+            packageId: nextVip.packageId,
+            engagementTarget: nextVip.engagementTarget,
+            views: 0, followers: 0, likes: 0, comments: 0
+          });
+          await FBVIPQueue.deleteOne({ _id: nextVip._id });
+        }
+        return res.json({ success: true, systemAlertMessage: null });
+      }
     }
 
     let profileUpdates = {
