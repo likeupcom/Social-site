@@ -105,6 +105,26 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
   .topbar{padding:0 16px}.main{padding:20px 14px}
   .actions{flex-direction:column}.modal{padding:22px}
 }
+
+/* ── YouTube Board Cards ── */
+.yt-section-title{font-size:16px;color:#cbd5e1;margin-bottom:15px;border-left:4px solid #38bdf8;padding-left:10px;display:flex;align-items:center;gap:8px;font-weight:600}
+.yt-vip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;width:100%}
+.yt-regular-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;width:100%}
+.yt-waiting-container{display:flex;flex-direction:column;gap:12px;width:100%}
+.yt-card{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;min-height:90px;overflow:hidden;transition:border-color .2s}
+.yt-card.yt-vip{border-color:rgba(234,179,8,.4);background:linear-gradient(135deg,#111827 0%,#1e1b4b 100%)}
+.yt-card.yt-queue{border-color:#3b82f6;flex-direction:column;align-items:stretch;gap:10px;min-height:unset}
+.yt-card-info{display:flex;align-items:center;gap:12px;flex:1;overflow:hidden;min-width:0}
+.yt-avatar{width:42px;height:42px;background:#1f2937;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#38bdf8;font-size:18px;flex-shrink:0}
+.yt-card.yt-vip .yt-avatar{color:#eab308;background:rgba(234,179,8,.1)}
+.yt-card.yt-queue .yt-avatar{color:#3b82f6;background:rgba(59,130,246,.1)}
+.yt-details{display:flex;flex-direction:column;overflow:hidden;min-width:0;flex:1}
+.yt-uname{font-weight:700;font-size:15px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yt-link{font-family:monospace;font-size:12px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.yt-metrics{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.yt-metric{background:#0b1220;padding:2px 7px;border-radius:4px;border:1px solid #1f2937;font-size:11px;color:#94a3b8}
+@media(max-width:900px){.yt-vip-grid,.yt-regular-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.yt-card:not(.yt-queue){flex-direction:column;align-items:stretch;gap:12px;min-height:unset}}
 </style>
 </head>
 <body>
@@ -193,8 +213,10 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
     <div id="tab-youtube" class="tab-content">
 
       <!-- Assign panel -->
-      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:24px;margin-bottom:28px;max-width:700px">
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:24px;margin-bottom:28px;max-width:800px">
         <h3 style="color:#00ffff;margin-bottom:18px;font-size:16px">📌 Assign User to YouTube Board</h3>
+
+        <!-- Row 1: user search + section -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
           <div style="position:relative">
             <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Select User</label>
@@ -219,6 +241,21 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
             </select>
           </div>
         </div>
+
+        <!-- Row 2: channel link + video link -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div>
+            <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">YouTube Channel Link</label>
+            <input id="ytChannelInput" type="url" placeholder="https://www.youtube.com/…"
+              style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none;box-sizing:border-box" />
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">YouTube Video Link</label>
+            <input id="ytVideoInput" type="url" placeholder="https://www.youtube.com/watch?v=…"
+              style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none;box-sizing:border-box" />
+          </div>
+        </div>
+
         <button class="btn-save" id="ytAssignBtn" onclick="assignYTUser()" style="padding:11px 28px">Assign User</button>
         <div id="ytAssignMsg" style="font-size:13px;margin-top:12px;min-height:18px"></div>
       </div>
@@ -229,45 +266,21 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
       </div>
 
       <!-- VIP Slots -->
-      <div style="margin-bottom:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span style="color:#ff007f;font-size:18px">💎</span>
-          <h3 style="color:#fff;font-size:15px">VIP Premium Channels <span style="color:#666;font-weight:400;font-size:13px">(4 slots)</span></h3>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Slot</th><th>Username</th><th>YouTube Channel</th><th>Views</th><th>Subs</th><th>Action</th></tr></thead>
-            <tbody id="ytVipBody"></tbody>
-          </table>
-        </div>
+      <div style="margin-bottom:35px">
+        <div class="yt-section-title">💎 VIP Premium Channels <span style="color:#666;font-weight:400;font-size:13px">(4 slots)</span></div>
+        <div class="yt-vip-grid" id="ytVipGrid"></div>
       </div>
 
       <!-- Standard Slots -->
-      <div style="margin-bottom:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span style="font-size:18px">📋</span>
-          <h3 style="color:#fff;font-size:15px">Standard Exchange Slots <span style="color:#666;font-weight:400;font-size:13px">(10 slots)</span></h3>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Slot</th><th>Username</th><th>YouTube Channel</th><th>Views</th><th>Subs</th><th>Action</th></tr></thead>
-            <tbody id="ytStandardBody"></tbody>
-          </table>
-        </div>
+      <div style="margin-bottom:40px">
+        <div class="yt-section-title">📋 Standard Exchange Slots <span style="color:#666;font-weight:400;font-size:13px">(10 slots)</span></div>
+        <div class="yt-regular-grid" id="ytStandardGrid"></div>
       </div>
 
       <!-- Waiting List -->
-      <div style="margin-bottom:28px">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-          <span style="font-size:18px">⏳</span>
-          <h3 style="color:#fff;font-size:15px">Queue Line Waiting List</h3>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>#</th><th>Username</th><th>YouTube Channel</th><th>Appeals</th><th>Action</th></tr></thead>
-            <tbody id="ytQueueBody"></tbody>
-          </table>
-        </div>
+      <div style="margin-bottom:40px">
+        <div class="yt-section-title">⏳ Queue Line Waiting List</div>
+        <div class="yt-waiting-container" id="ytQueueGrid"></div>
         <div id="ytQueueEmpty" class="empty-state" style="display:none">No users in the waiting list.</div>
       </div>
     </div>
@@ -773,6 +786,14 @@ function selectYTUser(id, label) {
   document.getElementById('ytUserSearch').value = '';
   document.getElementById('ytUserDropdown').style.display = 'none';
   document.getElementById('ytAssignMsg').textContent = '';
+  // Auto-fill URL fields from the user's stored profile data
+  const user = (ytBoardData.users || []).find(u => u._id === id);
+  if (user) {
+    const ch = document.getElementById('ytChannelInput');
+    const vi = document.getElementById('ytVideoInput');
+    if (ch) ch.value = user.youtubeChannel || '';
+    if (vi) vi.value = user.youtubeChannel || ''; // channel as video fallback
+  }
   const sel = document.getElementById('ytUserSelected');
   document.getElementById('ytUserSelectedLabel').textContent = '✓ ' + label;
   sel.style.display = 'flex';
@@ -782,6 +803,10 @@ function clearYTUserSelection() {
   document.getElementById('ytUserSelect').value = '';
   document.getElementById('ytUserSearch').value = '';
   document.getElementById('ytUserSelected').style.display = 'none';
+  const ch = document.getElementById('ytChannelInput');
+  const vi = document.getElementById('ytVideoInput');
+  if (ch) ch.value = '';
+  if (vi) vi.value = '';
 }
 
 // Close YT dropdown when clicking outside
@@ -793,65 +818,86 @@ document.addEventListener('click', function(e) {
   }
 });
 
-function ytSlotRow(slot, type) {
+function ytAdminCard(slot, type) {
+  const isVip = type === 'vip';
+  const label = isVip ? `VIP #${slot.position}` : `Slot #${slot.position}`;
   if (!slot.occupied) {
-    const pos = type === 'vip' ? slot.position : slot.position;
-    const label = type === 'vip' ? `VIP #${slot.position}` : `Slot #${slot.position}`;
-    return `<tr>
-      <td style="color:#555">${label}</td>
-      <td colspan="4" style="color:#334155;font-style:italic">Available Slot</td>
-      <td>—</td>
-    </tr>`;
+    return `<div class="yt-card${isVip ? ' yt-vip' : ''}">
+      <div class="yt-card-info">
+        <div class="yt-avatar">👤</div>
+        <div class="yt-details">
+          <span class="yt-uname" style="color:#64748b;font-style:italic">${label} — Available Slot</span>
+          <span class="yt-link" style="color:#334155">Waiting for user interaction...</span>
+        </div>
+      </div>
+    </div>`;
   }
-  const label = type === 'vip' ? `VIP #${slot.position}` : `Slot #${slot.position}`;
-  return `<tr>
-    <td><span style="color:${type==='vip'?'#ff007f':'#4facfe'};font-weight:700">${label}</span></td>
-    <td style="font-weight:600">${esc(slot.username)}</td>
-    <td style="color:#aaa;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((slot.youtubeChannel||'').replace('https://',''))}</td>
-    <td style="color:#00e676">${slot.views||0}</td>
-    <td style="color:#4facfe">${slot.subs||0}</td>
-    <td>
-      <button class="btn-sm btn-delete" onclick="removeYTSlot('${slot._id}','${esc(slot.username)}')">Remove</button>
-    </td>
-  </tr>`;
+  const channel = (slot.youtubeChannel || '').replace('https://', '');
+  const channelHref = slot.youtubeChannel || '#';
+  return `<div class="yt-card${isVip ? ' yt-vip' : ''}">
+    <div class="yt-card-info">
+      <div class="yt-avatar">👤</div>
+      <div class="yt-details">
+        <span class="yt-uname">${esc(slot.username)} <small style="color:#38bdf8;font-size:11px;font-weight:400">${label}</small></span>
+        <a href="${esc(channelHref)}" target="_blank" class="yt-link" style="color:#38bdf8;text-decoration:none" title="${esc(slot.youtubeChannel||'')}">${esc(channel) || '<em style="color:#555">no channel</em>'}</a>
+        <div class="yt-metrics">
+          <span class="yt-metric">👁 ${slot.views||0}</span>
+          <span class="yt-metric">🔔 ${slot.subs||0}</span>
+          <span class="yt-metric">👍 ${slot.likes||0}</span>
+          <span class="yt-metric">💬 ${slot.comments||0}</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn-sm btn-delete" style="margin-left:14px;flex-shrink:0" onclick="removeYTSlot('${slot._id}','${esc(slot.username)}')">Remove</button>
+  </div>`;
 }
 
 function renderYTVipSlots() {
-  document.getElementById('ytVipBody').innerHTML =
-    ytBoardData.vipSlots.map(s => ytSlotRow(s, 'vip')).join('');
+  document.getElementById('ytVipGrid').innerHTML =
+    ytBoardData.vipSlots.map(s => ytAdminCard(s, 'vip')).join('');
 }
 
 function renderYTStandardSlots() {
-  document.getElementById('ytStandardBody').innerHTML =
-    ytBoardData.standardSlots.map(s => ytSlotRow(s, 'standard')).join('');
+  document.getElementById('ytStandardGrid').innerHTML =
+    ytBoardData.standardSlots.map(s => ytAdminCard(s, 'standard')).join('');
 }
 
 function renderYTWaitingList() {
-  const tbody = document.getElementById('ytQueueBody');
+  const grid  = document.getElementById('ytQueueGrid');
   const empty = document.getElementById('ytQueueEmpty');
   if (!ytBoardData.waitingList.length) {
-    tbody.innerHTML = '';
+    grid.innerHTML = '';
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
-  tbody.innerHTML = ytBoardData.waitingList.map((q, i) => `
-    <tr>
-      <td style="color:#555">${i+1}</td>
-      <td style="font-weight:600">${esc(q.username)}</td>
-      <td style="color:#aaa;font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((q.youtubeChannel||'').replace('https://',''))}</td>
-      <td><span style="color:${q.appealCount>=2?'#ff4d6d':'#ffab00'};font-weight:600">${q.appealCount||0} / 3</span></td>
-      <td>
-        <button class="btn-sm btn-delete" onclick="removeYTQueue('${q._id}','${esc(q.username)}')">Remove</button>
-      </td>
-    </tr>`).join('');
+  grid.innerHTML = ytBoardData.waitingList.map((q, i) => {
+    const channel     = (q.youtubeChannel || '').replace('https://', '');
+    const channelHref = q.youtubeChannel || '#';
+    const appealColor = q.appealCount >= 2 ? '#ff4d6d' : '#ffab00';
+    return `<div class="yt-card yt-queue">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div class="yt-card-info">
+          <div class="yt-avatar">👤</div>
+          <div class="yt-details">
+            <span class="yt-uname">#${i+1} — ${esc(q.username)}</span>
+            <a href="${esc(channelHref)}" target="_blank" class="yt-link" style="color:#38bdf8;text-decoration:none;margin-top:2px;display:block" title="${esc(q.youtubeChannel||'')}">🔗 ${esc(channel) || '<em style="color:#555">no channel</em>'}</a>
+            <span style="font-size:11px;font-weight:700;color:${appealColor};margin-top:3px">⚖️ Appeals: ${q.appealCount||0} / 3</span>
+          </div>
+        </div>
+        <button class="btn-sm btn-delete" style="flex-shrink:0" onclick="removeYTQueue('${q._id}','${esc(q.username)}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 async function assignYTUser() {
-  const userId  = document.getElementById('ytUserSelect').value;
-  const section = document.getElementById('ytSectionSelect').value;
-  const msgEl   = document.getElementById('ytAssignMsg');
-  const btn     = document.getElementById('ytAssignBtn');
+  const userId         = document.getElementById('ytUserSelect').value;
+  const section        = document.getElementById('ytSectionSelect').value;
+  const youtubeChannel = (document.getElementById('ytChannelInput').value || '').trim();
+  const youtubeVideo   = (document.getElementById('ytVideoInput').value  || '').trim();
+  const msgEl          = document.getElementById('ytAssignMsg');
+  const btn            = document.getElementById('ytAssignBtn');
   msgEl.textContent = '';
   msgEl.style.color = '';
 
@@ -862,7 +908,7 @@ async function assignYTUser() {
     const r = await fetch('/api/admin/youtube/assign', {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, section })
+      body: JSON.stringify({ userId, section, youtubeChannel, youtubeVideo })
     });
     const d = await r.json();
     if (r.ok && d.success) {

@@ -289,8 +289,13 @@ router.post("/api/admin/youtube/assign", adminAuth, async (req, res) => {
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found." });
-    if (!user.youtubeChannel)
-      return res.status(400).json({ error: `${user.username} has no YouTube channel linked on their profile.` });
+
+    // Admin-supplied links take priority; fall back to user's stored profile links
+    const channelLink = req.body.youtubeChannel || user.youtubeChannel || "";
+    const videoLink   = req.body.youtubeVideo   || channelLink;
+
+    if (!channelLink)
+      return res.status(400).json({ error: `${user.username} has no YouTube channel — please enter the channel link in the form.` });
 
     const uid = user._id.toString();
 
@@ -306,8 +311,8 @@ router.post("/api/admin/youtube/assign", adminAuth, async (req, res) => {
       await YTWaitingQueue.create({
         userId: uid,
         username: user.username,
-        youtubeChannel: user.youtubeChannel,
-        youtubeVideo:   user.youtubeChannel, // channel link as video fallback
+        youtubeChannel: channelLink,
+        youtubeVideo:   videoLink,
         appealCount: 0,
         appealedBy:  []
       });
@@ -329,8 +334,8 @@ router.post("/api/admin/youtube/assign", adminAuth, async (req, res) => {
     await YTActiveSlot.create({
       userId: uid,
       username: user.username,
-      youtubeChannel: user.youtubeChannel,
-      youtubeVideo:   user.youtubeChannel,
+      youtubeChannel: channelLink,
+      youtubeVideo:   videoLink,
       isVip:  section === "vip",
       sequencePosition: freePos,
       views: 0, subs: 0, likes: 0, comments: 0
