@@ -848,7 +848,7 @@ function ytAdminCard(slot, type) {
         </div>
       </div>
     </div>
-    <button class="btn-sm btn-delete" style="margin-left:14px;flex-shrink:0" onclick="removeYTSlot('${slot._id}','${esc(slot.username)}')">Remove</button>
+    <button class="btn-sm btn-delete yt-rm-slot" data-id="${slot._id}" data-name="${esc(slot.username)}" style="margin-left:14px;flex-shrink:0">Remove</button>
   </div>`;
 }
 
@@ -885,7 +885,7 @@ function renderYTWaitingList() {
             <span style="font-size:11px;font-weight:700;color:${appealColor};margin-top:3px">⚖️ Appeals: ${q.appealCount||0} / 3</span>
           </div>
         </div>
-        <button class="btn-sm btn-delete" style="flex-shrink:0" onclick="removeYTQueue('${q._id}','${esc(q.username)}')">Remove</button>
+        <button class="btn-sm btn-delete yt-rm-queue" data-id="${q._id}" data-name="${esc(q.username)}" style="flex-shrink:0">Remove</button>
       </div>
     </div>`;
   }).join('');
@@ -953,6 +953,15 @@ function removeYTQueue(queueId, username) {
     }
   );
 }
+
+/* Delegated handler — fires for any yt-rm-slot / yt-rm-queue button
+   regardless of what characters are in the username */
+document.addEventListener('click', function(e) {
+  const slotBtn = e.target.closest('.yt-rm-slot');
+  if (slotBtn) { removeYTSlot(slotBtn.dataset.id, slotBtn.dataset.name); return; }
+  const queueBtn = e.target.closest('.yt-rm-queue');
+  if (queueBtn) { removeYTQueue(queueBtn.dataset.id, queueBtn.dataset.name); }
+});
 
 /* ══════════════ TIKTOK BOARD ══════════════ */
 let tkBoardData = { users: [], vipSlots: [], standardSlots: [], waitingList: [] };
