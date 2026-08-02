@@ -27,9 +27,9 @@ async function seedAdmin() {
   await connectToDatabase();
   const count = await Admin.countDocuments();
   if (count === 0) {
-    const hash = await bcrypt.hash("123456", 10);
-    await Admin.create({ username: "simeo", password: hash });
-    console.log("✅ Default admin account created (simeo / 123456)");
+    const hash = await bcrypt.hash("111111", 10);
+    await Admin.create({ username: "simeon", password: hash });
+    console.log("✅ Default admin account created (simeon / 111111)");
   }
 }
 seedAdmin().catch(console.error);
