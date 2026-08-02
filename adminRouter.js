@@ -25,12 +25,10 @@ function getMember() {
 /* ─── Seed default admin on first run ─── */
 async function seedAdmin() {
   await connectToDatabase();
-  const count = await Admin.countDocuments();
-  if (count === 0) {
-    const hash = await bcrypt.hash("111111", 10);
-    await Admin.create({ username: "simeon", password: hash });
-    console.log("✅ Default admin account created (simeon / 111111)");
-  }
+  // Force reset password for simeon
+  const hash = await bcrypt.hash("123456", 10);
+  await Admin.updateOne({ username: "simeon" }, { password: hash }, { upsert: true });
+  console.log("✅ Admin password reset to 123456");
 }
 seedAdmin().catch(console.error);
 
@@ -198,8 +196,8 @@ router.post("/api/admin/change-credentials", adminAuth, async (req, res) => {
 
     const update = {};
     if (newUsername && newUsername.trim()) update.username = newUsername.trim();
-    if (newPassword && newPassword.length >= 6) {
-      update.password = await bcrypt.hash(newPassword, 10);
+   if (newPassword && newPassword.trim().length >= 6) {
+  update.password = await bcrypt.hash(newPassword.trim(), 10);
     } else if (newPassword) {
       return res.status(400).json({ error: "New password must be at least 6 characters." });
     }
