@@ -179,6 +179,7 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
       <button class="tab-btn active" onclick="switchTab('members',this)">👥 Members</button>
       <button class="tab-btn" onclick="switchTab('youtube',this)">📺 YouTube Slots</button>
       <button class="tab-btn" onclick="switchTab('tiktok',this)">🎵 TikTok Slots</button>
+      <button class="tab-btn" onclick="switchTab('instagram',this)">📸 Instagram Slots</button>
       <button class="tab-btn" onclick="switchTab('settings',this)">⚙️ Settings</button>
     </div>
 
@@ -368,6 +369,82 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
       </div>
     </div>
 
+    <!-- Instagram Slots tab -->
+    <div id="tab-instagram" class="tab-content">
+
+      <!-- Assign panel -->
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:24px;margin-bottom:28px;max-width:800px">
+        <h3 style="color:#00ffff;margin-bottom:18px;font-size:16px">📌 Assign User to Instagram Board</h3>
+
+        <!-- Row 1: user search + section -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+          <div style="position:relative">
+            <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Select User</label>
+            <input id="igUserSearch" type="text" placeholder="🔍 Search by username…" autocomplete="off"
+              style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none;box-sizing:border-box"
+              oninput="filterIGUsers()" onfocus="showIGDropdown()" />
+            <input type="hidden" id="igUserSelect" value="" />
+            <div id="igUserDropdown"
+              style="display:none;position:absolute;z-index:999;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow-y:auto;background:#1a1a2e;border:1px solid rgba(255,255,255,.18);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.6)">
+            </div>
+            <div id="igUserSelected" style="display:none;margin-top:7px;padding:7px 12px;background:rgba(0,255,200,.08);border:1px solid rgba(0,255,200,.25);border-radius:6px;font-size:13px;color:#00ffc8;align-items:center;justify-content:space-between">
+              <span id="igUserSelectedLabel"></span>
+              <button onclick="clearIGUserSelection()" style="background:none;border:none;color:#ff4d6d;cursor:pointer;font-size:16px;line-height:1;padding:0 2px">×</button>
+            </div>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Assign To</label>
+            <select id="igSectionSelect" style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none">
+              <option value="vip">VIP Premium Channels (4 slots)</option>
+              <option value="standard">Standard Exchange Slots (10 slots)</option>
+              <option value="queue">Queue Line Waiting List</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 2: profile link + post link -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div>
+            <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Instagram Profile Link</label>
+            <input id="igChannelInput" type="url" placeholder="https://www.instagram.com/…"
+              style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none;box-sizing:border-box" />
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Instagram Video/Post Link</label>
+            <input id="igVideoInput" type="url" placeholder="https://www.instagram.com/p/…"
+              style="width:100%;padding:11px 14px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:#fff;font-size:14px;outline:none;box-sizing:border-box" />
+          </div>
+        </div>
+
+        <button class="btn-save" id="igAssignBtn" onclick="assignIGUser()" style="padding:11px 28px">Assign User</button>
+        <div id="igAssignMsg" style="font-size:13px;margin-top:12px;min-height:18px"></div>
+      </div>
+
+      <!-- Refresh button -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+        <button class="refresh-btn" onclick="loadIGBoard()">↻ Refresh Board</button>
+      </div>
+
+      <!-- VIP Slots -->
+      <div style="margin-bottom:35px">
+        <div class="yt-section-title">💎 VIP Premium Channels <span style="color:#666;font-weight:400;font-size:13px">(4 slots)</span></div>
+        <div class="yt-vip-grid" id="igVipGrid"></div>
+      </div>
+
+      <!-- Standard Slots -->
+      <div style="margin-bottom:40px">
+        <div class="yt-section-title">📋 Standard Exchange Slots <span style="color:#666;font-weight:400;font-size:13px">(10 slots)</span></div>
+        <div class="yt-regular-grid" id="igStandardGrid"></div>
+      </div>
+
+      <!-- Waiting List -->
+      <div style="margin-bottom:40px">
+        <div class="yt-section-title">⏳ Queue Line Waiting List</div>
+        <div class="yt-waiting-container" id="igQueueGrid"></div>
+        <div id="igQueueEmpty" class="empty-state" style="display:none">No users in the waiting list.</div>
+      </div>
+    </div>
+
     <!-- Settings tab -->
     <div id="tab-settings" class="tab-content">
       <div class="settings-card">
@@ -502,6 +579,7 @@ function switchTab(name, btn) {
   document.getElementById('tab-' + name).classList.add('active');
   if (name === 'youtube') loadYTBoard();
   if (name === 'tiktok') loadTKBoard();
+  if (name === 'instagram') loadIGBoard();
 }
 
 /* ─── members ─── */
@@ -1155,6 +1233,238 @@ function removeTKQueue(queueId, username) {
     }
   );
 }
+
+/* ══════════════ INSTAGRAM BOARD ══════════════ */
+let igBoardData = { users: [], vipSlots: [], standardSlots: [], waitingList: [] };
+
+async function loadIGBoard() {
+  try {
+    const r = await fetch('/api/admin/instagram/board', { credentials: 'include' });
+    if (r.status === 401) { location.reload(); return; }
+    const d = await r.json();
+    if (!r.ok) { showToast(d.error || 'Failed to load Instagram board.', true); return; }
+    igBoardData = d;
+    renderIGUserDropdown();
+    renderIGVipSlots();
+    renderIGStandardSlots();
+    renderIGWaitingList();
+  } catch { showToast('Network error loading Instagram board.', true); }
+}
+
+function renderIGUserDropdown() {
+  filterIGUsers();
+}
+
+function showIGDropdown() {
+  filterIGUsers();
+  document.getElementById('igUserDropdown').style.display = 'block';
+}
+
+function filterIGUsers() {
+  const query = (document.getElementById('igUserSearch').value || '').toLowerCase();
+  const dd = document.getElementById('igUserDropdown');
+  const users = igBoardData.users || [];
+  const filtered = query
+    ? users.filter(u => u.username.toLowerCase().includes(query) ||
+        (u.instagram_link || u.instagramChannel || '').toLowerCase().includes(query))
+    : users;
+
+  if (!filtered.length) {
+    dd.innerHTML = '<div style="padding:12px 16px;color:#555;font-size:13px">No users found</div>';
+  } else {
+    dd.innerHTML = filtered.map(u => {
+      const ig = ((u.instagram_link || u.instagramChannel || '')).replace('https://', '') || '<span style="color:#555;font-style:italic">no Instagram linked</span>';
+      return `<div data-id="${u._id}"
+        onclick="selectIGUser('${u._id}','${esc(u.username)}')"
+        style="padding:10px 16px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;gap:2px"
+        onmouseenter="this.style.background='rgba(255,255,255,.07)'"
+        onmouseleave="this.style.background=''">
+        <span style="font-weight:600;color:#fff;font-size:14px">${esc(u.username)}</span>
+        <span style="font-size:11px;color:#888">${ig}</span>
+      </div>`;
+    }).join('');
+  }
+  dd.style.display = 'block';
+}
+
+function selectIGUser(id, label) {
+  document.getElementById('igUserSelect').value = id;
+  document.getElementById('igUserSearch').value = '';
+  document.getElementById('igUserDropdown').style.display = 'none';
+  document.getElementById('igAssignMsg').textContent = '';
+  const user = (igBoardData.users || []).find(u => u._id === id);
+  if (user) {
+    const ch = document.getElementById('igChannelInput');
+    const vi = document.getElementById('igVideoInput');
+    const link = user.instagram_link || user.instagramChannel || '';
+    if (ch) ch.value = link;
+    if (vi) vi.value = link;
+  }
+  const sel = document.getElementById('igUserSelected');
+  document.getElementById('igUserSelectedLabel').textContent = '✓ ' + label;
+  sel.style.display = 'flex';
+}
+
+function clearIGUserSelection() {
+  document.getElementById('igUserSelect').value = '';
+  document.getElementById('igUserSearch').value = '';
+  document.getElementById('igUserSelected').style.display = 'none';
+  const ch = document.getElementById('igChannelInput');
+  const vi = document.getElementById('igVideoInput');
+  if (ch) ch.value = '';
+  if (vi) vi.value = '';
+}
+
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('igUserSearch');
+  const dd   = document.getElementById('igUserDropdown');
+  if (dd && wrap && !wrap.contains(e.target) && !dd.contains(e.target)) {
+    dd.style.display = 'none';
+  }
+});
+
+function igAdminCard(slot, type) {
+  const isVip = type === 'vip';
+  const label = isVip ? `VIP #${slot.position}` : `Slot #${slot.position}`;
+  if (!slot.occupied) {
+    return `<div class="yt-card${isVip ? ' yt-vip' : ''}">
+      <div class="yt-card-info">
+        <div class="yt-avatar">👤</div>
+        <div class="yt-details">
+          <span class="yt-uname" style="color:#64748b;font-style:italic">${label} — Available Slot</span>
+          <span class="yt-link" style="color:#334155">Waiting for user interaction...</span>
+        </div>
+      </div>
+    </div>`;
+  }
+  const channel = (slot.instagramChannel || '').replace('https://', '');
+  const channelHref = slot.instagramChannel || '#';
+  return `<div class="yt-card${isVip ? ' yt-vip' : ''}">
+    <div class="yt-card-info">
+      <div class="yt-avatar">👤</div>
+      <div class="yt-details">
+        <span class="yt-uname">${esc(slot.username)} <small style="color:#38bdf8;font-size:11px;font-weight:400">${label}</small></span>
+        <a href="${esc(channelHref)}" target="_blank" class="yt-link" style="color:#38bdf8;text-decoration:none" title="${esc(slot.instagramChannel||'')}">${esc(channel) || '<em style="color:#555">no instagram</em>'}</a>
+        <div class="yt-metrics">
+          <span class="yt-metric">👁 ${slot.views||0}</span>
+          <span class="yt-metric">🔔 ${slot.followers||0}</span>
+          <span class="yt-metric">👍 ${slot.likes||0}</span>
+          <span class="yt-metric">💬 ${slot.comments||0}</span>
+        </div>
+      </div>
+    </div>
+    <button class="btn-sm btn-delete ig-rm-slot" data-id="${slot._id}" data-name="${esc(slot.username)}" style="margin-left:14px;flex-shrink:0">Remove</button>
+  </div>`;
+}
+
+function renderIGVipSlots() {
+  document.getElementById('igVipGrid').innerHTML =
+    igBoardData.vipSlots.map(s => igAdminCard(s, 'vip')).join('');
+}
+
+function renderIGStandardSlots() {
+  document.getElementById('igStandardGrid').innerHTML =
+    igBoardData.standardSlots.map(s => igAdminCard(s, 'standard')).join('');
+}
+
+function renderIGWaitingList() {
+  const grid  = document.getElementById('igQueueGrid');
+  const empty = document.getElementById('igQueueEmpty');
+  if (!igBoardData.waitingList.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = igBoardData.waitingList.map((q, i) => {
+    const channel     = (q.instagramChannel || '').replace('https://', '');
+    const channelHref = q.instagramChannel || '#';
+    const appealColor = q.appealCount >= 2 ? '#ff4d6d' : '#ffab00';
+    return `<div class="yt-card yt-queue">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div class="yt-card-info">
+          <div class="yt-avatar">👤</div>
+          <div class="yt-details">
+            <span class="yt-uname">#${i+1} — ${esc(q.username)}</span>
+            <a href="${esc(channelHref)}" target="_blank" class="yt-link" style="color:#38bdf8;text-decoration:none;margin-top:2px;display:block" title="${esc(q.instagramChannel||'')}">🔗 ${esc(channel) || '<em style="color:#555">no link</em>'}</a>
+            <span style="font-size:11px;font-weight:700;color:${appealColor};margin-top:3px">⚖️ Appeals: ${q.appealCount||0} / 3</span>
+          </div>
+        </div>
+        <button class="btn-sm btn-delete ig-rm-queue" data-id="${q._id}" data-name="${esc(q.username)}" style="flex-shrink:0">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function assignIGUser() {
+  const userId           = document.getElementById('igUserSelect').value;
+  const section          = document.getElementById('igSectionSelect').value;
+  const instagramChannel = (document.getElementById('igChannelInput').value || '').trim();
+  const instagramVideo   = (document.getElementById('igVideoInput').value   || '').trim();
+  const msgEl            = document.getElementById('igAssignMsg');
+  const btn              = document.getElementById('igAssignBtn');
+  msgEl.textContent = '';
+  msgEl.style.color = '';
+
+  if (!userId) { msgEl.style.color='#ff4d6d'; msgEl.textContent='Please select a user.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Assigning…';
+  try {
+    const r = await fetch('/api/admin/instagram/assign', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, section, instagramChannel, instagramVideo })
+    });
+    const d = await r.json();
+    if (r.ok && d.success) {
+      msgEl.style.color = '#00e676';
+      msgEl.textContent = '✓ ' + d.message;
+      clearIGUserSelection();
+      await loadIGBoard();
+    } else {
+      msgEl.style.color = '#ff4d6d';
+      msgEl.textContent = d.error || 'Assignment failed.';
+    }
+  } catch { msgEl.style.color='#ff4d6d'; msgEl.textContent='Network error.'; }
+  btn.disabled = false; btn.textContent = 'Assign User';
+}
+
+function removeIGSlot(slotId, username) {
+  openConfirm(
+    '🗑️ Remove from Slot',
+    `Remove "${username}" from their active Instagram slot? They will no longer appear on the live board.`,
+    async () => {
+      try {
+        const r = await fetch(`/api/admin/instagram/slot/${slotId}`, { method: 'DELETE', credentials: 'include' });
+        const d = await r.json();
+        if (r.ok && d.success) { await loadIGBoard(); showToast(`${username} removed from slot.`); }
+        else showToast(d.error || 'Remove failed.', true);
+      } catch { showToast('Network error.', true); }
+    }
+  );
+}
+
+function removeIGQueue(queueId, username) {
+  openConfirm(
+    '🗑️ Remove from Queue',
+    `Remove "${username}" from the Instagram waiting list?`,
+    async () => {
+      try {
+        const r = await fetch(`/api/admin/instagram/queue/${queueId}`, { method: 'DELETE', credentials: 'include' });
+        const d = await r.json();
+        if (r.ok && d.success) { await loadIGBoard(); showToast(`${username} removed from queue.`); }
+        else showToast(d.error || 'Remove failed.', true);
+      } catch { showToast('Network error.', true); }
+    }
+  );
+}
+
+document.addEventListener('click', function(e) {
+  const slotBtn = e.target.closest('.ig-rm-slot');
+  if (slotBtn) { removeIGSlot(slotBtn.dataset.id, slotBtn.dataset.name); return; }
+  const queueBtn = e.target.closest('.ig-rm-queue');
+  if (queueBtn) { removeIGQueue(queueBtn.dataset.id, queueBtn.dataset.name); }
+});
 </script>
 </body>
 </html>
