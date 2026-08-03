@@ -661,4 +661,150 @@ router.delete("/api/admin/instagram/queue/:queueId", adminAuth, async (req, res)
   }
 });
 
+/* ================================================================
+   Facebook Board Admin Routes
+   Models FBActiveSlot / FBWaitingQueue registered by page3.js.
+================================================================= */
+
+function getFBModels() {
+  if (!mongoose.models.FBActiveSlot || !mongoose.models.FBWaitingQueue) {
+    try { require("./page3.js"); } catch (e) {}
+  }
+  return {
+    FBActiveSlot:   mongoose.models.FBActiveSlot,
+    FBWaitingQueue: mongoose.models.FBWaitingQueue
+  };
+}
+
+/* ── GET /api/admin/facebook/board ── */
+router.get("/api/admin/facebook/board", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const User = mongoose.models.User;
+    const { FBActiveSlot, FBWaitingQueue } = getFBModels();
+    if (!FBActiveSlot) return res.status(500).json({ error: "FB models not loaded yet — restart the server." });
+
+    const users = await User.find({})
+      .select("_id username facebook_link").lean();
+
+    const activeSlots = await FBActiveSlot.find().sort({ sequencePosition: 1 }).lean();
+    const waitingList = await FBWaitingQueue.find().sort({ timestamp: 1 }).lean();
+
+    const vipSlots = [];
+    for (let i = 0; i < 4; i++) {
+      const slot = activeSlots.find(s => s.sequencePosition === i);
+      vipSlots.push(slot ? { ...slot, position: i, occupied: true } : { position: i, occupied: false });
+    }
+    const standardSlots = [];
+    for (let i = 4; i < 14; i++) {
+      const slot = activeSlots.find(s => s.sequencePosition === i);
+      standardSlots.push(slot ? { ...slot, position: i, occupied: true } : { position: i, occupied: false });
+    }
+
+    return res.json({ users, vipSlots, standardSlots, waitingList });
+  } catch (err) {
+    console.error("[Admin FB board]", err);
+    return res.status(500).json({ error: "Failed to load Facebook board." });
+  }
+});
+
+/* ── POST /api/admin/facebook/assign ── */
+router.post("/api/admin/facebook/assign", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { userId, section } = req.body;
+    if (!userId || !section) return res.status(400).json({ error: "userId and section are required." });
+    if (!["vip", "standard", "queue"].includes(section))
+      return res.status(400).json({ error: "section must be vip, standard, or queue." });
+
+    const User = mongoose.models.User;
+    const { FBActiveSlot, FBWaitingQueue } = getFBModels();
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found." });
+
+    const channelLink = req.body.facebookChannel || user.facebook_link || "";
+    const videoLink   = req.body.facebookVideo   || channelLink;
+
+    if (!channelLink)
+      return res.status(400).json({ error: `${user.username} has no Facebook account linked — please enter the link in the form.` });
+
+    const uid = user._id.toString();
+
+    const alreadyActive = await FBActiveSlot.findOne({ userId: uid });
+    if (alreadyActive)
+      return res.status(409).json({ error: `${user.username} is already in an active slot (position ${alreadyActive.sequencePosition}).` });
+    const alreadyQueued = await FBWaitingQueue.findOne({ userId: uid });
+    if (alreadyQueued)
+      return res.status(409).json({ error: `${user.username} is already in the waiting list.` });
+
+    if (section === "queue") {
+      await FBWaitingQueue.create({
+        userId: uid,
+        username:        user.username,
+        facebookChannel: channelLink,
+        facebookVideo:   videoLink,
+        appealCount: 0,
+        appealedBy:  []
+      });
+      return res.json({ success: true, message: `${user.username} added to the Waiting List.` });
+    }
+
+    const range = section === "vip" ? [0,1,2,3] : [4,5,6,7,8,9,10,11,12,13];
+    let freePos = -1;
+    for (const pos of range) {
+      const taken = await FBActiveSlot.findOne({ sequencePosition: pos });
+      if (!taken) { freePos = pos; break; }
+    }
+    if (freePos === -1) {
+      const label = section === "vip" ? "VIP (all 4 slots are full)" : "Standard (all 10 slots are full)";
+      return res.status(409).json({ error: `No free slot in ${label}. Remove a user first or assign to Queue.` });
+    }
+
+    await FBActiveSlot.create({
+      userId: uid,
+      username:        user.username,
+      facebookChannel: channelLink,
+      facebookVideo:   videoLink,
+      isVip:  section === "vip",
+      sequencePosition: freePos,
+      views: 0, followers: 0, likes: 0, comments: 0
+    });
+
+    const label = section === "vip" ? `VIP slot #${freePos}` : `Standard slot #${freePos}`;
+    return res.json({ success: true, message: `${user.username} assigned to ${label}.` });
+  } catch (err) {
+    console.error("[Admin FB assign]", err);
+    return res.status(500).json({ error: "Assignment failed." });
+  }
+});
+
+/* ── DELETE /api/admin/facebook/slot/:slotId ── */
+router.delete("/api/admin/facebook/slot/:slotId", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { FBActiveSlot } = getFBModels();
+    const slot = await FBActiveSlot.findByIdAndDelete(req.params.slotId);
+    if (!slot) return res.status(404).json({ error: "Slot not found." });
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("[Admin FB remove slot]", err);
+    return res.status(500).json({ error: "Remove failed." });
+  }
+});
+
+/* ── DELETE /api/admin/facebook/queue/:queueId ── */
+router.delete("/api/admin/facebook/queue/:queueId", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const { FBWaitingQueue } = getFBModels();
+    const entry = await FBWaitingQueue.findByIdAndDelete(req.params.queueId);
+    if (!entry) return res.status(404).json({ error: "Queue entry not found." });
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("[Admin FB remove queue]", err);
+    return res.status(500).json({ error: "Remove failed." });
+  }
+});
+
 module.exports = router;
