@@ -32,20 +32,30 @@ async function seedAdmin() {
 }
 seedAdmin().catch(console.error);
 
-/* ─── Admin auth middleware ─── */
-function adminAuth(req, res, next) {
-  const token = req.cookies.admin_token;
-  if (!token) return res.status(401).json({ error: "Admin not authenticated." });
+/* ─── Custom verifyAdmin middleware for checking admin session tokens ─── */
+function verifyAdmin(req, res, next) {
+  const token = req.cookies.admin_token || 
+                (req.headers.authorization && req.headers.authorization.startsWith("Bearer ") ? req.headers.authorization.split(" ")[1] : null) ||
+                (req.headers["x-admin-token"]) ||
+                req.query.admin_token || 
+                req.query.token;
+
+  if (!token) return res.status(401).json({ error: "Admin access token required." });
+
   try {
     const decoded = jwt.verify(token, ADMIN_SECRET);
-    if (!decoded.isAdmin) throw new Error("Not an admin token");
+    if (!decoded.isAdmin) {
+      return res.status(403).json({ error: "Access denied. Admin privileges required." });
+    }
     req.adminUser = decoded.username;
     next();
-  } catch {
+  } catch (err) {
     res.clearCookie("admin_token", { secure: true, sameSite: "none" });
-    return res.status(401).json({ error: "Admin session expired." });
+    return res.status(401).json({ error: "Invalid or expired admin session token." });
   }
 }
+
+const adminAuth = verifyAdmin;
 
 /* ================================================================
    POST /api/admin/login
@@ -803,7 +813,163 @@ router.delete("/api/admin/facebook/queue/:queueId", adminAuth, async (req, res) 
     return res.json({ success: true });
   } catch (err) {
     console.error("[Admin FB remove queue]", err);
-    return res.status(500).json({ error: "Remove failed." });
+/* ================================================================
+   Deposit Admin Routes
+   Models & Endpoints for managing user deposit requests
+================================================================= */
+
+function getDepositModel() {
+  return mongoose.models.Deposit;
+}
+
+/* ── GET /api/admin/deposits/pending — list all pending deposits for admins ── */
+router.get("/api/admin/deposits/pending", verifyAdmin, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const Deposit = getDepositModel();
+    if (!Deposit) return res.status(500).json({ error: "Deposit model not loaded." });
+
+    const deposits = await Deposit.find({ status: { $in: ["pending", "PENDING"] } })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const formatted = deposits.map(d => ({
+      id: d._id.toString(),
+      _id: d._id.toString(),
+      userId: d.userId,
+      username: d.username || "",
+      sender_name: d.sender_name || d.fullName || "",
+      phone_number: d.phone_number || d.telephone || "",
+      amount: d.amount,
+      proof_image: d.proof_image || d.screenshotData || "",
+      screenshotMimeType: d.screenshotMimeType || "image/png",
+      status: d.status,
+      createdAt: d.createdAt,
+      updatedAt: d.updatedAt || d.createdAt
+    }));
+
+    return res.json({ deposits: formatted });
+  } catch (err) {
+    console.error("[Admin GET pending deposits]", err);
+    return res.status(500).json({ error: "Failed to fetch pending deposits." });
+  }
+});
+
+/* ── GET /api/admin/deposits — list all deposits (optional ?status= query filter) ── */
+router.get("/api/admin/deposits", verifyAdmin, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const Deposit = getDepositModel();
+    if (!Deposit) return res.status(500).json({ error: "Deposit model not loaded." });
+
+    const filter = {};
+    if (req.query.status) {
+      filter.status = new RegExp("^" + req.query.status.trim() + "$", "i");
+    }
+
+    const deposits = await Deposit.find(filter)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const formatted = deposits.map(d => ({
+      id: d._id.toString(),
+      _id: d._id.toString(),
+      userId: d.userId,
+      username: d.username || "",
+      sender_name: d.sender_name || d.fullName || "",
+      phone_number: d.phone_number || d.telephone || "",
+      amount: d.amount,
+      proof_image: d.proof_image || d.screenshotData || "",
+      screenshotMimeType: d.screenshotMimeType || "image/png",
+      status: d.status,
+      createdAt: d.createdAt,
+      updatedAt: d.updatedAt || d.createdAt
+    }));
+
+    return res.json({ deposits: formatted });
+  } catch (err) {
+    console.error("[Admin GET deposits]", err);
+    return res.status(500).json({ error: "Failed to fetch deposits." });
+  }
+});
+
+/* ── PATCH /api/admin/deposits/:id — approve or reject a deposit request ── */
+router.patch("/api/admin/deposits/:id", verifyAdmin, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const Deposit = getDepositModel();
+    const User = mongoose.models.User;
+    if (!Deposit) return res.status(500).json({ error: "Deposit model not loaded." });
+
+    const { status } = req.body;
+    if (!status || !["approved", "rejected", "APPROVED", "REJECTED"].includes(status)) {
+      return res.status(400).json({ error: "Status must be 'approved' or 'rejected'." });
+    }
+
+    const targetStatus = status.toLowerCase(); // 'approved' or 'rejected'
+    const deposit = await Deposit.findById(req.params.id);
+    if (!deposit) return res.status(404).json({ error: "Deposit request not found." });
+
+    let walletUpdated = false;
+    let newBalance = null;
+
+    if (targetStatus === "approved" && deposit.status.toLowerCase() !== "approved") {
+      // Find matching user in User model to credit VIP wallet balance
+      let user = null;
+      if (deposit.userId && mongoose.Types.ObjectId.isValid(deposit.userId)) {
+        user = await User.findById(deposit.userId);
+      }
+      if (!user && deposit.username) {
+        user = await User.findOne({ username: deposit.username });
+      }
+      if (!user && (deposit.sender_name || deposit.fullName)) {
+        const nameToMatch = deposit.sender_name || deposit.fullName;
+        user = await User.findOne({ username: nameToMatch });
+      }
+
+      if (user) {
+        const updatedUser = await User.findByIdAndUpdate(
+          user._id,
+          { $inc: { walletBalance: deposit.amount } },
+          { new: true }
+        );
+        walletUpdated = true;
+        newBalance = updatedUser.walletBalance;
+      } else {
+        console.warn(`[Admin approve deposit] User not found for deposit ID ${deposit._id}, userId: ${deposit.userId}`);
+      }
+    }
+
+    // Update status while maintaining all user details (sender_name, phone_number, amount, proof_image)
+    deposit.status = targetStatus;
+    deposit.updatedAt = new Date();
+    await deposit.save();
+
+    const responseDeposit = {
+      id: deposit._id.toString(),
+      _id: deposit._id.toString(),
+      userId: deposit.userId,
+      username: deposit.username || "",
+      sender_name: deposit.sender_name || deposit.fullName || "",
+      phone_number: deposit.phone_number || deposit.telephone || "",
+      amount: deposit.amount,
+      proof_image: deposit.proof_image || deposit.screenshotData || "",
+      screenshotMimeType: deposit.screenshotMimeType || "image/png",
+      status: deposit.status,
+      createdAt: deposit.createdAt,
+      updatedAt: deposit.updatedAt
+    };
+
+    return res.json({
+      success: true,
+      message: `Deposit request status updated to ${targetStatus}.${walletUpdated ? ` User main wallet balance updated to ${newBalance} FRW.` : ''}`,
+      deposit: responseDeposit,
+      walletUpdated,
+      newBalance
+    });
+  } catch (err) {
+    console.error("[Admin PATCH deposit status]", err);
+    return res.status(500).json({ error: "Deposit status update failed." });
   }
 });
 
