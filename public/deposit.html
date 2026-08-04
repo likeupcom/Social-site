@@ -560,24 +560,23 @@
         //               FORM ACCURACY VALIDATION ENGINE
         // ==========================================================
         function validateTerminalInputs(name, tel, amount, file) {
-            const namePattern = /^[A-Za-z\s]+$/;
-            const telPattern = /^\d{10}$/;
-            const amountPattern = /^\d+$/;
+            const cleanTel = (tel || "").toString().replace(/\D/g, "");
+            const numAmount = Number(amount);
 
-            if (!namePattern.test(name)) {
-                alert(activeDictionary.errName);
+            if (!name || name.trim().length < 2) {
+                alert(activeDictionary.errName || "Validation Error: Please enter a valid full name.");
                 return false;
             }
-            if (!telPattern.test(tel)) {
-                alert(activeDictionary.errPhone);
+            if (!cleanTel || cleanTel.length !== 10) {
+                alert(activeDictionary.errPhone || "Validation Error: Telephone must consist of exactly 10 digits.");
                 return false;
             }
-            if (!amountPattern.test(amount)) {
-                alert(activeDictionary.errAmount);
+            if (isNaN(numAmount) || numAmount <= 0) {
+                alert(activeDictionary.errAmount || "Validation Error: Amount field must be a valid numeric entry.");
                 return false;
             }
             if (!file || file.size === 0) {
-                alert(activeDictionary.errScreenshot);
+                alert(activeDictionary.errScreenshot || "Validation Error: Please upload your payment screenshot.");
                 return false;
             }
             return true;
@@ -598,6 +597,7 @@
 
             const fullNameVal = document.getElementById("inputFullName").value.trim();
             const telephoneVal = document.getElementById("inputTelephone").value.trim();
+            const cleanPhone = telephoneVal.replace(/\D/g, "");
             const amountVal = document.getElementById("inputAmount").value.trim();
             const fileVal = fileInput.files[0];
 
@@ -612,11 +612,11 @@
             // Secure multipart transmission — includes image proof of payment
             try {
                 const formData = new FormData();
-                formData.append("userId", currentUser);
+                formData.append("userId", currentUser || "");
                 formData.append("sender_name", fullNameVal);
                 formData.append("fullName", fullNameVal);
-                formData.append("phone_number", telephoneVal);
-                formData.append("telephone", telephoneVal);
+                formData.append("phone_number", cleanPhone);
+                formData.append("telephone", cleanPhone);
                 formData.append("amount", amountVal);
                 formData.append("screenshot", fileVal);
 
@@ -630,13 +630,13 @@
                 });
 
                 const result = await response.json();
-                if (response.ok) {
+                if (response.ok && result.success) {
                     alert(activeDictionary.successSubmit || "Deposit request submitted successfully!");
                     updateStatusDisplayBadge("PENDING");
                     
                     // Reset form and file preview cleanly
                     document.getElementById("depositTerminalForm").reset();
-                    filePreviewContainer.style.display = "none";
+                    if (filePreviewContainer) filePreviewContainer.style.display = "none";
                 } else {
                     alert(result.error || "Submission rejected by server routines.");
                     submitBtn.disabled = false;
