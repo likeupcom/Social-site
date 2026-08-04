@@ -246,6 +246,15 @@
     <div class="container">
 
         <div class="glass-panel">
+            <!-- Authentication Required Warning Banner (shown if not logged in) -->
+            <div id="authAlertBanner" style="display:none;background:rgba(255,77,109,0.12);border:1px solid rgba(255,77,109,0.35);color:#ff4d6d;padding:14px 18px;border-radius:10px;margin-bottom:24px;font-size:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:0 4px 20px rgba(255,77,109,0.15)">
+                <div style="display:flex;align-items:center;gap:10px">
+                    <span style="font-size:20px">🔒</span>
+                    <span><strong>Login Required:</strong> You must be logged in to submit a deposit request.</span>
+                </div>
+                <a href="/login.html" style="background:linear-gradient(45deg,#ff4d6d,#ff007f);color:#fff;padding:8px 18px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:13px;white-space:nowrap">Log In Now</a>
+            </div>
+
             <div class="status-tracker-header">
                 <div>
                     <div id="lblStatusTitle" style="font-weight: bold; font-size: 15px;">Transaction Monitor</div>
@@ -285,45 +294,77 @@
                     </div>
                 </div>
 
-                <!-- Screenshot Upload -->
+                <!-- Screenshot Upload & Replace File Option -->
                 <div class="form-group">
                     <label id="lblScreenshot" for="inputScreenshot">Payment Screenshot (Image Proof Required)</label>
                     <input type="file" id="inputScreenshot" class="terminal-input file-input" accept="image/*" required>
+
+                    <!-- Dynamic Selected File Preview & Replacement Container -->
+                    <div id="filePreviewContainer" style="display:none;margin-top:12px;padding:12px 16px;background:rgba(0,255,255,0.06);border:1px solid rgba(0,255,255,0.25);border-radius:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+                        <div style="display:flex;align-items:center;gap:12px;overflow:hidden">
+                            <span style="font-size:24px">📸</span>
+                            <div style="overflow:hidden">
+                                <div id="filePreviewName" style="font-size:13px;font-weight:bold;color:#00ffff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">Selected File</div>
+                                <div id="filePreviewSize" style="font-size:11px;color:#aaa">0 KB</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px">
+                            <button type="button" id="btnReplaceFile" class="copy-btn" style="background:rgba(0,255,255,0.15);border-color:#00ffff;color:#00ffff;font-weight:bold">🔄 Replace File</button>
+                            <button type="button" id="btnRemoveFile" class="copy-btn" style="background:rgba(255,77,109,0.15);border-color:#ff4d6d;color:#ff4d6d;font-weight:bold">✕ Remove</button>
+                        </div>
+                    </div>
                 </div>
 
                 <button type="submit" id="btnSubmitDeposit" class="action-btn">Initiate Secure Deposit</button>
             </form>
-
-            <div id="paymentInstructionPanel" class="instruction-panel">
-                <h3 id="txtInstructionHeader" style="color: #ff007f; font-size: 16px; margin-bottom: 10px; text-align: left;">⚠️ ACTION REQUIRED</h3>
-                <p id="txtInstructionBody" style="font-size: 14px; line-height: 1.6; color: #ddd;">
-                    Please type this number in your phone to complete the process:
-                </p>
-                <div class="ussd-container">
-                    <span id="ussdCodeDisplay" class="ussd-string">*182*8*1*2072458#</span>
-                    <button type="button" id="btnCopyUssd" class="copy-btn">Copy Code</button>
-                </div>
-                <div class="receiver-row">
-                    <span id="lblReceiver">Receiver Name:</span> <span class="receiver-name">simeo</span>
-                </div>
-            </div>
 
         </div>
 
     </div>
 
     <script>
-        const authToken = localStorage.getItem("ns_user_token") || "";
+        const authToken = localStorage.getItem("ns_user_token") || localStorage.getItem("token") || "";
 
-        // Consistent session mapping handling paradigm
-        const localUserSessionId = (function() {
-            let key = localStorage.getItem("ns_platform_user_token");
-            if (!key) {
-                key = "user_hub_tok_" + Math.random().toString(36).substring(2, 15) + "_" + Date.now();
-                localStorage.setItem("ns_platform_user_token", key);
-            }
-            return key;
-        })();
+        let currentUser = null;
+        let isLoggedIn = false;
+
+        // ==========================================================
+        //               USER AUTHENTICATION VERIFIER ENGINE
+        // ==========================================================
+        async function checkUserAuthentication() {
+            try {
+                const response = await fetch("/me", { credentials: "include" });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.user) {
+                        currentUser = data.user;
+                        isLoggedIn = true;
+                        
+                        // Hide login warning banner
+                        const banner = document.getElementById("authAlertBanner");
+                        if (banner) banner.style.display = "none";
+                        
+                        // Pre-fill name if empty
+                        const nameInput = document.getElementById("inputFullName");
+                        if (nameInput && !nameInput.value.trim()) {
+                            nameInput.value = currentUser;
+                        }
+                        return true;
+                    }
+                }
+            } catch (e) {}
+
+            isLoggedIn = false;
+            currentUser = null;
+
+            // Show login alert banner
+            const banner = document.getElementById("authAlertBanner");
+            if (banner) banner.style.display = "flex";
+
+            // Update badge to NONE since user is not logged in
+            updateStatusDisplayBadge("NONE");
+            return false;
+        }
 
         // ==========================================================
         //                MULTILINGUAL ENGINE DICTIONARY
@@ -348,16 +389,13 @@
                 badgeNone: "No Active Request",
                 badgePending: "Pending Approval",
                 badgeApproved: "Approved / Credited",
-                instructionHeader: "⚠️ ACTION REQUIRED",
-                instructionBody: "Please type this number in your phone to complete the process:",
-                receiverText: "Receiver Name:",
                 btnCopy: "Copy Code",
                 copiedMsg: "USSD Code copied to clipboard!",
                 errName: "Validation Error: Full Name must contain text characters only.",
                 errPhone: "Validation Error: Telephone must consist of exactly 10 digits.",
                 errAmount: "Validation Error: Amount field must be a valid numeric entry.",
                 errScreenshot: "Validation Error: Please upload your payment screenshot.",
-                successSubmit: "Deposit request committed safely to server storage layers."
+                successSubmit: "Deposit request submitted successfully! Pending admin approval."
             },
             fr: {
                 monitorTitle: "Moniteur de Transaction",
@@ -374,16 +412,13 @@
                 badgeNone: "Aucune Demande Active",
                 badgePending: "En Attente d'Approbation",
                 badgeApproved: "Approuvé / Crédité",
-                instructionHeader: "⚠️ ACTION REQUISE",
-                instructionBody: "Veuillez taper ce numéro sur votre téléphone pour terminer le processus:",
-                receiverText: "Nom du Destinataire:",
                 btnCopy: "Copier le Code",
                 copiedMsg: "Code USSD copié dans le presse-papiers!",
                 errName: "Erreur de Validation: Le nom complet doit contenir des lettres uniquement.",
                 errPhone: "Erreur de Validation: Le téléphone doit comporter exactement 10 chiffres.",
                 errAmount: "Erreur de Validation: Le champ montant doit être une valeur numérique valide.",
                 errScreenshot: "Erreur de Validation: Veuillez télécharger votre capture d'écran de paiement.",
-                successSubmit: "Demande de dépôt enregistrée avec succès sur le serveur."
+                successSubmit: "Demande de dépôt soumise avec succès! En attente d'approbation."
             },
             rw: {
                 monitorTitle: "Gukurikirana Transaksiyo",
@@ -400,16 +435,13 @@
                 badgeNone: "Nta Nyandiko Ihari",
                 badgePending: "Irimo Gusuzumwa (Pending)",
                 badgeApproved: "Yemejwe / Byakorewe",
-                instructionHeader: "⚠️ IKIGOMBA GUKORWA",
-                instructionBody: "Nyamuneka kandika uyu mubare muri telefone yawe ngo urangize gahunda:",
-                receiverText: "Izina ry'Uwakira:",
                 btnCopy: "Kopera Kode",
                 copiedMsg: "Kode ya USSD yakopewe!",
                 errName: "Ikosa ryo Kwemeza: Amazina agomba kuba inyuguti gusa.",
                 errPhone: "Ikosa ryo Kwemeza: Numero ya telefone igomba kuba igizwe n'imibare 10 gusa.",
                 errAmount: "Ikosa ryo Kwemeza: Umubare w'amafaranga ugomba kuba imibare gusa.",
                 errScreenshot: "Ikosa ryo Kwemeza: Nyamuneka shyiraho ifoto y'ubwishyu bwawe.",
-                successSubmit: "Ibisabwa byo gushyiraho amafaranga byoherejwe kuri server cluster."
+                successSubmit: "Ibisabwa byo gushyiraho amafaranga byoherejwe kuri server."
             }
         };
 
@@ -428,32 +460,33 @@
             document.getElementById("inputTelephone").placeholder = activeDictionary.phPhone;
             document.getElementById("inputAmount").placeholder = activeDictionary.phAmount;
             document.getElementById("btnSubmitDeposit").innerText = activeDictionary.btnSubmit;
-            
-            document.getElementById("txtInstructionHeader").innerText = activeDictionary.instructionHeader;
-            document.getElementById("txtInstructionBody").innerText = activeDictionary.instructionBody;
-            document.getElementById("lblReceiver").innerText = activeDictionary.receiverText;
-            document.getElementById("btnCopyUssd").innerText = activeDictionary.btnCopy;
         }
 
         // ==========================================================
         //         LIVE TRANSACTION STATUS ENGINE LOOP (POLLING)
         // ==========================================================
         async function checkLiveDatabaseDepositStatus() {
+            if (!isLoggedIn || !currentUser) {
+                updateStatusDisplayBadge("NONE");
+                return;
+            }
             try {
-                const response = await fetch(`/api/deposit/status?userId=${localUserSessionId}`, {
+                const response = await fetch(`/api/deposit/status?userId=${encodeURIComponent(currentUser)}`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${authToken}`,
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    credentials: 'include'
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    updateStatusDisplayBadge(data.status); // Server response controls frontend view
+                    updateStatusDisplayBadge(data.status);
+                } else {
+                    updateStatusDisplayBadge("NONE");
                 }
             } catch (err) {
-                console.error("Failed to query runtime structural status from database.");
+                console.error("Failed to query deposit status from database.");
             }
         }
 
@@ -462,23 +495,65 @@
             const submitBtn = document.getElementById("btnSubmitDeposit");
             
             badge.className = "status-badge"; // Reset styles
+            const st = (status || "NONE").toUpperCase();
 
-            if (status === "PENDING") {
-                badge.innerText = activeDictionary.badgePending;
+            if (st === "PENDING") {
+                badge.innerText = activeDictionary.badgePending || "Pending Approval";
                 badge.classList.add("status-pending");
-                document.getElementById("paymentInstructionPanel").style.display = "block";
                 submitBtn.disabled = true;
-            } else if (status === "APPROVED") {
-                badge.innerText = activeDictionary.badgeApproved;
+                submitBtn.innerText = "⏳ Request Pending Approval";
+            } else if (st === "APPROVED") {
+                badge.innerText = activeDictionary.badgeApproved || "Approved / Credited";
                 badge.classList.add("status-approved");
-                document.getElementById("paymentInstructionPanel").style.display = "none";
                 submitBtn.disabled = false;
-                document.getElementById("depositTerminalForm").reset();
+                submitBtn.innerText = activeDictionary.btnSubmit || "Initiate Secure Deposit";
+            } else if (st === "REJECTED") {
+                badge.innerText = "Rejected";
+                badge.classList.add("status-rejected");
+                submitBtn.disabled = false;
+                submitBtn.innerText = activeDictionary.btnSubmit || "Initiate Secure Deposit";
             } else {
-                badge.innerText = activeDictionary.badgeNone;
+                badge.innerText = activeDictionary.badgeNone || "No Active Request";
                 badge.classList.add("status-none");
-                // Do not explicitly alter display here to allow UI workflow visibility
+                submitBtn.disabled = false;
+                submitBtn.innerText = activeDictionary.btnSubmit || "Initiate Secure Deposit";
             }
+        }
+
+        // ==========================================================
+        //             FILE REPLACEMENT & PREVIEW ENGINE
+        // ==========================================================
+        const fileInput = document.getElementById("inputScreenshot");
+        const filePreviewContainer = document.getElementById("filePreviewContainer");
+        const filePreviewName = document.getElementById("filePreviewName");
+        const filePreviewSize = document.getElementById("filePreviewSize");
+        const btnReplaceFile = document.getElementById("btnReplaceFile");
+        const btnRemoveFile = document.getElementById("btnRemoveFile");
+
+        if (fileInput) {
+            fileInput.addEventListener("change", function() {
+                if (fileInput.files && fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    filePreviewName.innerText = file.name;
+                    filePreviewSize.innerText = (file.size / 1024).toFixed(1) + " KB";
+                    filePreviewContainer.style.display = "flex";
+                } else {
+                    filePreviewContainer.style.display = "none";
+                }
+            });
+        }
+
+        if (btnReplaceFile) {
+            btnReplaceFile.addEventListener("click", function() {
+                fileInput.click();
+            });
+        }
+
+        if (btnRemoveFile) {
+            btnRemoveFile.addEventListener("click", function() {
+                fileInput.value = "";
+                filePreviewContainer.style.display = "none";
+            });
         }
 
         // ==========================================================
@@ -514,57 +589,65 @@
         document.getElementById("depositTerminalForm").addEventListener("submit", async function(e) {
             e.preventDefault();
 
+            // BLOCK NON-LOGGED-IN USERS BEFORE INITIATING DEPOSIT
+            if (!isLoggedIn) {
+                alert("⚠️ Access Blocked: You must be logged in to submit a deposit request.\n\nRedirecting to login page...");
+                window.location.href = "/login.html";
+                return;
+            }
+
             const fullNameVal = document.getElementById("inputFullName").value.trim();
             const telephoneVal = document.getElementById("inputTelephone").value.trim();
             const amountVal = document.getElementById("inputAmount").value.trim();
-            const fileInput = document.getElementById("inputScreenshot");
             const fileVal = fileInput.files[0];
 
             if (!validateTerminalInputs(fullNameVal, telephoneVal, amountVal, fileVal)) {
                 return;
             }
 
+            const submitBtn = document.getElementById("btnSubmitDeposit");
+            submitBtn.disabled = true;
+            submitBtn.innerText = "⏳ Processing Transmission...";
+
             // Secure multipart transmission — includes image proof of payment
             try {
                 const formData = new FormData();
-                formData.append("userId", localUserSessionId);
+                formData.append("userId", currentUser);
+                formData.append("sender_name", fullNameVal);
                 formData.append("fullName", fullNameVal);
+                formData.append("phone_number", telephoneVal);
                 formData.append("telephone", telephoneVal);
                 formData.append("amount", amountVal);
                 formData.append("screenshot", fileVal);
 
                 const response = await fetch('/api/deposit/submit', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Authorization': `Bearer ${authToken}`
-                        // No Content-Type — browser sets multipart boundary automatically
                     },
                     body: formData
                 });
 
                 const result = await response.json();
                 if (response.ok) {
-                    // Update state presentation immediately based strictly on server instructions
+                    alert(activeDictionary.successSubmit || "Deposit request submitted successfully!");
                     updateStatusDisplayBadge("PENDING");
-                    document.getElementById("paymentInstructionPanel").style.display = "block";
+                    
+                    // Reset form and file preview cleanly
+                    document.getElementById("depositTerminalForm").reset();
+                    filePreviewContainer.style.display = "none";
                 } else {
-                    alert(result.error || "Submission rejected by pipeline authorization routines.");
+                    alert(result.error || "Submission rejected by server routines.");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = activeDictionary.btnSubmit || "Initiate Secure Deposit";
                 }
             } catch (err) {
                 console.error("Critical communications interruption across pipeline endpoint stream.", err);
+                alert("Network communication error. Please try again.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = activeDictionary.btnSubmit || "Initiate Secure Deposit";
             }
-        });
-
-        // ==========================================================
-        //                    CLIPBOARD OPERATIONS
-        // ==========================================================
-        document.getElementById("btnCopyUssd").addEventListener("click", function() {
-            const codeText = document.getElementById("ussdCodeDisplay").innerText;
-            navigator.clipboard.writeText(codeText).then(() => {
-                alert(activeDictionary.copiedMsg);
-            }).catch(err => {
-                console.error("Clipboard operational loop fault.");
-            });
         });
 
         // Static payment instruction block copy button
@@ -586,12 +669,15 @@
         });
 
         // Initialize configurations seamlessly
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             applyDynamicLocalization();
             
-            // Kickstart status check polling lifecycle loops
-            checkLiveDatabaseDepositStatus();
-            setInterval(checkLiveDatabaseDepositStatus, 4000);
+            // Verify authentication on load
+            const authenticated = await checkUserAuthentication();
+            if (authenticated) {
+                await checkLiveDatabaseDepositStatus();
+                setInterval(checkLiveDatabaseDepositStatus, 4000);
+            }
         });
     </script>
 </body>
