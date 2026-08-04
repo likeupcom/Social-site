@@ -304,102 +304,100 @@ app.delete("/api/user/profile", async (req, res) => {
 /* ---------------- 7. DEPOSIT ENDPOINTS ---------------- */
 
 // POST /api/deposit/submit — accepts multipart/form-data with a screenshot image or JSON body
-app.post("/api/deposit/submit", (req, res, next) => {
-  upload.single("screenshot")(req, res, (err) => {
+app.post("/api/deposit/submit", (req, res) => {
+  upload.single("screenshot")(req, res, async (err) => {
     if (err) {
       return res.status(400).json({ error: err.message || "Payment screenshot upload failed." });
     }
-    next();
-  });
-}, async (req, res) => {
-  try {
-    await connectToDatabase();
-    const senderName = (req.body.sender_name || req.body.fullName || "").toString().trim();
-    const rawPhone = (req.body.phone_number || req.body.telephone || "").toString();
-    const phoneNumber = rawPhone.replace(/\D/g, "");
-    const amountVal = Number(req.body.amount);
-    let userId = (req.body.userId || "").toString().trim();
+    try {
+      await connectToDatabase();
+      const senderName = (req.body.sender_name || req.body.fullName || "").toString().trim();
+      const rawPhone = (req.body.phone_number || req.body.telephone || "").toString();
+      const phoneNumber = rawPhone.replace(/\D/g, "");
+      const amountVal = Number(req.body.amount);
+      let userId = (req.body.userId || "").toString().trim();
 
-    if (!senderName || senderName.length < 2) {
-      return res.status(400).json({ error: "Please enter a valid depositor full name." });
-    }
-    if (!phoneNumber || phoneNumber.length !== 10) {
-      return res.status(400).json({ error: "Phone number must be exactly 10 digits (e.g. 078XXXXXXX)." });
-    }
-    if (isNaN(amountVal) || amountVal <= 0) {
-      return res.status(400).json({ error: "Please enter a valid numeric deposit amount in FRW." });
-    }
+      if (!senderName || senderName.length < 2) {
+        return res.status(400).json({ error: "Please enter a valid depositor full name." });
+      }
+      if (!phoneNumber || phoneNumber.length !== 10) {
+        return res.status(400).json({ error: "Phone number must be exactly 10 digits (e.g. 078XXXXXXX)." });
+      }
+      if (isNaN(amountVal) || amountVal <= 0) {
+        return res.status(400).json({ error: "Please enter a valid numeric deposit amount in FRW." });
+      }
 
-    let proofImage = "";
-    let mimeType = "image/png";
-    if (req.file) {
-      proofImage = req.file.buffer.toString("base64");
-      mimeType = req.file.mimetype;
-    } else if (req.body.proof_image || req.body.screenshotData) {
-      proofImage = req.body.proof_image || req.body.screenshotData;
-    } else {
-      return res.status(400).json({ error: "Payment screenshot/proof image is required." });
-    }
+      let proofImage = "";
+      let mimeType = "image/png";
+      if (req.file) {
+        proofImage = req.file.buffer.toString("base64");
+        mimeType = req.file.mimetype;
+      } else if (req.body.proof_image || req.body.screenshotData) {
+        proofImage = req.body.proof_image || req.body.screenshotData;
+      } else {
+        return res.status(400).json({ error: "Payment screenshot/proof image is required." });
+      }
 
-    // Extract logged in username if token is provided
-    let username = "";
-    const authHeader = req.headers.authorization || "";
-    const token = req.cookies.token || req.query.token || (authHeader.startsWith("Bearer ") ? authHeader.substring(7) : "");
-    if (token) {
-      try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        username = decoded.user || "";
-      } catch (e) {}
-    }
+      // Extract logged in username if token is provided
+      let username = "";
+      const authHeader = req.headers.authorization || "";
+      const token = req.cookies.token || req.query.token || (authHeader.startsWith("Bearer ") ? authHeader.substring(7) : "");
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, JWT_SECRET);
+          username = decoded.user || "";
+        } catch (e) {}
+      }
 
-    if (!userId && username) {
-      const dbUser = await User.findOne({ username });
-      if (dbUser) userId = dbUser._id.toString();
-    }
-    if (!userId) {
-      userId = username || senderName;
-    }
+      if (!userId && username) {
+        const dbUser = await User.findOne({ username });
+        if (dbUser) userId = dbUser._id.toString();
+      }
+      if (!userId) {
+        userId = username || senderName;
+      }
 
-    // Upsert or update existing pending request for this user to ensure submission always succeeds
-    const existing = await Deposit.findOne({ 
-      $or: [{ userId }, { username: username || userId }], 
-      status: { $in: ["pending", "PENDING"] } 
-    });
-
-    let depositDoc;
-    if (existing) {
-      existing.sender_name = senderName;
-      existing.fullName = senderName;
-      existing.phone_number = phoneNumber;
-      existing.telephone = phoneNumber;
-      existing.amount = amountVal;
-      existing.proof_image = proofImage;
-      existing.screenshotData = proofImage;
-      existing.screenshotMimeType = mimeType;
-      existing.status = "pending";
-      existing.updatedAt = new Date();
-      depositDoc = await existing.save();
-    } else {
-      depositDoc = await Deposit.create({
-        userId,
-        username,
-        sender_name:         senderName,
-        fullName:            senderName,
-        phone_number:        phoneNumber,
-        telephone:           phoneNumber,
-        amount:              amountVal,
-        proof_image:         proofImage,
-        screenshotData:      proofImage,
-        screenshotMimeType:  mimeType,
-        status:              "pending"
+      // Upsert or update existing pending request for this user to ensure submission always succeeds
+      const existing = await Deposit.findOne({ 
+        $or: [{ userId }, { username: username || userId }], 
+        status: { $in: ["pending", "PENDING"] } 
       });
-    }
 
-    return res.json({ success: true, status: "pending", id: depositDoc._id });
-  } catch (err) {
-    console.error("[Deposit Submit]", err);
-    return res.status(500).json({ error: err.message || "Deposit submission failed." });
-  }
+      let depositDoc;
+      if (existing) {
+        existing.sender_name = senderName;
+        existing.fullName = senderName;
+        existing.phone_number = phoneNumber;
+        existing.telephone = phoneNumber;
+        existing.amount = amountVal;
+        existing.proof_image = proofImage;
+        existing.screenshotData = proofImage;
+        existing.screenshotMimeType = mimeType;
+        existing.status = "pending";
+        existing.updatedAt = new Date();
+        depositDoc = await existing.save();
+      } else {
+        depositDoc = await Deposit.create({
+          userId,
+          username,
+          sender_name:         senderName,
+          fullName:            senderName,
+          phone_number:        phoneNumber,
+          telephone:           phoneNumber,
+          amount:              amountVal,
+          proof_image:         proofImage,
+          screenshotData:      proofImage,
+          screenshotMimeType:  mimeType,
+          status:              "pending"
+        });
+      }
+
+      return res.json({ success: true, status: "pending", id: depositDoc._id });
+    } catch (err) {
+      console.error("[Deposit Submit]", err);
+      return res.status(500).json({ error: err.message || "Deposit submission failed." });
+    }
+  });
 });
 
 // GET /api/deposit/status — polled by the frontend every 4 seconds
