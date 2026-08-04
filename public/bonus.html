@@ -4,6 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NS Platform - Referral & Bonus Suite</title>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="NS Platform - Referral & Bonus Suite">
+    <meta property="og:description" content="Join NS Platform Partnership Hub and earn rewards with your referral code.">
+    <meta property="og:image" content="/og-preview.png">
+    <meta property="og:image:secure_url" content="/og-preview.png">
+    <meta property="og:image:type" content="image/png">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="NS Platform - Referral & Bonus Suite">
+    <meta name="twitter:description" content="Join NS Platform Partnership Hub and earn rewards with your referral code.">
+    <meta name="twitter:image" content="/og-preview.png">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0a0a12; color: #ffffff; padding: 20px; overflow-x: hidden; }
@@ -75,7 +89,7 @@
         }
         .referral-box {
             flex-grow: 1; font-family: 'Courier New', Courier, monospace;
-            font-size: 20px; font-weight: bold; color: #00ffff; letter-spacing: 2px; padding-left: 5px;
+            font-size: 13px; font-weight: bold; color: #00ffff; word-break: break-all; padding-left: 5px;
         }
         .copy-btn {
             background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
@@ -182,23 +196,26 @@
             </div>
         </div>
 
-        <div style="font-size:13px; color:#aaa; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;" id="lblYourCode">Your Referral Code</div>
+        <div style="font-size:13px; color:#aaa; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;" id="lblYourCode">Your Referral Link</div>
         <div class="referral-output-container">
             <div id="dashReferralCode" class="referral-box">—————</div>
             <button type="button" id="btnDashCopy" class="copy-btn">Copy</button>
         </div>
 
         <div class="social-share-matrix">
-            <a href="https://api.whatsapp.com/" target="_blank" class="social-icon-link" id="shareWhatsApp" style="--hover-glow:#25D366; color:#25D366;">
+            <a href="https://api.whatsapp.com/" target="_blank" class="social-icon-link" id="shareWhatsApp" style="--hover-glow:#25D366; color:#25D366;" title="Share on WhatsApp">
                 <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.713-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.428 1.936 13.948.91 11.32.91c-5.443 0-9.87 4.372-9.874 9.802-.001 1.716.463 3.393 1.34 4.877L1.751 21.2l5.896-1.546zm12.182-5.465c-.29-.145-1.711-.845-1.975-.94-.264-.096-.456-.145-.647.145-.192.29-.744.94-.91 1.13-.167.193-.334.215-.624.07-2.9-.145-4.83-1.085-6.7-4.31-.264-.455.264-.423.755-1.4.08-.165.04-.31-.02-.455-.06-.145-.54-1.3-.74-1.785-.195-.47-.395-.407-.54-.415-.143-.007-.307-.01-.472-.01-.165 0-.435.063-.663.312-.228.248-.87.852-.87 2.078 0 1.226.892 2.41 1.016 2.575.125.165 1.756 2.68 4.256 3.757.595.256 1.06.41 1.423.525.6.19 1.145.163 1.577.098.48-.072 1.712-.699 1.95-.1.372-.24.745-.623.745-1.03 0-.114-.007-.212-.022-.294z"/></svg>
             </a>
-            <a href="https://www.instagram.com/" target="_blank" class="social-icon-link" id="shareInstagram" style="--hover-glow:#e1306c; color:#e1306c;">
+            <a href="https://t.me/" target="_blank" class="social-icon-link" id="shareTelegram" style="--hover-glow:#0088cc; color:#0088cc;" title="Share on Telegram">
+                <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.562 8.161c-.18.717-.962 4.084-1.362 5.411-.168.56-.476.748-.777.766-.653.038-1.147-.433-1.782-.849-1-.652-1.564-1.058-2.536-1.698-1.123-.74-.396-1.146.245-1.81.167-.174 3.072-2.816 3.129-3.056.007-.03.014-.145-.054-.205-.068-.06-.17-.04-.243-.023-.104.024-1.761 1.12-4.97 3.284-.47.323-.896.48-1.278.472-.423-.009-1.235-.239-1.839-.435-.742-.241-1.332-.37-1.28-.78.027-.213.322-.432.884-.657 3.46-1.507 5.767-2.502 6.922-2.984 3.297-1.37 3.98-1.608 4.428-1.615.098 0 .319.024.462.141.12.098.154.232.17.325.016.094.036.31.02.483z"/></svg>
+            </a>
+            <a href="https://www.instagram.com/" target="_blank" class="social-icon-link" id="shareInstagram" style="--hover-glow:#e1306c; color:#e1306c;" title="Share on Instagram">
                 <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
             </a>
-            <a href="https://www.facebook.com/" target="_blank" class="social-icon-link" id="shareFacebook" style="--hover-glow:#1877f2; color:#1877f2;">
+            <a href="https://www.facebook.com/" target="_blank" class="social-icon-link" id="shareFacebook" style="--hover-glow:#1877f2; color:#1877f2;" title="Share on Facebook">
                 <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             </a>
-            <a href="https://www.tiktok.com/" target="_blank" class="social-icon-link" id="shareTikTok" style="--hover-glow:#00f2fe; color:#00f2fe;">
+            <a href="https://www.tiktok.com/" target="_blank" class="social-icon-link" id="shareTikTok" style="--hover-glow:#00f2fe; color:#00f2fe;" title="Share on TikTok">
                 <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.03 1.6 4.17 1.22 1.42 2.97 2.26 4.8 2.41v3.83c-1.39-.07-2.74-.55-3.87-1.39-.75-.56-1.37-1.27-1.83-2.09-.01 2.94.01 5.88-.01 8.81-.03 2.15-.65 4.3-1.89 6.03-1.63 2.33-4.22 3.8-7.1 3.86-2.37.07-4.75-.63-6.64-2.06-2.3-1.68-3.72-4.32-3.82-7.16-.16-3.4 1.74-6.74 4.81-8.23 1.5-.75 3.18-.99 4.83-.73V9.32c-1.02-.27-2.13-.08-2.99.53-.98.67-1.55 1.79-1.56 2.97-.02 1.52 1.01 2.92 2.48 3.29 1.15.31 2.41-.12 3.11-1.05.39-.51.6-1.13.59-1.77-.02-4.43 0-8.85-.01-13.28z"/></svg>
             </a>
         </div>
@@ -230,12 +247,12 @@ const languageDictionary = {
         lblDashPhone:       "Phone Number",
         lblDashWallet:      "Referral Wallet",
         lblDashReferred:    "Total Referred",
-        lblYourCode:        "Your Referral Code",
+        lblYourCode:        "Your Referral Link",
         btnCopy:            "Copy",
         msgLoginFirst:      "Please log in first to access the referral programme.",
         msgSuccessReg:      "Congratulations! You are now officially part of NS Platform.",
         msgAlreadyMember:   "You are already a registered member.",
-        msgCopied:          "Referral code copied to clipboard!",
+        msgCopied:          "Referral link copied to clipboard!",
         errName:            "Validation Error: Names must contain text characters only.",
         errPhone:           "Validation Error: Telephone must consist of exactly 10 digits.",
         processing:         "Syncing…",
@@ -256,12 +273,12 @@ const languageDictionary = {
         lblDashPhone:       "Numéro de Téléphone",
         lblDashWallet:      "Portefeuille de Parrainage",
         lblDashReferred:    "Total Parrainés",
-        lblYourCode:        "Votre Code de Parrainage",
+        lblYourCode:        "Votre Lien de Parrainage",
         btnCopy:            "Copier",
         msgLoginFirst:      "Veuillez vous connecter d'abord pour accéder au programme de parrainage.",
         msgSuccessReg:      "Félicitations! Vous faites officiellement partie de NS Platform.",
         msgAlreadyMember:   "Vous êtes déjà un membre enregistré.",
-        msgCopied:          "Code de parrainage copié avec succès!",
+        msgCopied:          "Lien de parrainage copié avec succès!",
         errName:            "Erreur: Le nom doit contenir des lettres uniquement.",
         errPhone:           "Erreur: Le téléphone doit comporter exactement 10 chiffres.",
         processing:         "Synchronisation…",
@@ -282,12 +299,12 @@ const languageDictionary = {
         lblDashPhone:       "Numero ya Telefone",
         lblDashWallet:      "Amafaranga y'Utumire",
         lblDashReferred:    "Abantu Batumirwa Bose",
-        lblYourCode:        "Kode Yawe yo Gutumira",
+        lblYourCode:        "Iliyanzi Yayo y'Utumire",
         btnCopy:            "Kopera",
         msgLoginFirst:      "Nyamuneka banza winjire (Login) mbere yo gukoresha porogaramu yo gutumira.",
         msgSuccessReg:      "Urakoze cyane! Ubu uri umunyamuryango yemewe wa NS Platform.",
         msgAlreadyMember:   "Urasanzwe ari umunyamuryango wanditse.",
-        msgCopied:          "Kode yo gutumira yakopewe neza!",
+        msgCopied:          "Lien yo gutumira yakopewe neza!",
         errName:            "Ikosa: Amazina agomba kuba inyuguti gusa.",
         errPhone:           "Ikosa: Numero ya telefone igomba kuba igizwe n'imibare 10 gusa.",
         processing:         "Tegereza…",
@@ -336,10 +353,18 @@ function renderDashboard(data) {
     document.getElementById("dashPhone").innerText     = data.phoneNumber || "—";
     document.getElementById("dashWallet").innerText    = (data.walletBalance  || 0).toLocaleString() + " FRW";
     document.getElementById("dashReferred").innerText  = (data.totalReferredUsers || 0).toLocaleString();
-    document.getElementById("dashReferralCode").innerText = data.referralCode || "—";
 
-    if (data.referralCode) {
-        updateShareLinks(data.referralCode);
+    const code = data.referralCode || "";
+    const fullLink = code ? `https://social-site-lemon.vercel.app?ref=${code}` : "—";
+    const codeEl = document.getElementById("dashReferralCode");
+    if (codeEl) {
+        codeEl.innerText = fullLink;
+        codeEl.setAttribute("data-code", code);
+        codeEl.setAttribute("data-link", fullLink);
+    }
+
+    if (code) {
+        updateShareLinks(code);
     }
 
     // Swap panels
@@ -348,12 +373,25 @@ function renderDashboard(data) {
 }
 
 function updateShareLinks(code) {
-    const base    = window.location.origin;
-    const message = encodeURIComponent(`Join NS Platform and boost your subsribers, followers, likes, views, comments, and overall engagement on multiple social media platforms—completely free.: ${base}?ref=${code}`);
-    document.getElementById("shareWhatsApp").href   = `https://api.whatsapp.com/send?text=${message}`;
-    document.getElementById("shareFacebook").href   = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(base + '?ref=' + code)}`;
-    document.getElementById("shareInstagram").href  = "https://www.instagram.com/";
-    document.getElementById("shareTikTok").href     = "https://www.tiktok.com/";
+    const base        = "https://social-site-lemon.vercel.app";
+    const shareUrl    = `${base}?ref=${code}`;
+    const shareText   = "Join NS Platform and boost your subscribers, followers, likes, views, comments, and overall engagement on multiple social media platforms—completely free.: ";
+    const fullMessage = encodeURIComponent(`${shareText}${shareUrl}`);
+
+    const shareWhatsApp = document.getElementById("shareWhatsApp");
+    if (shareWhatsApp) shareWhatsApp.href = `https://api.whatsapp.com/send?text=${fullMessage}`;
+
+    const shareTelegram = document.getElementById("shareTelegram");
+    if (shareTelegram) shareTelegram.href = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+
+    const shareFacebook = document.getElementById("shareFacebook");
+    if (shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+
+    const shareInstagram = document.getElementById("shareInstagram");
+    if (shareInstagram) shareInstagram.href = "https://www.instagram.com/";
+
+    const shareTikTok = document.getElementById("shareTikTok");
+    if (shareTikTok) shareTikTok.href = "https://www.tiktok.com/";
 }
 
 // ==========================================================
@@ -444,10 +482,14 @@ document.getElementById("partnershipForm").addEventListener("submit", async func
 //         COPY BUTTON
 // ==========================================================
 document.getElementById("btnDashCopy").addEventListener("click", function() {
-    const code = document.getElementById("dashReferralCode").innerText;
-    if (!code || code === "—" || code === "—————") return;
+    const codeEl = document.getElementById("dashReferralCode");
+    const rawText = codeEl.getAttribute("data-link") || codeEl.innerText;
+    if (!rawText || rawText === "—" || rawText === "—————") return;
 
-    navigator.clipboard.writeText(code).then(() => {
+    const code = codeEl.getAttribute("data-code") || rawText.replace("https://social-site-lemon.vercel.app?ref=", "").replace("https://social-site-lemon.vercel.app/?ref=", "").trim();
+    const fullLink = `https://social-site-lemon.vercel.app?ref=${code}`;
+
+    navigator.clipboard.writeText(fullLink).then(() => {
         const btn = this;
         const original = btn.innerText;
         btn.innerText = "✓ Copied!";
@@ -461,7 +503,7 @@ document.getElementById("btnDashCopy").addEventListener("click", function() {
             btn.style.borderColor = "";
         }, 2000);
     }).catch(() => {
-        alert(D.msgCopied);
+        alert(D.msgCopied || "Link copied!");
     });
 });
 
