@@ -304,19 +304,30 @@ app.delete("/api/user/profile", async (req, res) => {
 /* ---------------- 7. DEPOSIT ENDPOINTS ---------------- */
 
 // POST /api/deposit/submit — accepts multipart/form-data with a screenshot image or JSON body
-app.post("/api/deposit/submit", upload.single("screenshot"), async (req, res) => {
+app.post("/api/deposit/submit", (req, res, next) => {
+  upload.single("screenshot")(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message || "Payment screenshot upload failed." });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
     await connectToDatabase();
-    const senderName = (req.body.sender_name || req.body.fullName || "").trim();
-    const phoneNumber = (req.body.phone_number || req.body.telephone || "").trim();
+    const senderName = (req.body.sender_name || req.body.fullName || "").toString().trim();
+    const rawPhone = (req.body.phone_number || req.body.telephone || "").toString();
+    const phoneNumber = rawPhone.replace(/\D/g, "");
     const amountVal = Number(req.body.amount);
-    let userId = req.body.userId || "";
+    let userId = (req.body.userId || "").toString().trim();
 
-    if (!senderName || !phoneNumber || isNaN(amountVal) || amountVal <= 0) {
-      return res.status(400).json({ error: "Missing or invalid required fields (sender_name, phone_number, amount)." });
+    if (!senderName || senderName.length < 2) {
+      return res.status(400).json({ error: "Please enter a valid depositor full name." });
     }
-    if (!/^\d{10}$/.test(phoneNumber)) {
-      return res.status(400).json({ error: "Phone number must be exactly 10 digits." });
+    if (!phoneNumber || phoneNumber.length !== 10) {
+      return res.status(400).json({ error: "Phone number must be exactly 10 digits (e.g. 078XXXXXXX)." });
+    }
+    if (isNaN(amountVal) || amountVal <= 0) {
+      return res.status(400).json({ error: "Please enter a valid numeric deposit amount in FRW." });
     }
 
     let proofImage = "";
@@ -330,9 +341,10 @@ app.post("/api/deposit/submit", upload.single("screenshot"), async (req, res) =>
       return res.status(400).json({ error: "Payment screenshot/proof image is required." });
     }
 
-    // Try to extract username if user is logged in
+    // Extract logged in username if token is provided
     let username = "";
-    const token = req.cookies.token || req.query.token || req.headers.authorization?.replace("Bearer ", "");
+    const authHeader = req.headers.authorization || "";
+    const token = req.cookies.token || req.query.token || (authHeader.startsWith("Bearer ") ? authHeader.substring(7) : "");
     if (token) {
       try {
         const decoded = jwt.verify(token, JWT_SECRET);
@@ -348,33 +360,45 @@ app.post("/api/deposit/submit", upload.single("screenshot"), async (req, res) =>
       userId = username || senderName;
     }
 
-    // Block duplicate pending requests from the same user/session
+    // Upsert or update existing pending request for this user to ensure submission always succeeds
     const existing = await Deposit.findOne({ 
-      $or: [{ userId }, { sender_name: senderName }], 
+      $or: [{ userId }, { username: username || userId }], 
       status: { $in: ["pending", "PENDING"] } 
     });
-    if (existing) {
-      return res.status(400).json({ error: "You already have a pending deposit request." });
-    }
 
-    const depositDoc = await Deposit.create({
-      userId,
-      username,
-      sender_name:         senderName,
-      fullName:            senderName,
-      phone_number:        phoneNumber,
-      telephone:           phoneNumber,
-      amount:              amountVal,
-      proof_image:         proofImage,
-      screenshotData:      proofImage,
-      screenshotMimeType:  mimeType,
-      status:              "pending"
-    });
+    let depositDoc;
+    if (existing) {
+      existing.sender_name = senderName;
+      existing.fullName = senderName;
+      existing.phone_number = phoneNumber;
+      existing.telephone = phoneNumber;
+      existing.amount = amountVal;
+      existing.proof_image = proofImage;
+      existing.screenshotData = proofImage;
+      existing.screenshotMimeType = mimeType;
+      existing.status = "pending";
+      existing.updatedAt = new Date();
+      depositDoc = await existing.save();
+    } else {
+      depositDoc = await Deposit.create({
+        userId,
+        username,
+        sender_name:         senderName,
+        fullName:            senderName,
+        phone_number:        phoneNumber,
+        telephone:           phoneNumber,
+        amount:              amountVal,
+        proof_image:         proofImage,
+        screenshotData:      proofImage,
+        screenshotMimeType:  mimeType,
+        status:              "pending"
+      });
+    }
 
     return res.json({ success: true, status: "pending", id: depositDoc._id });
   } catch (err) {
     console.error("[Deposit Submit]", err);
-    return res.status(500).json({ error: "Deposit submission failed." });
+    return res.status(500).json({ error: err.message || "Deposit submission failed." });
   }
 });
 
