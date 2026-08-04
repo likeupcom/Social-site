@@ -349,7 +349,7 @@ function renderDashboard(data) {
 
 function updateShareLinks(code) {
     const base    = window.location.origin;
-    const message = encodeURIComponent(`Join NS Platform using my referral code ${code} and start earning: ${base}?ref=${code}`);
+    const message = encodeURIComponent(`Join NS Platform and boost your subsribers, followers, likes, views, comments, and overall engagement on multiple social media platforms—completely free.: ${base}?ref=${code}`);
     document.getElementById("shareWhatsApp").href   = `https://api.whatsapp.com/send?text=${message}`;
     document.getElementById("shareFacebook").href   = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(base + '?ref=' + code)}`;
     document.getElementById("shareInstagram").href  = "https://www.instagram.com/";
