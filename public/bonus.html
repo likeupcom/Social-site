@@ -380,8 +380,8 @@ function renderDashboard(data) {
 function updateShareLinks(code) {
     const base        = "https://social-site-lemon.vercel.app";
     const shareUrl    = `${base}?ref=${code}`;
-    const shareText   = "Join NS Platform and boost your subscribers, followers, likes, views, comments, and overall engagement on multiple social media platforms—completely free.: ";
-    const fullMessage = encodeURIComponent(`${shareText}${shareUrl}`);
+    const shareText   = "Join NS Platform and boost your subscribers, followers, likes, views, comments, and overall engagement on multiple social media platforms—completely free.";
+    const fullMessage = encodeURIComponent(`${shareText} ${shareUrl}`);
 
     const shareWhatsApp = document.getElementById("shareWhatsApp");
     if (shareWhatsApp) shareWhatsApp.href = `https://api.whatsapp.com/send?text=${fullMessage}`;
@@ -393,10 +393,50 @@ function updateShareLinks(code) {
     if (shareFacebook) shareFacebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
 
     const shareInstagram = document.getElementById("shareInstagram");
-    if (shareInstagram) shareInstagram.href = "https://www.instagram.com/";
+    if (shareInstagram) {
+        shareInstagram.href = "https://www.instagram.com/";
+        shareInstagram.onclick = function(e) {
+            if (navigator.share) {
+                e.preventDefault();
+                navigator.share({
+                    title: 'NS Platform',
+                    text: shareText,
+                    url: shareUrl
+                }).catch(() => {});
+            } else {
+                e.preventDefault();
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert(`Referral link copied to clipboard!\n${shareUrl}\n\nPaste it on Instagram to share.`);
+                    window.open("https://www.instagram.com/", "_blank");
+                }).catch(() => {
+                    window.open("https://www.instagram.com/", "_blank");
+                });
+            }
+        };
+    }
 
     const shareTikTok = document.getElementById("shareTikTok");
-    if (shareTikTok) shareTikTok.href = "https://www.tiktok.com/";
+    if (shareTikTok) {
+        shareTikTok.href = "https://www.tiktok.com/";
+        shareTikTok.onclick = function(e) {
+            if (navigator.share) {
+                e.preventDefault();
+                navigator.share({
+                    title: 'NS Platform',
+                    text: shareText,
+                    url: shareUrl
+                }).catch(() => {});
+            } else {
+                e.preventDefault();
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert(`Referral link copied to clipboard!\n${shareUrl}\n\nPaste it on TikTok to share.`);
+                    window.open("https://www.tiktok.com/", "_blank");
+                }).catch(() => {
+                    window.open("https://www.tiktok.com/", "_blank");
+                });
+            }
+        };
+    }
 }
 
 // ==========================================================
