@@ -24,13 +24,16 @@ function getMember() {
 
 /* ─── Seed default admin on first run ─── */
 async function seedAdmin() {
-  await connectToDatabase();
-  // Force reset password for simeon
-  const hash = await bcrypt.hash("123456", 10);
-  await Admin.updateOne({ username: "simeon" }, { password: hash }, { upsert: true });
-  console.log("✅ Admin password reset to 123456");
+  try {
+    if (!process.env.MONGODB_URI) return;
+    await connectToDatabase();
+    const hash = await bcrypt.hash("123456", 10);
+    await Admin.updateOne({ username: "simeon" }, { password: hash }, { upsert: true });
+  } catch (err) {
+    console.warn("⚠️ Admin seed skipped/error during startup:", err.message);
+  }
 }
-seedAdmin().catch(console.error);
+seedAdmin().catch(() => {});
 
 /* ─── Custom verifyAdmin middleware for checking admin session tokens ─── */
 function verifyAdmin(req, res, next) {
@@ -813,6 +816,10 @@ router.delete("/api/admin/facebook/queue/:queueId", adminAuth, async (req, res) 
     return res.json({ success: true });
   } catch (err) {
     console.error("[Admin FB remove queue]", err);
+    return res.status(500).json({ error: "Remove failed." });
+  }
+});
+
 /* ================================================================
    Deposit Admin Routes
    Models & Endpoints for managing user deposit requests
