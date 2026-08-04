@@ -53,14 +53,43 @@ const User = mongoose.models.User || mongoose.model("User", userSchema);
 /* --- Deposit Schema & Model --- */
 const depositSchema = new mongoose.Schema({
   userId:              { type: String, required: true },
-  fullName:            { type: String, required: true },
-  telephone:           { type: String, required: true },
-  amount:              { type: Number, required: true },
-  screenshotData:      { type: String },      // base64-encoded image
-  screenshotMimeType:  { type: String },
-  status:              { type: String, default: "PENDING" },
-  createdAt:           { type: Date,   default: Date.now }
+  username:            { type: String, default: "" },
+  sender_name:         { type: String, required: true },
+  fullName:            { type: String, default: "" },
+  phone_number:        { 
+    type: String, 
+    required: true,
+    validate: {
+      validator: function(v) { return /^\d{10}$/.test(v); },
+      message: props => `${props.value} is not a valid 10-digit phone number!`
+    }
+  },
+  telephone:           { type: String, default: "" },
+  amount:              { type: Number, required: true, min: [1, "Amount must be positive"] },
+  proof_image:         { type: String },      // base64 image or URL proof
+  screenshotData:      { type: String },      // base64-encoded image for backwards compatibility
+  screenshotMimeType:  { type: String, default: "image/png" },
+  status:              { 
+    type: String, 
+    enum: ["pending", "approved", "rejected", "PENDING", "APPROVED", "REJECTED"], 
+    default: "pending" 
+  },
+  createdAt:           { type: Date,   default: Date.now },
+  updatedAt:           { type: Date,   default: Date.now }
 });
+
+// Sync aliases before save
+depositSchema.pre("save", function(next) {
+  if (this.sender_name && !this.fullName) this.fullName = this.sender_name;
+  if (this.fullName && !this.sender_name) this.sender_name = this.fullName;
+  if (this.phone_number && !this.telephone) this.telephone = this.phone_number;
+  if (this.telephone && !this.phone_number) this.phone_number = this.telephone;
+  if (this.proof_image && !this.screenshotData) this.screenshotData = this.proof_image;
+  if (this.screenshotData && !this.proof_image) this.proof_image = this.screenshotData;
+  this.updatedAt = new Date();
+  next();
+});
+
 const Deposit = mongoose.models.Deposit || mongoose.model("Deposit", depositSchema);
 
 /* ---------------- 3. UTILITY & VALIDATION FUNCTIONS ---------------- */
@@ -274,36 +303,75 @@ app.delete("/api/user/profile", async (req, res) => {
 
 /* ---------------- 7. DEPOSIT ENDPOINTS ---------------- */
 
-// POST /api/deposit/submit — accepts multipart/form-data with a screenshot image
+// POST /api/deposit/submit — accepts multipart/form-data with a screenshot image or JSON body
 app.post("/api/deposit/submit", upload.single("screenshot"), async (req, res) => {
   try {
     await connectToDatabase();
-    const { userId, fullName, telephone, amount } = req.body;
+    const senderName = (req.body.sender_name || req.body.fullName || "").trim();
+    const phoneNumber = (req.body.phone_number || req.body.telephone || "").trim();
+    const amountVal = Number(req.body.amount);
+    let userId = req.body.userId || "";
 
-    if (!fullName || !telephone || !amount) {
-      return res.status(400).json({ error: "Missing required fields." });
+    if (!senderName || !phoneNumber || isNaN(amountVal) || amountVal <= 0) {
+      return res.status(400).json({ error: "Missing or invalid required fields (sender_name, phone_number, amount)." });
     }
-    if (!req.file) {
-      return res.status(400).json({ error: "Payment screenshot is required." });
+    if (!/^\d{10}$/.test(phoneNumber)) {
+      return res.status(400).json({ error: "Phone number must be exactly 10 digits." });
     }
 
-    // Block duplicate pending requests from the same session
-    const existing = await Deposit.findOne({ userId, status: "PENDING" });
+    let proofImage = "";
+    let mimeType = "image/png";
+    if (req.file) {
+      proofImage = req.file.buffer.toString("base64");
+      mimeType = req.file.mimetype;
+    } else if (req.body.proof_image || req.body.screenshotData) {
+      proofImage = req.body.proof_image || req.body.screenshotData;
+    } else {
+      return res.status(400).json({ error: "Payment screenshot/proof image is required." });
+    }
+
+    // Try to extract username if user is logged in
+    let username = "";
+    const token = req.cookies.token || req.query.token || req.headers.authorization?.replace("Bearer ", "");
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        username = decoded.user || "";
+      } catch (e) {}
+    }
+
+    if (!userId && username) {
+      const dbUser = await User.findOne({ username });
+      if (dbUser) userId = dbUser._id.toString();
+    }
+    if (!userId) {
+      userId = username || senderName;
+    }
+
+    // Block duplicate pending requests from the same user/session
+    const existing = await Deposit.findOne({ 
+      $or: [{ userId }, { sender_name: senderName }], 
+      status: { $in: ["pending", "PENDING"] } 
+    });
     if (existing) {
       return res.status(400).json({ error: "You already have a pending deposit request." });
     }
 
-    await Deposit.create({
+    const depositDoc = await Deposit.create({
       userId,
-      fullName:           fullName.trim(),
-      telephone:          telephone.trim(),
-      amount:             Number(amount),
-      screenshotData:     req.file.buffer.toString("base64"),
-      screenshotMimeType: req.file.mimetype,
-      status:             "PENDING"
+      username,
+      sender_name:         senderName,
+      fullName:            senderName,
+      phone_number:        phoneNumber,
+      telephone:           phoneNumber,
+      amount:              amountVal,
+      proof_image:         proofImage,
+      screenshotData:      proofImage,
+      screenshotMimeType:  mimeType,
+      status:              "pending"
     });
 
-    return res.json({ success: true, status: "PENDING" });
+    return res.json({ success: true, status: "pending", id: depositDoc._id });
   } catch (err) {
     console.error("[Deposit Submit]", err);
     return res.status(500).json({ error: "Deposit submission failed." });
@@ -314,13 +382,23 @@ app.post("/api/deposit/submit", upload.single("screenshot"), async (req, res) =>
 app.get("/api/deposit/status", async (req, res) => {
   try {
     await connectToDatabase();
-    const { userId } = req.query;
+    let { userId } = req.query;
     if (!userId) return res.json({ status: "NONE" });
 
-    const deposit = await Deposit.findOne({ userId }).sort({ createdAt: -1 });
+    const deposit = await Deposit.findOne({
+      $or: [{ userId }, { username: userId }, { sender_name: userId }]
+    }).sort({ createdAt: -1 });
+
     if (!deposit) return res.json({ status: "NONE" });
 
-    return res.json({ status: deposit.status });
+    return res.json({ 
+      status: deposit.status,
+      id: deposit._id,
+      sender_name: deposit.sender_name || deposit.fullName,
+      phone_number: deposit.phone_number || deposit.telephone,
+      amount: deposit.amount,
+      createdAt: deposit.createdAt
+    });
   } catch (err) {
     console.error("[Deposit Status]", err);
     return res.status(500).json({ error: "Status check failed." });
