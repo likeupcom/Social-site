@@ -79,7 +79,7 @@ const depositSchema = new mongoose.Schema({
 });
 
 // Sync aliases before save
-depositSchema.pre("save", function(next) {
+depositSchema.pre("save", function() {
   if (this.sender_name && !this.fullName) this.fullName = this.sender_name;
   if (this.fullName && !this.sender_name) this.sender_name = this.fullName;
   if (this.phone_number && !this.telephone) this.telephone = this.phone_number;
@@ -87,7 +87,6 @@ depositSchema.pre("save", function(next) {
   if (this.proof_image && !this.screenshotData) this.screenshotData = this.proof_image;
   if (this.screenshotData && !this.proof_image) this.proof_image = this.screenshotData;
   this.updatedAt = new Date();
-  next();
 });
 
 const Deposit = mongoose.models.Deposit || mongoose.model("Deposit", depositSchema);
