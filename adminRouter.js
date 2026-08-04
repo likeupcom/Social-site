@@ -246,9 +246,14 @@ router.post("/api/admin/change-credentials", adminAuth, async (req, res) => {
 ================================================================= */
 
 function getYTModels() {
+  if (!mongoose.models.YTActiveSlot || !mongoose.models.YTWaitingQueue) {
+    try { require("./page.js"); } catch (e) {}
+  }
   return {
     YTActiveSlot:   mongoose.models.YTActiveSlot,
-    YTWaitingQueue: mongoose.models.YTWaitingQueue
+    YTWaitingQueue: mongoose.models.YTWaitingQueue,
+    YTUserProfile:  mongoose.models.YTUserProfile,
+    VIPQueue:       mongoose.models.VIPQueue
   };
 }
 
@@ -364,10 +369,55 @@ router.post("/api/admin/youtube/assign", adminAuth, async (req, res) => {
 router.delete("/api/admin/youtube/slot/:slotId", adminAuth, async (req, res) => {
   try {
     await connectToDatabase();
-    const { YTActiveSlot } = getYTModels();
+    const { YTActiveSlot, YTWaitingQueue, YTUserProfile, VIPQueue } = getYTModels();
+    if (!YTActiveSlot) return res.status(500).json({ error: "YT models not loaded yet." });
+
     const slot = await YTActiveSlot.findByIdAndDelete(req.params.slotId);
     if (!slot) return res.status(404).json({ error: "Slot not found." });
-    return res.json({ success: true });
+
+    const userId = slot.userId;
+
+    // Reset profile for removed user so they are freed from board lock
+    if (YTUserProfile && userId) {
+      await YTUserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { acceptedConditions: false, visitedChannels: [], activeSequenceIndex: 0 } },
+        { upsert: false }
+      );
+    }
+
+    // Clean up appealedBy references in waiting list
+    if (YTWaitingQueue && userId) {
+      await YTWaitingQueue.updateMany(
+        { appealedBy: userId },
+        { $pull: { appealedBy: userId } }
+      );
+    }
+
+    // Auto VIP Queue Promotion: If a VIP slot (sequencePosition < 4 or isVip) was freed
+    if ((slot.isVip || slot.sequencePosition < 4) && VIPQueue) {
+      const nextVip = await VIPQueue.findOne({ platform: "youtube" }).sort({ createdAt: 1 });
+      if (nextVip) {
+        let freePos = slot.sequencePosition;
+        if (freePos < 0 || freePos > 3) freePos = 0;
+
+        await YTActiveSlot.create({
+          userId: nextVip.userId,
+          username: nextVip.username,
+          youtubeChannel: nextVip.targetLink,
+          youtubeVideo: nextVip.targetLink,
+          isVip: true,
+          sequencePosition: freePos,
+          packageId: nextVip.packageId,
+          engagementTarget: nextVip.engagementTarget,
+          views: 0, subs: 0, likes: 0, comments: 0
+        });
+
+        await VIPQueue.deleteOne({ _id: nextVip._id });
+      }
+    }
+
+    return res.json({ success: true, message: `Removed ${slot.username} from YouTube slot.` });
   } catch (err) {
     console.error("[Admin YT remove slot]", err);
     return res.status(500).json({ error: "Remove failed." });
@@ -378,10 +428,22 @@ router.delete("/api/admin/youtube/slot/:slotId", adminAuth, async (req, res) => 
 router.delete("/api/admin/youtube/queue/:queueId", adminAuth, async (req, res) => {
   try {
     await connectToDatabase();
-    const { YTWaitingQueue } = getYTModels();
+    const { YTWaitingQueue, YTUserProfile } = getYTModels();
+    if (!YTWaitingQueue) return res.status(500).json({ error: "YT models not loaded yet." });
+
     const entry = await YTWaitingQueue.findByIdAndDelete(req.params.queueId);
     if (!entry) return res.status(404).json({ error: "Queue entry not found." });
-    return res.json({ success: true });
+
+    const userId = entry.userId;
+    if (YTUserProfile && userId) {
+      await YTUserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { acceptedConditions: false, visitedChannels: [], activeSequenceIndex: 0 } },
+        { upsert: false }
+      );
+    }
+
+    return res.json({ success: true, message: `Removed ${entry.username} from YouTube queue.` });
   } catch (err) {
     console.error("[Admin YT remove queue]", err);
     return res.status(500).json({ error: "Remove failed." });
@@ -394,9 +456,14 @@ router.delete("/api/admin/youtube/queue/:queueId", adminAuth, async (req, res) =
 ================================================================= */
 
 function getTKModels() {
+  if (!mongoose.models.TKActiveSlot || !mongoose.models.TKWaitingQueue) {
+    try { require("./page1.js"); } catch (e) {}
+  }
   return {
     TKActiveSlot:   mongoose.models.TKActiveSlot,
-    TKWaitingQueue: mongoose.models.TKWaitingQueue
+    TKWaitingQueue: mongoose.models.TKWaitingQueue,
+    TKUserProfile:  mongoose.models.TKUserProfile,
+    TKVIPQueue:     mongoose.models.TKVIPQueue
   };
 }
 
@@ -504,10 +571,52 @@ router.post("/api/admin/tiktok/assign", adminAuth, async (req, res) => {
 router.delete("/api/admin/tiktok/slot/:slotId", adminAuth, async (req, res) => {
   try {
     await connectToDatabase();
-    const { TKActiveSlot } = getTKModels();
+    const { TKActiveSlot, TKWaitingQueue, TKUserProfile, TKVIPQueue } = getTKModels();
+    if (!TKActiveSlot) return res.status(500).json({ error: "TK models not loaded yet." });
+
     const slot = await TKActiveSlot.findByIdAndDelete(req.params.slotId);
     if (!slot) return res.status(404).json({ error: "Slot not found." });
-    return res.json({ success: true });
+
+    const userId = slot.userId;
+
+    if (TKUserProfile && userId) {
+      await TKUserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { acceptedConditions: false, visitedChannels: [], activeSequenceIndex: 0 } },
+        { upsert: false }
+      );
+    }
+
+    if (TKWaitingQueue && userId) {
+      await TKWaitingQueue.updateMany(
+        { appealedBy: userId },
+        { $pull: { appealedBy: userId } }
+      );
+    }
+
+    if ((slot.isVip || slot.sequencePosition < 4) && TKVIPQueue) {
+      const nextVip = await TKVIPQueue.findOne().sort({ createdAt: 1 });
+      if (nextVip) {
+        let freePos = slot.sequencePosition;
+        if (freePos < 0 || freePos > 3) freePos = 0;
+
+        await TKActiveSlot.create({
+          userId: nextVip.userId,
+          username: nextVip.username,
+          TiktokChannel: nextVip.targetLink,
+          TiktokVideo: nextVip.targetLink,
+          isVip: true,
+          sequencePosition: freePos,
+          packageId: nextVip.packageId,
+          engagementTarget: nextVip.engagementTarget,
+          views: 0, subs: 0, likes: 0, comments: 0
+        });
+
+        await TKVIPQueue.deleteOne({ _id: nextVip._id });
+      }
+    }
+
+    return res.json({ success: true, message: `Removed ${slot.username} from TikTok slot.` });
   } catch (err) {
     console.error("[Admin TK remove slot]", err);
     return res.status(500).json({ error: "Remove failed." });
@@ -518,10 +627,22 @@ router.delete("/api/admin/tiktok/slot/:slotId", adminAuth, async (req, res) => {
 router.delete("/api/admin/tiktok/queue/:queueId", adminAuth, async (req, res) => {
   try {
     await connectToDatabase();
-    const { TKWaitingQueue } = getTKModels();
+    const { TKWaitingQueue, TKUserProfile } = getTKModels();
+    if (!TKWaitingQueue) return res.status(500).json({ error: "TK models not loaded yet." });
+
     const entry = await TKWaitingQueue.findByIdAndDelete(req.params.queueId);
     if (!entry) return res.status(404).json({ error: "Queue entry not found." });
-    return res.json({ success: true });
+
+    const userId = entry.userId;
+    if (TKUserProfile && userId) {
+      await TKUserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { acceptedConditions: false, visitedChannels: [], activeSequenceIndex: 0 } },
+        { upsert: false }
+      );
+    }
+
+    return res.json({ success: true, message: `Removed ${entry.username} from TikTok queue.` });
   } catch (err) {
     console.error("[Admin TK remove queue]", err);
     return res.status(500).json({ error: "Remove failed." });
@@ -539,7 +660,9 @@ function getIGModels() {
   }
   return {
     IGActiveSlot:   mongoose.models.IGActiveSlot,
-    IGWaitingQueue: mongoose.models.IGWaitingQueue
+    IGWaitingQueue: mongoose.models.IGWaitingQueue,
+    IGUserProfile:  mongoose.models.IGUserProfile,
+    IGVIPQueue:     mongoose.models.IGVIPQueue
   };
 }
 
@@ -650,10 +773,52 @@ router.post("/api/admin/instagram/assign", adminAuth, async (req, res) => {
 router.delete("/api/admin/instagram/slot/:slotId", adminAuth, async (req, res) => {
   try {
     await connectToDatabase();
-    const { IGActiveSlot } = getIGModels();
+    const { IGActiveSlot, IGWaitingQueue, IGUserProfile, IGVIPQueue } = getIGModels();
+    if (!IGActiveSlot) return res.status(500).json({ error: "IG models not loaded yet." });
+
     const slot = await IGActiveSlot.findByIdAndDelete(req.params.slotId);
     if (!slot) return res.status(404).json({ error: "Slot not found." });
-    return res.json({ success: true });
+
+    const userId = slot.userId;
+
+    if (IGUserProfile && userId) {
+      await IGUserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { acceptedConditions: false, visitedChannels: [], activeSequenceIndex: 0 } },
+        { upsert: false }
+      );
+    }
+
+    if (IGWaitingQueue && userId) {
+      await IGWaitingQueue.updateMany(
+        { appealedBy: userId },
+        { $pull: { appealedBy: userId } }
+      );
+    }
+
+    if ((slot.isVip || slot.sequencePosition < 4) && IGVIPQueue) {
+      const nextVip = await IGVIPQueue.findOne().sort({ createdAt: 1 });
+      if (nextVip) {
+        let freePos = slot.sequencePosition;
+        if (freePos < 0 || freePos > 3) freePos = 0;
+
+        await IGActiveSlot.create({
+          userId: nextVip.userId,
+          username: nextVip.username,
+          instagramChannel: nextVip.targetLink,
+          instagramVideo: nextVip.targetLink,
+          isVip: true,
+          sequencePosition: freePos,
+          packageId: nextVip.packageId,
+          engagementTarget: nextVip.engagementTarget,
+          views: 0, followers: 0, likes: 0, comments: 0
+        });
+
+        await IGVIPQueue.deleteOne({ _id: nextVip._id });
+      }
+    }
+
+    return res.json({ success: true, message: `Removed ${slot.username} from Instagram slot.` });
   } catch (err) {
     console.error("[Admin IG remove slot]", err);
     return res.status(500).json({ error: "Remove failed." });
@@ -664,10 +829,22 @@ router.delete("/api/admin/instagram/slot/:slotId", adminAuth, async (req, res) =
 router.delete("/api/admin/instagram/queue/:queueId", adminAuth, async (req, res) => {
   try {
     await connectToDatabase();
-    const { IGWaitingQueue } = getIGModels();
+    const { IGWaitingQueue, IGUserProfile } = getIGModels();
+    if (!IGWaitingQueue) return res.status(500).json({ error: "IG models not loaded yet." });
+
     const entry = await IGWaitingQueue.findByIdAndDelete(req.params.queueId);
     if (!entry) return res.status(404).json({ error: "Queue entry not found." });
-    return res.json({ success: true });
+
+    const userId = entry.userId;
+    if (IGUserProfile && userId) {
+      await IGUserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { acceptedConditions: false, visitedChannels: [], activeSequenceIndex: 0 } },
+        { upsert: false }
+      );
+    }
+
+    return res.json({ success: true, message: `Removed ${entry.username} from Instagram queue.` });
   } catch (err) {
     console.error("[Admin IG remove queue]", err);
     return res.status(500).json({ error: "Remove failed." });
@@ -685,7 +862,9 @@ function getFBModels() {
   }
   return {
     FBActiveSlot:   mongoose.models.FBActiveSlot,
-    FBWaitingQueue: mongoose.models.FBWaitingQueue
+    FBWaitingQueue: mongoose.models.FBWaitingQueue,
+    FBUserProfile:  mongoose.models.FBUserProfile,
+    FBVIPQueue:     mongoose.models.FBVIPQueue
   };
 }
 
@@ -796,10 +975,52 @@ router.post("/api/admin/facebook/assign", adminAuth, async (req, res) => {
 router.delete("/api/admin/facebook/slot/:slotId", adminAuth, async (req, res) => {
   try {
     await connectToDatabase();
-    const { FBActiveSlot } = getFBModels();
+    const { FBActiveSlot, FBWaitingQueue, FBUserProfile, FBVIPQueue } = getFBModels();
+    if (!FBActiveSlot) return res.status(500).json({ error: "FB models not loaded yet." });
+
     const slot = await FBActiveSlot.findByIdAndDelete(req.params.slotId);
     if (!slot) return res.status(404).json({ error: "Slot not found." });
-    return res.json({ success: true });
+
+    const userId = slot.userId;
+
+    if (FBUserProfile && userId) {
+      await FBUserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { acceptedConditions: false, visitedChannels: [], activeSequenceIndex: 0 } },
+        { upsert: false }
+      );
+    }
+
+    if (FBWaitingQueue && userId) {
+      await FBWaitingQueue.updateMany(
+        { appealedBy: userId },
+        { $pull: { appealedBy: userId } }
+      );
+    }
+
+    if ((slot.isVip || slot.sequencePosition < 4) && FBVIPQueue) {
+      const nextVip = await FBVIPQueue.findOne().sort({ createdAt: 1 });
+      if (nextVip) {
+        let freePos = slot.sequencePosition;
+        if (freePos < 0 || freePos > 3) freePos = 0;
+
+        await FBActiveSlot.create({
+          userId: nextVip.userId,
+          username: nextVip.username,
+          facebookChannel: nextVip.targetLink,
+          facebookVideo: nextVip.targetLink,
+          isVip: true,
+          sequencePosition: freePos,
+          packageId: nextVip.packageId,
+          engagementTarget: nextVip.engagementTarget,
+          views: 0, followers: 0, likes: 0, comments: 0
+        });
+
+        await FBVIPQueue.deleteOne({ _id: nextVip._id });
+      }
+    }
+
+    return res.json({ success: true, message: `Removed ${slot.username} from Facebook slot.` });
   } catch (err) {
     console.error("[Admin FB remove slot]", err);
     return res.status(500).json({ error: "Remove failed." });
@@ -810,10 +1031,22 @@ router.delete("/api/admin/facebook/slot/:slotId", adminAuth, async (req, res) =>
 router.delete("/api/admin/facebook/queue/:queueId", adminAuth, async (req, res) => {
   try {
     await connectToDatabase();
-    const { FBWaitingQueue } = getFBModels();
+    const { FBWaitingQueue, FBUserProfile } = getFBModels();
+    if (!FBWaitingQueue) return res.status(500).json({ error: "FB models not loaded yet." });
+
     const entry = await FBWaitingQueue.findByIdAndDelete(req.params.queueId);
     if (!entry) return res.status(404).json({ error: "Queue entry not found." });
-    return res.json({ success: true });
+
+    const userId = entry.userId;
+    if (FBUserProfile && userId) {
+      await FBUserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { acceptedConditions: false, visitedChannels: [], activeSequenceIndex: 0 } },
+        { upsert: false }
+      );
+    }
+
+    return res.json({ success: true, message: `Removed ${entry.username} from Facebook queue.` });
   } catch (err) {
     console.error("[Admin FB remove queue]", err);
     return res.status(500).json({ error: "Remove failed." });
