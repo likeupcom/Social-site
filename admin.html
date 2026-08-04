@@ -993,8 +993,9 @@ function openConfirm(title, msg, cb) {
   confirmCallback = cb;
   document.getElementById('confirmModal').classList.add('open');
   document.getElementById('confirmOkBtn').onclick = async () => {
+    const action = confirmCallback;
     closeConfirm();
-    if (confirmCallback) await confirmCallback();
+    if (action) await action();
   };
 }
 function closeConfirm() {
