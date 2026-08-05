@@ -201,6 +201,7 @@ tbody td{padding:13px 16px;color:#ddd;vertical-align:middle}
               <th>Phone Number</th>
               <th>Referral Balance (FRW)</th>
               <th>Total Referrals</th>
+              <th>Withdrawal Status</th>
               <th>Referral Code</th>
               <th>Status</th>
               <th>Actions</th>
@@ -864,6 +865,23 @@ function renderTable() {
 
   tbody.innerHTML = filtered.map((m, i) => {
     const isBanned = m.status === 'banned';
+    const w = m.withdrawal;
+
+    let withdrawalBadge = `<span style="color:#666;font-size:12px">None</span>`;
+    let withdrawalActions = '';
+
+    if (w && w.status === 'pending') {
+      withdrawalBadge = `<span class="status-badge" style="background:rgba(255,171,0,.15);color:#ffab00;border:1px solid rgba(255,171,0,.3)">Pending (${(w.amount||0).toLocaleString()} FRW)</span>`;
+      withdrawalActions = `
+        <button class="btn-sm btn-activate" onclick="handleWithdrawal('${m._id}', 'approved')">✓ Approve</button>
+        <button class="btn-sm btn-delete" onclick="handleWithdrawal('${m._id}', 'rejected')">✕ Reject</button>
+      `;
+    } else if (w && w.status === 'approved') {
+      withdrawalBadge = `<span class="status-badge status-active">Approved (${(w.amount||0).toLocaleString()} FRW)</span>`;
+    } else if (w && w.status === 'rejected') {
+      withdrawalBadge = `<span class="status-badge status-banned">Rejected</span>`;
+    }
+
     return `
     <tr>
       <td style="color:#555">${i + 1}</td>
@@ -872,10 +890,12 @@ function renderTable() {
       <td>${esc(m.phoneNumber)}</td>
       <td style="color:#00e676;font-weight:600">${(m.walletBalance || 0).toLocaleString()} FRW</td>
       <td style="color:#4facfe">${m.totalReferredUsers || 0}</td>
+      <td>${withdrawalBadge}</td>
       <td><code style="color:#ffab00;font-size:12px">${esc(m.referralCode)}</code></td>
       <td><span class="status-badge ${isBanned ? 'status-banned' : 'status-active'}">${isBanned ? 'Banned' : 'Active'}</span></td>
       <td>
         <div class="actions">
+          ${withdrawalActions}
           <button class="btn-sm btn-edit"     onclick="openEdit('${m._id}')">Edit</button>
           ${isBanned
             ? `<button class="btn-sm btn-activate" onclick="setStatus('${m._id}','active','${esc(m.fullName)}')">Activate</button>`
@@ -885,6 +905,36 @@ function renderTable() {
       </td>
     </tr>`;
   }).join('');
+}
+
+async function handleWithdrawal(memberId, actionStatus) {
+  const m = allMembers.find(x => x._id === memberId);
+  const name = m ? m.fullName : 'this member';
+  const label = actionStatus === 'approved' ? 'approve' : 'reject';
+
+  openConfirm(
+    `${actionStatus === 'approved' ? '✅ Approve' : '✕ Reject'} Withdrawal`,
+    `Are you sure you want to ${label} the withdrawal request for "${name}"?`,
+    async () => {
+      try {
+        const r = await fetch(`/api/admin/members/${memberId}/withdrawal`, {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: actionStatus })
+        });
+        const d = await r.json();
+        if (r.ok && d.success) {
+          showToast(`Withdrawal request ${actionStatus}.`);
+          await loadMembers();
+        } else {
+          showToast(d.error || 'Failed to update withdrawal status.', true);
+        }
+      } catch {
+        showToast('Network error.', true);
+      }
+    }
+  );
 }
 
 function esc(str) {
