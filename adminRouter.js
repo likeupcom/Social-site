@@ -114,8 +114,31 @@ router.get("/api/admin/members", adminAuth, async (req, res) => {
     const Member = getMember();
     if (!Member) return res.status(500).json({ error: "Member model not loaded." });
 
+    const Withdrawal = mongoose.models.Withdrawal || mongoose.model("Withdrawal");
+
     const members = await Member.find({}).sort({ createdAt: -1 }).lean();
-    return res.json({ members });
+
+    let withdrawals = [];
+    if (Withdrawal) {
+      const userIds = members.map(m => m.userId);
+      withdrawals = await Withdrawal.find({ userId: { $in: userIds } }).sort({ createdAt: -1 }).lean();
+    }
+
+    const membersWithWithdrawal = members.map(m => {
+      let w = withdrawals.find(x => x.userId === m.userId && x.status === "pending")
+           || withdrawals.find(x => x.userId === m.userId);
+      return {
+        ...m,
+        withdrawal: w ? {
+          id: w._id.toString(),
+          amount: w.amount,
+          status: w.status,
+          createdAt: w.createdAt
+        } : null
+      };
+    });
+
+    return res.json({ members: membersWithWithdrawal });
   } catch (err) {
     console.error("[Admin members]", err);
     return res.status(500).json({ error: "Failed to fetch members." });
@@ -189,6 +212,61 @@ router.delete("/api/admin/members/:id", adminAuth, async (req, res) => {
   } catch (err) {
     console.error("[Admin delete member]", err);
     return res.status(500).json({ error: "Delete failed." });
+  }
+});
+
+/* ================================================================
+   PATCH /api/admin/members/:id/withdrawal — approve | reject member withdrawal
+================================================================= */
+router.patch("/api/admin/members/:id/withdrawal", adminAuth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const Member = getMember();
+    if (!Member) return res.status(500).json({ error: "Member model not loaded." });
+
+    const Withdrawal = mongoose.models.Withdrawal || mongoose.model("Withdrawal");
+    if (!Withdrawal) return res.status(500).json({ error: "Withdrawal model not loaded." });
+
+    const { status } = req.body;
+    if (!status || !["approved", "rejected"].includes(status.toLowerCase())) {
+      return res.status(400).json({ error: "Status must be 'approved' or 'rejected'." });
+    }
+
+    const targetStatus = status.toLowerCase();
+    const member = await Member.findById(req.params.id);
+    if (!member) return res.status(404).json({ error: "Member not found." });
+
+    let withdrawal = await Withdrawal.findOne({ userId: member.userId, status: "pending" });
+    if (!withdrawal) {
+      withdrawal = await Withdrawal.findOne({ userId: member.userId }).sort({ createdAt: -1 });
+    }
+
+    if (!withdrawal) {
+      return res.status(404).json({ error: "No withdrawal request found for this member." });
+    }
+
+    withdrawal.status = targetStatus;
+    withdrawal.updatedAt = new Date();
+    await withdrawal.save();
+
+    if (targetStatus === "approved") {
+      member.walletBalance = 0;
+      await member.save();
+    }
+
+    return res.json({
+      success: true,
+      message: `Withdrawal request ${targetStatus} successfully.`,
+      member,
+      withdrawal: {
+        id: withdrawal._id.toString(),
+        amount: withdrawal.amount,
+        status: withdrawal.status
+      }
+    });
+  } catch (err) {
+    console.error("[Admin patch withdrawal]", err);
+    return res.status(500).json({ error: "Withdrawal update failed." });
   }
 });
 
