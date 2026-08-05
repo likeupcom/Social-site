@@ -39,6 +39,19 @@ const MemberSchema = new mongoose.Schema({
 });
 const Member = mongoose.models.Member || mongoose.model("Member", MemberSchema);
 
+/* ---------- Withdrawal schema & model ---------- */
+const WithdrawalSchema = new mongoose.Schema({
+  userId:      { type: String, required: true },
+  username:    { type: String, required: true },
+  fullName:    { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  amount:      { type: Number, required: true },
+  status:      { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+  createdAt:   { type: Date,   default: Date.now },
+  updatedAt:   { type: Date,   default: Date.now }
+});
+const Withdrawal = mongoose.models.Withdrawal || mongoose.model("Withdrawal", WithdrawalSchema);
+
 /* ---------- helpers ---------- */
 function makeReferralCode(username) {
   const prefix = username.slice(0, 4).toUpperCase().replace(/[^A-Z0-9]/g, "X");
@@ -71,6 +84,8 @@ router.get("/api/bonus/my-profile", auth, async (req, res) => {
     const member = await Member.findOne({ userId: dbUser._id.toString() });
     if (!member) return res.json({ registered: false });
 
+    const latestWithdrawal = await Withdrawal.findOne({ userId: dbUser._id.toString() }).sort({ createdAt: -1 });
+
     return res.json({
       registered:         true,
       username:           member.username,
@@ -78,7 +93,9 @@ router.get("/api/bonus/my-profile", auth, async (req, res) => {
       phoneNumber:        member.phoneNumber,
       walletBalance:      member.walletBalance,
       totalReferredUsers: member.totalReferredUsers,
-      referralCode:       member.referralCode
+      referralCode:       member.referralCode,
+      withdrawalStatus:   latestWithdrawal ? latestWithdrawal.status : null,
+      withdrawalAmount:   latestWithdrawal ? latestWithdrawal.amount : 0
     });
   } catch (err) {
     console.error("[Bonus] my-profile error:", err);
@@ -187,6 +204,55 @@ router.post("/api/bonus/generate-code", auth, async (req, res) => {
   } catch (err) {
     console.error("[Bonus] generate-code error:", err);
     return res.status(500).json({ error: "Code retrieval failed." });
+  }
+});
+
+/* ================================================================
+   POST /api/bonus/withdraw
+   Submits a withdrawal request via Admin for referral wallet balance.
+================================================================= */
+router.post("/api/bonus/withdraw", auth, async (req, res) => {
+  try {
+    await connectToDatabase();
+    const User   = mongoose.model("User");
+    const lookup = typeof req.user === "object" ? req.user.username : req.user;
+    const dbUser = await User.findOne({ username: lookup });
+    if (!dbUser) return res.status(404).json({ error: "User account not found." });
+
+    const member = await Member.findOne({ userId: dbUser._id.toString() });
+    if (!member) {
+      return res.status(404).json({ error: "Member profile not found." });
+    }
+
+    if (member.walletBalance <= 0) {
+      return res.status(400).json({ error: "you have no money to withdraw" });
+    }
+
+    const existingPending = await Withdrawal.findOne({
+      userId: dbUser._id.toString(),
+      status: "pending"
+    });
+    if (existingPending) {
+      return res.status(400).json({ error: "Your withdrawal request is already pending approval." });
+    }
+
+    const withdrawal = await Withdrawal.create({
+      userId:      dbUser._id.toString(),
+      username:    member.username,
+      fullName:    member.fullName,
+      phoneNumber: member.phoneNumber,
+      amount:      member.walletBalance,
+      status:      "pending"
+    });
+
+    return res.json({
+      success: true,
+      status:  "pending",
+      amount:  withdrawal.amount
+    });
+  } catch (err) {
+    console.error("[Bonus] withdraw error:", err);
+    return res.status(500).json({ error: "Withdrawal request failed." });
   }
 });
 
