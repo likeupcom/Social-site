@@ -201,6 +201,16 @@
             </div>
         </div>
 
+        <!-- ── Withdraw via Admin Button & Status Badge ── -->
+        <div class="withdraw-container" style="margin-top:20px; margin-bottom:20px; text-align:center;">
+            <button type="button" id="btnWithdrawAdmin" class="action-btn" style="background: linear-gradient(45deg, #ff007f, #7928ca); max-width: 320px; margin: 0 auto; display: block;">
+                Withdraw via Admin
+            </button>
+            <div id="withdrawalStatusBadge" style="display:none; margin-top:12px; padding:10px 16px; border-radius:8px; font-weight:600; font-size:14px; background:rgba(255, 171, 0, 0.15); border:1px solid rgba(255, 171, 0, 0.3); color:#ffab00;">
+                Status: <span id="withdrawalStatusText">pending</span>
+            </div>
+        </div>
+
         <div style="font-size:13px; color:#aaa; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;" id="lblYourCode">Your Referral Link</div>
         <div class="referral-output-container">
             <div id="dashReferralCode" class="referral-box">—————</div>
@@ -226,6 +236,19 @@
         </div>
     </div>
 
+</div>
+
+<!-- ── Custom Modal for Withdrawal Notifications / Confirmations ── -->
+<div id="bonusModalOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#0f0f1a; border:1px solid rgba(0,255,255,0.25); border-radius:16px; padding:28px; max-width:420px; width:100%; text-align:center; box-shadow:0 12px 48px rgba(0,0,0,0.9);">
+        <div style="font-size:36px; margin-bottom:12px;">💸</div>
+        <h3 id="bonusModalTitle" style="color:#00ffff; font-size:18px; margin-bottom:12px;">Notification</h3>
+        <p id="bonusModalMsg" style="color:#e0e0e0; font-size:15px; line-height:1.6; margin-bottom:24px;"></p>
+        <div id="bonusModalActions" style="display:flex; gap:12px; justify-content:center;">
+            <button type="button" id="btnBonusModalCancel" class="copy-btn" style="display:none; padding:10px 20px;">Cancel</button>
+            <button type="button" id="btnBonusModalConfirm" class="action-btn" style="padding:10px 24px; font-size:14px; width:auto; min-width:110px;">OK</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -261,7 +284,11 @@ const languageDictionary = {
         errName:            "Validation Error: Names must contain text characters only.",
         errPhone:           "Validation Error: Telephone must consist of exactly 10 digits.",
         processing:         "Syncing…",
-        loading:            "Loading your profile…"
+        loading:            "Loading your profile…",
+        btnWithdrawAdmin:   "withdraw via admin",
+        msgNoMoney:         "you have no money to withdraw",
+        confirmWithdraw:    "are you sure you want to withdraw your money",
+        msgPending:         "pending"
     },
     fr: {
         mainHeading:        "👥 ESPACE DE PARTENARIAT NS PLATFORM",
@@ -287,7 +314,11 @@ const languageDictionary = {
         errName:            "Erreur: Le nom doit contenir des lettres uniquement.",
         errPhone:           "Erreur: Le téléphone doit comporter exactement 10 chiffres.",
         processing:         "Synchronisation…",
-        loading:            "Chargement de votre profil…"
+        loading:            "Chargement de votre profil…",
+        btnWithdrawAdmin:   "withdraw via admin",
+        msgNoMoney:         "you have no money to withdraw",
+        confirmWithdraw:    "are you sure you want to withdraw your money",
+        msgPending:         "pending"
     },
     rw: {
         mainHeading:        "👥 AB FATANYABIKORWA BA NS PLATFORM",
@@ -313,7 +344,11 @@ const languageDictionary = {
         errName:            "Ikosa: Amazina agomba kuba inyuguti gusa.",
         errPhone:           "Ikosa: Numero ya telefone igomba kuba igizwe n'imibare 10 gusa.",
         processing:         "Tegereza…",
-        loading:            "Turimo gushaka amakuru yawe…"
+        loading:            "Turimo gushaka amakuru yawe…",
+        btnWithdrawAdmin:   "withdraw via admin",
+        msgNoMoney:         "you have no money to withdraw",
+        confirmWithdraw:    "are you sure you want to withdraw your money",
+        msgPending:         "pending"
     }
 };
 
@@ -339,6 +374,96 @@ function applyLocalization() {
     document.getElementById("lblDashReferred").innerText      = D.lblDashReferred;
     document.getElementById("lblYourCode").innerText          = D.lblYourCode;
     document.getElementById("btnDashCopy").innerText          = D.btnCopy;
+
+    const btnWithdraw = document.getElementById("btnWithdrawAdmin");
+    if (btnWithdraw && !btnWithdraw.hasAttribute("data-custom-label")) {
+        btnWithdraw.innerText = D.btnWithdrawAdmin || "withdraw via admin";
+    }
+}
+
+// ==========================================================
+//              MODAL NOTIFICATION HELPER
+// ==========================================================
+function showNotificationModal(message, isConfirm = false, onConfirm = null) {
+    const overlay = document.getElementById("bonusModalOverlay");
+    const msgEl = document.getElementById("bonusModalMsg");
+    const titleEl = document.getElementById("bonusModalTitle");
+    const cancelBtn = document.getElementById("btnBonusModalCancel");
+    const confirmBtn = document.getElementById("btnBonusModalConfirm");
+
+    if (!overlay || !msgEl) {
+        if (isConfirm) {
+            if (confirm(message)) { if (onConfirm) onConfirm(); }
+        } else {
+            alert(message);
+        }
+        return;
+    }
+
+    msgEl.innerText = message;
+    titleEl.innerText = isConfirm ? "Confirm Action" : "Notification";
+
+    if (isConfirm) {
+        cancelBtn.style.display = "inline-block";
+        cancelBtn.innerText = "Cancel";
+        confirmBtn.innerText = "Confirm";
+        cancelBtn.onclick = () => { overlay.style.display = "none"; };
+        confirmBtn.onclick = async () => {
+            overlay.style.display = "none";
+            if (onConfirm) await onConfirm();
+        };
+    } else {
+        cancelBtn.style.display = "none";
+        confirmBtn.innerText = "OK";
+        confirmBtn.onclick = () => { overlay.style.display = "none"; };
+    }
+
+    overlay.style.display = "flex";
+}
+
+// ==========================================================
+//              WITHDRAWAL UI UPDATER
+// ==========================================================
+function updateWithdrawalUI(status) {
+    const badge = document.getElementById("withdrawalStatusBadge");
+    const statusTxt = document.getElementById("withdrawalStatusText");
+    const btn = document.getElementById("btnWithdrawAdmin");
+
+    if (!badge || !statusTxt || !btn) return;
+
+    if (status === "pending") {
+        badge.style.display = "block";
+        statusTxt.innerText = D.msgPending || "pending";
+        badge.style.background = "rgba(255, 171, 0, 0.15)";
+        badge.style.borderColor = "rgba(255, 171, 0, 0.3)";
+        badge.style.color = "#ffab00";
+        btn.setAttribute("data-custom-label", "true");
+        btn.disabled = true;
+        btn.innerText = (D.btnWithdrawAdmin || "withdraw via admin") + " (pending)";
+    } else if (status === "approved") {
+        badge.style.display = "block";
+        statusTxt.innerText = "Approved";
+        badge.style.background = "rgba(0, 230, 118, 0.15)";
+        badge.style.borderColor = "rgba(0, 230, 118, 0.3)";
+        badge.style.color = "#00e676";
+        btn.removeAttribute("data-custom-label");
+        btn.disabled = false;
+        btn.innerText = D.btnWithdrawAdmin || "withdraw via admin";
+    } else if (status === "rejected") {
+        badge.style.display = "block";
+        statusTxt.innerText = "Rejected";
+        badge.style.background = "rgba(255, 77, 109, 0.15)";
+        badge.style.borderColor = "rgba(255, 77, 109, 0.3)";
+        badge.style.color = "#ff4d6d";
+        btn.removeAttribute("data-custom-label");
+        btn.disabled = false;
+        btn.innerText = D.btnWithdrawAdmin || "withdraw via admin";
+    } else {
+        badge.style.display = "none";
+        btn.removeAttribute("data-custom-label");
+        btn.disabled = false;
+        btn.innerText = D.btnWithdrawAdmin || "withdraw via admin";
+    }
 }
 
 // ==========================================================
@@ -353,7 +478,10 @@ function validateInputs(names, tel) {
 // ==========================================================
 //         DASHBOARD RENDERING (shared for load + submit)
 // ==========================================================
+let currentMemberData = null;
+
 function renderDashboard(data) {
+    currentMemberData = data;
     document.getElementById("dashFullName").innerText  = data.fullName  || data.username || "—";
     document.getElementById("dashPhone").innerText     = data.phoneNumber || "—";
     document.getElementById("dashWallet").innerText    = (data.walletBalance  || 0).toLocaleString() + " FRW";
@@ -370,6 +498,12 @@ function renderDashboard(data) {
 
     if (code) {
         updateShareLinks(code);
+    }
+
+    if (data.withdrawalStatus) {
+        updateWithdrawalUI(data.withdrawalStatus);
+    } else {
+        updateWithdrawalUI(null);
     }
 
     // Swap panels
@@ -550,6 +684,50 @@ document.getElementById("btnDashCopy").addEventListener("click", function() {
     }).catch(() => {
         alert(D.msgCopied || "Link copied!");
     });
+});
+
+// ==========================================================
+//         WITHDRAW VIA ADMIN BUTTON
+// ==========================================================
+document.getElementById("btnWithdrawAdmin").addEventListener("click", function() {
+    const numericBalance = currentMemberData ? (currentMemberData.walletBalance || 0) : 0;
+
+    if (numericBalance <= 0) {
+        showNotificationModal(D.msgNoMoney || "you have no money to withdraw");
+        return;
+    }
+
+    if (currentMemberData && currentMemberData.withdrawalStatus === "pending") {
+        showNotificationModal(D.msgPending || "pending");
+        return;
+    }
+
+    showNotificationModal(
+        D.confirmWithdraw || "are you sure you want to withdraw your money",
+        true,
+        async () => {
+            try {
+                const res = await fetch("/api/bonus/withdraw", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    if (currentMemberData) {
+                        currentMemberData.withdrawalStatus = "pending";
+                    }
+                    updateWithdrawalUI("pending");
+                    showNotificationModal(D.msgPending || "pending");
+                } else {
+                    showNotificationModal(data.error || "Withdrawal request failed.");
+                }
+            } catch (err) {
+                console.error("[Bonus] withdraw error:", err);
+                showNotificationModal("Network error. Please try again.");
+            }
+        }
+    );
 });
 
 // ==========================================================
